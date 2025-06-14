@@ -68,7 +68,7 @@ class consultarSalidaAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
-      $new = $this->conex->prepare("SELECT * FROM salidaalimentos sa INNER JOIN tiposalidas ts ON ts.idTipoSalidas = sa.idTipoSalidaA WHERE sa.status =1 and ts.tipoSalida != 'Menú' and  sa.fecha BETWEEN ? AND ?");
+      $new = $this->conex->prepare("SELECT * FROM vista_salida_alimentos WHERE  sa.fecha BETWEEN ? AND ?");
       $new->bindValue(1, $this->fechaInicio);
       $new->bindValue(2, $this->fechaFin);
       $new->execute();
@@ -88,7 +88,7 @@ class consultarSalidaAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
-      $new = $this->conex->prepare(" SELECT * FROM salidaalimentos sa INNER JOIN tiposalidas ts ON ts.idTipoSalidas = sa.idTipoSalidaA WHERE sa.status =1 and ts.tipoSalida != 'Menú'; ");
+      $new = $this->conex->prepare(" SELECT * FROM vista_salida_alimentos ");
       $new->execute();
       $salidaAlimentos = $new->fetchAll(\PDO::FETCH_OBJ);
       $bitacora = new bitacoraModelo;
@@ -177,7 +177,7 @@ class consultarSalidaAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
-      $query = $this->conex->prepare("SELECT a.imgAlimento, a.codigo, a.nombre, a.marca, a.unidadMedida, dsa.cantidad, sa.fecha, sa.hora, sa.descripcion, ts.tipoSalida  FROM salidaalimentos sa INNER JOIN tiposalidas ts ON ts.idTipoSalidas = sa.idTipoSalidaA INNER JOIN detallesalidaa dsa ON dsa.idSalidaA = sa.idSalidaA INNER JOIN alimento a ON a.idAlimento = dsa.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE ta.idTipoA= ? and sa.idSalidaA =?");
+      $query = $this->conex->prepare("SELECT imgAlimento, codigo, nombre, marca, unidadMedida, cantidad, fecha, hora, descripcion, tipoSalida  FROM vista_detalle_salida_alimentos WHERE idTipoA = ? AND idSalidaA = ?");
       $query->bindValue(1, $this->tipoA);
       $query->bindValue(2, $this->id);
       $query->execute();
@@ -232,7 +232,7 @@ class consultarSalidaAlimentosModelo extends connectDB
     try {
       $this->conectarDB();
       $this->conex->beginTransaction();
-      $query = $this->conex->prepare("SELECT * FROM  salidaalimentos WHERE idSalidaA = ?");
+      $query = $this->conex->prepare("SELECT * FROM salidaalimentos WHERE idSalidaA = ? FOR UPDATE");
       $query->bindValue(1, $this->id);
       $query->execute();
       $data = $query->fetchAll();
@@ -315,7 +315,7 @@ class consultarSalidaAlimentosModelo extends connectDB
 
       $this->id = $id;
       $this->conectarDB();
-      $mostrar = $this->conex->prepare(" SELECT  * FROM salidaalimentos sa INNER JOIN tiposalidas ts ON ts.idTipoSalidas = sa.idTipoSalidaA INNER JOIN detallesalidaa dsa ON dsa.idSalidaA = sa.idSalidaA INNER JOIN alimento a ON a.idAlimento = dsa.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE sa.idSalidaA = ? and sa.status=1 ");
+      $mostrar = $this->conex->prepare("SELECT * FROM vista_detalle_salida_alimentos WHERE idSalidaA = ? AND statusDetalle = 1 ");
       $mostrar->bindValue(1, $this->id);
       $mostrar->execute();
       $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
@@ -336,14 +336,14 @@ class consultarSalidaAlimentosModelo extends connectDB
       $this->conectarDB();
       if (!empty($fechaI) && !empty($fechaF)) {
 
-        $new = $this->conex->prepare(" SELECT  * FROM salidaalimentos sa INNER JOIN tiposalidas ts ON ts.idTipoSalidas = sa.idTipoSalidaA INNER JOIN detallesalidaa dsa ON dsa.idSalidaA = sa.idSalidaA INNER JOIN alimento a ON a.idAlimento = dsa.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE  sa.status=1 and  sa.fecha BETWEEN ? AND ?");
+        $new = $this->conex->prepare(" SELECT * FROM vista_detalle_salida_alimentos  WHERE statusDetalle = 1 AND fecha BETWEEN ? AND ?");
         $new->bindValue(1, $fechaI);
         $new->bindValue(2, $fechaF);
         $new->execute();
         $data = $new->fetchAll(\PDO::FETCH_OBJ);
 
       } else {
-        $mostrar = $this->conex->prepare(" SELECT  * FROM salidaalimentos sa INNER JOIN tiposalidas ts ON ts.idTipoSalidas = sa.idTipoSalidaA INNER JOIN detallesalidaa dsa ON dsa.idSalidaA = sa.idSalidaA INNER JOIN alimento a ON a.idAlimento = dsa.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE  sa.status=1; ");
+        $mostrar = $this->conex->prepare(" SELECT * FROM vista_detalle_salida_alimentos WHERE statusDetalle = 1 ");
         $mostrar->execute();
         $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
       }

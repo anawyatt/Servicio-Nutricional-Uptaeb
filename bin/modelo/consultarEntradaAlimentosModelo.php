@@ -180,7 +180,7 @@ class consultarEntradaAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
-      $query = $this->conex->prepare("SELECT a.imgAlimento, a.codigo, a.nombre, a.marca, a.unidadMedida, dea.cantidad, ea.fecha, ea.hora, ea.descripcion FROM entradaalimento ea INNER JOIN detalleentradaa dea ON dea.idEntradaA = ea.idEntradaA INNER JOIN alimento a ON a.idAlimento = dea.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE ta.idTipoA= ? and ea.idEntradaA =  ?");
+      $query = $this->conex->prepare(" SELECT imgAlimento, codigo, nombre, marca, unidadMedida, cantidad, fecha, hora, descripcion  FROM vista_alimentos_entrada  WHERE idTipoA = ? AND idEntradaA = ? AND status = 1");
       $query->bindValue(1, $this->tipoA);
       $query->bindValue(2, $this->id);
       $query->execute();
@@ -235,7 +235,7 @@ class consultarEntradaAlimentosModelo extends connectDB
     try {
       $this->conectarDB();
       $this->conex->beginTransaction();
-      $query = $this->conex->prepare("SELECT * FROM  entradaalimento WHERE idEntradaA = ?");
+      $query = $this->conex->prepare("SELECT * FROM entradaalimento WHERE idEntradaA = ? FOR UPDATE ");
       $query->bindValue(1, $this->id);
       $query->execute();
       $data = $query->fetchAll();
@@ -318,7 +318,7 @@ class consultarEntradaAlimentosModelo extends connectDB
     try {
       $this->conectarDB();
       $this->id = $id;
-      $mostrar = $this->conex->prepare(" SELECT * FROM entradaalimento ea INNER JOIN detalleentradaa dea ON dea.idEntradaA = ea.idEntradaA INNER JOIN alimento a ON a.idAlimento = dea.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE ea.idEntradaA = ? and ea.status=1; ");
+      $mostrar = $this->conex->prepare(" SELECT * FROM vista_alimentos_entrada WHERE idEntradaA = ? AND status = 1");
       $mostrar->bindValue(1, $this->id);
       $mostrar->execute();
       $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
@@ -341,14 +341,14 @@ class consultarEntradaAlimentosModelo extends connectDB
       $this->conectarDB();
       if (!empty($fechaI) && !empty($fechaF)) {
 
-        $new = $this->conex->prepare(" SELECT * FROM entradaalimento ea INNER JOIN detalleentradaa dea ON dea.idEntradaA = ea.idEntradaA INNER JOIN alimento a ON a.idAlimento = dea.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE  ea.status=1 and  ea.fecha BETWEEN ? AND ?");
+        $new = $this->conex->prepare("SELECT * FROM vista_alimentos_entrada WHERE status = 1 AND fecha BETWEEN ? AND ?");
         $new->bindValue(1, $fechaI);
         $new->bindValue(2, $fechaF);
         $new->execute();
         $data = $new->fetchAll(\PDO::FETCH_OBJ);
 
       } else {
-        $mostrar = $this->conex->prepare("SELECT * FROM entradaalimento ea INNER JOIN detalleentradaa dea ON dea.idEntradaA = ea.idEntradaA INNER JOIN alimento a ON a.idAlimento = dea.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE  ea.status=1");
+        $mostrar = $this->conex->prepare("SELECT * FROM vista_alimentos_entrada WHERE status = 1");
         $mostrar->execute();
         $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
       }

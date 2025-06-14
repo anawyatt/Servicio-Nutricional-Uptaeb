@@ -2,27 +2,28 @@
             SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
             START TRANSACTION;
             SET time_zone = "+00:00";
+            DROP DATABASE IF EXISTS comerdorUPTAEB;
             CREATE DATABASE comerdorUPTAEB;
             USE comerdorUPTAEB;
         
         -- Tabla Sección
         CREATE TABLE seccion (
             idSeccion INT AUTO_INCREMENT PRIMARY KEY,
-            seccion VARCHAR(255) NOT NULL,
+            seccion VARCHAR(50) NOT NULL,
             status TINYINT(1) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
         -- Tabla Estudiante
         CREATE TABLE estudiante (
             cedEstudiante INT PRIMARY KEY,
-            nombre VARCHAR(500) NOT NULL,
-            segNombre VARCHAR(500),
-            apellido VARCHAR(500) NOT NULL,
-            segApellido VARCHAR(500),
+            nombre VARCHAR(50) NOT NULL,
+            segNombre VARCHAR(50),
+            apellido VARCHAR(50) NOT NULL,
+            segApellido VARCHAR(50),
             sexo VARCHAR(1) NOT NULL,
             telefono VARCHAR(20),
-            nucleo VARCHAR(500) NOT NULL,
-            carrera VARCHAR(500) NOT NULL,
+            nucleo VARCHAR(100) NOT NULL,
+            carrera VARCHAR(100) NOT NULL,
             status TINYINT(1) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -38,7 +39,7 @@
         -- Tabla Horario
         CREATE TABLE horario(
             idHorario INT AUTO_INCREMENT PRIMARY KEY,
-            dia VARCHAR(200) NOT NULL,
+            dia VARCHAR(50) NOT NULL,
             idSeccion INT NOT NULL,
             status TINYINT(1) NOT NULL,
             FOREIGN KEY (idSeccion) REFERENCES seccion(idSeccion)
@@ -46,9 +47,9 @@
 
         CREATE TABLE excepcion(
             idExc INT AUTO_INCREMENT PRIMARY KEY,
-            descripcion VARCHAR(1000) NOT NULL,
+            descripcion VARCHAR(300) NOT NULL,
             cedEstudiante INT NOT NULL,
-            fecha date NOT NULL DEFAULT current_timestamp(),
+            fecha DATE NOT NULL DEFAULT CURRENT_DATE,
             status TINYINT(1) NOT NULL,
             FOREIGN KEY (cedEstudiante) REFERENCES estudiante(cedEstudiante)
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -56,18 +57,19 @@
         -- Tabla tipoAlimento
         CREATE TABLE  tipoAlimento (
             idTipoA INT AUTO_INCREMENT PRIMARY KEY,
-            tipo VARCHAR(255) NOT NULL,
+            tipo VARCHAR(50) NOT NULL,
             status TINYINT(1) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+        
 
         -- Tabla alimento
         CREATE TABLE  alimento (
             idAlimento INT AUTO_INCREMENT PRIMARY KEY,
-            codigo VARCHAR(1000) NOT NULL,
-            imgAlimento VARCHAR(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-            nombre VARCHAR(255) NOT NULL,
+            codigo VARCHAR(20) NOT NULL,
+            imgAlimento VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+            nombre VARCHAR(50) NOT NULL,
             unidadMedida VARCHAR(50) NOT NULL,
-            marca VARCHAR(255) NOT NULL,
+            marca VARCHAR(50) NOT NULL,
             stock INT NOT NULL,
             reservado INT NOT NULL,
             idTipoA INT NOT NULL,
@@ -79,8 +81,8 @@
         CREATE TABLE  entradaAlimento (
             idEntradaA INT AUTO_INCREMENT PRIMARY KEY,
             fecha DATE NOT NULL,
-            hora time NOT NULL DEFAULT current_timestamp(),
-            descripcion VARCHAR(5000) NOT NULL,
+            hora TIME NOT NULL DEFAULT CURRENT_TIME,
+            descripcion VARCHAR(300) NOT NULL,
             status TINYINT(1) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -98,19 +100,17 @@
         -- Tabla tipoSalidas
         CREATE TABLE  tipoSalidas (
             idTipoSalidas INT AUTO_INCREMENT PRIMARY KEY,
-            tipoSalida VARCHAR(255) NOT NULL,
+            tipoSalida VARCHAR(50) NOT NULL,
             status TINYINT(1) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
-        INSERT INTO `tipoSalidas` (`tipoSalida`, `status`) VALUES
-        ('Menú', 1);
 
         -- Tabla salidaAlimentos
         CREATE TABLE  salidaAlimentos (
             idSalidaA INT AUTO_INCREMENT PRIMARY KEY,
             fecha DATE NOT NULL,
-            hora time NOT NULL DEFAULT current_timestamp(),
-            descripcion VARCHAR(255) NOT NULL,
+            hora TIME NOT NULL DEFAULT CURRENT_TIME,
+            descripcion VARCHAR(300) NOT NULL,
             idTipoSalidaA INT NOT NULL,
             status TINYINT(1) NOT NULL,
             FOREIGN KEY (idTipoSalidaA) REFERENCES tipoSalidas(idTipoSalidas)
@@ -120,7 +120,7 @@
         CREATE TABLE  menu (
             idMenu INT AUTO_INCREMENT PRIMARY KEY,
             feMenu date NOT NULL,
-            horarioComida VARCHAR(255) NOT NULL,
+            horarioComida VARCHAR(50) NOT NULL,
             cantPlatos INT NOT NULL,
             status TINYINT(1) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
@@ -155,16 +155,16 @@
         -- Tabla tipoUtensilios
         CREATE TABLE  tipoUtensilios (
             idTipoU INT AUTO_INCREMENT PRIMARY KEY,
-            tipo VARCHAR(255) NOT NULL,
+            tipo VARCHAR(50) NOT NULL,
             status TINYINT(1) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
         -- Tabla utensilios
         CREATE TABLE  utensilios (
             idUtensilios INT AUTO_INCREMENT PRIMARY KEY,
-            imgUtensilios VARCHAR(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
-            nombre VARCHAR(255) NOT NULL,
-            material VARCHAR(255) NOT NULL,
+            imgUtensilios VARCHAR(100) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+            nombre VARCHAR(50) NOT NULL,
+            material VARCHAR(100) NOT NULL,
             stock INT NOT NULL,
             idTipoU INT NOT NULL,
             status TINYINT(1) NOT NULL,
@@ -175,8 +175,8 @@
         CREATE TABLE  entradaU (
             idEntradaU INT AUTO_INCREMENT PRIMARY KEY,
             fecha DATE NOT NULL,
-            hora time NOT NULL DEFAULT current_timestamp(),
-            descripcion VARCHAR(255) NOT NULL,
+            hora TIME NOT NULL DEFAULT CURRENT_TIME,
+            descripcion VARCHAR(300) NOT NULL,
             status TINYINT(1) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
@@ -195,8 +195,8 @@
         CREATE TABLE  salidaUtensilios (
             idSalidaU INT AUTO_INCREMENT PRIMARY KEY,
             fecha DATE NOT NULL,
-            hora time NOT NULL DEFAULT current_timestamp(),
-            descripcion VARCHAR(255) NOT NULL,
+            hora TIME NOT NULL DEFAULT CURRENT_TIME,
+            descripcion VARCHAR(300) NOT NULL,
             idTipoSalidas INT NOT NULL,
             status TINYINT(1) NOT NULL,
             FOREIGN KEY (idTipoSalidas) REFERENCES tipoSalidas(idTipoSalidas)
@@ -218,8 +218,8 @@
         CREATE TABLE  asistencia (
             idAsistencia INT AUTO_INCREMENT PRIMARY KEY,
             cedEstudiante INT NOT NULL,
-            fecha date NOT NULL DEFAULT current_timestamp(),
-            hora time NOT NULL DEFAULT current_timestamp(),
+            fecha DATE NOT NULL DEFAULT CURRENT_DATE,
+            hora TIME NOT NULL DEFAULT CURRENT_TIME,
             idMenu INT NOT NULL,
             status TINYINT(1) NOT NULL,
             FOREIGN KEY (cedEstudiante) REFERENCES estudiante(cedEstudiante),
@@ -229,8 +229,8 @@
         -- Tabla evento
         CREATE TABLE  evento (
             idEvento INT AUTO_INCREMENT PRIMARY KEY,
-            nomEvent VARCHAR(255) NOT NULL,
-            descripEvent VARCHAR(6000) NOT NULL,
+            nomEvent VARCHAR(100) NOT NULL,
+            descripEvent VARCHAR(300) NOT NULL,
             idMenu INT NOT NULL,
             status TINYINT(1) NOT NULL,
             FOREIGN KEY (idMenu) REFERENCES menu(idMenu)
@@ -267,7 +267,25 @@
                 
                 CREATE INDEX idx_asistencia_fecha_idmenu ON asistencia(fecha, idMenu);
 
-             
+                CREATE INDEX idx_alimento_idAlimento ON alimento(idAlimento);
+                CREATE INDEX idx_alimento_idTipoA ON alimento(idTipoA);
+                CREATE INDEX idx_alimento_busqueda ON alimento (idTipoA, nombre, marca);
+                CREATE INDEX idx_alimento_idTipoA_stock_status ON alimento (idTipoA, stock, status);
+                CREATE INDEX idx_alimento_status_stock ON alimento (status, stock);
+                CREATE INDEX idx_entradaalimento_status_fecha ON entradaalimento (status, fecha);
+                CREATE INDEX idx_detalleentradaa_idEntradaA ON detalleentradaa (idEntradaA);
+                CREATE INDEX idx_detalleentradaa_idAlimento ON detalleentradaa (idAlimento);
+                CREATE INDEX idx_detallesalidaa_idAlimento_status ON detallesalidaa (idAlimento, status);
+                CREATE INDEX idx_salidaalimentos_idSalidaA_status ON salidaalimentos (idSalidaA, status);
+                CREATE INDEX idx_detallesalidaa_idDetalleSalidaA ON detallesalidaa (idDetalleSalidaA);
+                CREATE INDEX idx_detallesalidaa_idSalidaA_idAlimento ON detallesalidaa (idSalidaA, idAlimento);
+                CREATE INDEX idx_salidaalimentos_fecha_status ON salidaalimentos(fecha, status);
+                CREATE INDEX idx_salidaalimentos_tiposalida ON salidaalimentos(idTipoSalidaA);
+                
+
+
+
+
                COMMIT;
 
                 START TRANSACTION;
@@ -320,6 +338,13 @@
                     e.carrera, 
                     e.status;
 
+
+                    CREATE OR REPLACE VIEW vista_alimentos AS SELECT a.*, ta.tipo FROM alimento a INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE a.status = 1;
+                    CREATE OR REPLACE VIEW vista_alimentos_entrada AS SELECT ea.idEntradaA, ea.fecha, ea.hora, ea.descripcion, ea.status, a.idAlimento, a.imgAlimento, a.codigo, a.nombre, a.marca, a.unidadMedida, ta.idTipoA, ta.tipo, dea.cantidad FROM entradaalimento ea INNER JOIN detalleentradaa dea ON dea.idEntradaA = ea.idEntradaA INNER JOIN alimento a ON a.idAlimento = dea.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA;
+                    CREATE OR REPLACE VIEW vista_salida_alimentos AS SELECT sa.idSalidaA, sa.fecha, sa.hora, sa.descripcion, sa.status, sa.idTipoSalidaA, ts.tipoSalida FROM salidaalimentos sa INNER JOIN tiposalidas ts ON ts.idTipoSalidas = sa.idTipoSalidaA WHERE ts.tipoSalida != 'Menú' AND sa.status = 1;
+                    CREATE OR REPLACE VIEW vista_detalle_salida_alimentos AS SELECT sa.idSalidaA, sa.fecha, sa.hora, sa.descripcion, ts.tipoSalida, a.idAlimento, a.nombre, a.codigo, a.marca, a.unidadMedida, a.stock, a.imgAlimento, ta.idTipoA, ta.tipo AS tipoAlimento, dsa.cantidad, dsa.status AS statusDetalle FROM salidaalimentos sa INNER JOIN tiposalidas ts ON ts.idTipoSalidas = sa.idTipoSalidaA INNER JOIN detallesalidaa dsa ON dsa.idSalidaA = sa.idSalidaA INNER JOIN alimento a ON a.idAlimento = dsa.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA;
+                    
+                    
                     DELIMITER $$
 
                         CREATE PROCEDURE sp_mostrar_asistencia (

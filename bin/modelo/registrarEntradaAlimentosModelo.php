@@ -254,39 +254,29 @@ class registrarEntradaAlimentosModelo extends connectDB
   }
 
 
-  private function actualizarStock($idAlimento, $cantidad)
-  {
+ private function actualizarStock($idAlimento, $cantidad)
+{
     $this->alimento = $idAlimento;
     $this->cantidad = $cantidad;
-    try {
-      $info = $this->infoAlimento2($this->alimento);
-      $actualizarStock = $info[0]["stock"] + $this->cantidad;
-      $registrar = $this->conex->prepare(" UPDATE `alimento` SET stock = ?  WHERE `idAlimento` = ? ");
-      $registrar->bindValue(1, $actualizarStock);
-      $registrar->bindValue(2, $this->alimento);
-      $registrar->execute();
-    } catch (\Exception $e) {
-      throw new \RuntimeException('Error al actualizar el stock: ' . $e->getMessage());
-    }
-
-  }
-
-  private function infoAlimento2($alimento)
-  {
-    $this->alimento = $alimento;
 
     try {
-      $mostrar = $this->conex->prepare("SELECT * FROM alimento  WHERE  status =1 and idAlimento=? ");
-      $mostrar->bindValue(1, $this->alimento);
-      $mostrar->execute();
-      $data = $mostrar->fetchAll();
-      return $data;
+        $query = $this->conex->prepare("SELECT stock FROM `alimento` WHERE `idAlimento` = ? FOR UPDATE");
+        $query->bindValue(1, $this->alimento);
+        $query->execute();
+
+        $row = $query->fetch(\PDO::FETCH_ASSOC);
+        $nuevoStock = $row['stock'] + $this->cantidad;
+
+        $registrar = $this->conex->prepare("UPDATE `alimento` SET stock = ? WHERE `idAlimento` = ?");
+        $registrar->bindValue(1, $nuevoStock);
+        $registrar->bindValue(2, $this->alimento);
+        $registrar->execute();
 
     } catch (\Exception $e) {
-      throw new \RuntimeException('Error al mostrar la info del alimento 2: ' . $e->getMessage());
+        throw new \RuntimeException('Error al actualizar el stock: ' . $e->getMessage());
     }
+}
 
-  }
 
   private function notificaciones($fecha, $hora, $descripcion)
   {

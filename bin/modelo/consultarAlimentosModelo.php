@@ -36,22 +36,39 @@ class consultarAlimentosModelo extends connectDB
   private function mostrarA()
   {
     try {
-      $this->conectarDB();
+      
       if ($this->tipoA != 'Seleccionar' && !empty($this->tipoA)) {
-        $new = $this->conex->prepare(" SELECT * FROM alimento a INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE a.status =1 and ta.idTipoA = ? ");
-        $new->bindValue(1, $this->tipoA);
-        $new->execute();
-        $data = $new->fetchAll(\PDO::FETCH_OBJ);
+        return $this->mostrarAconFiltros();
       } else {
-        $new = $this->conex->prepare(" SELECT * FROM alimento a INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE a.status =1 ");
-        $new->execute();
-        $data = $new->fetchAll(\PDO::FETCH_OBJ);
+        return $this->mostrarAsinFiltros();
       }
-      $this->desconectarDB();
-      return $data;
+
     } catch (\Exception $e) {
       throw new \RuntimeException('Error al mostrar los alimentos: ' . $e->getMessage());
     }
+  }
+
+  private function mostrarAconFiltros()
+  {
+    $this->conectarDB();
+    $new = $this->conex->prepare(" SELECT * FROM vista_alimentos WHERE ta.idTipoA = ? ");
+    $new->bindValue(1, $this->tipoA);
+    $new->execute();
+    $data = $new->fetchAll(\PDO::FETCH_OBJ);
+    $this->desconectarDB();
+    return $data;
+
+  }
+
+  private function mostrarAsinFiltros()
+  {
+    $this->conectarDB();
+    $new = $this->conex->prepare(" SELECT * FROM vista_alimentos ");
+    $new->execute();
+    $data = $new->fetchAll(\PDO::FETCH_OBJ);
+    $this->desconectarDB();
+    return $data;
+
   }
 
   public function verificarExistencia($id)
@@ -95,7 +112,7 @@ class consultarAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
-      $query = $this->conex->prepare("SELECT * FROM alimento a INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE  a.idAlimento =?");
+      $query = $this->conex->prepare("SELECT * FROM vista_alimentos WHERE idAlimento=?");
       $query->bindValue(1, $this->id);
       $query->execute();
       $data = $query->fetchAll();
@@ -393,7 +410,7 @@ class consultarAlimentosModelo extends connectDB
     try {
       $this->conectarDB();
       $this->conex->beginTransaction();
-      $query = $this->conex->prepare("SELECT * FROM  alimento WHERE idAlimento = ?");
+      $query = $this->conex->prepare("SELECT * FROM vista_alimentos WHERE idAlimento= ?");
       $query->bindValue(1, $this->id);
       $query->execute();
       $data = $query->fetchAll();

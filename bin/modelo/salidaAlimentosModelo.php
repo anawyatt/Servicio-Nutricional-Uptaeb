@@ -321,7 +321,7 @@ class salidaAlimentosModelo extends connectDB
     $this->alimento = $alimento;
 
     try {
-      $mostrar = $this->conex->prepare("SELECT * FROM alimento  WHERE  status =1 and idAlimento=? ");
+      $mostrar = $this->conex->prepare("SELECT * FROM alimento WHERE status = 1 AND idAlimento = ? FOR UPDATE");
       $mostrar->bindValue(1, $this->alimento);
       $mostrar->execute();
       $data = $mostrar->fetchAll();
