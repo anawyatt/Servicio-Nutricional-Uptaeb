@@ -1,0 +1,1832 @@
+let permisos, modificarPermiso, eliminarPermiso, registrarPermiso;
+$.ajax({
+    method: 'POST', url: "", dataType: 'json', data: { getPermisos: 'a' },
+    success(data) { permisos = data; }
+}).then(function () {
+    registrarPermiso = (typeof permisos.registrar === 'undefined') ? 'disabled' : '';
+    modificarPermiso = (typeof permisos.modificar === 'undefined') ? 'disabled' : '';
+    eliminarPermiso = (typeof permisos.eliminar === 'undefined') ? 'disabled' : '';
+    $('#enviar').attr(registrarPermiso, '');
+});
+
+function quitarBotones(){
+
+if (typeof permisos.modificar == 'undefined') {
+console.log(permisos)
+$(".editar").remove()   
+}
+
+if (typeof permisos.eliminar == 'undefined') {
+console.log(permisos)
+$(".borrar").remove()   
+}
+}
+
+   // Inicializar DataTable
+      $('#ani2').hide(1000);
+    tablaMenu();
+
+let mostrarM = $('.tabla').DataTable({
+    "columns": [
+        { "data": "feMenu", "render":function (data) {
+          let feMenu = new Date(data);
+          let dia = feMenu.getUTCDate().toString().padStart(2, '0'); // Usar getUTCDate()
+          let mes = (feMenu.getUTCMonth() + 1).toString().padStart(2, '0'); // Usar getUTCMonth()
+          let anio = feMenu.getUTCFullYear(); // Usar getUTCFullYear()
+  
+          return `${dia}-${mes}-${anio}`;
+      },
+            "className": "text-center"
+        },
+        { "data": "horarioComida", "className": "text-center" },
+        { "data": "cantPlatos", "className": "text-center" },
+        {
+            "data": "idMenu",
+            "render": function (data, type, row) {
+                return `
+                    <td class="text-center accion">
+                        <a id="${data}" class="btn btn-sm btn-icon text-info flex-end text-center informacion" data-bs-toggle="modal" data-bs-target="#infoMenu" data-bs-toggle="tooltip" title="Información Menú" href="#" type="button">
+                            <span class="btn-inner pi">
+                                <i class="bi bi-eye icon-24 t" width="20"></i>
+                            </span>
+                        </a>
+                        <a id="${data}" class="btn btn-sm btn-icon text-primary flex-end text-center editar" data-bs-toggle="tooltip" title="Modificar Menú" href="#" type="button">
+                            <span class="btn-inner pi">
+                                <i class="bi bi-pencil icon-24 t" width="20"></i>
+                            </span>
+                        </a>
+                        <a id="${data}" class="btn btn-sm btn-icon text-danger text-center borrar" data-bs-toggle="tooltip" title="Eliminar Menú" href="#" type="button">
+                            <i class="bi bi-trash icon-24 t" width="20"></i>
+                        </a>
+                        <a id="${data}" class="btn btn-sm btn-icon text-primary text-center pdf" data-bs-toggle="modal" data-bs-target="#pdfMenu" data-bs-toggle="tooltip" title="Descargar Menú" href="#" type="button">
+                            <i class="ri-download-line icon-24 t" width="20"></i>
+                        </a>
+                    </td>`;
+            },
+            "className": "text-center"
+        }
+    ]
+});
+
+// Función para rellenar la tabla
+function tablaMenu() {
+    let fechaInicio = $('#fecha').val();
+    let fechaFin = $('#fecha2').val();
+
+    $.ajax({
+        method: "post",
+        url: "",
+        dataType: "json",
+        data: { mostrarMenu: true, fechaInicio, fechaFin },
+        success(data) {
+            $('#ani2').show(2000);
+            mostrarM.clear().rows.add(data).draw();
+            mostrarM.on('draw.dt', function () {
+                quitarBotones();
+            });
+            quitarBotones();
+        }
+    });
+}
+
+ 
+
+
+
+ //------------------------- FILTRO DE BUSQUEDA -----------------
+ $('#fecha, #fecha2').on('change', function() { 
+    errorFI=false
+    errorFF=false
+    validarFechaIncio();
+    validarFechaFin();
+    tablaMenu() ;
+  })
+
+
+let errorFI=false
+let errorFF=false
+
+
+ $(document).ready(function () {
+ 
+   if (!$('.activarFiltro').is(':checked')) {
+       $('.buscar').hide();
+      tablaMenu() ;
+   }
+   
+   $('.activarFiltro').change(function () {
+       if ($(this).is(':checked')) {
+           $('.buscar').show();
+       } else {
+           $('.buscar').hide();
+           $('#fecha').val("");
+           $('#fecha2').val("");
+          tablaMenu() ;
+       }
+   });
+
+});
+
+
+function validarFechaIncio(){
+  var fechaInicio =new Date($('#fecha').val());
+  var fechaActual = new Date();
+
+            
+                if (fechaInicio > fechaActual) {
+                   Swal.fire({
+                         toast: true,
+                         position: 'top-end',
+                         icon:'error',
+                         title:'<b class="text-rojo">Fecha Inicio inválida!</b>',
+                         showConfirmButton:false,
+                         timer:3000,
+                         timerProgressBar:3000,
+                   })
+               $(".error1").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la Fecha, No debe ser mayor a la fecha de hoy!');
+               $(".error1").show();
+               $('#fecha').addClass('errorBorder');
+               $('.bar1').removeClass('bar');
+               $('.ic1').addClass('l');
+               $('.ic1').removeClass('labelPri');
+               $('.letra1').addClass('labelE');
+               $('.letra1').removeClass('label-char');
+               errorFI=true
+                }
+                else{
+                $(".error1").html("");
+                $(".error1").hide();
+                $('#fecha').removeClass('errorBorder');
+                $('.bar1').addClass('bar');
+                $('.ic1').removeClass('l');
+                $('.ic1').addClass('labelPri');
+                $('.letra1').removeClass('labelE');
+                $('.letra1').addClass('label-char');
+
+                }
+}
+
+
+function validarFechaFin(){
+  var fechaInicio =new Date($('#fecha').val());
+  var fechaFin=new Date($('#fecha2').val());
+  var fechaActual = new Date();
+
+               if (fechaFin > fechaActual) {
+                   Swal.fire({
+                         toast: true,
+                         position: 'top-end',
+                         icon:'error',
+                         title:'<b class="text-rojo">Fecha Fin inválida!</b>',
+                         showConfirmButton:false,
+                         timer:3000,
+                         timerProgressBar:3000,
+                   })
+               $(".error2").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la Fecha, No debe ser mayor a la fecha de hoy!');
+               $(".error2").show();
+               $('#fecha2').addClass('errorBorder');
+               $('.bar2').removeClass('bar');
+               $('.ic2').addClass('l');
+               $('.ic2').removeClass('labelPri');
+               $('.letra2').addClass('labelE');
+               $('.letra2').removeClass('label-char');
+                    errorFF=true
+                }
+                 else if (fechaInicio > fechaFin) {
+                   Swal.fire({
+                         toast: true,
+                         position: 'top-end',
+                         icon:'error',
+                         title:'<b class="text-rojo">Fecha Fin inválida!</b>',
+                         showConfirmButton:false,
+                         timer:3000,
+                         timerProgressBar:3000,
+                   })
+                        $(".error2").html('<i  class="bi bi-exclamation-triangle-fill"></i> La fecha no debe ser menor a la fecha de inicio!');
+                        $(".error2").show();
+                        $('#fecha2').addClass('errorBorder');
+                        $('.bar2').removeClass('bar');
+                        $('.ic2').addClass('l');
+                        $('.ic2').removeClass('labelPri');
+                        $('.letra2').addClass('labelE');
+                        $('.letra2').removeClass('label-char');
+                    errorFF=true
+                }
+                else{
+                $(".error2").html("");
+                $(".error2").hide();
+                $('#fecha2').removeClass('errorBorder');
+                $('.bar2').addClass('bar');
+                $('.ic2').removeClass('l');
+                $('.ic2').addClass('labelPri');
+                $('.letra2').removeClass('labelE');
+                $('.letra2').addClass('label-char');
+
+                }
+                
+}
+
+ // ----------------------------------- MOSTRAR INFORMACIÓN ------------------------------------------
+
+
+      $(document).on('click', '.informacion', function () {
+    let id = this.id;
+    $.ajax({
+        method: "post",
+        url: "", 
+        dataType: "json",
+        data: { infoMenu: true, id: id },
+        success(data) {
+            let tipoA = '';
+            let lista = data;
+
+            lista.forEach(fila => { 
+                tipoA += `
+                    <table class="table table-hover table-bordered tabla1">
+                        <thead class="table-success">
+                            <tr>
+                                <th colspan="5" class='blanco fw-bold text-center'>${fila.tipo}</th>
+                            </tr>
+                            <tr>
+                                <th class="blanco">Imagen</th>
+                                <th class="blanco">Alimento</th>
+                                <th class="blanco">Marca</th>
+                                <th class="blanco">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="infoA_${fila.idTipoA}" class="infoA tbody1"></tbody>
+                    </table>
+                `;
+
+              
+                mostrarAlimentos(fila.idTipoA, id);
+            });
+
+            $('#tablas').html(tipoA);
+        }
+    });
+});
+
+function mostrarAlimentos(idTipoA, idMenu) {
+  $.ajax({
+      method: "post",
+      url: "", 
+      dataType: "json",
+      data: {infoAlimento: true, idTipoA, idMenu},
+      success(data) {
+
+        let tablita ='';
+        let feMenu = new Date(data[0].feMenu);
+        let dia = feMenu.getUTCDate().toString().padStart(2, '0'); // Usar getUTCDate()
+        let mes = (feMenu.getUTCMonth() + 1).toString().padStart(2, '0'); // Usar getUTCMonth()
+        let anio = feMenu.getUTCFullYear(); // Usar getUTCFullYear()
+
+        let fechaFormateada = `${dia}-${mes}-${anio}`;
+
+        tablita = `
+            <tr>
+                <td class="text-center">${fechaFormateada}</td>
+                <td class="text-center">${data[0].horarioComida}</td>
+                <td class="text-center">${data[0].cantPlatos}</td>
+            </tr>
+        `;
+              
+        let tablita2 = `
+            <tr>
+                <td class="">${data[0].descripcion}</td>
+            </tr>
+        `;
+
+        $('#tbody33').html(tablita);
+        $('#tbody44').html(tablita2);
+
+
+        //--------------------- DETALLE
+        let alimento = '';
+        let lista = data;
+
+        lista.forEach(fila => { 
+
+          let unidadMedida;
+          if (fila.unidadMedida === 'Unidad' && fila.cantidad > 1) {
+           unidadMedida = fila.unidadMedida + 'es';
+          }
+          else{
+            unidadMedida = fila.unidadMedida;
+          }
+          if (fila.unidadMedida !== 'Unidad' && fila.cantidad > 1) {
+             unidadMedida = fila.unidadMedida + 's';
+          }
+            alimento += `
+                <tr>
+                    <td><img src="${fila.imgAlimento}" width="70" height="70" alt="Profile" class="mb-2"></td>
+                    <td>${fila.nombre}</td>
+                    <td>${fila.marca}</td>
+                    <td>${fila.cantidad} ${unidadMedida}</td>
+                </tr>
+            `;
+        });
+
+        $(`#infoA_${idTipoA}`).html(alimento);
+    }
+});
+}
+/*
+$('#info1').hide(100);
+
+$(document).on('click', '#alimentoos', function (){
+   idAli = this.id;
+   $('#info1').hide(1000);
+   $('#tablas').show(1000);
+}); 
+
+
+ $(document).on('click', '#menus', function (){
+     idMen = this.id;
+     $('#tablas').hide(1000);
+     $('#info1').show(1000);
+ }); 
+
+ $(document).on('click', '.cut', function (){
+   $('#tablas').hide(0);
+   $('#info1').show(1000);
+}); */
+ //-------------------------------------- MODIFICAR INFORMACIÓN ------------------------------------------
+
+
+   $('#alimento1').hide(100);
+
+   $(document).on('click', '#alimentoB', function (){
+      idAli = this.id;
+      $('#menu1').hide(1000);
+      $('#alimento1').show(1000);
+   }); 
+
+
+    $(document).on('click', '#menuB', function (){
+        idMen = this.id;
+        $('#alimento1').hide(1000);
+        $('#menu1').show(1000);
+    }); 
+
+    $(document).on('click', '.cut', function (){
+      $('#alimento1').hide(0);
+      $('#menu1').show(1000);
+   }); 
+
+    $('input[type="checkbox"]').on('change', function(e) {
+  // Desmarcar todos los checkboxes excepto el seleccionado
+  $('input[type="checkbox"]').not(this).prop('checked', false);
+
+  // Verificar si no hay ningún checkbox seleccionado
+  if ($('input[type="checkbox"]:checked').length == 0) {
+    e.preventDefault(); // Prevenir comportamiento por defecto
+    validarCheck();  // Llamar a la función de validación cuando no hay selección
+  } else {
+    e.preventDefault(); // Prevenir comportamiento por defecto
+    validarCheck();  // Llamar a la función de validación
+    validarFH();     // Llamar a la función adicional cuando hay selección
+  }
+});
+
+   function valModificar(idd){
+    let id = idd ;
+    $.ajax({
+     url: "",
+     dataType: 'json',
+     method: "POST",
+     data: {modificar: 'modificar', id},
+     success(data){
+ 
+       if (data.resultado === "no se puede"){
+          $('#modificarMenu').modal('hide');
+          $('#cerrar2').click();
+              Swal.fire({
+                 toast: true,
+                 position: 'top-end',
+                 icon:'error',
+                 title: `<b class="fw-bold text-rojo">No se puede Modificar!</b><b style="font-size:13px!important;">
+                 El Menú Ya Fue Utilizado. `,
+                 showConfirmButton:false,
+                 timer:3000,
+                 timerProgressBar:3000,
+             })
+              
+            }
+            if(data.resultado === "se puede"){
+             $('#modificarMenu').modal('show');
+            }
+            } 
+    })
+ 
+   }
+
+
+ $(document).on('click', '.editar', function () {
+    let id = this.id;
+
+    valModificar(id);
+  
+    $.ajax({
+        method: "post",
+        url: "", 
+        dataType: "json",
+        data: { infoMenu: true, id: id },
+        success: function(data) {
+            let alimentos = '';
+            let requests = [];
+
+            data.forEach(fila => {
+                requests.push(
+                    $.ajax({
+                        method: "post",
+                        url: "", 
+                        dataType: "json",
+                        data: { infoAlimento: true, idTipoA: fila.idTipoA, idMenu: id },
+                        success: function(data) {
+                          console.log('idSalidaA:', idSalidaA);
+                            if (data.resultado === 'error menú') {
+                                $('.cerrar2').click();
+                                tablaMenu();
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: '<span class=" text-rojo">¡El menú fue anulado recientemente!</span>',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true,
+                                });
+                            } else {
+                              $("#idd").val(data[0].idMenu);
+                              $("#feMenu").val(data[0].feMenu);
+                              $("#cantPlatos").val(data[0].cantPlatos);
+                              $("#descripcion").val(data[0].descripcion);
+                              $("#idSalidaA").val(data[0].idSalidaA);
+                              $('input[name="opcion"]').prop('checked', false);
+    
+                  
+                               $('input[name="opcion"][value="' + data[0].horarioComida + '"]').prop('checked', true);
+                                alimentos += procesarAlimento(data);
+                            }
+                        }
+                    })
+                );
+            });
+
+            $.when.apply($, requests).done(function() {
+                $(`#tbody3`).html(alimentos);
+                tableContainer.scrollTop = tableContainer.scrollHeight;
+            });
+        }
+    });
+});
+
+ $(document).on('click', '.resetear', function () {
+    let id = $("#idd").val();
+    $.ajax({
+        method: "post",
+        url: "", 
+        dataType: "json",
+        data: { infoMenu: true, id: id },
+        success: function(data) {
+            let alimentos = '';
+            let requests = [];
+
+            data.forEach(fila => {
+                requests.push(
+                    $.ajax({
+                        method: "post",
+                        url: "", 
+                        dataType: "json",
+                        data: { infoAlimento: true, idTipoA: fila.idTipoA, idMenu: id },
+                        success: function(data) {
+                            if (data.resultado === 'error menú') {
+                                $('.cerrar2').click();
+                                tablaMenu();
+                                Swal.fire({
+                                    toast: true,
+                                    position: 'top-end',
+                                    icon: 'error',
+                                    title: '<span class=" text-rojo">¡El menú fue anulado recientemente!</span>',
+                                    showConfirmButton: false,
+                                    timer: 3000,
+                                    timerProgressBar: true,
+                                });
+                            } else {
+                              $("#feMenu").val(data[0].feMenu);
+                              $("#cantPlatos").val(data[0].cantPlatos);
+                              $("#descripcion").val(data[0].descripcion);
+                              $("#idSalidaA").val(data[0].idSalidaA);
+                   
+                              $('input[name="opcion"]').prop('checked', false);
+    
+                  
+                               $('input[name="opcion"][value="' + data[0].horarioComida + '"]').prop('checked', true);
+                                alimentos += procesarAlimento(data);
+                            }
+                        }
+                    })
+                );
+            });
+
+            $.when.apply($, requests).done(function() {
+                $(`#tbody3`).html(alimentos);
+                tableContainer.scrollTop = tableContainer.scrollHeight;
+            });
+        }
+    });
+});
+
+function procesarAlimento(data) {
+    let alimento1 = '';
+    let lista1 = data;
+
+    lista1.forEach(fila => {
+        let unidadMedida;
+        if (fila.unidadMedida === 'Unidad' && fila.cantidad > 1) {
+            unidadMedida = fila.unidadMedida + 'es';
+        } else {
+            unidadMedida = fila.unidadMedida;
+        }
+        if (fila.unidadMedida !== 'Unidad' && fila.cantidad > 1) {
+            unidadMedida = fila.unidadMedida + 's';
+        }
+
+        alimento1 += `
+            <tr class='${fila.idAlimento}'>
+                <td class='d-none'><input class='d-none idAlimento2' value='${fila.idAlimento}'></td>
+                <td><img src="${fila.imgAlimento}" width="50" height="50" alt="Profile" class="mb-2"></td>
+                <td>${fila.nombre}</td>
+                <td>${fila.marca}</td>
+                <td>${fila.cantidad} ${unidadMedida}<input class='d-none' id='cantidadA' value='${fila.cantidad}'></td>
+                <td>
+                    <a id='quitarFila' class="btn btn-sm btn-icon text-danger text-center" value='${fila.idAlimento}' data-bs-toggle="tooltip" title="Borrar Alimento" type="button">
+                        <i class="bi bi-trash icon-24 t" width="20"></i>
+                    </a>
+                </td>
+            </tr>
+        `;
+    });
+
+    return alimento1;
+}
+
+
+
+
+
+   
+
+    $('#disponibilidad').hide();
+    $('#tablaD').hide();
+    $('#ani').show();
+    $("#tipoA").on('change', function() {
+	    verificarTipoA()
+      mostrarAlimento($(this).val());
+      chequeo_tipoA()
+    });
+
+    $("#alimento").on('change', function() {
+	    verificarAlimento()
+	    chequeo_alimento()
+
+	    mostrar2($(this).val());
+	    mostrarCantidadDisponible($(this).val());
+
+	    let alimento = $('#alimento').val();
+        let alimentoDuplicado = false;
+        $('#tabla3 tbody tr').each(function() {
+            let idAlimento = $(this).find('.idAlimento2').val();
+            if (alimento === idAlimento) {
+                alimentoDuplicado = true;
+                return false;  
+            }
+        });
+
+        if (alimentoDuplicado) {
+        	Swal.fire({
+                          toast: true,
+                          position: 'top-end',
+                          icon:'error',
+                          title:'<span class=" text-rojo">El alimento ya está en la tabla!</span>',
+                          showConfirmButton:false,
+                          timer:3000,
+                          timerProgressBar:3000,
+                          width:'38%',
+                      })
+         $(".error3").html('<i  class="bi bi-exclamation-triangle-fill"></i> El alimento ya existe en la tabla!');
+         $(".error3").show();
+         $('#alimento').addClass('is-invalid');
+         $('.bar3').removeClass('bar');
+         $('.ic3').addClass('l');
+         $('.ic3').removeClass('labelPri');
+         $('.letra3').addClass('labelE');
+         $('.letra3').removeClass('label-char');
+        }
+ });
+
+
+ $('#horarioC').on('change',function(e){
+ 
+  if ($('input[type=checkbox]:checked').length==0) {
+     e.preventDefault();
+     validarCheck();
+  }
+  else{
+    e.preventDefault();
+     validarCheck();
+     validarFH();
+  }
+});
+
+    $("#cantidad").focusout(function(){
+      chequeo_cantidad();
+    });
+
+    $("#cantidad").on('keyup', function(){
+     chequeo_cantidad();
+    });
+
+    $("#feMenu").focusout(function(){
+      chequeo_fecha();
+      validarFH();
+    });
+
+    $("#feMenu").on('keyup', function(){
+      chequeo_fecha();
+      validarFH();
+    });
+
+    $("#cantPlatos").focusout(function(){
+      chequeo_cantidadE();
+    });
+  
+    $("#cantPlatos").on('keyup', function(){
+      chequeo_cantidadE();
+    });
+
+    $("#descripcion").focusout(function(){
+      chequeo_descripcion();
+    });
+
+    $("#descripcion").on('keyup', function(){
+      chequeo_descripcion();
+    });
+
+
+    $("#cancelar").on('click', function() {
+  	 primary();
+  	setTodayDate(hoyA);
+    vaciarTabla()
+    $('#ani').hide();
+     $('#tablaD').hide();
+     $('#descripcion').val('');
+    });
+
+ 
+ $("#cancelarInventario").on('click', function() {
+ primary2();
+ });
+
+ $("#agregarInventario").on('click', function() {
+ error_tipoA = false;
+ error_alimento = false;
+ error_cantidad = false;
+ error_veriTA = false;
+ error_veriA = false;
+ error_horarioC = false;
+
+ verificarTipoA();
+ chequeo_tipoA();
+ verificarAlimento();
+ chequeo_alimento();
+ chequeo_cantidad();
+
+     let alimento = $('#alimento').val();
+     let alimentoDuplicado = false;
+     $('#tabla3 tbody tr').each(function() {
+         let idAlimento = $(this).find('.idAlimento2').val();
+         if (alimento === idAlimento) {
+             alimentoDuplicado = true;
+             return false;  // Salir del bucle each
+         }
+     });
+
+     if (alimentoDuplicado) {
+              Swal.fire({
+                       toast: true,
+                       position: 'top-end',
+                       icon:'error',
+                       title:'<span class=" text-rojo">El alimento ya está en la tabla!</span>',
+                       showConfirmButton:false,
+                       timer:3000,
+                       timerProgressBar:3000,
+                       width:'38%',
+                   })
+      $(".error3").html('<i  class="bi bi-exclamation-triangle-fill"></i> El alimento ya existe en la tabla!');
+      $(".error3").show();
+      $('#alimento').addClass('is-invalid');
+      $('.bar3').removeClass('bar');
+      $('.ic3').addClass('l');
+      $('.ic3').removeClass('labelPri');
+      $('.letra3').addClass('labelE');
+      $('.letra3').removeClass('label-char');
+     } else {
+      if (!error_tipoA && !error_alimento && !error_veriA  && !error_veriTA  && !error_cantidad ) {
+          let cantidad = $('#cantidad').val();
+          let unidad=$('#unidad').val();
+          if (cantidad > 0 && cantidad !== '') {
+                      primary2();
+                      mostrarInfo(alimento, cantidad, unidad);
+          }
+      
+     }
+ }
+});
+
+
+$('body').on('click', '#quitarFila', function(e) {
+  var claseAEliminar = $(this).attr('value');
+  console.log(claseAEliminar);  // Obtener el valor del atributo 'value' del botón
+
+  Swal.fire({
+      title: '¿Deseas eliminar este alimento de la tabla?',
+      icon: 'question',
+      showCancelButton: true,
+      width: '35%',
+      cancelButtonText: 'Cancelar',
+      confirmButtonText: 'Aceptar',
+  }).then((result) => {
+      if (result.isConfirmed) {
+      
+          $('.tables tbody .' + claseAEliminar).remove();
+          modiAli();  
+          validarTabla(); 
+      }
+  });
+
+ e.preventDefault();
+});
+
+$("#editar").on("click", function(e){
+  e.preventDefault();
+  error_fecha=false;
+  error_horarioC = false;
+  error_cantidadE= false;
+  error_descrip = false;
+  error_tabla=false;
+  error_validarFH=false;
+  
+ 
+  chequeo_fecha();
+  chequeo_cantidadE();
+  chequeo_descripcion();
+  validarTabla();
+  validarCheck()
+  validarFH()
+
+  if(!error_fecha && !error_horarioC &&  !error_cantidadE && !error_descrip && !error_tabla && !error_validarFH ){
+      modificar();
+
+  }
+  else{
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon:'error',
+                title:'<span class=" text-rojo">Ingrese los Datos Correctamente!</span>',
+                showConfirmButton:false,
+                timer:3000,
+                timerProgressBar:3000,
+                width:'38%',
+            })
+       }
+     
+
+     })
+
+
+function modiAli() {
+  let feMenu = $("#feMenu").val();
+  let horarioComida = $("input[name='opcion']:checked").val();
+  let cantPlatos = $("#cantPlatos").val();
+  let descripcion = $("#descripcion").val();
+  let id = $('#idd').val();
+  let idSalidaA = $('#idSalidaA').val();
+
+  $.ajax({
+      type: "post",
+      url: "", 
+      dataType: "json",
+      data: {
+          feMenu,
+          horarioComida,
+          cantPlatos,
+          descripcion,
+          id,
+          idSalidaA
+      },
+      success(response) {
+          if (response.resultado === "error") {
+              Swal.fire({
+                  toast: true,
+                  position: 'top-end',
+                  icon: 'error',
+                  title: response.mensaje,
+                  showConfirmButton: false,
+                  timer: 3000,
+                  timerProgressBar: true,
+              });
+          } else {
+              console.log('Alimento devuelto al stock');
+          }
+      }
+  });
+}
+
+            
+
+function modificar() {
+  $("#editar").prop("disabled", true);  
+  let feMenu = $("#feMenu").val();
+  let horarioComida = $("input[name='opcion']:checked").val();
+  let cantPlatos = $("#cantPlatos").val();
+  let descripcion = $("#descripcion").val();
+  let id = $('#idd').val();
+  let idSalidaA = $('#idSalidaA').val();
+  let token = $('[name="csrf_token"]').val();
+if(token){
+         console.log(token);
+
+  $.ajax({
+      type: "post",
+      url: "",  
+      dataType: "json",
+      data: {
+          feMenu,
+          horarioComida,
+          cantPlatos,
+          descripcion,
+          id,
+          idSalidaA,
+          csrfToken: token
+
+      },
+      success(response) {
+          if (response.resultado === "error" && response .newCsrfToken) { 
+              Swal.fire({
+                  toast: true,
+                  position: 'top-end',
+                  icon: 'error',
+                  title: response.mensaje,
+                  showConfirmButton: false,
+                  timer: 3000,
+                  timerProgressBar: true,
+              })
+              $(".error5").html('<i  class="bi bi-exclamation-triangle-fill"></i> El Menú ya esta registrado en esa fecha y horario!');
+              $(".error6").html('<i  class="bi bi-exclamation-triangle-fill"></i> El Menú ya esta registrado en esa fecha y horario!');
+              $(".error5, .error6").show();
+              $('#feMenu').addClass('errorBorder');
+              $('.bar6').removeClass('bar');
+              $('.ic6').addClass('l');
+              $('.ic6').removeClass('labelPri');
+              $('.letra').addClass('labelE');
+              $('.letra').removeClass('label-char');
+              error_validarFH = true;
+          } else {
+              actualizarDetalle();  
+                $('[name="csrf_token"]').val(response.newCsrfToken);
+              $('#cerrar2').click();
+              delete mostrarM ;
+              Swal.fire({
+                  toast: true,
+                  position: 'top-end',
+                  icon: 'success',
+                  title: '¡El Menú Fue Modificado Exitosamente!',
+                  showConfirmButton: false,
+                  timer: 2500,
+                  timerProgressBar: true,
+              });
+
+              tablaMenu();  
+              vaciarTabla();  
+          }
+      },
+      complete() {
+          $("#editar").prop("disabled", false);  
+      }
+  });
+}
+}
+     function actualizarDetalle() {
+  let idMenu = $('#idd').val();
+  let idSalidaA = $('#idSalidaA').val();
+  let alimentosEnviados = [];  
+
+
+  $('#tabla3 tbody tr').each(function () {
+      let alimento = $(this).find('.idAlimento2').val();
+      let cantidad = $(this).find('#cantidadA').val();
+
+     
+         // Verificar si el alimento ya ha sido enviado, para evitar duplicados
+         if (!alimentosEnviados.includes(alimento) && cantidad > 0) {  // Solo si la cantidad es mayor a 0
+          alimentosEnviados.push(alimento);  // Añadir el alimento a la lista de procesados
+
+
+          $.ajax({
+              url: "",  
+              method: "post",
+              dataType: "json",
+              data: {
+                  cantidad,
+                  idMenu,
+                  alimento,
+                  idSalidaA
+              },
+              success(data) {
+                  console.log(data);
+              }
+          });
+      }
+  });
+}
+
+
+              
+
+function primary (){
+  $(".error2, .error3, .error4, .error5, .error6, .error7, .error8").html("");
+   $(".error2, .error3, .error4, .error5, .error6, .error7, .error8").hide();
+   $('#tipoA, #alimento, #cantidad, #feMenu, #cantPlatos, #descripcion').removeClass('is-invalid');
+   $('#cantidad, #feMenu, #cantPlatos, #descripcion').removeClass('errorBorder');
+   $('.bar2, .bar3, .bar4, .bar5, .bar6, .bar7, .bar8').addClass('bar');
+   $('.ic2, .ic3, .ic4, .ic5, .ic6, .ic7, .ic8').removeClass('l');
+   $('.ic2, .ic3, .ic4, .ic5, .ic6, .ic7, .ic8').addClass('labelPri');
+   $('.letra2, .letra3, .letra4, .letra5, .letra6, .letra7, .letra8').removeClass('labelE');
+   $('.letra2, .letra3, .letra4, .letra5, .letra6, .letra7, .letra8').addClass('label-char');
+   $('#tipoA, #alimento').val('Seleccionar').trigger('change.select2');
+   $('#cantPlatos, #descripcion').val('');
+   $('input[type=checkbox]').prop('checked', false);
+   $('#disponibilidad').hide();
+    $('#agregarInventario').prop('disabled', false);;
+    }
+
+
+function primary2 (){
+$(".error2, .error3, .error4").html("");
+ $(".error2, .error3, .error4").hide();
+ $('#tipoA, #alimento').removeClass('is-invalid');
+ $('#cantidad').removeClass('errorBorder');
+ $('.bar2, .bar3, .bar4').addClass('bar');
+ $('.ic2, .ic3, .ic4').removeClass('l');
+ $('.ic2, .ic3, .ic4').addClass('labelPri');
+ $('.letra2, .letra3, .letra4').removeClass('labelE');
+ $('.letra2, .letra3, .letra4').addClass('label-char');
+ $('#tipoA, #alimento').val('Seleccionar').trigger('change.select2');
+ $('#disponibilidad').hide();
+  $('#agregarInventario').prop('disabled', false);
+}
+
+function primary3(){
+$('.error5').html('');
+  $('#tablita #horarioComida #horarioC').each(function () {
+       $(this).find('.checkHorarioComida').removeClass('is-invalid') ;
+   })
+}
+
+
+ 
+         let error_tipoA= false;
+         let error_alimento=false;
+         let error_cantidad= false;
+         let error_horarioC = false;
+         let error_fecha = false;
+         let error_cantidadE= false;
+         let error_descrip = false;
+         let error_veriTA = false;
+         let error_veriA = false;
+         let error_tabla=false;
+         let error_validarFH = false;
+         let hoyA= $('#feMenu');
+         const tableContainer = document.getElementById('tablas1');
+         const tableContainer2 = document.getElementById('totalD');
+
+
+// ----------------------- VALIDACIONES -----------------------------
+
+function chequeo_tipoA() { 
+  var tipoA = $("#tipoA").val();
+  if (tipoA != 'Seleccionar') {
+   $(".error2").html("");
+   $(".error2").hide();
+   $('#tipoA').removeClass('is-invalid');
+   $('.bar2').addClass('bar');
+   $('.ic2').removeClass('l');
+   $('.ic2').addClass('labelPri');
+   $('.letra2').removeClass('labelE');
+   $('.letra2').addClass('label-char');
+  } else {
+   $(".error2").html('<i  class="bi bi-exclamation-triangle-fill"></i> Seleccione el tipo de alimento!');
+   $(".error2").show();
+   $('#tipoA').addClass('is-invalid');
+   $('.bar2').removeClass('bar');
+   $('.ic2').addClass('l');
+   $('.ic2').removeClass('labelPri');
+   $('.letra2').addClass('labelE');
+   $('.letra2').removeClass('label-char');
+   error_tipoA = true;
+  }
+}
+
+
+function chequeo_alimento() { 
+  var alimento = $("#alimento").val();
+  if (alimento != 'Seleccionar') {
+   $(".error3").html("");
+   $(".error3").hide();
+   $('#alimento').removeClass('is-invalid');
+   $('.bar3').addClass('bar');
+   $('.ic3').removeClass('l');
+   $('.ic3').addClass('labelPri');
+   $('.letra3').removeClass('labelE');
+   $('.letra3').addClass('label-char');
+  } else {
+   $(".error3").html('<i  class="bi bi-exclamation-triangle-fill"></i> Seleccione el alimento!');
+   $(".error3").show();
+   $('#alimento').addClass('is-invalid');
+   $('.bar3').removeClass('bar');
+   $('.ic3').addClass('l');
+   $('.ic3').removeClass('labelPri');
+   $('.letra3').addClass('labelE');
+   $('.letra3').removeClass('label-char');
+   error_alimento = true;
+  }
+}
+
+function chequeo_cantidad() {
+var chequeo = /^[1-9]\d*$/;
+let alimento = $('.alimento').val();
+var cantidad = $("#cantidad").val();
+
+disponible(alimento).then(mostrarCantidadDisponible => {
+console.log(mostrarCantidadDisponible);
+console.log(alimento);
+
+if (chequeo.test(cantidad) && cantidad !== 0) {
+$(".error4").html("");
+$(".error4").hide();
+$('#cantidad').removeClass('errorBorder');
+$('.bar4').addClass('bar');
+$('.ic4').removeClass('l');
+$('.ic4').addClass('labelPri');
+$('.letra4').removeClass('labelE');
+$('.letra4').addClass('label-char');
+} else {
+$(".error4").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la cantidad de alimentos!');
+$(".error4").show();
+$('#cantidad').addClass('errorBorder');
+$('.bar4').removeClass('bar');
+$('.ic4').addClass('l');
+$('.ic4').removeClass('labelPri');
+$('.letra4').addClass('labelE');
+$('.letra4').removeClass('label-char');
+error_cantidad = true;
+}
+
+if (cantidad > mostrarCantidadDisponible) {
+$(".error4").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese una cantidad igual o inferior a lo que está disponible!');
+$(".error4").show();
+$('#cantidad').addClass('errorBorder');
+$('.bar4').removeClass('bar');
+$('.ic4').addClass('l');
+$('.ic4').removeClass('labelPri');
+$('.letra4').addClass('labelE');
+$('.letra4').removeClass('label-char');
+$('#agregarInventario').prop('disabled', true);
+error_cantidad = true;
+} else {
+$(".error4").html("");
+$(".error4").hide();
+$('#cantidad').removeClass('errorBorder');
+$('.bar4').addClass('bar');
+$('.ic4').removeClass('l');
+$('.ic4').addClass('labelPri');
+$('.letra4').removeClass('labelE');
+$('.letra4').addClass('label-char');
+$('#agregarInventario').prop('disabled', false);
+}
+}).catch(error => {
+console.error('Error al obtener la cantidad disponible:', error);
+});
+}
+
+function validarCheck() {
+const checkboxes = $('input[type=checkbox]');
+const errorElement = $('.error5');
+let selected = false;
+
+checkboxes.on('change', function() {
+  if ($(this).is(':checked')) {
+    checkboxes.not(this).prop('checked', false).removeClass('is-invalid');
+    selected = true;
+  } else {
+    selected = false;
+  }
+
+  if (selected) {
+    errorElement.html('');
+    checkboxes.removeClass('is-invalid');
+  } else {
+    errorElement.html('<i class="bi bi-exclamation-triangle-fill"></i> ¡Seleccione un horario para el menú!');
+    checkboxes.addClass('is-invalid');
+  }
+});
+
+if ($('input[type=checkbox]:checked').length == 0) {
+  errorElement.html('<i class="bi bi-exclamation-triangle-fill"></i> ¡Seleccione un horario para el menú!');
+  checkboxes.addClass('is-invalid');
+  error_horarioC = true;
+} else {
+  errorElement.html('');
+  checkboxes.removeClass('is-invalid');
+}
+}
+
+function chequeo_fecha() {
+const fecha = Date.parse($("#feMenu").val());
+  Date.parse($("#feMenu").val());
+  const hoy = Date.now();
+      if (fecha !== '' &&  fecha >= hoy){
+          $(".error6").html("");
+          $(".error6").hide();
+          $('#feMenu').removeClass('errorBorder');
+          $('.bar6').addClass('bar');
+          $('.ic6').removeClass('l');
+          $('.ic6').addClass('labelPri');
+          $('.letra6').removeClass('labelE');
+          $('.letra6').addClass('label-char');
+      } else {
+         $(".error6").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la Fecha, No debe ser menor a la fecha de hoy!');
+         $(".error6").show();
+         $('#feMenu').addClass('errorBorder');
+         $('.bar6').removeClass('bar');
+         $('.ic6').addClass('l');
+         $('.ic6').removeClass('labelPri');
+         $('.letra6').addClass('labelE');
+         $('.letra6').removeClass('label-char');
+         error_fecha = true;
+      }
+}
+
+function chequeo_cantidadE() {
+const chequeo = /^[1-9]\d*$/;
+const cantidadE = $("#cantPlatos").val();
+if (chequeo.test(cantidadE) && cantidadE !== 0) {
+ $(".error7").html("");
+ $(".error7").hide();
+ $('#cantPlatos').removeClass('errorBorder');
+ $('.bar7').addClass('bar');
+ $('.ic7').removeClass('l');
+ $('.ic7').addClass('labelPri');
+ $('.letra7').removeClass('labelE');
+ $('.letra7').addClass('label-char');
+} else {
+ $(".error7").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la cantidad de comensales!');
+ $(".error7").show();
+ $('#cantPlatos').addClass('errorBorder');
+ $('.bar7').removeClass('bar');
+ $('.ic7').addClass('l');
+ $('.ic7').removeClass('labelPri');
+ $('.letra7').addClass('labelE');
+ $('.letra7').removeClass('label-char');
+ error_cantidadE = true;
+}
+}
+
+function chequeo_descripcion() {
+const chequeo = /^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/;
+const descripcion = $("#descripcion").val();
+if (chequeo.test(descripcion) && descripcion !== '') {
+ $(".error8").html("");
+ $(".error8").hide();
+ $('#descripcion').removeClass('errorBorder');
+ $('.bar8').addClass('bar');
+ $('.ic8').removeClass('l');
+ $('.ic8').addClass('labelPri');
+ $('.letra8').removeClass('labelE');
+ $('.letra8').addClass('label-char');
+} else {
+ $(".error8").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la descripción del menú!');
+ $(".error8").show();
+ $('#descripcion').addClass('errorBorder');
+ $('.bar8').removeClass('bar');
+ $('.ic8').addClass('l');
+ $('.ic8').removeClass('labelPri');
+ $('.letra8').addClass('labelE');
+ $('.letra8').removeClass('label-char');
+   error_descripcion = true;
+}
+}
+
+
+
+
+
+
+      function verificarTipoA(){
+         
+           let tipoA = $("#tipoA").val();
+           if (tipoA != 'Seleccionar') {
+             $.ajax({
+                    type: "POST",
+                    url: '',
+                    dataType: "json",
+                    data:{ valida:'si', tipoA},
+                    success(data){
+                      if (data.resultado === 'no esta') {
+                         delete select;
+                          mostrarTipoA();
+                          Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon:'error',
+                            title:'<b class="text-rojo">El tipo de alimento  ha sido anulado recientemente!</b>',
+                            showConfirmButton:false,
+                            timer:3000,
+                            timerProgressBar:3000,
+                          })
+                        
+                          error_veriTA = true;
+                      }
+                        
+                      
+                      }
+                    })
+                  }
+            
+
+          }
+
+
+           function verificarAlimento(){
+
+         
+           let alimento = $("#alimento").val();
+           if (alimento != 'Seleccionar') {
+             $.ajax({
+                    type: "POST",
+                    url: '',
+                    dataType: "json",
+                    data:{ valida2:'si', alimento},
+                    success(data){
+                      if (data.resultado === 'no esta') {
+                         delete select;
+                          mostrarTipoA();
+                          Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon:'error',
+                            title:'<b class="text-rojo">El  alimento  ha sido anulado recientemente!</b>',
+                            showConfirmButton:false,
+                            timer:3000,
+                            timerProgressBar:3000,
+                          })
+                        
+                          error_veriA = true;
+                      }
+                        
+                      
+                      }
+                    })
+                  }
+          }
+
+          function validarFH(){
+            let feMenu = $("#feMenu").val();
+            let horarioComida = $("input[name='opcion']:checked").val();
+            let id = $('#idd').val();
+
+            if (feMenu != '' && horarioComida != '' ) {
+              $.ajax({
+                     type: "POST",
+                     url: '',
+                     dataType: "json",
+                     data:{ validar:'si', 
+                      feMenu,
+                      horarioComida,
+                      id
+                      },
+                      success: function(response) {
+                        if (response.resultado === "error" && response.mensaje === 'Ya tiene un menú registrado para esa fecha y horario' ) {
+                           Swal.fire({
+                             toast: true,
+                             position: 'top-end',
+                             icon:'error',
+                             title: response.mensaje,
+                             showConfirmButton:false,
+                             timer:3000,
+                             timerProgressBar:3000,
+                           })
+                           $(".error5").html('<i  class="bi bi-exclamation-triangle-fill"></i> El menú ya esta registrado en esa fecha y horario!');
+                           $(".error6").html('<i  class="bi bi-exclamation-triangle-fill"></i> El menú ya esta registrado en esa fecha y horario!');
+                           $(".error5, .error6").show();
+                           $('#feMenu').addClass('errorBorder');
+                           $('.bar6').removeClass('bar');
+                           $('.ic6').addClass('l');
+                           $('.ic6').removeClass('labelPri');
+                           $('.letra').addClass('labelE');
+                           $('.letra').removeClass('label-char');
+                           $("#editar").prop("disabled", true);
+                           error_validarFH = true;
+                        }
+                        else{
+                          
+                           $(".error5, .error6").hide();
+                           $('#feMenu').removeClass('errorBorder');
+                           $('.bar6').addClass('bar');
+                           $('.ic6').removeClass('l');
+                           $('.ic6').addClass('labelPri');
+                           $('.letra').removeClass('labelE');
+                           $('.letra').addClass('label-char');
+                           $("#editar").prop("disabled", false);
+
+
+                         }
+                          
+                       }
+                     })
+                  }
+     
+                 }
+
+    
+
+
+
+       ////---------------------------MOSTRAR SELECT TIPO DE ALIMENTOS -------------------------------
+mostrarTipoA();
+let select;
+select=$('#tipoA');
+let input;
+input= ' <option value="Seleccionar">Seleccionar</option>';
+
+function mostrarTipoA(){
+    $.ajax({
+      url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {select: 'mostrar'}, 
+      success(response){
+
+        let opE = '';
+        response.forEach(fila => {
+          opE += `<option  value="${fila.idTipoA}">${fila.tipo} </option> `
+        })
+        $('#tipoA').html(input + opE);
+      }
+    })
+  }
+
+ 
+
+
+////---------------------------MOSTRAR SELECT DE ALIMENTOS -------------------------------
+let select2;
+select2 = $('#alimento');
+let input2;
+input2 = ' <option value="Seleccionar">Seleccionar</option>';
+
+function mostrarAlimento(a) {
+    let tipoA = a;
+    $.ajax({
+      url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {select2: 'mostrar', tipoA},
+      success(response) {
+        let opE = '';
+        response.forEach(fila => {
+          let imgSrc = fila.imgAlimento.toLowerCase().replace(' ', '_');
+          if (fila.marca === 'Sin Marca') {
+            opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre}</option>`;
+          } else {
+            opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre} - ${fila.marca}</option>`;
+          }
+        });
+        $('#alimento').html(input2 + opE);
+      }
+    });
+}
+
+$(document).ready(function() {
+  $("#tipoA").select2({
+    theme: 'bootstrap-5',
+    dropdownParent: $('#sel'),
+    selectionCssClass: "input",
+    width: '100%'
+  });
+
+  $("#alimento").select2({
+    theme: 'bootstrap-5',
+    dropdownParent: $('#sel2'),
+    selectionCssClass: "input",
+    width: '100%',
+    templateResult: formatState,
+    templateSelection: formatState
+  });
+
+  function formatState(state) {
+    if (!state.id) {
+      return state.text;
+    }
+    let imgSrc = $(state.element).data('img_src');
+    if (imgSrc) {
+      let $state = $(`
+        <span>
+          <img src="${imgSrc}" class="img-flag" style="width: 25px; height: 25px; margin-right: 10px;" />
+          ${state.text}
+        </span>
+      `);
+      return $state;
+    }
+    return state.text;
+  }
+});
+         
+   
+
+function newAlimento(idAlimento,imagen, codigo, alimento, marca, cantidad, unidad){
+  let unidadMedida;
+  if (unidad === 'Unidad' && cantidad > 1) {
+   unidadMedida = unidad + 'es';
+  }
+  else{
+    unidadMedida = unidad;
+  }
+  if (unidad !== 'Unidad' && cantidad > 1) {
+     unidadMedida = unidad + 's';
+  }
+  let newAlimento = `
+  
+      <tr class='${idAlimento}'>
+         <td class='d-none'><input class='d-none idAlimento2'  value='${idAlimento}'></td>
+         <td><img src="${imagen}" width="70" height="70"alt="Profile" class=" mb-2"></td>
+         <td>${alimento}</td>
+         <td>${marca}</td>
+         <td>${cantidad} ${unidadMedida}<input class='d-none' id='cantidadA' value='${cantidad}'></td>
+         <td>
+            <a id='quitarFila'  class="btn btn-sm btn-icon text-danger text-center " value='${idAlimento}'   data-bs-toggle="tooltip" title="Borrar Alimento"   type="button" >
+                   <i class="bi bi-trash icon-24 t" width="20"></i>
+            </a>
+         </td>
+      
+      </tr>`;
+  
+      console.log(newAlimento);
+      return newAlimento;
+  
+      }
+  
+function mostrarLoQueQueda(imagen, codigo, nombre, cantidad, restar, unidad){
+    let unidadMedida;
+  if (unidad === 'Unidad' && cantidad > 1) {
+   unidadMedida = unidad + 'es';
+  }
+  else{
+    unidadMedida = unidad;
+  }
+  if (unidad !== 'Unidad' && cantidad > 1) {
+     unidadMedida = unidad + 's';
+  }
+  
+  
+  let total= cantidad - restar;
+  
+  let newAlimento = `
+  
+      <tr class='${codigo}'>
+         <td><img src="${imagen}" width="70" height="70"alt="Profile" class=" mb-2"></td>
+         <td>${codigo}</td>
+          <td>${nombre}</td>
+         <td>${total} ${unidadMedida}<input class='d-none' id='cantidadA' value='${cantidad}'></td>
+      </tr>`;
+      return newAlimento;
+      }
+  
+  function mostrar2(alimento){
+    let idAlimento = alimento;
+      $.ajax({
+        url: '',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {muestra:true, idAlimento}, 
+        success(data){
+        if ($('#alimento').val() === 'Seleccionar') {
+           $('#unidad').val(' ');
+        }
+        else{
+          $('#unidad').val(data[0].unidadMedida);
+        }
+        
+        }
+      })
+  
+      }
+  
+      function mostrarInfo(alimento, cantidad, unidad){
+        let idAlimento = alimento;
+          $.ajax({
+            url: '',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {muestra:true, idAlimento}, 
+            success(data){
+            let newRow= newAlimento(data[0].idAlimento,data[0].imgAlimento, data[0].codigo, data[0].nombre, data[0].marca, cantidad, unidad);
+            let newRow2= mostrarLoQueQueda(data[0].imgAlimento, data[0].codigo, data[0].nombre, data[0].stock, cantidad,unidad)
+            $('#tablaD').show(1000);
+             $('#ani').show(1000);
+            $('#tabla3 tbody').append(newRow);
+            $('.tabla2 tbody').append(newRow2);
+            $('#cancelarInventario').click();
+            tableContainer.scrollTop = tableContainer.scrollHeight;
+            tableContainer2.scrollTop = tableContainer2.scrollHeight;
+      
+            }
+          })
+      
+      }
+  
+      function mostrarCantidadDisponible(alimento){
+    let idAlimento = alimento;
+      $.ajax({
+        url: '',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {muestra:true, idAlimento}, 
+        success(data){
+           if ($('#alimento').val() === 'Seleccionar') {
+              $('#dispo').val('');
+            }
+              else{
+                let unidadMedida;
+                if (data[0].unidadMedida === 'Unidad' && data[0].stock > 1) {
+                   unidadMedida = data[0].unidadMedida + 'es';
+                }
+                if (data[0].unidadMedida !== 'Unidad' && data[0].stock > 1) {
+                     unidadMedida = data[0].unidadMedida + 's';
+                }
+                 else{
+                     unidadMedida = data[0].unidadMedida;
+                }
+                $('#disponibilidad').show(100);
+                $('#dispo').val(data[0].stock + ' '+unidadMedida);
+              }
+  
+              let cantidad = data[0].stock;
+  
+               return cantidad
+        }
+      })
+  
+      }
+  
+  
+    function disponible(alimento) {
+    return new Promise((resolve, reject) => {
+      let idAlimento = alimento;
+      $.ajax({
+        url: '',
+        type: 'POST',
+        dataType: 'JSON',
+        data: { muestra: true, idAlimento }, 
+        success(data) {
+  
+          let cantidad = data.stock;
+          resolve(cantidad);
+        },
+        error(err) {
+          reject(err);
+        }
+      });
+    });
+  }
+  
+               function validarTabla() {
+                  if ($('#tabla3 tbody tr').length === 0) {
+                      $('#tablaD').hide(1000);
+                     error_tabla=true;
+                  } 
+              }
+
+
+          
+              validarTabla();
+  
+              function vaciarTabla() {
+              const tabla = document.getElementById('tabla3').getElementsByTagName('tbody')[0];
+              while (tabla.firstChild) {
+                  tabla.removeChild(tabla.firstChild);
+              }
+  
+              const tabla2 = document.getElementById('tabla2').getElementsByTagName('tbody')[0];
+              while (tabla2.firstChild) {
+                  tabla2.removeChild(tabla2.firstChild);
+                  $('#tablaD').hide(1000);
+              }
+          }
+
+
+
+
+
+
+
+//---------------------------------- ELIMINAR---------------//
+
+        function valAnulacion(idd){
+          let id = idd;
+          $.ajax({
+           url: "",
+           dataType: 'json',
+           method: "POST",
+           data: {valAnulacion: true, id: id },
+           success: function(data) {
+       
+             if (data.resultado === "no se puede"){
+                $('#borrarM').modal('hide');
+                $('#cerrar3').click();
+                    Swal.fire({
+                       toast: true,
+                       position: 'top-end',
+                       icon:'error',
+                       title: `<b class="fw-bold text-rojo">No se puede Eliminar!</b><b style="font-size:13px!important;">
+                      Este Menú ya fue realizado. `,
+                       showConfirmButton:false,
+                       timer:3000,
+                       timerProgressBar:3000,
+                   })
+                    
+                  }
+                   if (data.resultado === "se puede") {
+                    $('#borrarM').modal('show');
+                  }
+                  } 
+          })
+       
+        }
+         
+        $(document).on('click', '.borrar', function() {
+            let id = this.id;
+        
+             $.ajax({
+             url: "",
+             dataType: 'json',
+             method: "POST",
+             data: {infoMenu: 'anular', id},
+        
+             success: function(data) {
+              if (data.resultado === 'ya no existe') {
+                $('#cerrar3').click();
+                 delete mostrarM ;
+                 tablaMenu();
+                 Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon:'error',
+                        title:'<span class=" text-rojo">El menú fue eliminado recientemente!</span>',
+                        showConfirmButton:false,
+                        timer:3000,
+                        timerProgressBar:3000,
+                    })
+                }
+                 else{
+                       valAnulacion(id);
+                       $('#idM').val(id);
+                       $('.eliminarM').html('¿Deseas eliminar este menú: <b class="azul5">'+data[0].horarioComida+'</b>?');
+                    
+                 }
+              
+             }
+         
+            })
+         
+        });
+         
+        $('#borrar').click((e)=>{
+            let idM= $('#idM').val();
+             let token = $('[name="csrf_token"]').val();
+
+         if (token) {                 
+           console.log(token);
+                        e.preventDefault();
+
+              console.log('Botón eliminar clickeado, enviando AJAX...');
+             $.ajax({
+                 url: '',
+                 method: 'post',
+                 dataType: 'json',
+                 data: {
+                   eliminar: true, 
+                   id: idM, 
+                   borrar: 'borrar', 
+                   csrfToken: token
+                   },
+                 success(data) {
+                     console.log(data);
+                     if (data.resultado === 'eliminado' && data.newCsrfToken ) {
+                      $('[name="csrf_token"]').val(data.newCsrfToken);
+                        $('#cerrar3').click();
+                         $('#cerrar3').click();
+                        tablaMenu();
+                          Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon:'success',
+                                title:'Menú Eliminado Exitosamente!',
+                                showConfirmButton:false,
+                                timer:2500,
+                                timerProgressBar:true,
+                     })
+               }
+             }
+           })
+             }
+        })
+
+
+
+        
+    ///-----------------------DESCARGAR PDF 
+
+      $(document).on('click', '.pdf', function() {
+        id = this.id;
+ 
+        $('#idMenu').val(id);
+    })
+ 
+ function exportarReporte(){
+   
+     let idMenu = $('#idMenu').val();
+     $('.loadingAnimation').show();
+     $.ajax({
+       url: '',
+       type: 'POST',
+       dataType: 'JSON',
+       data: {reporte:true, idMenu}, 
+       success(data){
+          if(data.respuesta == "guardado"){
+             console.log(data.ruta)
+             descargarArchivo(data.ruta);
+             abrirArchivo(data.ruta);
+              $('#clos').click();
+         }else{
+             console.log('ERROR PDF MENU')
+         }
+         $('.loadingAnimation').hide();
+ 
+       } })
+ }
+ 
+ function descargarArchivo(ruta){
+ let link=document.createElement('a');
+ link.href = ruta;
+ link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
+ link.click();
+ }
+ 
+ function abrirArchivo(ruta){
+     window.open(ruta, '_blank');
+ }
+ 
+ $('#reportebtn').click(()=>{
+     exportarReporte();
+ })
+
+
+ $('#me1').addClass('active');
+$('#me3').addClass('text-primary');
+$('.me3').addClass('active');
+
+
+
+setInterval(function() {
+  $.ajax({
+     url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+      success(data){
+      if (data.newCsrfToken) {
+      $('[name="csrf_token"]').val(data.newCsrfToken);
+        console.log('Token CSRF renovado');
+      } else {
+        console.log('No se pudo renovar el token CSRF');
+      }
+    },
+    error: function(err) {
+      console.error('Error renovando token CSRF:', err);
+    }
+  });
+}, 240000);

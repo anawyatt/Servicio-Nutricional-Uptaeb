@@ -1,0 +1,391 @@
+
+            SET SQL_MODE = "NO_AUTO_VALUE_ON_ZERO";
+            START TRANSACTION;
+            SET time_zone = "+00:00";
+            CREATE DATABASE comerdorUPTAEB;
+            USE comerdorUPTAEB;
+        
+        -- Tabla Sección
+        CREATE TABLE seccion (
+            idSeccion INT AUTO_INCREMENT PRIMARY KEY,
+            seccion VARCHAR(255) NOT NULL,
+            status TINYINT(1) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla Estudiante
+        CREATE TABLE estudiante (
+            cedEstudiante INT PRIMARY KEY,
+            nombre VARCHAR(500) NOT NULL,
+            segNombre VARCHAR(500),
+            apellido VARCHAR(500) NOT NULL,
+            segApellido VARCHAR(500),
+            sexo VARCHAR(1) NOT NULL,
+            telefono VARCHAR(20),
+            nucleo VARCHAR(500) NOT NULL,
+            carrera VARCHAR(500) NOT NULL,
+            status TINYINT(1) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla Estudiante_Seccion (relación muchos a muchos)
+        CREATE TABLE estudiante_seccion (
+            idEstudianteSeccion INT AUTO_INCREMENT PRIMARY KEY,
+            cedEstudiante INT NOT NULL,
+            idSeccion INT NOT NULL,
+            FOREIGN KEY (cedEstudiante) REFERENCES estudiante(cedEstudiante),
+            FOREIGN KEY (idSeccion) REFERENCES seccion(idSeccion)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla Horario
+        CREATE TABLE horario(
+            idHorario INT AUTO_INCREMENT PRIMARY KEY,
+            dia VARCHAR(200) NOT NULL,
+            idSeccion INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idSeccion) REFERENCES seccion(idSeccion)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        CREATE TABLE excepcion(
+            idExc INT AUTO_INCREMENT PRIMARY KEY,
+            descripcion VARCHAR(1000) NOT NULL,
+            cedEstudiante INT NOT NULL,
+            fecha date NOT NULL DEFAULT current_timestamp(),
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (cedEstudiante) REFERENCES estudiante(cedEstudiante)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla tipoAlimento
+        CREATE TABLE  tipoAlimento (
+            idTipoA INT AUTO_INCREMENT PRIMARY KEY,
+            tipo VARCHAR(255) NOT NULL,
+            status TINYINT(1) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla alimento
+        CREATE TABLE  alimento (
+            idAlimento INT AUTO_INCREMENT PRIMARY KEY,
+            codigo VARCHAR(1000) NOT NULL,
+            imgAlimento VARCHAR(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+            nombre VARCHAR(255) NOT NULL,
+            unidadMedida VARCHAR(50) NOT NULL,
+            marca VARCHAR(255) NOT NULL,
+            stock INT NOT NULL,
+            reservado INT NOT NULL,
+            idTipoA INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idTipoA) REFERENCES tipoAlimento(idTipoA)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla inventarioAlimento
+        CREATE TABLE  entradaAlimento (
+            idEntradaA INT AUTO_INCREMENT PRIMARY KEY,
+            fecha DATE NOT NULL,
+            hora time NOT NULL DEFAULT current_timestamp(),
+            descripcion VARCHAR(5000) NOT NULL,
+            status TINYINT(1) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla detalleInventarioA
+        CREATE TABLE  detalleEntradaA (
+            idDetalleA INT AUTO_INCREMENT PRIMARY KEY,
+            cantidad INT NOT NULL,
+            idAlimento INT NOT NULL,
+            idEntradaA INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idAlimento) REFERENCES alimento(idAlimento),
+            FOREIGN KEY (idEntradaA) REFERENCES entradaAlimento(idEntradaA)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla tipoSalidas
+        CREATE TABLE  tipoSalidas (
+            idTipoSalidas INT AUTO_INCREMENT PRIMARY KEY,
+            tipoSalida VARCHAR(255) NOT NULL,
+            status TINYINT(1) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        INSERT INTO `tipoSalidas` (`tipoSalida`, `status`) VALUES
+        ('Menú', 1);
+
+        -- Tabla salidaAlimentos
+        CREATE TABLE  salidaAlimentos (
+            idSalidaA INT AUTO_INCREMENT PRIMARY KEY,
+            fecha DATE NOT NULL,
+            hora time NOT NULL DEFAULT current_timestamp(),
+            descripcion VARCHAR(255) NOT NULL,
+            idTipoSalidaA INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idTipoSalidaA) REFERENCES tipoSalidas(idTipoSalidas)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla menú
+        CREATE TABLE  menu (
+            idMenu INT AUTO_INCREMENT PRIMARY KEY,
+            feMenu date NOT NULL,
+            horarioComida VARCHAR(255) NOT NULL,
+            cantPlatos INT NOT NULL,
+            status TINYINT(1) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+        -- Tabla detalleSalidaMenu
+        CREATE TABLE  detalleSalidaMenu (
+            idDetalleSalidaMenu INT AUTO_INCREMENT PRIMARY KEY,
+            cantidad INT NOT NULL,
+            idMenu INT NOT NULL,
+            idAlimento INT NOT NULL,
+            idSalidaA INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idMenu) REFERENCES menu(idMenu),
+            FOREIGN KEY (idAlimento) REFERENCES alimento(idAlimento),
+            FOREIGN KEY (idSalidaA) REFERENCES salidaAlimentos(idSalidaA)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+        -- Tabla detalleSalidaA
+        CREATE TABLE  detalleSalidaA (
+            idDetalleSalidaA INT AUTO_INCREMENT PRIMARY KEY,
+            cantidad INT NOT NULL,
+            idAlimento INT NOT NULL,
+            idSalidaA INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idAlimento) REFERENCES alimento(idAlimento),
+            FOREIGN KEY (idSalidaA) REFERENCES salidaAlimentos(idSalidaA)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+        -- Tabla tipoUtensilios
+        CREATE TABLE  tipoUtensilios (
+            idTipoU INT AUTO_INCREMENT PRIMARY KEY,
+            tipo VARCHAR(255) NOT NULL,
+            status TINYINT(1) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla utensilios
+        CREATE TABLE  utensilios (
+            idUtensilios INT AUTO_INCREMENT PRIMARY KEY,
+            imgUtensilios VARCHAR(10000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
+            nombre VARCHAR(255) NOT NULL,
+            material VARCHAR(255) NOT NULL,
+            stock INT NOT NULL,
+            idTipoU INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idTipoU) REFERENCES tipoUtensilios(idTipoU)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla inventarioU
+        CREATE TABLE  entradaU (
+            idEntradaU INT AUTO_INCREMENT PRIMARY KEY,
+            fecha DATE NOT NULL,
+            hora time NOT NULL DEFAULT current_timestamp(),
+            descripcion VARCHAR(255) NOT NULL,
+            status TINYINT(1) NOT NULL
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla detalleInventarioU
+        CREATE TABLE  detalleEntradaU (
+            idDetalleU INT AUTO_INCREMENT PRIMARY KEY,
+            cantidad INT NOT NULL,
+            idUtensilios INT NOT NULL,
+            idEntradaU INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idUtensilios) REFERENCES utensilios(idUtensilios),
+            FOREIGN KEY ( idEntradaU) REFERENCES entradaU( idEntradaU)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla salidaUtensilios
+        CREATE TABLE  salidaUtensilios (
+            idSalidaU INT AUTO_INCREMENT PRIMARY KEY,
+            fecha DATE NOT NULL,
+            hora time NOT NULL DEFAULT current_timestamp(),
+            descripcion VARCHAR(255) NOT NULL,
+            idTipoSalidas INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idTipoSalidas) REFERENCES tipoSalidas(idTipoSalidas)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla detalleSalidaU
+        CREATE TABLE  detalleSalidaU (
+            idDetalleSalidaU INT AUTO_INCREMENT PRIMARY KEY,
+            cantidad INT NOT NULL,
+            idUtensilios INT NOT NULL,
+            idSalidaU INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idUtensilios) REFERENCES utensilios(idUtensilios),
+            FOREIGN KEY (idSalidaU) REFERENCES salidaUtensilios(idSalidaU)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+        -- Tabla Asistencia
+        CREATE TABLE  asistencia (
+            idAsistencia INT AUTO_INCREMENT PRIMARY KEY,
+            cedEstudiante INT NOT NULL,
+            fecha date NOT NULL DEFAULT current_timestamp(),
+            hora time NOT NULL DEFAULT current_timestamp(),
+            idMenu INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (cedEstudiante) REFERENCES estudiante(cedEstudiante),
+            FOREIGN KEY (idMenu) REFERENCES menu(idMenu)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+        -- Tabla evento
+        CREATE TABLE  evento (
+            idEvento INT AUTO_INCREMENT PRIMARY KEY,
+            nomEvent VARCHAR(255) NOT NULL,
+            descripEvent VARCHAR(6000) NOT NULL,
+            idMenu INT NOT NULL,
+            status TINYINT(1) NOT NULL,
+            FOREIGN KEY (idMenu) REFERENCES menu(idMenu)
+        ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+
+
+        COMMIT;
+
+                START TRANSACTION;
+
+                CREATE INDEX idx_estudiante_cedula ON estudiante(cedEstudiante);
+                CREATE INDEX idx_estudiante_status ON estudiante(status);
+
+                CREATE INDEX idx_estudianteSeccion_cedula ON estudiante_seccion(cedEstudiante);
+                CREATE INDEX idx_estudianteSeccion_idSeccion ON estudiante_seccion(idSeccion);
+                
+                CREATE INDEX idx_seccion_idSeccion ON seccion(idSeccion);
+                CREATE INDEX idx_seccion_status ON seccion(status);
+
+                CREATE INDEX idx_horario_idSeccion ON horario(idSeccion);
+                CREATE INDEX idx_horario_status ON horario(status);
+
+                CREATE INDEX idx_menu_fecha_horario ON menu(feMenu, horarioComida);
+                CREATE INDEX idx_menu_status ON menu(status);
+
+                CREATE INDEX idx_asistencia_idmenu_fecha ON asistencia(idMenu, fecha);
+                CREATE INDEX idx_asistencia_fecha ON asistencia(fecha);
+                CREATE INDEX idx_asistencia_cedula_fecha ON asistencia(cedEstudiante, fecha);
+
+                CREATE INDEX idx_menu_fecha_horario_status ON menu(feMenu, horarioComida, status);
+                
+                CREATE INDEX idx_asistencia_fecha_cedula ON asistencia(fecha, cedEstudiante);
+                CREATE INDEX idx_menu_horario ON menu(horarioComida);
+                
+                CREATE INDEX idx_asistencia_fecha_idmenu ON asistencia(fecha, idMenu);
+
+             
+               COMMIT;
+
+                START TRANSACTION;
+            
+                -- Vistas
+                CREATE OR REPLACE VIEW vista_estudiantes_con_secciones AS
+                SELECT 
+                    e.cedEstudiante,
+                    e.nombre,
+                    e.apellido,
+                    e.carrera,
+                    e.status,
+                    GROUP_CONCAT(s.seccion ORDER BY s.seccion SEPARATOR ', ') AS seccion 
+                FROM estudiante e
+                JOIN estudiante_seccion es ON e.cedEstudiante = es.cedEstudiante
+                JOIN seccion s ON es.idSeccion = s.idSeccion 
+                WHERE e.status = 1 AND s.status = 1 
+                GROUP BY e.cedEstudiante;
+
+                CREATE OR REPLACE VIEW vista_info_estudiante AS
+                SELECT 
+                    e.cedEstudiante, 
+                    e.nombre, 
+                    e.segNombre, 
+                    e.apellido, 
+                    e.segApellido, 
+                    e.sexo, 
+                    e.telefono, 
+                    e.nucleo, 
+                    e.carrera, 
+                    e.status, 
+                    GROUP_CONCAT(DISTINCT s.seccion ORDER BY s.seccion SEPARATOR ', ') AS seccion,
+                    GROUP_CONCAT(DISTINCT h.dia ORDER BY 
+                        FIELD(h.dia, 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo') 
+                        SEPARATOR ', ') AS horario
+                FROM estudiante e
+                JOIN estudiante_seccion es ON e.cedEstudiante = es.cedEstudiante
+                JOIN seccion s ON es.idSeccion = s.idSeccion
+                JOIN horario h ON s.idSeccion = h.idSeccion
+                WHERE e.status = 1 AND s.status = 1 AND h.status = 1
+                GROUP BY 
+                    e.cedEstudiante, 
+                    e.nombre, 
+                    e.segNombre, 
+                    e.apellido, 
+                    e.segApellido, 
+                    e.sexo, 
+                    e.telefono,     
+                    e.nucleo, 
+                    e.carrera, 
+                    e.status;
+
+                    DELIMITER $$
+
+                        CREATE PROCEDURE sp_mostrar_asistencia (
+                            IN p_fecha DATE,
+                            IN p_horario VARCHAR(20)
+                        )
+                        BEGIN
+                            DECLARE v_fecha DATE;
+                            SET v_fecha = IFNULL(p_fecha, CURDATE());
+
+                            SELECT DISTINCT 
+                                e.cedEstudiante AS Cedula, 
+                                e.nombre AS Nombre, 
+                                e.apellido AS Apellido, 
+                                e.carrera AS Carrera, 
+                                v_fecha AS Fecha,
+                                m.horarioComida AS HorarioDeComida
+                            FROM asistencia a 
+                            JOIN estudiante e ON a.cedEstudiante = e.cedEstudiante 
+                            JOIN menu m ON a.idMenu = m.idMenu 
+                            WHERE a.status = 1
+                                AND a.fecha = v_fecha
+                                AND (p_horario IS NULL OR m.horarioComida = p_horario);
+                        END $$
+                        DELIMITER ;
+                            DELIMITER $$
+
+                            CREATE PROCEDURE sp_mostrar_ultima_asistencia (
+                                IN p_horario VARCHAR(20)
+                            )
+                            BEGIN
+                                DECLARE v_max_fecha DATE;
+
+                                -- Buscar la fecha máxima antes de hoy según el horario
+                                IF p_horario IS NOT NULL AND p_horario != '' THEN
+                                    SELECT MAX(a.fecha)
+                                    INTO v_max_fecha
+                                    FROM asistencia a
+                                    JOIN menu m ON a.idMenu = m.idMenu
+                                    WHERE m.horarioComida = p_horario
+                                    AND a.fecha < CURDATE();
+                                ELSE
+                                    SELECT MAX(fecha)
+                                    INTO v_max_fecha
+                                    FROM asistencia
+                                    WHERE fecha < CURDATE();
+                                END IF;
+
+                                -- Consulta principal con fecha incluida
+                                SELECT DISTINCT 
+                                    e.cedEstudiante AS Cedula, 
+                                    e.nombre AS Nombre, 
+                                    e.apellido AS Apellido, 
+                                    e.carrera AS Carrera, 
+                                    m.horarioComida AS HorarioDeComida,
+                                    a.fecha AS FechaAsistencia
+                                FROM asistencia a
+                                JOIN estudiante e ON a.cedEstudiante = e.cedEstudiante
+                                JOIN menu m ON a.idMenu = m.idMenu
+                                WHERE a.status = 1
+                                AND a.fecha = v_max_fecha
+                                ORDER BY a.fecha DESC, a.hora DESC;
+
+                            END $$
+                            DELIMITER ;
+
+
+
+                COMMIT;

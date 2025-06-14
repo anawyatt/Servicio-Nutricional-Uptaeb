@@ -1,0 +1,76 @@
+.form-container {
+    padding: 20px;
+}
+.form-container .header {
+    text-align: center;
+    margin-bottom: 20px;
+}
+.form-container .icon {
+    font-size: 50px;
+    color: #007bff;
+}
+.form-group {
+    margin-bottom: 15px;
+}
+.form-control {
+    border: none;
+    border-bottom: 1px solid #007aff;
+    border-radius: 20;
+    box-shadow: none;
+}
+.form-control:focus {
+    border-color: #007bff;
+    box-shadow: none;
+}
+
+
+#contador-container {
+  text-align: center;
+}
+
+.contador {
+  text-align: center;
+  font-size: 24px;
+  font-weight: bold;
+  border: 2px solid #ccc;
+  border-radius: 68px;
+  padding: 10px;
+  margin-top: 10px;
+}
+
+#contador-label {
+  display: block;
+  text-align: center;
+  font-size: 18px;
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.hidden {
+display: none;
+}
+
+#qr-detection {
+position: absolute;
+top: 50%;
+left: 50%;
+transform: translate(-50%, -50%);
+padding: 50px;
+background-color: rgba(22, 59, 161, 0.7);
+color: white;
+font-size: 50px;
+text-align: center;
+border-radius: 10px;
+animation: blink 1s infinite;
+}
+
+@keyframes blink {
+0% { opacity: 1; }
+50% { opacity: 0; }
+100% { opacity: 1; }
+}
+
+.video-container {
+position: relative;
+display: inline-block;
+}

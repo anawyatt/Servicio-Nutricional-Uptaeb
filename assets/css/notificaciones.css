@@ -1,0 +1,15 @@
+.dropdown-item h6 {
+    margin: 0;
+    font-size: 18px;
+  }
+  
+  .dropdown-item p {
+    margin: 5px 0 0;
+    font-size: 14px;
+  }
+  
+  /* Hacer que el contenedor de las notificaciones sea desplazable cuando alcance el borde */
+  #nota {
+    max-height: 300px; /* Ajusta según sea necesario */
+    overflow-y: auto;
+  }
