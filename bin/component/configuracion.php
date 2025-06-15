@@ -2,7 +2,6 @@
 
 	namespace component;
   use modelo\mantenimientoModelo as mantenimiento;
-  use \PDO;
 
   $objetoB= new mantenimiento();
 

@@ -51,7 +51,7 @@ class consultarAlimentosModelo extends connectDB
   private function mostrarAconFiltros()
   {
     $this->conectarDB();
-    $new = $this->conex->prepare(" SELECT * FROM vista_alimentos WHERE ta.idTipoA = ? ");
+    $new = $this->conex->prepare(" SELECT * FROM vista_alimentos WHERE idTipoA = ? ");
     $new->bindValue(1, $this->tipoA);
     $new->execute();
     $data = $new->fetchAll(\PDO::FETCH_OBJ);

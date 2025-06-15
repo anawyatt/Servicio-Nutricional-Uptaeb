@@ -68,7 +68,7 @@ class consultarSalidaAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
-      $new = $this->conex->prepare("SELECT * FROM vista_salida_alimentos WHERE  sa.fecha BETWEEN ? AND ?");
+      $new = $this->conex->prepare("SELECT * FROM vista_salida_alimentos WHERE  fecha BETWEEN ? AND ?");
       $new->bindValue(1, $this->fechaInicio);
       $new->bindValue(2, $this->fechaFin);
       $new->execute();
