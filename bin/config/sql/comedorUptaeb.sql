@@ -741,6 +741,46 @@ SET character_set_client = utf8;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary table structure for view `vista_estudiantes_con_secciones`
+--
+
+DROP TABLE IF EXISTS `vista_estudiantes_con_secciones`;
+/*!50001 DROP VIEW IF EXISTS `vista_estudiantes_con_secciones`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vista_estudiantes_con_secciones` AS SELECT
+ 1 AS `cedEstudiante`,
+  1 AS `nombre`,
+  1 AS `apellido`,
+  1 AS `carrera`,
+  1 AS `status`,
+  1 AS `seccion` */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vista_info_estudiante`
+--
+
+DROP TABLE IF EXISTS `vista_info_estudiante`;
+/*!50001 DROP VIEW IF EXISTS `vista_info_estudiante`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vista_info_estudiante` AS SELECT
+ 1 AS `cedEstudiante`,
+  1 AS `nombre`,
+  1 AS `segNombre`,
+  1 AS `apellido`,
+  1 AS `segApellido`,
+  1 AS `sexo`,
+  1 AS `telefono`,
+  1 AS `nucleo`,
+  1 AS `carrera`,
+  1 AS `status`,
+  1 AS `seccion`,
+  1 AS `horario` */;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Temporary table structure for view `vista_salida_alimentos`
 --
 
@@ -813,6 +853,42 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
+-- Final view structure for view `vista_estudiantes_con_secciones`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vista_estudiantes_con_secciones`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vista_estudiantes_con_secciones` AS select `e`.`cedEstudiante` AS `cedEstudiante`,`e`.`nombre` AS `nombre`,`e`.`apellido` AS `apellido`,`e`.`carrera` AS `carrera`,`e`.`status` AS `status`,group_concat(`s`.`seccion` order by `s`.`seccion` ASC separator ', ') AS `seccion` from ((`estudiante` `e` join `estudiante_seccion` `es` on(`e`.`cedEstudiante` = `es`.`cedEstudiante`)) join `seccion` `s` on(`es`.`idSeccion` = `s`.`idSeccion`)) where `e`.`status` = 1 and `s`.`status` = 1 group by `e`.`cedEstudiante` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vista_info_estudiante`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vista_info_estudiante`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vista_info_estudiante` AS select `e`.`cedEstudiante` AS `cedEstudiante`,`e`.`nombre` AS `nombre`,`e`.`segNombre` AS `segNombre`,`e`.`apellido` AS `apellido`,`e`.`segApellido` AS `segApellido`,`e`.`sexo` AS `sexo`,`e`.`telefono` AS `telefono`,`e`.`nucleo` AS `nucleo`,`e`.`carrera` AS `carrera`,`e`.`status` AS `status`,group_concat(distinct `s`.`seccion` order by `s`.`seccion` ASC separator ', ') AS `seccion`,group_concat(distinct `h`.`dia` order by field(`h`.`dia`,'Lunes','Martes','Miércoles','Jueves','Viernes','Sábado','Domingo') ASC separator ', ') AS `horario` from (((`estudiante` `e` join `estudiante_seccion` `es` on(`e`.`cedEstudiante` = `es`.`cedEstudiante`)) join `seccion` `s` on(`es`.`idSeccion` = `s`.`idSeccion`)) join `horario` `h` on(`s`.`idSeccion` = `h`.`idSeccion`)) where `e`.`status` = 1 and `s`.`status` = 1 and `h`.`status` = 1 group by `e`.`cedEstudiante`,`e`.`nombre`,`e`.`segNombre`,`e`.`apellido`,`e`.`segApellido`,`e`.`sexo`,`e`.`telefono`,`e`.`nucleo`,`e`.`carrera`,`e`.`status` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `vista_salida_alimentos`
 --
 
@@ -839,4 +915,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-14 22:13:44
+-- Dump completed on 2025-06-15 18:38:38
