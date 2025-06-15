@@ -17,6 +17,11 @@
   $sistem = new encryption();
   $NotificacionesServer = new NotificacionesServer();
 
+  $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Usuarios', 'registrar');
+  $permisos = $datosPermisos['permisos'];
+  $payload = $datosPermisos['payload'];
+
+
     if (isset($payload->cedula)) {
         $NotificacionesServer->setCedula($payload->cedula);
     } else {
@@ -31,10 +36,6 @@
         $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
     }
 
-    $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Usuarios', 'registrar');
-    $permisos = $datosPermisos['permisos'];
-    $payload = $datosPermisos['payload'];
-
     $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
     if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
@@ -44,7 +45,9 @@
     }
     
        if(isset($_POST['mostrarC']) && isset($_POST['cedula']) ){
+          PostRateMiddleware::verificar('verificar', (array)$payload); 
         $validarC = $object->validarCedula($_POST['cedula']);
+
         if (isset($validarC['resultado']) && $validarC['resultado'] === 'error Cedula') {
             echo json_encode($validarC);
             die();
@@ -52,6 +55,7 @@
       }
 
     if(isset($_POST['muestra2'])  && isset($_POST['correo']) ){
+          PostRateMiddleware::verificar('verificar', (array)$payload); 
       $validarCorreo=  $object->validarCorreo($_POST['correo']);
       if (isset($validarCorreo['resultado']) && $validarCorreo['resultado'] === 'error correo'){
         echo json_encode($validarCorreo);
@@ -60,6 +64,7 @@
     }
 
     if(isset($_POST['muestra3'])  && isset($_POST['telefono']) ){
+           PostRateMiddleware::verificar('verificar', (array)$payload); 
       $validarTelefono= $object->validarTelefono($_POST['telefono']);
       if(isset($validarTelefono['resultado']) && $validarTelefono['resultado'] === 'error telefono'){
         echo json_encode($validarTelefono);
@@ -68,6 +73,7 @@
     }
 
       if (isset($_POST['valida']) && isset($_POST['idRol'])) {
+            PostRateMiddleware::verificar('verificar', (array)$payload); 
           $validarExistencia = $object->verificarExistenciaRol($_POST['idRol']);
           echo json_encode($validarExistencia);
           die();
@@ -86,7 +92,6 @@
      &&  isset($_POST['clave']) && isset($_POST['csrfToken'])){
 
        $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
-       
 
         PostRateMiddleware::verificar('registrar', (array)$payload); 
      $registrarUsuario = $object->registrarUsuario($_POST['cedula'], $_POST['nombre'], $_POST['segNombre'], $_POST['apellido'], 
@@ -111,5 +116,6 @@
   
   }
 
+ 
   ?>
   

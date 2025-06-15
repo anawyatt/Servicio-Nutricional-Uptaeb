@@ -17,6 +17,11 @@
     $sistem = new encryption();
     $NotificacionesServer = new NotificacionesServer();
 
+    $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Eventos', 'consultar');
+    $permisos = $datosPermisos['permisos'];
+    $payload = $datosPermisos['payload'];
+
+
     if (isset($payload->cedula)) {
         $NotificacionesServer->setCedula($payload->cedula);
     } else {
@@ -31,9 +36,6 @@
         $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
     }
 
-    $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Eventos', 'consultar');
-    $permisos = $datosPermisos['permisos'];
-    $payload = $datosPermisos['payload'];
 
      $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
