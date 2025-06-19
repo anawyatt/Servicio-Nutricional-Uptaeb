@@ -785,6 +785,7 @@ function procesarAlimento(data) {
  }
 });
 
+let claseAEliminar;
 
 $('body').on('click', '#quitarFila', function(e) {
   let claseAEliminar = $(this).attr('value');
@@ -800,9 +801,7 @@ $('body').on('click', '#quitarFila', function(e) {
   }).then((result) => {
             if (result.isConfirmed) {
           $('.tables tbody .' + claseAEliminar).remove();
-
-          modiAli(claseAEliminar);
-
+          modiAli();
           validarTabla();
       }
   });
@@ -858,6 +857,10 @@ function modiAli() {
   let id = $('#idd').val();
   let idSalidaA = $('#idSalidaA').val();
 
+  let token = $('[name="csrf_token"]').val();
+      if(token){
+              console.log(token);
+
   $.ajax({
       type: "post",
       url: "", 
@@ -868,7 +871,8 @@ function modiAli() {
           cantPlatos,
           descripcion,
           id,
-          idSalidaA
+          idSalidaA,
+          csrfToken: token
       },
       success(response) {
           if (response.resultado === "error") {
@@ -882,13 +886,12 @@ function modiAli() {
                   timerProgressBar: true,
               });
           } else {
+             $('[name="csrf_token"]').val(response.newCsrfToken);
               console.log('Alimento devuelto al stock');
-              if (claseAEliminar) {
-          mostrarCantidadDisponible(claseAEliminar);
-        }
           }
       }
   });
+}
 }
 
             
