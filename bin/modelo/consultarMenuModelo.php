@@ -152,8 +152,7 @@ class consultarMenuModelo extends connectDB {
                 return ["Sistema", "¡Error Sistema!"];
             }
         }
-        
-        
+             
         public function verificarExistencia($id){
             if (!preg_match("/^[0-9]{1,}$/", $id)) {
                 return ['resultado' => 'Seleccionar Menú'];
@@ -193,8 +192,7 @@ class consultarMenuModelo extends connectDB {
         private function mostrar() {
             try {
                 $this->conectarDB();
-                $info = $this->conex->prepare("SELECT idTipoA, tipo, feMenu, horarioComida FROM vista_tipo_alimentos_por_menu
-                WHERE idMenu = ?;");
+                $info = $this->conex->prepare("SELECT idTipoA, tipo, feMenu, horarioComida FROM vista_tipo_alimentos_por_menu WHERE idMenu = ?;");
             
                 $info->bindValue(1, $this->id);
                 $info->execute();
@@ -327,7 +325,10 @@ class consultarMenuModelo extends connectDB {
         private function mostrarA(){
             try{
                 $this->conectarDB();
-                $mostrar = $this->conex->prepare("SELECT DISTINCT a.idAlimento, a.codigo, a.imgAlimento, a.nombre, a.unidadMedida, a.marca, a.stock FROM tipoalimento ta INNER JOIN alimento a ON ta.idTipoA = a.idTipoA WHERE a.idTipoA =? and a.stock > 0 and a.idAlimento IN (SELECT idAlimento FROM detalleentradaa WHERE status=1);");
+                $mostrar = $this->conex->prepare("SELECT DISTINCT a.idAlimento, a.codigo, 
+                a.imgAlimento, a.nombre, a.unidadMedida, a.marca, a.stock FROM tipoalimento
+                 ta INNER JOIN alimento a ON ta.idTipoA = a.idTipoA WHERE a.idTipoA =? and a.stock > 0
+                  and a.idAlimento IN (SELECT idAlimento FROM detalleentradaa WHERE status=1);");
                 $mostrar->bindValue(1, $this->tipoA);
                 $mostrar->execute();
                 $resultado = $mostrar->fetchAll();
@@ -352,7 +353,8 @@ class consultarMenuModelo extends connectDB {
         private function infor(){
             try{
             $this->conectarDB();
-                $mostrar = $this->conex->prepare("SELECT * FROM alimento  WHERE  status =1 and idAlimento=? ");
+                $mostrar = $this->conex->prepare("SELECT idAlimento, codigo, imgAlimento, nombre, unidadMedida,
+                marca, stock, reservado, idTipoA FROM alimento  WHERE status =1 and idAlimento=? ");
                 $mostrar->bindValue(1, $this->alimento);
                 $mostrar->execute();
                 $resultado = $mostrar->fetchAll();
@@ -473,37 +475,38 @@ class consultarMenuModelo extends connectDB {
             try {
                 $this->conectarDB();
                 $this->conex->beginTransaction();
-                $bitacora = new bitacoraModelo;
-        
-              
+
+                $bitacora = new bitacoraModelo();
+
                 $idTipoSalidas = $this->tipoSalidaMenu();
                 $updateM = $this->datosMenu($this->id);
                 $updateS = $this->salidaA($idTipoSalidas, $this->idSalidaA);
-                $borrar=$this->borrarAlimentoM($this->idSalidaA);
+                $borrar = $this->borrarAlimentoM($this->idSalidaA);
+
         
                 if ($updateM['feMenu'] !== $this->feMenu) {
                     $this->actualizarFechaMenu($this->feMenu, $this->id);
-                    $bitacora->registrarBitacora('Modificar Menú', "feMenu de '{$updateM['feMenu']}' a
-                     '{$this->feMenu}'",  $this->payload->cedula);
+                    $bitacora->registrarBitacora('Modificar Menú', "feMenu de '{$updateM['feMenu']}' a '{$this->feMenu}'", $this->payload->cedula);
                 }
                 
                 if ($updateM['horarioComida'] !== $this->horarioComida) {
                     $this->actualizarHorarioComida($this->horarioComida, $this->id);
-                    $bitacora->registrarBitacora('Modificar Menú', "horarioComida de '{$updateM['horarioComida']}' a '{$this->horarioComida}'",  $this->payload->cedula);
+                    $bitacora->registrarBitacora('Modificar Menú', "horarioComida de '{$updateM['horarioComida']}' a '{$this->horarioComida}'", $this->payload->cedula);
                 }
                 
                 if ($updateM['cantPlatos'] !== $this->cantPlatos) {
                     $this->actualizarCantidadPlatos($this->cantPlatos, $this->id);
-                    $bitacora->registrarBitacora('Modificar Menú', "cantPlatos de '{$updateM['cantPlatos']}' a '{$this->cantPlatos}'",  $this->payload->cedula);
+                    $bitacora->registrarBitacora('Modificar Menú', "cantPlatos de '{$updateM['cantPlatos']}' a '{$this->cantPlatos}'", $this->payload->cedula);
                 }
                 
                 if ($updateS['descripcion'] !== $this->descripcion) {
                     $this->actualizarDescripcionSalida($this->descripcion, $idTipoSalidas, $this->idSalidaA);
-                    $bitacora->registrarBitacora('Modificar Menú', "descripcion de '{$updateS['descripcion']}' a '{$this->descripcion}'",  $this->payload->cedula);
+                    $bitacora->registrarBitacora('Modificar Menú', "descripcion de '{$updateS['descripcion']}' a '{$this->descripcion}'", $this->payload->cedula);
                 }
                 
         
                 $this->conex->commit();
+
                 
                return [ 'resultado' => 'Menú Actualizado Exitosamente','menuId' => $this->id,'salidaId' => $this->idSalidaA];
 
@@ -536,6 +539,26 @@ class consultarMenuModelo extends connectDB {
             $info->bindValue(2, $idSalidaA);
             $info->execute();
             return $info->fetch(PDO::FETCH_ASSOC);
+        }
+
+        private function borrarAlimentoM($id) {
+            $this->id = $id;
+            try {
+        
+                $data = $this->obtenerAlimentosSalida($this->id);
+        
+        
+                foreach ($data as $item) {
+                    $this->regresarStock($item->idAlimento, $item->cantidad);
+                    $this->borrarReservado($item->idAlimento, $item->cantidad);
+                }
+
+                 $this->eliminarDetallesSalida($this->id);
+
+                 return $data;
+           } catch (Exception $e) {
+                return $e->getMessage();
+            }
         }
                
         private function actualizarFechaMenu($feMenu, $idMenu) {
@@ -603,7 +626,6 @@ class consultarMenuModelo extends connectDB {
             return $this->actualizarDetalle();
         }
           
-
         private function actualizarDetalle(){
             try {
                 $this->conectarDB();
@@ -627,6 +649,22 @@ class consultarMenuModelo extends connectDB {
                finally {
                    $this->desconectarDB();
                } 
+        }
+
+         private function infoAlimento2($alimento){
+          $this->alimento=$alimento;
+          
+          try{
+              $mostrar = $this->conex->prepare("SELECT idAlimento, codigo, imgAlimento, nombre, unidadMedida, marca,
+              stock, reservado, idTipoA  FROM alimento WHERE status = 1 AND idAlimento = ?");
+              $mostrar->bindValue(1, $this->alimento);
+              $mostrar->execute();
+              $data = $mostrar->fetchAll();
+                  return $data;
+              
+          }catch(\PDOException $e){
+              return $e;
+           }
         }
               
         private function actualizarStock($alimento, $cantidad){
@@ -665,40 +703,6 @@ class consultarMenuModelo extends connectDB {
         
         }
 
-        private function infoAlimento2($alimento){
-          $this->alimento=$alimento;
-          
-          try{
-              $mostrar = $this->conex->prepare("SELECT idAlimento, codigo, imgAlimento, nombre, unidadMedida, marca,
-              stock, idTipoA  FROM alimento WHERE status = 1 AND idAlimento = ?");
-              $mostrar->bindValue(1, $this->alimento);
-              $mostrar->execute();
-              $data = $mostrar->fetchAll();
-                  return $data;
-              
-          }catch(\PDOException $e){
-              return $e;
-           }
-        }
-
-        
-        private function borrarAlimentoM($id) {
-            $this->id = $id;
-            try {
-        
-                $data = $this->obtenerAlimentosSalida($this->id);
-        
-                $this->eliminarDetallesSalida($this->id);
-        
-                foreach ($data as $item) {
-                    $this->regresarStock($item->idAlimento, $item->cantidad);
-                    $this->borrarReservado($item->idAlimento, $item->cantidad);
-                }
-           } catch (Exception $e) {
-                return $e->getMessage();
-            }
-        }
-        
         private function obtenerAlimentosSalida($idSalidaA) {
             $info = $this->conex->prepare("SELECT idAlimento, cantidad FROM detallesalidamenu WHERE idSalidaA = ?");
             $info->bindValue(1, $idSalidaA);
@@ -738,8 +742,8 @@ class consultarMenuModelo extends connectDB {
             } catch (Exception $error) {
                 throw new Exception("Error al actualizar el stock: " . $error->getMessage());
             }
-        }
- 
+        }    
+
         public function verificarAnulacion($id){
             if (!preg_match("/^[0-9]{1,}$/", $id)) {
                 return ['resultado' => 'Seleccionar Menú'];
@@ -787,7 +791,7 @@ class consultarMenuModelo extends connectDB {
                 $this->conex->beginTransaction();
         
                 $mostrar = $this->conex->prepare("SELECT sa.idSalidaA FROM menu m INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa 
-                ON sa.idSalidaA = dsm.idSalidaA WHERE m.idMenu = ?;");
+                ON sa.idSalidaA = dsm.idSalidaA WHERE m.idMenu = ? FOR UPDATE;");
 
                 $mostrar->bindValue(1, $this->id);
                 $mostrar->execute();

@@ -986,6 +986,7 @@ let newAlimento = `
 
 
      function registrar(){
+      $("#registrar").prop("disabled", true);
       let feMenu = $("#feMenu").val();
       let horarioComida = $("input[name='opcion']:checked").val();
       let cantPlatos = $("#cantPlatos").val();
@@ -996,51 +997,51 @@ let newAlimento = `
 
           if(token){
            console.log(token);
-          $.ajax({
-         url:"",
-         method:"post",
-         dataType:"json",
-         data:{
-          registrar:true,
-          feMenu,
-          horarioComida,
-          cantPlatos,
-          nomEvent,
-          descripEvent,
-          descripcion,
-          csrfToken: token
-         },
-         success: function(data) {
-              if (data.resultado === 'registrado' && data.newCsrfToken) {
-            registrarDetalle(data.mensaje.eventId,  data.mensaje.menuId, data.mensaje.salidaId);
-            $('[name="csrf_token"]').val(data.newCsrfToken);
-              Swal.fire({
-               toast: true,
-               position: 'top-end',
-               icon:'success',
-               title:'Evento Registrado Exitosamente!',
-               showConfirmButton:false,
-               timer:2500,
-               timerProgressBar:true,
-            })
-             primary();
-             $('#cancelar').click();
-             $('.tabla tbody tr').remove();
-             $('#ani').hide();
+           $.ajax({
+            url:"",
+            method:"post",
+            dataType:"json",
+            data:{
+              registrar:true,
+              feMenu,
+              horarioComida,
+              cantPlatos,
+              nomEvent,
+              descripEvent,
+              descripcion,
+              csrfToken: token
+            },
+            success: function(data) {
+                  if (data.resultado == 'exitoso' && data.eventId && data.menuId && data.salidaId && data.newCsrfToken) {
+
+                    registrarDetalle(data.eventId,  data.menuId, data.salidaId);
+
+                    $('[name="csrf_token"]').val(data.newCsrfToken);
+
+                  Swal.fire({
+                  toast: true,
+                  position: 'top-end',
+                  icon:'success',
+                  title:'Evento Registrado Exitosamente!',
+                  showConfirmButton:false,
+                  timer:2500,
+                  timerProgressBar:true,
+                })
+                  primary();
+                  $('#cancelar').click();
+                  $('.tabla tbody tr').remove();
+                  $('#ani').hide();
+                
+              }
           
-       }
-  
-       
-        }  
-      })
-      }
-     }
-    
-
-
-  
-
-    
+                }  
+                ,complete() {
+                            $("#registrar").prop("disabled", false);
+                }
+              })
+              }
+            }
+          
 
 
     function registrarDetalle(menuId, salidaId) {
@@ -1048,21 +1049,21 @@ let newAlimento = `
       let alimento = $(this).find('#idAlimento').val();
       let cantidad = $(this).find('#cantidadA').val();
 
-      $.ajax({
-        url:"",
-        method:"post",
-        dataType:"json",
-        data:{
-          alimento,
-          cantidad,
-          menuId,
-          salidaId
+        $.ajax({
+          url:"",
+          method:"post",
+          dataType:"json",
+          data:{
+            alimento,
+            cantidad,
+            menuId,
+            salidaId
         },
-       success(data){
-         console.log(data);
-       }
-  })
- })
+            success(data){
+              console.log(data);
+            }
+        })
+      })
     }
 
 

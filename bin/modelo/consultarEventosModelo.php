@@ -227,15 +227,14 @@ class consultarEventosModelo extends connectDB {
         private function mostEven(){
             try {
                  $this->conectarDB();
-                $query = $this->conex->prepare("SELECT idAlimento, imgAlimento, nombre, marca, unidadMedida, cantidad, idTipoA, 
-                tipo, idMenu, feMenu, horarioComida, cantPlatos, descripcion, idSalidaA, idEvento,  nomEvent, 
-                descripEvent, idMenuE FROM vista_detalle_alimentos_evento WHERE idTipoA = ? AND idEvento = ?;");
+                $show = $this->conex->prepare("SELECT idAlimento, imgAlimento, nombre, marca, unidadMedida, cantidad, idTipoA, tipo, idMenu, feMenu, horarioComida, cantPlatos, descripcion, idSalidaA, 
+                idEvento, nomEvent, descripEvent, idMenuEvento FROM vista_detalle_alimentos_evento WHERE idTipoA = ? AND idEvento = ?;");
 
-                $query->bindValue(1, $this->idTipoA);
-                $query->bindValue(2, $this->id);
+                $show->bindValue(1, $this->idTipoA);
+                $show->bindValue(2, $this->id);
       
-                $query->execute();
-                $data = $query->fetchAll(PDO::FETCH_ASSOC);
+                $show->execute();
+                $data = $show->fetchAll(PDO::FETCH_ASSOC);
                 $this->desconectarDB(); 
                 
                 return $data;
@@ -493,15 +492,18 @@ class consultarEventosModelo extends connectDB {
             try {
                  $this->conectarDB();
                 $this->conex->beginTransaction();
+
                 $bitacora = new bitacoraModelo;
+
+                $borrar=$this->borrarAlimentoM($this->idSalidaA);
+
         
-              
                 $idTipoSalidas = $this->tipoSalidaMenu();
                 $updateM = $this->datosMenu($this->idMenu);
                 $updateE = $this->datosEvento($this->id);
                 $updateS = $this->salidaA($idTipoSalidas, $this->idSalidaA);
-        
-            
+
+
                 if ($updateM['feMenu'] !== $this->feMenu) {
                     $this->actualizarFechaMenu($this->feMenu, $this->idMenu);
                     $bitacora->registrarBitacora('Modificar Evento', "feMenu de '{$updateM['feMenu']}' a '{$this->feMenu}'",$this->payload->cedula);
@@ -530,8 +532,7 @@ class consultarEventosModelo extends connectDB {
                 }
         
                 $this->conex->commit();
-                $this->borrarAlimentoM($this->idSalidaA);
-        
+
                 return ['resultado' => 'Evento Actualizado Exitosamente','eventoId' => $this->id,'menuId' => $this->idMenu,'salidaId' => $this->idSalidaA];
                 
             } catch (Exception $error) {
@@ -549,6 +550,7 @@ class consultarEventosModelo extends connectDB {
             $info->execute();
             return $info->fetchColumn();
         }
+      
         
         private function datosMenu($idMenu) {
             $info = $this->conex->prepare("SELECT feMenu, horarioComida, cantPlatos FROM menu WHERE idMenu = ? AND status = 1");
@@ -556,7 +558,8 @@ class consultarEventosModelo extends connectDB {
             $info->execute();
             return $info->fetch(PDO::FETCH_ASSOC);
         }
-        
+
+       
         private function datosEvento($idEvento) {
             $info = $this->conex->prepare("SELECT nomEvent, descripEvent FROM evento WHERE idEvento = ? AND status = 1");
             $info->bindValue(1, $idEvento);
@@ -700,10 +703,26 @@ class consultarEventosModelo extends connectDB {
         
         }
     
+
+        private function infoAlimento2($alimento){
+          $this->alimento=$alimento;
+          
+          try{
+              $mostrar = $this->conex->prepare("SELECT idAlimento, codigo, imgAlimento, nombre, unidadMedida, marca,
+              stock, reservado, idTipoA  FROM alimento WHERE status = 1 AND idAlimento = ? FOR UPDATE;");
+              $mostrar->bindValue(1, $this->alimento);
+              $mostrar->execute();
+              $data = $mostrar->fetchAll();
+              return $data;
+              
+          }catch(\PDOException $e){
+              return $e;
+           }
+        }
+
         private function borrarAlimentoM($id) {
             $this->id = $id;
             try {
-                $this->conex->beginTransaction();
                 $data = $this->obtenerAlimentosSalida($this->id);
         
                 $this->eliminarDetallesSalida($this->id);
@@ -712,16 +731,13 @@ class consultarEventosModelo extends connectDB {
                     $this->regresarStock($item->idAlimento, $item->cantidad);
                     $this->borrarReservado($item->idAlimento, $item->cantidad);
                 }
-        
-                $this->conex->commit();
            } catch (Exception $e) {
-                $this->conex->rollBack();
                 return $e->getMessage();
             }
         }
-        
+
         private function obtenerAlimentosSalida($idSalidaA) {
-            $info = $this->conex->prepare("SELECT idAlimento, cantidad FROM detallesalidamenu WHERE idSalidaA = ?");
+            $info = $this->conex->prepare("SELECT idAlimento, cantidad FROM detallesalidamenu WHERE idSalidaA = ? FOR UPDATE;");
             $info->bindValue(1, $idSalidaA);
             $info->execute();
             return $info->fetchAll(PDO::FETCH_OBJ);
@@ -760,6 +776,7 @@ class consultarEventosModelo extends connectDB {
                 throw new Exception("Error al actualizar el stock: " . $error->getMessage());
             }
         }
+
 
         public function verificarAnulacion($id){
             if (!preg_match("/^[0-9]{1,}$/", $id)) {
@@ -804,7 +821,7 @@ class consultarEventosModelo extends connectDB {
                  $this->conex->beginTransaction();
          
                 $mostrar = $this->conex->prepare("SELECT m.idMenu, sa.idSalidaA FROM evento e INNER JOIN menu m ON m.idMenu = e.idMenu INNER JOIN detallesalidamenu dsm 
-                ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA WHERE e.idEvento = ?;");
+                ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA WHERE e.idEvento = ? FOR UPDATE;");
                 $mostrar->bindValue(1, $this->id);
                 $mostrar->execute();
                 $data = $mostrar->fetchAll(PDO::FETCH_ASSOC);
@@ -950,22 +967,7 @@ class consultarEventosModelo extends connectDB {
             $updateReservado->bindValue(1, $nuevoReservado);
             $updateReservado->bindValue(2, $idAlimento);
             $updateReservado->execute();
-        }
-
-        private function infoAlimento2($alimento){
-          $this->alimento=$alimento;
-          
-          try{
-              $mostrar = $this->conex->prepare("SELECT idAlimento, codigo, imgAlimento, nombre, unidadMedida, marca,
-              stock, idTipoA  FROM alimento WHERE status = 1 AND idAlimento = ?");
-              $mostrar->bindValue(1, $this->alimento);
-              $mostrar->execute();
-              $data = $mostrar->fetchAll();
-                  return $data;
-          }catch(\PDOException $e){
-              return $e;
-           }
-        }
+        }    
  
         private function detalleEvento($id){
  

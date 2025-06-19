@@ -242,6 +242,10 @@ class consultarUsuarioModelo extends connectDB{
             $this->conectarDBSeguridad();
             $this->conex2->beginTransaction();
 
+            $lock = $this->conex2->prepare("SELECT cedula FROM usuario WHERE cedula = ? FOR UPDATE");
+            $lock->bindValue(1, $this->cedula);
+            $lock->execute();
+
             $correoCifrado = $this->encryption->encryptData($this->correo);
             $telefonoCifrado = $this->encryption->encryptData($this->telefono);
 
@@ -287,6 +291,10 @@ class consultarUsuarioModelo extends connectDB{
         try {
             $this->conectarDBSeguridad();
             $this->conex2->beginTransaction();
+
+            $lock = $this->conex2->prepare("SELECT cedula FROM usuario WHERE cedula = ? FOR UPDATE");
+            $lock->bindValue(1, $this->id);
+            $lock->execute();
 
             $query = $this->conex2->prepare("UPDATE `usuario` SET `status`='0' WHERE cedula = ?");
             $query->bindValue(1, $this->id);

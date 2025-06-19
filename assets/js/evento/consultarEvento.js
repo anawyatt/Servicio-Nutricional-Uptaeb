@@ -846,79 +846,86 @@ function modiAli() {
             
 
 function modificar() {
-  $("#editar").prop("disabled", false);
-  let feMenu = $("#feMenu").val();
-  let horarioComida = $("input[name='opcion']:checked").val();
-  let cantPlatos = $("#cantPlatos").val();
-  let idMenu = $('#idMenu').val();
-  let nomEvent = $("#nomEvent").val();
-  let descripEvent = $("#descripEvent").val();
-  let id = $('#idd').val();
-  let descripcion = $("#descripcion").val();
-  let idSalidaA = $('#idSalidaA').val();
- 
+      $("#editar").prop("disabled", false);
+      let feMenu = $("#feMenu").val();
+      let horarioComida = $("input[name='opcion']:checked").val();
+      let cantPlatos = $("#cantPlatos").val();
+      let idMenu = $('#idMenu').val();
+      let nomEvent = $("#nomEvent").val();
+      let descripEvent = $("#descripEvent").val();
+      let id = $('#idd').val();
+      let descripcion = $("#descripcion").val();
+      let idSalidaA = $('#idSalidaA').val();
+      let token = $('[name="csrf_token"]').val();
+    
+      if(token){
+       console.log(token);
 
-    $.ajax({
-        type: "post",
-        url: "", 
-        dataType: "json",
-        data: {
-         feMenu,
-             horarioComida,
-             cantPlatos,
-             idMenu,
-             nomEvent,
-             descripEvent,
-             id,
-             descripcion,
-             idSalidaA
-        
+          $.ajax({
+              type: "post",
+              url: "", 
+              dataType: "json",
+              data: {
+              feMenu,
+                  horarioComida,
+                  cantPlatos,
+                  idMenu,
+                  nomEvent,
+                  descripEvent,
+                  id,
+                  descripcion,
+                  idSalidaA,
+                  csrfToken: token            
+                  },
+            success(response) {
+                if (response.resultado === "error" && response.newCsrfToken) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: response.mensaje,
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                    })
+                    $(".error5").html('<i  class="bi bi-exclamation-triangle-fill"></i> El evento ya esta registrado en esa fecha y horario!');
+                    $(".error6").html('<i  class="bi bi-exclamation-triangle-fill"></i> El evento ya esta registrado en esa fecha y horario!');
+                    $(".error5, .error6").show();
+                    $('#feMenu').addClass('errorBorder');
+                    $('.bar6').removeClass('bar');
+                    $('.ic6').addClass('l');
+                    $('.ic6').removeClass('labelPri');
+                    $('.letra').addClass('labelE');
+                    $('.letra').removeClass('label-char');
+                    error_validarFH = true;
+                    } 
+                    else {
+                    actualizarDetalle();  
+                    $('[name="csrf_token"]').val(response.newCsrfToken);
+                    $('#cerrar2').click();
+                    delete mostrarE;
+                    Swal.fire({
+                      toast: true,
+                      position: 'top-end',
+                      icon:'success',
+                      title:'El Evento Fue Modificado Exitosamente!',
+                      showConfirmButton:false,
+                      timer:2500,
+                      timerProgressBar:true,
+                    });
+
+                    tablaEvento(); 
+                    vaciarTabla();  
+                }
+              
             },
-      success(response) {
-          if (response.resultado === "error") {
-              Swal.fire({
-                  toast: true,
-                  position: 'top-end',
-                  icon: 'error',
-                  title: response.mensaje,
-                  showConfirmButton: false,
-                  timer: 3000,
-                  timerProgressBar: true,
-              })
-              $(".error5").html('<i  class="bi bi-exclamation-triangle-fill"></i> El evento ya esta registrado en esa fecha y horario!');
-              $(".error6").html('<i  class="bi bi-exclamation-triangle-fill"></i> El evento ya esta registrado en esa fecha y horario!');
-              $(".error5, .error6").show();
-              $('#feMenu').addClass('errorBorder');
-              $('.bar6').removeClass('bar');
-              $('.ic6').addClass('l');
-              $('.ic6').removeClass('labelPri');
-              $('.letra').addClass('labelE');
-              $('.letra').removeClass('label-char');
-              error_validarFH = true;
-              } 
-              else {
-              actualizarDetalle();  
-              $('#cerrar2').click();
-              delete mostrarE;
-              Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon:'success',
-                title:'El Evento Fue Modificado Exitosamente!',
-                showConfirmButton:false,
-                timer:2500,
-                timerProgressBar:true,
-              });
-
-              tablaEvento(); 
-              vaciarTabla();  
+            complete() {
+                $("#editar").prop("disabled", false);  
+            }
+              
+        });
           }
-      },
-      complete() {
-          $("#editar").prop("disabled", false);  
       }
-  });
-}
 
 
   function actualizarDetalle() {
@@ -1773,16 +1780,29 @@ function valAnulacion(idd){
    $('#borrar').click((e)=>{
 
     let idE= $('#idE').val();
+    let token = $('[name="csrf_token"]').val();
+
+     if (token) {                 
+      console.log(token);
+       e.preventDefault();
+
+          console.log('Botón eliminar clickeado, enviando AJAX...');
  
      e.preventDefault();
      $.ajax({
        url: '',
        method: 'post',
        dataType: 'json',
-       data:{id : idE , borrar: 'borrar'},
+       data:{
+        eliminar: true, 
+        id : idE ,
+        borrar: 'borrar',
+        csrfToken: token
+        },
        success(data){
          console.log(data);
-       if (data.resultado === 'eliminado'){
+        if (data.resultado === 'eliminado' && data.newCsrfToken ) {
+          $('[name="csrf_token"]').val(data.newCsrfToken);             
          $('#cerrar3').click();
          tablaEvento();
            Swal.fire({
@@ -1796,7 +1816,9 @@ function valAnulacion(idd){
              })
        }
      }
+     
    })
+   }
      })
  
 

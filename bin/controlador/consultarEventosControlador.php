@@ -126,10 +126,9 @@
         }
 
        
-      if (isset($_POST['feMenu']) && isset($_POST['cantPlatos']) && isset($_POST['nomEvent']) 
+      if (isset($datosPermisos['permiso']['modificar']) && isset($_POST['feMenu']) && isset($_POST['cantPlatos']) && isset($_POST['nomEvent']) 
         && isset($_POST['descripEvent']) && isset($_POST['horarioComida']) && isset($_POST['descripcion'])
-        && isset($_POST['id']) && isset($_POST['idSalidaA']) && isset($_POST['idMenu']) 
-        && isset($datosPermisos['permiso']['modificar'])  && isset($_POST['csrfToken']) ) {
+        && isset($_POST['id']) && isset($_POST['idSalidaA']) && isset($_POST['idMenu']) && isset($_POST['csrfToken'])) {
 
             $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
 
@@ -138,9 +137,27 @@
         $modificarE = $object->modificarEven($_POST['feMenu'],  $_POST['cantPlatos'], $_POST['nomEvent'],
         $_POST['descripEvent'], $_POST['horarioComida'],  $_POST['descripcion'], $_POST['id'], 
         $_POST['idSalidaA'], $_POST['idMenu']);
-        echo json_encode(['mensaje' => $modificarE, 'newCsrfToken' => $csrf['newToken']]);
-        die();
-      }
+        if (!isset($modificarE['resultado']) || $modificarE['resultado'] !== 'Evento Actualizado Exitosamente') {
+
+              echo json_encode([
+                  'resultado' => 'error',
+                  'mensaje' => $modificarE,
+                  'newCsrfToken' => $csrf['newToken']
+              ]);
+              die();
+          }
+
+          echo json_encode([
+              'resultado' => 'exitoso',
+              'eventoId' => $modificarE['eventoId'],
+              'menuId' => $modificarE['menuId'],
+              'salidaId' => $modificarE['salidaId'],
+              'newCsrfToken' => $csrf['newToken']
+          ]);
+          die();
+
+        }
+      
 
       if (isset($_POST['cantidad']) && isset($_POST['idMenu']) && isset($_POST['alimento']) 
         && isset($_POST['idSalidaA'])) {
@@ -149,6 +166,9 @@
         echo json_encode($modificarDSE);
         die();
       }
+
+
+            
 
   
 
@@ -163,17 +183,16 @@
           die();
       }
   
-    if(isset($_POST['id']) && isset($_POST['borrar']) && isset($datosPermisos['permiso']['eliminar']) 
-    && isset($_POST['csrfToken'])) {
+    if(isset($_POST['id']) && isset($_POST['borrar']) && isset($_POST['csrfToken']) && isset($datosPermisos['permiso']['eliminar'])) {
 
              $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
 
           PostRateMiddleware::verificar('anular', (array)$payload); 
           $eliminar = $object->eliminarEvento($_POST['id']);
-          echo json_encode(['mensaje' => $eliminar, 'newCsrfToken' => $csrf['newToken']]);
+          echo json_encode(['resultado' => $eliminar['resultado'], 'newCsrfToken' => $csrf['newToken']]);
           die();
-    }
-  
+    } 
+
     //  REPORTE DEl PDF //
     if(isset ($_POST['reporte']) && isset ($_POST['idEvento'])){
       $respuesta = $object->fpdf($_POST['idEvento']);

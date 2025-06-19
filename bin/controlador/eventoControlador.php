@@ -98,13 +98,21 @@
 
       $registrarE= $object->registrarEvento( $_POST['feMenu'], $_POST['horarioComida'] , $_POST['cantPlatos'], $_POST['nomEvent'], $_POST['descripEvent'], $_POST['descripcion']); 
       if (!isset($registrarE['resultado']) || $registrarE['resultado'] !== 'registrado') {
-              echo json_encode(['resultado' => 'error', 'mensaje' => $registrarE, 'newCsrfToken' => $csrf['newToken']]);
+              echo json_encode([
+                'resultado' => 'error', 
+                'mensaje' => $registrarE, 
+                'newCsrfToken' => $csrf['newToken']]);
               die();
           }
-
-          echo json_encode(['resultado' => 'registrado', 'mensaje' => $registrarE, 'newCsrfToken' => $csrf['newToken']]);
+          echo json_encode([
+              'resultado' => 'exitoso',
+              'eventId' => $registrarE['eventId'],
+              'menuId' => $registrarE['menuId'],
+              'salidaId' => $registrarE['salidaId'],
+              'newCsrfToken' => $csrf['newToken']
+          ]);
           die();
-        }
+      }
       
   
     if(isset($_POST['alimento'])  && isset($_POST['cantidad']) && isset($_POST['menuId'])  && isset($_POST['salidaId']) ){
