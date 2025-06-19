@@ -527,14 +527,14 @@ class consultarMenuModelo extends connectDB {
         }
         
         private function datosMenu($idMenu) {
-            $info = $this->conex->prepare("SELECT feMenu, horarioComida, cantPlatos FROM menu WHERE idMenu = ? AND status = 1");
+            $info = $this->conex->prepare("SELECT feMenu, horarioComida, cantPlatos FROM menu WHERE idMenu = ? AND status = 1 FOR UPDATE");
             $info->bindValue(1, $idMenu);
             $info->execute();
             return $info->fetch(PDO::FETCH_ASSOC);
         }
 
         private function salidaA($idTipoSalidas, $idSalidaA) {
-            $info = $this->conex->prepare("SELECT descripcion FROM salidaalimentos WHERE idTipoSalidaA = ? AND idSalidaA = ? AND status = 1");
+            $info = $this->conex->prepare("SELECT descripcion FROM salidaalimentos WHERE idTipoSalidaA = ? AND idSalidaA = ? AND status = 1 FOR UPDATE");
             $info->bindValue(1, $idTipoSalidas);
             $info->bindValue(2, $idSalidaA);
             $info->execute();
@@ -656,7 +656,7 @@ class consultarMenuModelo extends connectDB {
           
           try{
               $mostrar = $this->conex->prepare("SELECT idAlimento, codigo, imgAlimento, nombre, unidadMedida, marca,
-              stock, reservado, idTipoA  FROM alimento WHERE status = 1 AND idAlimento = ?");
+              stock, reservado, idTipoA  FROM alimento WHERE status = 1 AND idAlimento = ? FOR UPDATE");
               $mostrar->bindValue(1, $this->alimento);
               $mostrar->execute();
               $data = $mostrar->fetchAll();
@@ -704,7 +704,7 @@ class consultarMenuModelo extends connectDB {
         }
 
         private function obtenerAlimentosSalida($idSalidaA) {
-            $info = $this->conex->prepare("SELECT idAlimento, cantidad FROM detallesalidamenu WHERE idSalidaA = ?");
+            $info = $this->conex->prepare("SELECT idAlimento, cantidad FROM detallesalidamenu WHERE idSalidaA = ? FOR UPDATE");
             $info->bindValue(1, $idSalidaA);
             $info->execute();
             return $info->fetchAll(PDO::FETCH_OBJ);

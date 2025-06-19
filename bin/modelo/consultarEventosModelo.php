@@ -494,14 +494,13 @@ class consultarEventosModelo extends connectDB {
                 $this->conex->beginTransaction();
 
                 $bitacora = new bitacoraModelo;
-
-                $borrar=$this->borrarAlimentoM($this->idSalidaA);
-
         
                 $idTipoSalidas = $this->tipoSalidaMenu();
                 $updateM = $this->datosMenu($this->idMenu);
                 $updateE = $this->datosEvento($this->id);
                 $updateS = $this->salidaA($idTipoSalidas, $this->idSalidaA);
+                $borrar=$this->borrarAlimentoM($this->idSalidaA);
+
 
 
                 if ($updateM['feMenu'] !== $this->feMenu) {
@@ -552,8 +551,8 @@ class consultarEventosModelo extends connectDB {
         }
       
         
-        private function datosMenu($idMenu) {
-            $info = $this->conex->prepare("SELECT feMenu, horarioComida, cantPlatos FROM menu WHERE idMenu = ? AND status = 1");
+         private function datosMenu($idMenu) {
+            $info = $this->conex->prepare("SELECT feMenu, horarioComida, cantPlatos FROM menu WHERE idMenu = ? AND status = 1 FOR UPDATE");
             $info->bindValue(1, $idMenu);
             $info->execute();
             return $info->fetch(PDO::FETCH_ASSOC);
@@ -561,14 +560,14 @@ class consultarEventosModelo extends connectDB {
 
        
         private function datosEvento($idEvento) {
-            $info = $this->conex->prepare("SELECT nomEvent, descripEvent FROM evento WHERE idEvento = ? AND status = 1");
+            $info = $this->conex->prepare("SELECT nomEvent, descripEvent FROM evento WHERE idEvento = ? AND status = 1 FOR UPDATE");
             $info->bindValue(1, $idEvento);
             $info->execute();
             return $info->fetch(PDO::FETCH_ASSOC);
         }
         
         private function salidaA($idTipoSalidas, $idSalidaA) {
-            $info = $this->conex->prepare("SELECT descripcion FROM salidaalimentos WHERE idTipoSalidaA = ? AND idSalidaA = ? AND status = 1");
+            $info = $this->conex->prepare("SELECT descripcion FROM salidaalimentos WHERE idTipoSalidaA = ? AND idSalidaA = ? AND status = 1 FOR UPDATE");
             $info->bindValue(1, $idTipoSalidas);
             $info->bindValue(2, $idSalidaA);
             $info->execute();

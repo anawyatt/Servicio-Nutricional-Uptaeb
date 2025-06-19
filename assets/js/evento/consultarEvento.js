@@ -797,8 +797,6 @@ else{
   
 
   })
-
-
 function modiAli() {
   let feMenu = $("#feMenu").val();
   let horarioComida = $("input[name='opcion']:checked").val();
@@ -809,21 +807,26 @@ function modiAli() {
   let id = $('#idd').val();
   let descripcion = $("#descripcion").val();
   let idSalidaA = $('#idSalidaA').val();
- 
+
+  let token = $('[name="csrf_token"]').val();
+      if(token){
+              console.log(token);
+
   $.ajax({
       type: "post",
       url: "", 
       dataType: "json",
       data: {
-        feMenu,
-        horarioComida,
-        cantPlatos,
-        idMenu,
-        nomEvent,
-        descripEvent,
-        id,
-        descripcion,
-        idSalidaA
+          feMenu,
+          horarioComida,
+          cantPlatos,
+          idMenu,
+          nomEvent,
+          descripEvent,
+          id,
+          descripcion,
+          idSalidaA,
+          csrfToken: token
       },
       success(response) {
           if (response.resultado === "error") {
@@ -837,11 +840,15 @@ function modiAli() {
                   timerProgressBar: true,
               });
           } else {
+             $('[name="csrf_token"]').val(response.newCsrfToken);
               console.log('Alimento devuelto al stock');
           }
       }
   });
 }
+}
+
+
 
             
 
