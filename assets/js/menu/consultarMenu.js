@@ -1115,61 +1115,42 @@ function chequeo_alimento() {
 }
 
 function chequeo_cantidad() {
-var chequeo = /^[1-9]\d*$/;
-let alimento = $('.alimento').val();
-var cantidad = $("#cantidad").val();
+  var chequeo = /^[1-9]\d*$/;
+  let alimento = $('#alimento').val();
+  var cantidad = $("#cantidad").val();
 
-disponible(alimento).then(mostrarCantidadDisponible => {
-console.log(mostrarCantidadDisponible);
-console.log(alimento);
+  disponible(alimento).then(mostrarCantidadDisponible => {
+    console.log("Cantidad ingresada:", cantidad);
+    console.log("Stock disponible:", mostrarCantidadDisponible);
 
-if (chequeo.test(cantidad) && cantidad !== 0) {
-$(".error4").html("");
-$(".error4").hide();
-$('#cantidad').removeClass('errorBorder');
-$('.bar4').addClass('bar');
-$('.ic4').removeClass('l');
-$('.ic4').addClass('labelPri');
-$('.letra4').removeClass('labelE');
-$('.letra4').addClass('label-char');
-} else {
-$(".error4").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la cantidad de alimentos!');
-$(".error4").show();
-$('#cantidad').addClass('errorBorder');
-$('.bar4').removeClass('bar');
-$('.ic4').addClass('l');
-$('.ic4').removeClass('labelPri');
-$('.letra4').addClass('labelE');
-$('.letra4').removeClass('label-char');
-error_cantidad = true;
+    if (!chequeo.test(cantidad) || Number(cantidad) === 0) {
+      $(".error4").html('<i class="bi bi-exclamation-triangle-fill"></i> Ingrese la cantidad de alimentos!');
+      $(".error4").show();
+      $('#cantidad').addClass('errorBorder');
+      $('#agregarInventario').prop('disabled', true);
+      return;
+    }
+
+    if (Number(cantidad) > mostrarCantidadDisponible) {
+      $(".error4").html('<i class="bi bi-exclamation-triangle-fill"></i> Ingrese una cantidad igual o inferior a lo que está disponible!');
+      $(".error4").show();
+      $('#cantidad').addClass('errorBorder');
+      $('#agregarInventario').prop('disabled', true);
+    } else {
+      $(".error4").html('');
+      $(".error4").hide();
+      $('#cantidad').removeClass('errorBorder');
+      $('#agregarInventario').prop('disabled', false);
+    }
+  }).catch(error => {
+    console.error('Error al obtener el stock disponible:', error);
+    $(".error4").html('<i class="bi bi-exclamation-triangle-fill"></i> Error consultando el stock.');
+    $(".error4").show();
+    $('#cantidad').addClass('errorBorder');
+    $('#agregarInventario').prop('disabled', true);
+  });
 }
 
-if (cantidad > mostrarCantidadDisponible) {
-$(".error4").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese una cantidad igual o inferior a lo que está disponible!');
-$(".error4").show();
-$('#cantidad').addClass('errorBorder');
-$('.bar4').removeClass('bar');
-$('.ic4').addClass('l');
-$('.ic4').removeClass('labelPri');
-$('.letra4').addClass('labelE');
-$('.letra4').removeClass('label-char');
-$('#agregarInventario').prop('disabled', true);
-error_cantidad = true;
-} else {
-$(".error4").html("");
-$(".error4").hide();
-$('#cantidad').removeClass('errorBorder');
-$('.bar4').addClass('bar');
-$('.ic4').removeClass('l');
-$('.ic4').addClass('labelPri');
-$('.letra4').removeClass('labelE');
-$('.letra4').addClass('label-char');
-$('#agregarInventario').prop('disabled', false);
-}
-}).catch(error => {
-console.error('Error al obtener la cantidad disponible:', error);
-});
-}
 
 function validarCheck() {
 const checkboxes = $('input[type=checkbox]');
@@ -1652,7 +1633,7 @@ function mostrarLoQueQueda(imagen, codigo, nombre, cantidad, restar, unidad){
         data: { muestra: true, idAlimento }, 
         success(data) {
   
-          let cantidad = data.stock;
+          let cantidad = Number(data[0].stock);
           resolve(cantidad);
         },
         error(err) {
@@ -1753,7 +1734,7 @@ function mostrarLoQueQueda(imagen, codigo, nombre, cantidad, restar, unidad){
                  else{
                        valAnulacion(id);
                        $('#idM').val(id);
-                       $('.eliminarM').html('¿Deseas eliminar este menú: <b class="azul5">'+data[0].horarioComida+'</b>?');
+                       $('.eliminarM').html('¿Deseas eliminar este menú: <b class="azul5">'+data.data[0].horarioComida+'</b>?');
                     
                  }
               
