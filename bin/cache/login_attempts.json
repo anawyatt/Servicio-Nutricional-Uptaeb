@@ -1,1 +1,20 @@
-[]
+{
+    "68ae5f1b2dcb43412e3e8c2d8d81f99d22e46f1dd1529f54935276a513be898a": {
+        "intentos": 1,
+        "bloqueado_hasta": null,
+        "primer_intento": 1750554843,
+        "hash_info": "68ae5f1b"
+    },
+    "b3b0a6dfb419c6d5344462cb77d643730d002d39e8bbf645c0ae824c72acad56": {
+        "intentos": 2,
+        "bloqueado_hasta": null,
+        "primer_intento": 1750554863,
+        "hash_info": "b3b0a6df"
+    },
+    "7d7d9502a2ed6da991b84ad89e2ec1fcc37dd0db0c95e5e3494276b2575aa696": {
+        "intentos": 1,
+        "bloqueado_hasta": null,
+        "primer_intento": 1750558978,
+        "hash_info": "7d7d9502"
+    }
+}
