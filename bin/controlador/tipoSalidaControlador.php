@@ -51,6 +51,7 @@ if (isset($_POST['tipoS'])) {
 }
 
 if (isset($_POST['registrar']) && isset($_POST['tipoS']) && $datosPermisos['permiso']['registrar']) {
+  PostRateMiddleware::verificar('registrar', (array)$payload);
   $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
   $registrar = $objeto->registrarTipoSalida($_POST['tipoS']);
   echo json_encode(['mensaje' => $registrar,'newCsrfToken' => $csrf['newToken']]);
@@ -80,6 +81,7 @@ if (isset($_POST['mostrar']) && isset($_POST['id'])) {
 //-------- MODIFICAR -----------------------------------------
 
 if (isset($_POST['tipoS2']) && isset($_POST['id']) && $datosPermisos['permiso']['modificar']) {
+  PostRateMiddleware::verificar('modificar', (array)$payload);
   $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
   $verificarExistencia = $objeto->verificarExistencia($_POST['id']);
   $verificarTipoAlimento = $objeto->verificarTipoS2($_POST['tipoS2'], $_POST['id']);
@@ -91,6 +93,7 @@ if (isset($_POST['tipoS2']) && isset($_POST['id']) && $datosPermisos['permiso'][
 
 //-------- ANULAR -----------------------------------------
 if (isset($_POST['id']) && isset($_POST['borrar'])  && $datosPermisos['permiso']['eliminar']) {
+  PostRateMiddleware::verificar('anular', (array)$payload);
   $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
   $verificarExistencia = $objeto->verificarExistencia($_POST['id']);
   $anular = $objeto->anularTipoSalida($_POST['id']);
