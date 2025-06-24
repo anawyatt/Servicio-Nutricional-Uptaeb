@@ -9,6 +9,8 @@ use component\NotificacionesServer as NotificacionesServer;
 use helpers\encryption as encryption;
 use helpers\permisosHelper as permisosHelper;
 use modelo\EstudianteNormalizer as EstudianteNormalizer;
+use helpers\csrfTokenHelper;
+use middleware\csrfMiddleware;
 
 set_time_limit(3600);
 
@@ -21,22 +23,29 @@ $objeto = new estudiantes;
 
 $sistem = new encryption();
 
-  $normalizer = new EstudianteNormalizer();
+$normalizer = new EstudianteNormalizer();
 $NotificacionesServer = new NotificacionesServer();
 
+
 if (isset($_POST['notificaciones'])) {
-    $valor = $NotificacionesServer->consultarNotificaciones();
+  $valor = $NotificacionesServer->consultarNotificaciones();
 }
 
 if (isset($_POST['notificacionId'])) {
-    $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
+  $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
 }
-
 
 $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Estudiantes', 'consultar');
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
+$tokenCsrf = csrfTokenHelper::generateCsrfToken($payload->cedula);
+
+if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
+  $resultadoToken = csrfMiddleware::verificarYRenovar($_POST['csrfToken'], $payload->cedula);
+  echo json_encode(['message' => 'Token renovado', 'newCsrfToken' => $resultadoToken['newToken']]);
+  die();
+}
 
 
 if (isset($_POST['verEstudiantes']) && isset($datosPermisos['permiso']['consultar'])) {
@@ -166,6 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 
 // Tu código original de procesamiento
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
     if (isset($_POST['data'])) {
 
         $data = json_decode($_POST['data'], true);

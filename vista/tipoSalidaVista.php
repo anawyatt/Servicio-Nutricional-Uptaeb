@@ -117,6 +117,7 @@
                             <button type="button" id="cerrar" class="btn-close limpiar cierra" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form method="POST" class="p-2 formu" id="registrarM">
+                            <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                             <div class="modal-body mb-2">
                                 <div class="wave-group p-2  my-2 mb-2">
                                     <input required="" type="text" class="input tipoS" id="tipoS">
@@ -162,6 +163,8 @@
                             <button type="button" id="cerrar2" class="btn-close resetear" data-bs-dismiss="modal" aria-label="Close"></button>
                         </div>
                         <form method="POST" class="p-2" id="modificarM">
+                            <input type="hidden" name="csrf_token" id="tokenCsrfModificar"
+                                value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                             <input type="hidden" name="" id="idd">
                             <div class="modal-body mb-2">
                                 <div class="wave-group p-2  my-2 mb-2">
@@ -214,6 +217,8 @@
                             <button type="button" class="btn-close btn-primary" aria-label="Close" data-bs-dismiss="modal"></button>
                         </div>
                         <form method="POST" id="eliminarU">
+                            <input type="hidden" name="csrf_token" id="tokenCsrfEliminar"
+                                value="<?php echo htmlspecialchars($tokenCsrf); ?>">
 
                             <div class="modal-body mb-2">
                                 <div align="center">
