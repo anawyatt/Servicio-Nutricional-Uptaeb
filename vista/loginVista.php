@@ -154,8 +154,7 @@
 
     <?php $components->componentsJS(); ?>
     <script src="assets/js/login/login.js"></script>
-
-
+    <script src="assets/js/login/passwordRecovery.js"></script>
 
 </body>
 
