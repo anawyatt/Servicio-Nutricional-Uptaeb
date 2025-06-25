@@ -33,8 +33,8 @@ class cambiarClaveModelo extends connectDB
                 return ['resultado' => 'error', 'mensaje' => 'Token inválido o expirado'];
             }
 
-            if (!$datos || $datos['tipo'] !== 'recuperacion') {
-                return ['resultado' => 'error', 'mensaje' => 'Token de token inválido'];
+            if ($datos['tipo'] !== 'recuperacion') {
+                return ['resultado' => 'error', 'mensaje' => 'Token inválido'];
             }
 
             if ($datos['codigo'] != $this->codigo) {

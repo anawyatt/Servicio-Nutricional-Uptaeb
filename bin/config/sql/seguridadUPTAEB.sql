@@ -9,7 +9,7 @@
             idRol INT AUTO_INCREMENT PRIMARY KEY,
             nombreRol VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
             status tinyint(1) NOT NULL
-        )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+        )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci; 
 
         INSERT INTO `rol` (`idRol`, `nombreRol`, `status`) VALUES
         (1, 'Super Usuario', 1);
@@ -129,7 +129,7 @@
         )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
         INSERT INTO `usuario` (`cedula`, `img`, `nombre`, `segNombre`, `apellido`, `segApellido`, `correo`, `telefono`, `clave`, `idRol`, `status`) VALUES
-        (12345678, 'assets/images/perfil/user.png', 'Servicio', 'Andres', 'Nutricional ', 'Eloy', 'servicionutricional2024@gmail.com', '0424 - 0000099', '$2y$10$M.vMxIOMqGZGDDW6RLoOOOkmDC5AIDzAkM0J2WeNtlGeV6OwcHYL.', 1, 1);
+        (12345678, 'assets/images/perfil/user.png', 'Servicio', 'Andres', 'Nutricional ', 'Eloy', 'ydjYy701fmCFBES2ecJ1SZm0WBfzpLfIVL0IAnlf52VBbvcNHQ/Ey1csGeE6ASwN', '0424 - 0000099', '$2y$10$M.vMxIOMqGZGDDW6RLoOOOkmDC5AIDzAkM0J2WeNtlGeV6OwcHYL.', 1, 1);
 
         CREATE TABLE bitacora(
             idBitacora INT AUTO_INCREMENT PRIMARY KEY,

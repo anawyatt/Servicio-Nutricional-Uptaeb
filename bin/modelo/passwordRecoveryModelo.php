@@ -72,12 +72,12 @@ class passwordRecoveryModelo extends connectDB
         protected function procesarEnvioCorreo($usuario) {
             $nombreCompleto = trim($usuario['nombre'] . ' ' . $usuario['segNombre'] . ' ' . $usuario['apellido'] . ' ' . $usuario['segApellido']);
             $codigo = rand(100000, 999999);
-           
+
             $payload = [
-            'correo' => $this->correo,
-            'codigo' => $codigo,
-            'tipo' => 'recuperacion',
-            'exp' => time() + 900
+                'correo' => $this->correo,
+                'codigo' => $codigo,
+                'tipo' => 'recuperacion',
+                'exp' => time() + 600 
             ];
 
             $token = JwtHelpers::generarToken($payload);
@@ -108,42 +108,46 @@ class passwordRecoveryModelo extends connectDB
                 $mail->Subject = 'Recuperación de contraseña';
 
             $body = '
-            <!DOCTYPE html>
-            <html lang="es">
-                    <head>
-                        <meta charset="UTF-8" />
-                        <title>Restablecer Contraseña</title>
-                        <body style="margin:0;padding:0;background-color:#ffffff;font-family:Arial,sans-serif;">
-            <div class="container" style="width:100%;max-width:600px;margin:30px auto;background-color:#ffffff;border-radius:8px;box-shadow:0 0 10px rgba(0,0,0,0.08);overflow:hidden;border:1px solid #e0e0e0;">
-                
-                <!-- Header -->
-                <div class="header" style="text-align:center;background-color:#003aa5;padding:25px 15px;color:#ffffff;">
-                <img src="https://i.ibb.co/zr1Tkj8/logo2.png" alt="Logo Servicio Nutricional UPTAEB" style="max-width:100px;margin-bottom:10px;">
-                <h1 style="margin:0;font-size:22px;font-weight:bold;">Restablecer Contraseña</h1>
-                </div>
+                        <!DOCTYPE html>
+                <html lang="es">
+                <head>
+                    <meta charset="UTF-8" />
+                    <title>Restablecer Contraseña</title>
+                </head>
+                <body style="margin:0; padding:0; background-color:#ffffff; font-family:Arial, sans-serif; color: #000000;">
+                    <div class="container" style="width:100%; max-width:600px; margin:30px auto; background-color:#ffffff; border-radius:8px; box-shadow:0 0 10px rgba(0,0,0,0.08); overflow:hidden; border:1px solid #e0e0e0;">
 
-                <!-- Contenido -->
-                <div class="content" style="padding:25px 20px;text-align:justify;font-size:16px;line-height:1.6;color:#444444;">
-                <p><strong>Hola, ' . htmlspecialchars($nombreCompleto) . '.</strong></p>
-                <p>Recibimos una solicitud para restablecer tu contraseña. Por favor, inicia sesión utilizando el siguiente código. Esto te llevará directamente a tu perfil. Luego, selecciona la opción <strong>"Contraseña"</strong> e ingresa la contraseña de tu preferencia.</p>
-                
-                <h2 style="text-align:center;color:#e74c3c;font-size:24px;margin:25px 0 10px 0;letter-spacing:2px;">Código Generado:</h2>
-                <h2 style="text-align:center;color:#e74c3c;font-size:28px;margin:5px 0;">' . htmlspecialchars($codigo) . '</h2>
-                
-                <p>Tienes un plazo de <strong>3 minutos</strong> para ingresar con el código generado. Si el tiempo expira, tendrás que solicitar uno nuevo. Recuerda que solo dispones de <strong>3 intentos</strong>.</p>
-                
-                <p style="text-align:center;margin:30px 0;">
-                    <a href="' . htmlspecialchars($enlace) . '" style="background:#003aa5;color:#fff;padding:12px 25px;text-decoration:none;border-radius:6px;font-weight:bold;display:inline-block;">Restablecer Contraseña</a>
-                </p>
-                </div>
+                        <div class="header" style="text-align:center; background-color:#003aa5; padding:25px 15px; color:#ffffff;">
+                            <img src="https://i.ibb.co/zr1Tkj8/logo2.png" alt="Logo Servicio Nutricional UPTAEB" style="max-width:100px; margin-bottom:10px;">
+                            <h1 style="margin:0; font-size:22px; font-weight:bold;">Restablecer Contraseña</h1>
+                        </div>
 
-                <!-- Footer -->
-                <div class="footer" style="background-color:#f4f4f4;padding:15px;text-align:center;font-size:12px;color:#777777;border-top:1px solid #dddddd;">
-                Sistema de Gestión Operativa del Servicio Nutricional UPTAEB.
-                </div>
-            </div>
-            </body>
-            </html>
+                        <div class="content" style="padding:25px 20px; text-align:justify; font-size:16px; line-height:1.6; color:#000000;">
+                            <p><strong>Hola, ' . htmlspecialchars($nombreCompleto) . '.</strong></p>
+                            <p>Hemos recibido una solicitud para restablecer la contraseña de tu cuenta. Para continuar, por favor haz clic en el botón de abajo.</p>
+
+                            <h2 style="text-align:center; color:#003aa5; font-size:24px; margin:25px 0 10px 0; letter-spacing:2px;">Código Generado:</h2>
+                            <h2 style="text-align:center; color:#003aa5; font-size:28px; margin:5px 0;">' . htmlspecialchars($codigo) . '</h2>
+
+                            <p>Recuerda que el código es válido por <strong>10 minutos</strong>. Si el tiempo expira, tendrás que solicitar un nuevo código.</p>
+
+                            <p style="text-align:center; margin:30px 0;">
+                                <a href="' . htmlspecialchars($enlace) . '" style="background:#003aa5; color:#fff; padding:12px 25px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">Restablecer Contraseña</a>
+                            </p>
+                        </div>
+
+                        <p style="font-size:14px; color:#000000; text-align:center; margin-top:20px;">
+                            Si no solicitaste este cambio, por favor ignora este mensaje. Tu cuenta está segura.
+                        </p>
+
+                        <div class="footer" style="background-color:#f4f4f4; padding:15px; text-align:center; font-size:12px; color:#000000; border-top:1px solid #dddddd;">
+                            Sistema de Gestión Operativa del Servicio Nutricional UPTAEB.
+                        </div>
+
+                    </div>
+                </body>
+                </html>
+
                     ';
 
                 $mail->Subject = 'Recuperación de contraseña';
