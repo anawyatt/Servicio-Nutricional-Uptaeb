@@ -5,6 +5,7 @@ namespace bin\controlador;
 use config\componentes\configSistema as configSistema;
 use helpers\encryption as encryption;
 use middleware\JwtMiddleware;  // Usamos el middleware de JWT
+use helpers\JwtHelpers;
 
 class frontControlador extends configSistema
 {
@@ -14,9 +15,11 @@ class frontControlador extends configSistema
     private $sistem;
     private $cipher;
     private $jwtPayload; // Guardamos info del token aquí
+    private $request;    // <-- NUEVA propiedad
 
     public function __construct($request)
     {
+        $this->request = $request; // <-- Guardamos el request
         $this->sistem = new configSistema();
         $this->cipher = new encryption();
         
@@ -38,36 +41,52 @@ class frontControlador extends configSistema
         $decryptedURL = $this->cipher->decryptURL($this->url);
         $pattern = preg_match("/^[\w\-\/]+$/", $decryptedURL);
         if ($pattern == 1) {
-            $this->_loadPage($decryptedURL);
+            $this->_loadPage($decryptedURL, $this->request); // <-- PASAMOS el segundo argumento
         } else {
             die('La URL ingresada es inválida');
         }
     }
 
-    private function _loadPage($url)
-    {
-        $publicRoutes = ['login'];
-        if (!in_array($url, $publicRoutes)) {
-            $this->jwtPayload = JwtMiddleware::verificarToken();
-            if (!$this->jwtPayload) {
-                $loginURL = urlencode($this->cipher->encryptURL('login'));
-                die("<script>window.location='?url=" . $loginURL . "'</script>");
-            }
+    private function _loadPage($url, $request)
+{
+    $publicRoutes = ['login', 'cambiarClave'];
 
-        }
-
-        // Si la URL es válida, cargar el controlador correspondiente
-        $pathControlador = $this->directory . $url . $this->controlador;
-        error_log("Intentando cargar controlador: " . $pathControlador);
-
-        if (file_exists($pathControlador)) {
-            require_once($pathControlador);
-        } else {
-            // Si no se encuentra el archivo del controlador, redirigir a login
-            error_log("Controlador no encontrado para URL: " . $url);
+    if (!in_array($url, $publicRoutes)) {
+        $this->jwtPayload = JwtMiddleware::verificarToken();
+        if (!$this->jwtPayload) {
             $loginURL = urlencode($this->cipher->encryptURL('login'));
             die("<script>window.location='?url=" . $loginURL . "'</script>");
         }
+
+    } else if ($url === 'cambiarClave') {
+
+        if (isset($request["token"])) {
+            $token = $request["token"];
+            $payload = JwtHelpers::verificarTokenPersonalizado($token); 
+            if (!$payload || $payload['tipo'] !== 'recuperacion') {
+                die("Token inválido o expirado.");
+            }
+            $this->jwtPayload = $payload;
+        } else {
+            die("Token no proporcionado.");
+        }
     }
+
+    $pathControlador = $this->directory . $url . $this->controlador;
+    if (file_exists($pathControlador)) {
+        require_once($pathControlador);
+
+        // ✅ Ejecutamos la función principal si existe
+        if (function_exists('main')) {
+            if ($url === 'cambiarClave') {
+                main($this->jwtPayload); // ← Le pasas el payload aquí
+            } 
+        }
+    } else {
+        $loginURL = urlencode($this->cipher->encryptURL('login'));
+        die("<script>window.location='?url=" . $loginURL . "'</script>");
+    }
+}
+
 }
 ?>

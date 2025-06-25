@@ -59,8 +59,15 @@ function recuperarCorreo() {
             } else if (data.resultado === 'no existe') {
                 mostrarToast('error', 'Error, ingrese correctamente el correo electrónico.');
             } else if (data.resultado === 'ok') {
-                $('#borrarR').click(); 
+                $('.correo').val('');
+                $('.error3').hide().html('');
+                $('.correo').removeClass('errorBorder');
+                $('.bar3').addClass('bar');
+                $('.ic3').removeClass('l').addClass('labelPri');
+                $('.letra3').removeClass('labelE').addClass('label-char');
+
                 mostrarToast('success', 'Correo enviado. Revisa tu bandeja de entrada.');
+                                
             } else {
                 mostrarToast('error', 'Ocurrió un error inesperado.');
             }

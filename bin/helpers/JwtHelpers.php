@@ -42,4 +42,18 @@ class JwtHelpers
             return null;
         }
     }
+
+    public static function verificarTokenPersonalizado($token){
+        try {
+            $decoded = JWT::decode($token, new Key(self::getKey(), self::$algo));
+            return (array)$decoded;
+            } catch (ExpiredException $e) {
+            return false;
+        } catch (\Exception $e) {
+            return false;
+        }
+    }
+
+
+
 }

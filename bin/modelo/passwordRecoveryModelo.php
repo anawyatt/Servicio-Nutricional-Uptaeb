@@ -8,6 +8,7 @@ use config\connect\connectDB as connectDB;
 use helpers\encryption as encryption;
 use helpers\JwtHelpers;
 use config\componentes\configSistema;
+use helpers\ConteoRecuperarHelpers;
 
 
 class passwordRecoveryModelo extends connectDB
@@ -15,6 +16,7 @@ class passwordRecoveryModelo extends connectDB
     private $correo;
     private $encryption;  
     private $baseUrl;  
+    private $sistem;
 
 
     public function __construct()
@@ -22,20 +24,34 @@ class passwordRecoveryModelo extends connectDB
         parent::__construct();
         $this->encryption = new encryption();
         $config = new configSistema();
-        $this->baseUrl = rtrim($config->_URL_(), '/');
+        $this->baseUrl = rtrim($config->_URL_());
         $this->sistem = new encryption();  
     }
-
 
         public function recuperContraseñas($correo) {
             $this->correo = trim($correo);
 
-             if (!preg_match("/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/", $this->correo)) {
+            if (!preg_match("/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/", $this->correo)) {
                 return ['resultado' => 'error', 'mensaje' => 'Correo inválido'];
             }
 
-            return $this->enviarCorreoRecuperacion();
+            $verificacion = conteoRecuperarHelpers::verificarBloqueo($this->correo);
+            if ($verificacion['bloqueado']) {
+                return ['resultado' => 'error', 'mensaje' => $verificacion['mensaje']];
+            }
+
+            $resultadoEnvio = $this->enviarCorreoRecuperacion();
+
+            if ($resultadoEnvio['resultado'] === 'no existe' || $resultadoEnvio['resultado'] === 'error') {
+                $intento = conteoRecuperarHelpers::registrarIntento($this->correo);
+                $mensajeExtra = isset($intento['mensaje']) ? ' ' . $intento['mensaje'] : '';
+                return ['resultado' => 'error', 'mensaje' => $resultadoEnvio['mensaje'] . $mensajeExtra];
+            }
+
+            conteoRecuperarHelpers::resetearIntentos($this->correo);
+            return $resultadoEnvio;
         }
+
 
 
         protected function enviarCorreoRecuperacion() {
@@ -67,8 +83,7 @@ class passwordRecoveryModelo extends connectDB
             $token = JwtHelpers::generarToken($payload);
 
             $rutaCifrada = urlencode($this->sistem->encryptURL("cambiarClave"));
-            $enlace = $this->baseUrl . "/?url=" . $rutaCifrada . "&token=$token";
-            var_dump($enlace);
+            $enlace = $this->baseUrl . "?url=" . $rutaCifrada . "&token=" . urlencode($token);
 
             return $this->enviarCorreo($nombreCompleto, $codigo, $enlace);
         }
