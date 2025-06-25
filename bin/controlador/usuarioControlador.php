@@ -45,9 +45,7 @@
     }
     
        if(isset($_POST['mostrarC']) && isset($_POST['cedula']) ){
-          PostRateMiddleware::verificar('verificar', (array)$payload); 
-        $validarC = $object->validarCedula($_POST['cedula']);
-
+                $validarC = $object->validarCedula($_POST['cedula']);
         if (isset($validarC['resultado']) && $validarC['resultado'] === 'error Cedula') {
             echo json_encode($validarC);
             die();
@@ -55,7 +53,6 @@
       }
 
     if(isset($_POST['muestra2'])  && isset($_POST['correo']) ){
-          PostRateMiddleware::verificar('verificar', (array)$payload); 
       $validarCorreo=  $object->validarCorreo($_POST['correo']);
       if (isset($validarCorreo['resultado']) && $validarCorreo['resultado'] === 'error correo'){
         echo json_encode($validarCorreo);
@@ -64,7 +61,6 @@
     }
 
     if(isset($_POST['muestra3'])  && isset($_POST['telefono']) ){
-           PostRateMiddleware::verificar('verificar', (array)$payload); 
       $validarTelefono= $object->validarTelefono($_POST['telefono']);
       if(isset($validarTelefono['resultado']) && $validarTelefono['resultado'] === 'error telefono'){
         echo json_encode($validarTelefono);
@@ -73,7 +69,6 @@
     }
 
       if (isset($_POST['valida']) && isset($_POST['idRol'])) {
-            PostRateMiddleware::verificar('verificar', (array)$payload); 
           $validarExistencia = $object->verificarExistenciaRol($_POST['idRol']);
           echo json_encode($validarExistencia);
           die();
