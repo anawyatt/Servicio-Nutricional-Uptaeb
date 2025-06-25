@@ -119,7 +119,8 @@
                     <h5 class="modal-title title" id="staticBackdropLabel">Registrar Tipo de Utensilio</h5>
                     <button type="button" id="cerrar" class="btn-close limpiar" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
-                    <form  method="POST" class="p-2" id="registrarM">
+                    <form method="POST" class="p-2" id="registrarM">
+                        <input type="hidden" name="csrf_token" id="tokenCsrf" value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                         <div class="modal-body mb-2">
                             <div class="wave-group p-2  my-2 mb-2">
                                     <input required="" type="text" class="input tipo" id="tipo">
@@ -168,6 +169,7 @@
                         <button type="button" id="cerrar2" class="btn-close resetear" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form  method="POST" class="p-2" id="modificarM">
+                <input type="hidden" name="csrf_token" id="tokenCsrfModificar" value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                 <input type="hidden" name="" id="idd">
                     <div class="modal-body mb-2">
                         <div class="wave-group p-2  my-2 mb-2">
@@ -219,6 +221,8 @@
                     <button type="button" id="cerrar3" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <form method="POST" id="eliminarRol">
+                <input type="hidden" name="csrf_token" id="tokenCsrfEliminar" value="<?php echo htmlspecialchars($tokenCsrf); ?>">
+
                     <div class="modal-body mb-2">
                         <div align="center">
                             <img src="assets/images/basura.png" width="250">

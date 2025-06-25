@@ -8,8 +8,8 @@
  use component\NotificacionesServer as NotificacionesServer;
  use helpers\encryption as encryption;
  use helpers\permisosHelper as permisosHelper;
-
-
+ use helpers\csrfTokenHelper;
+ use middleware\csrfMiddleware;
  use modelo\entradaUtensiliosModelo as entradaUtensilios;
 
  $objeto = new entradaUtensilios;
@@ -18,6 +18,16 @@
  $permisos = $datosPermisos['permisos'];
  $payload = $datosPermisos['payload'];
  $NotificacionesServer = new NotificacionesServer();
+  if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
+$tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
+
+if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
+    $resultadoToken = csrfMiddleware::verificarYRenovar($_POST['csrfToken'], $payload->cedula);
+    echo json_encode(['message' => 'Token renovado','newCsrfToken' => $resultadoToken['newToken']]);
+    die();
+}
 
     if (isset($payload->cedula)) {
           $NotificacionesServer->setCedula($payload->cedula);
@@ -63,9 +73,11 @@ if (isset($datosPermisos['permiso']['consultar'])) {
 
 // ------------------- REGISTRAR -----------------------
 if (isset($datosPermisos['permiso']['registrar'])) {
-  if (isset($_POST['registrar'], $_POST['fecha'], $_POST['hora'], $_POST['descripcion'])) {
+  if (isset($_POST['registrar'], $_POST['fecha'], $_POST['hora'], $_POST['descripcion'], $_POST['csrfToken'])) {
+    $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
     $registrarU = $objeto->registrarEntradaU($_POST['fecha'], $_POST['hora'], $_POST['descripcion']);
-    exit(json_encode($registrarU));
+    echo json_encode(['mensaje'=> $registrarU, 'newCsrfToken' => $csrf['newToken']]);
+    exit();
   }
 
   if (isset($_POST['utensilio'], $_POST['cantidad'], $_POST['id'])) {

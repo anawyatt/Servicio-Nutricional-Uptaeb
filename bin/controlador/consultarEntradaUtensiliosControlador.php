@@ -9,6 +9,8 @@
  use helpers\encryption as encryption;
  use helpers\permisosHelper as permisosHelper;
  use modelo\consultarEntradaUtensiliosModelo as consultarEntradaUtensilios;
+ use helpers\csrfTokenHelper;
+ use middleware\csrfMiddleware;
 
  $objeto = new consultarEntradaUtensilios;
  $sistem = new encryption();
@@ -17,22 +19,29 @@
  $permisos = $datosPermisos['permisos'];
  $payload = $datosPermisos['payload'];
 
- $NotificacionesServer = new NotificacionesServer();
+ $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
+
+if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
+    $resultadoToken = csrfMiddleware::verificarYRenovar($_POST['csrfToken'], $payload->cedula);
+    echo json_encode(['message' => 'Token renovado','newCsrfToken' => $resultadoToken['newToken']]);
+    die();
+}
+
+$NotificacionesServer = new NotificacionesServer();
 
 if (isset($payload->cedula)) {
           $NotificacionesServer->setCedula($payload->cedula);
       } else {
-          echo json_encode(['error' => 'Cédula no encontrada en el token']);
-          exit;
-      }
+          die("<script>window.location='?url=" .urlencode( $sistem->encryptURL('login')) . "'</script>");
+}
 
-      if (isset($_POST['notificaciones'])) {
-          $valor = $NotificacionesServer->consultarNotificaciones();
-      }
+if (isset($_POST['notificaciones'])) {
+  $valor = $NotificacionesServer->consultarNotificaciones();
+}
     
-      if (isset($_POST['notificacionId'])) {
-          $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-  }
+if (isset($_POST['notificacionId'])) {
+  $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
+}
 
 
 if (isset($_POST['mostrarEU'], $_POST['fechaInicio'], $_POST['fechaFin'])) {
@@ -41,7 +50,7 @@ if (isset($_POST['mostrarEU'], $_POST['fechaInicio'], $_POST['fechaFin'])) {
 }
  
 if (isset($datosPermisos['permiso']['consultar'])) {
-  if (isset($_POST['infoTipoUtensilio'], $_POST['id'])) {
+  if (isset($_POST['infoTipoUtensilio'], $_POST['id'],)) {
     $verificacion = $objeto->verificarExistencia($_POST['id']);
     
     if ($verificacion === null) {
@@ -54,21 +63,27 @@ if (isset($datosPermisos['permiso']['consultar'])) {
 
   if (isset($_POST['infoUtensilio'], $_POST['idTipoU'], $_POST['idInventarioU'])) {
     $utensilios = $objeto->utensilios($_POST['idTipoU'], $_POST['idInventarioU']);
-    exit(json_encode($utensilios));
+    echo json_encode($utensilios);
+    exit();
   }
 }
  //--------ANULAR-----------------
 
-if (isset($datosPermisos['permiso']['anular'])) {
+if (isset($datosPermisos['permiso']['eliminar'])) {
   if (isset($_POST['valAnulacion'], $_POST['id'])) {
+  
     $resultado = $objeto->verificarAnulacion($_POST['id']);
-    exit(json_encode($resultado));
+    echo json_encode($resultado);
+    exit();
   }
 
   
-  if (isset($_POST['id'], $_POST['borrar'])) {
+  if (isset($_POST['id'], $_POST['borrar'], $_POST['csrfToken'])) {
+    $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
+    
     $resultado = $objeto->anularEntradaUtensilios($_POST['id']);
-    exit(json_encode($resultado));
+    echo json_encode(['mensaje' => $resultado, 'newCsrfToken' => $csrf['newToken']]);
+    die();
   }
 }
 //-----------------REPORTE-------------------
