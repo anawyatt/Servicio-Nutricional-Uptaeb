@@ -167,8 +167,9 @@
            $this->feMenu = $feMenu;
            $this->horarioComida = $horarioComida;
            $resultado = $this->validar();
-           return $resultado === true ? ['resultado' => 'error', 'mensaje' => 'Ya tiene un menú registrado para esa fecha y horario'] 
-           :  ['resultado' => 'No tiene un menú registrado para esa fecha y horario'];
+           return $resultado === true 
+           ? ['resultado' => 'error', 'mensaje' => 'Ya tiene un menú registrado para esa fecha y horario'] 
+           : ['resultado' => 'No tiene un menú registrado para esa fecha y horario'];
         }
 
         private function validar(){
@@ -220,8 +221,7 @@
         private function menu(){
           try {
              $this->conectarDB();
-
-            $this->conex->beginTransaction();
+             $this->conex->beginTransaction();
     
               $idTipoSalidas = $this->tipoSalida();
               $menuId = $this->infoMenu();
@@ -300,29 +300,28 @@
       
         private function registrarDetalle() {
           try {
-             $this->conectarDB();
+              $this->conectarDB();
               $this->conex->beginTransaction();
 
               $this->detalleSalidaMenu();
               list($nombreAlimento, $unidadMedida) = $this->obtenerDatosAlimento();        
-              $this->actualizarStock($this->alimento, $this->cantidad);
-              $this->actualizarReservado($this->alimento, $this->cantidad);
-       
+              $resultado = $this->actualizarStockYReservado($this->alimento, $this->cantidad);
+              if (isset($resultado['error'])) 
+              return $resultado;
+
               $bitacora = new bitacoraModelo;
               $bitacora->registrarBitacora('Menú', 'Se despachó el alimento '.$nombreAlimento.' cantidad: '.$this->cantidad.' '.$unidadMedida, $this->payload->cedula);
 
               $this->conex->commit();
-               
               return ['resultado' => 'exitoso'];
 
                
-                }catch (Exception $error) {
-                  $this->conex->rollBack();
-                  return ['error' => $error->getMessage()];     
-               }
-               finally {
-                   $this->desconectarDB();
-               } 
+                    } catch (Exception $error) {
+                $this->conex->rollBack();
+                return ['error' => $error->getMessage()];     
+            } finally {
+                $this->desconectarDB();
+            } 
         }
 
         private function detalleSalidaMenu() {
@@ -344,68 +343,38 @@
           return [$alimento['nombre'], $alimento['unidadMedida']];
         }
         
-        private function actualizarStock($idAlimento, $cantidad){
-          $this->alimento=$idAlimento;
-          $this->cantidad=$cantidad;
-         try {
-      
-            $info= $this->infoAlimento2($this->alimento);
-            $actualizarStock= $info[0]["stock"] - $this->cantidad;
-            $registrar=$this->conex->prepare("UPDATE `alimento` SET stock = ? WHERE `idAlimento` = ?;");
-            $registrar->bindValue(1, $actualizarStock);
-            $registrar->bindValue(2, $this->alimento);
-            $registrar->execute();
-         }
-         
-         catch(Exception $error){
-                  return array("Sistema", "¡Error Sistema!");
-      
-         }
-      
-        }
-                                       
-        private function actualizarReservado($idAlimento, $cantidad){
-          $this->alimento=$idAlimento;
-          $this->cantidad=$cantidad;
-         try {
-      
-            $info= $this->infoAlimento2($this->alimento);
-            $actualizarReservado= $info[0]["reservado"] + $this->cantidad;
-            $registrar=$this->conex->prepare("UPDATE `alimento` SET  reservado = ? WHERE `idAlimento` = ?;");
-            $registrar->bindValue(1, $actualizarReservado);
-            $registrar->bindValue(2, $this->alimento);
-            $registrar->execute();
-         }
-         
-         catch(Exception $error){
-                  return array("Sistema", "¡Error Sistema!");
-      
-         }
-      
-        }
+        private function actualizarStockYReservado($idAlimento, $cantidad) {
+          try {
+              $query = $this->conex->prepare("SELECT stock, reservado FROM alimento WHERE idAlimento = ? FOR UPDATE");
+              $query->bindValue(1, $idAlimento);
+              $query->execute();
+              $data = $query->fetch(PDO::FETCH_ASSOC);
 
-        private function infoAlimento2($alimento){
-          $this->alimento=$alimento;
-          
-          try{
-              $mostrar = $this->conex->prepare("SELECT idAlimento, codigo, imgAlimento, nombre, unidadMedida, marca,
-                stock, idTipoA  FROM alimento WHERE status = 1 AND idAlimento = ?");
-              $mostrar->bindValue(1, $this->alimento);
-              $mostrar->execute();
-              $data = $mostrar->fetchAll();
-                return $data;
-          }catch(\PDOException $e){
-              return $e;
+              if (!$data) {
+                  throw new Exception("Alimento no encontrado.");
+              }
+
+              $nuevoStock = $data['stock'] - $cantidad;
+              $nuevoReservado = $data['reservado'] + $cantidad;
+
+              if ($nuevoStock < 0) {
+                  throw new Exception("No hay stock suficiente.");
+              }
+
+              $update = $this->conex->prepare("UPDATE alimento SET stock = ?, reservado = ? WHERE idAlimento = ?");
+              $update->bindValue(1, $nuevoStock);
+              $update->bindValue(2, $nuevoReservado);
+              $update->bindValue(3, $idAlimento);
+              $update->execute();
+
+              return true;
+
+          } catch (Exception $error) {
+              return ['error' => $error->getMessage()];
           }
         }
 
-    
-    
-    
-    
-    
-    
-         private function notificaciones2() {
+        private function notificaciones2() {
           try {
              $this->conectarDBSeguridad();
             $titulo = "Registro de menú";
@@ -434,7 +403,7 @@
               
               error_log("Error al enviar notificación a través de WebSocket: " . $e->getMessage());
           }
-      }
+        }
 
         private function notificaciones() {
           $this->conectarDBSeguridad();

@@ -3,17 +3,23 @@
   use component\initComponents as initComponents;
   use helpers\encryption as encryption;
   use modelo\loginModelo as login;
+  use modelo\passwordRecoveryModelo as passwordRecovery;
+
 
   $object = new login();
+  $objecto = new passwordRecovery();
+
  
   if(isset($_POST['cedula'])){
     $respuesta = $object->loginSistema($_POST['cedula'], $_POST['clave']);
     echo json_encode($respuesta);
     die();  
    }
-
-    if(isset($_POST['enviar']) && isset($_POST['correo'])){
-    $mostrar= $object->recuperContraseñas($_POST['correo']);
+   
+  if (isset($_POST['enviar']) && isset($_POST['correo'])) {
+    $respuesta = $objecto->recuperContraseñas($_POST['correo']);
+    echo json_encode($respuesta);
+    die();
   }
 
 

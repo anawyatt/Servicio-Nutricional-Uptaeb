@@ -229,43 +229,59 @@ function validarFechaFin(){
  // ----------------------------------- MOSTRAR INFORMACIÓN ------------------------------------------
 
 
-      $(document).on('click', '.informacion', function () {
+     $(document).on('click', '.informacion', function () {
     let id = this.id;
     $.ajax({
         method: "post",
         url: "", 
         dataType: "json",
         data: { infoMenu: true, id: id },
-        success(data) {
-            let tipoA = '';
-            let lista = data;
+        success: function(data) {
+            if (data.resultado === 'success') {
+                let lista = data.data;
+                let tipoA = '';
 
-            lista.forEach(fila => { 
-                tipoA += `
-                    <table class="table table-hover table-bordered tabla1">
-                        <thead class="table-success">
-                            <tr>
-                                <th colspan="5" class='blanco fw-bold text-center'>${fila.tipo}</th>
-                            </tr>
-                            <tr>
-                                <th class="blanco">Imagen</th>
-                                <th class="blanco">Alimento</th>
-                                <th class="blanco">Marca</th>
-                                <th class="blanco">Cantidad</th>
-                            </tr>
-                        </thead>
-                        <tbody id="infoA_${fila.idTipoA}" class="infoA tbody1"></tbody>
-                    </table>
-                `;
+                lista.forEach(fila => { 
+                    tipoA += `
+                        <table class="table table-hover table-bordered tabla1">
+                            <thead class="table-success">
+                                <tr>
+                                    <th colspan="5" class='blanco fw-bold text-center'>${fila.tipo}</th>
+                                </tr>
+                                <tr>
+                                    <th class="blanco">Imagen</th>
+                                    <th class="blanco">Alimento</th>
+                                    <th class="blanco">Marca</th>
+                                    <th class="blanco">Cantidad</th>
+                                </tr>
+                            </thead>
+                            <tbody id="infoA_${fila.idTipoA}" class="infoA tbody1"></tbody>
+                        </table>
+                    `;
 
-              
-                mostrarAlimentos(fila.idTipoA, id);
+                    mostrarAlimentos(fila.idTipoA, id);
+                });
+
+                $('#tablas').html(tipoA);
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.mensaje || 'No se pudo cargar el menú'
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error en la petición:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'Ocurrió un error inesperado'
             });
-
-            $('#tablas').html(tipoA);
         }
     });
 });
+
 
 function mostrarAlimentos(idTipoA, idMenu) {
   $.ajax({
@@ -431,56 +447,81 @@ $(document).on('click', '#alimentoos', function (){
         method: "post",
         url: "", 
         dataType: "json",
-        data: { infoMenu: true, id: id },
-        success: function(data) {
-            let alimentos = '';
-            let requests = [];
+        data: { 
+          infoMenu: true, 
+          id: id 
+        },
+        success: function(response) {
+            if (response.resultado === 'success') {
+                let data = response.data;
+                let alimentos = '';
+                let requests = [];
 
-            data.forEach(fila => {
-                requests.push(
-                    $.ajax({
-                        method: "post",
-                        url: "", 
-                        dataType: "json",
-                        data: { infoAlimento: true, idTipoA: fila.idTipoA, idMenu: id },
-                        success: function(data) {
-                          console.log('idSalidaA:', idSalidaA);
-                            if (data.resultado === 'error menú') {
-                                $('.cerrar2').click();
-                                tablaMenu();
-                                Swal.fire({
-                                    toast: true,
-                                    position: 'top-end',
-                                    icon: 'error',
-                                    title: '<span class=" text-rojo">¡El menú fue anulado recientemente!</span>',
-                                    showConfirmButton: false,
-                                    timer: 3000,
-                                    timerProgressBar: true,
-                                });
-                            } else {
-                              $("#idd").val(data[0].idMenu);
-                              $("#feMenu").val(data[0].feMenu);
-                              $("#cantPlatos").val(data[0].cantPlatos);
-                              $("#descripcion").val(data[0].descripcion);
-                              $("#idSalidaA").val(data[0].idSalidaA);
-                              $('input[name="opcion"]').prop('checked', false);
-    
-                  
-                               $('input[name="opcion"][value="' + data[0].horarioComida + '"]').prop('checked', true);
-                                alimentos += procesarAlimento(data);
+                data.forEach(fila => {
+                    requests.push(
+                        $.ajax({
+                            method: "post",
+                            url: "", 
+                            dataType: "json",
+                            data: { 
+                              infoAlimento: true, 
+                              idTipoA: fila.idTipoA, 
+                              idMenu: id
+                            },
+                            success: function(alimentoData) {
+                                if (alimentoData.resultado === 'error menú') {
+                                    $('.cerrar2').click();
+                                    tablaMenu();
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'top-end',
+                                        icon: 'error',
+                                        title: '<span class=" text-rojo">¡El menú fue anulado recientemente!</span>',
+                                        showConfirmButton: false,
+                                        timer: 3000,
+                                        timerProgressBar: true,
+                                    });
+                                } else {
+                                    $("#idd").val(alimentoData[0].idMenu);
+                                    $("#feMenu").val(alimentoData[0].feMenu);
+                                    $("#cantPlatos").val(alimentoData[0].cantPlatos);
+                                    $("#descripcion").val(alimentoData[0].descripcion);
+                                    $("#idSalidaA").val(alimentoData[0].idSalidaA);
+                                    $('input[name="opcion"]').prop('checked', false);
+                                    $('input[name="opcion"][value="' + alimentoData[0].horarioComida + '"]').prop('checked', true);
+                                    alimentos += procesarAlimento(alimentoData);
+                                }
                             }
-                        }
-                    })
-                );
-            });
+                        })
+                    );
+                });
 
-            $.when.apply($, requests).done(function() {
-                $(`#tbody3`).html(alimentos);
-                tableContainer.scrollTop = tableContainer.scrollHeight;
+                $.when.apply($, requests).done(function() {
+                    $(`#tbody3`).html(alimentos);
+                    tableContainer.scrollTop = tableContainer.scrollHeight;
+                });
+
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: response.mensaje
+                });
+            }
+        },
+        error: function(xhr, status, error) {
+            console.error('Error en la petición:', error);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error de conexión',
+                text: 'Ocurrió un error inesperado'
             });
         }
     });
 });
+
+
+  
 
  $(document).on('click', '.resetear', function () {
     let id = $("#idd").val();
@@ -588,11 +629,10 @@ function procesarAlimento(data) {
     });
 
     $("#alimento").on('change', function() {
-	    verificarAlimento()
-	    chequeo_alimento()
-
-	    mostrar2($(this).val());
-	    mostrarCantidadDisponible($(this).val());
+	    verificarAlimento();
+      chequeo_alimento();
+      mostrar2($(this).val());
+      mostrarCantidadDisponible($(this).val());
 
 	    let alimento = $('#alimento').val();
         let alimentoDuplicado = false;
@@ -745,29 +785,31 @@ function procesarAlimento(data) {
  }
 });
 
+let claseAEliminar;
 
 $('body').on('click', '#quitarFila', function(e) {
-  var claseAEliminar = $(this).attr('value');
-  console.log(claseAEliminar);  // Obtener el valor del atributo 'value' del botón
+  let claseAEliminar = $(this).attr('value');
+  console.log(claseAEliminar);  
 
   Swal.fire({
       title: '¿Deseas eliminar este alimento de la tabla?',
       icon: 'question',
       showCancelButton: true,
       width: '35%',
-      cancelButtonText: 'Cancelar',
+      cancelButtonText: 'Cancelar', 
       confirmButtonText: 'Aceptar',
   }).then((result) => {
-      if (result.isConfirmed) {
-      
+            if (result.isConfirmed) {
           $('.tables tbody .' + claseAEliminar).remove();
-          modiAli();  
-          validarTabla(); 
+          modiAli();
+          validarTabla();
       }
   });
 
- e.preventDefault();
+  e.preventDefault();
 });
+
+
 
 $("#editar").on("click", function(e){
   e.preventDefault();
@@ -815,6 +857,10 @@ function modiAli() {
   let id = $('#idd').val();
   let idSalidaA = $('#idSalidaA').val();
 
+  let token = $('[name="csrf_token"]').val();
+      if(token){
+              console.log(token);
+
   $.ajax({
       type: "post",
       url: "", 
@@ -825,7 +871,8 @@ function modiAli() {
           cantPlatos,
           descripcion,
           id,
-          idSalidaA
+          idSalidaA,
+          csrfToken: token
       },
       success(response) {
           if (response.resultado === "error") {
@@ -839,10 +886,12 @@ function modiAli() {
                   timerProgressBar: true,
               });
           } else {
+             $('[name="csrf_token"]').val(response.newCsrfToken);
               console.log('Alimento devuelto al stock');
           }
       }
   });
+}
 }
 
             
@@ -856,8 +905,8 @@ function modificar() {
   let id = $('#idd').val();
   let idSalidaA = $('#idSalidaA').val();
   let token = $('[name="csrf_token"]').val();
-if(token){
-         console.log(token);
+      if(token){
+              console.log(token);
 
   $.ajax({
       type: "post",
@@ -874,7 +923,7 @@ if(token){
 
       },
       success(response) {
-          if (response.resultado === "error" && response .newCsrfToken) { 
+          if (response.resultado === "error" && response.newCsrfToken) { 
               Swal.fire({
                   toast: true,
                   position: 'top-end',
@@ -1066,61 +1115,42 @@ function chequeo_alimento() {
 }
 
 function chequeo_cantidad() {
-var chequeo = /^[1-9]\d*$/;
-let alimento = $('.alimento').val();
-var cantidad = $("#cantidad").val();
+  var chequeo = /^[1-9]\d*$/;
+  let alimento = $('#alimento').val();
+  var cantidad = $("#cantidad").val();
 
-disponible(alimento).then(mostrarCantidadDisponible => {
-console.log(mostrarCantidadDisponible);
-console.log(alimento);
+  disponible(alimento).then(mostrarCantidadDisponible => {
+    console.log("Cantidad ingresada:", cantidad);
+    console.log("Stock disponible:", mostrarCantidadDisponible);
 
-if (chequeo.test(cantidad) && cantidad !== 0) {
-$(".error4").html("");
-$(".error4").hide();
-$('#cantidad').removeClass('errorBorder');
-$('.bar4').addClass('bar');
-$('.ic4').removeClass('l');
-$('.ic4').addClass('labelPri');
-$('.letra4').removeClass('labelE');
-$('.letra4').addClass('label-char');
-} else {
-$(".error4").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la cantidad de alimentos!');
-$(".error4").show();
-$('#cantidad').addClass('errorBorder');
-$('.bar4').removeClass('bar');
-$('.ic4').addClass('l');
-$('.ic4').removeClass('labelPri');
-$('.letra4').addClass('labelE');
-$('.letra4').removeClass('label-char');
-error_cantidad = true;
+    if (!chequeo.test(cantidad) || Number(cantidad) === 0) {
+      $(".error4").html('<i class="bi bi-exclamation-triangle-fill"></i> Ingrese la cantidad de alimentos!');
+      $(".error4").show();
+      $('#cantidad').addClass('errorBorder');
+      $('#agregarInventario').prop('disabled', true);
+      return;
+    }
+
+    if (Number(cantidad) > mostrarCantidadDisponible) {
+      $(".error4").html('<i class="bi bi-exclamation-triangle-fill"></i> Ingrese una cantidad igual o inferior a lo que está disponible!');
+      $(".error4").show();
+      $('#cantidad').addClass('errorBorder');
+      $('#agregarInventario').prop('disabled', true);
+    } else {
+      $(".error4").html('');
+      $(".error4").hide();
+      $('#cantidad').removeClass('errorBorder');
+      $('#agregarInventario').prop('disabled', false);
+    }
+  }).catch(error => {
+    console.error('Error al obtener el stock disponible:', error);
+    $(".error4").html('<i class="bi bi-exclamation-triangle-fill"></i> Error consultando el stock.');
+    $(".error4").show();
+    $('#cantidad').addClass('errorBorder');
+    $('#agregarInventario').prop('disabled', true);
+  });
 }
 
-if (cantidad > mostrarCantidadDisponible) {
-$(".error4").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese una cantidad igual o inferior a lo que está disponible!');
-$(".error4").show();
-$('#cantidad').addClass('errorBorder');
-$('.bar4').removeClass('bar');
-$('.ic4').addClass('l');
-$('.ic4').removeClass('labelPri');
-$('.letra4').addClass('labelE');
-$('.letra4').removeClass('label-char');
-$('#agregarInventario').prop('disabled', true);
-error_cantidad = true;
-} else {
-$(".error4").html("");
-$(".error4").hide();
-$('#cantidad').removeClass('errorBorder');
-$('.bar4').addClass('bar');
-$('.ic4').removeClass('l');
-$('.ic4').addClass('labelPri');
-$('.letra4').removeClass('labelE');
-$('.letra4').addClass('label-char');
-$('#agregarInventario').prop('disabled', false);
-}
-}).catch(error => {
-console.error('Error al obtener la cantidad disponible:', error);
-});
-}
 
 function validarCheck() {
 const checkboxes = $('input[type=checkbox]');
@@ -1603,7 +1633,7 @@ function mostrarLoQueQueda(imagen, codigo, nombre, cantidad, restar, unidad){
         data: { muestra: true, idAlimento }, 
         success(data) {
   
-          let cantidad = data.stock;
+          let cantidad = Number(data[0].stock);
           resolve(cantidad);
         },
         error(err) {
@@ -1704,7 +1734,7 @@ function mostrarLoQueQueda(imagen, codigo, nombre, cantidad, restar, unidad){
                  else{
                        valAnulacion(id);
                        $('#idM').val(id);
-                       $('.eliminarM').html('¿Deseas eliminar este menú: <b class="azul5">'+data[0].horarioComida+'</b>?');
+                       $('.eliminarM').html('¿Deseas eliminar este menú: <b class="azul5">'+data.data[0].horarioComida+'</b>?');
                     
                  }
               
@@ -1737,7 +1767,6 @@ function mostrarLoQueQueda(imagen, codigo, nombre, cantidad, restar, unidad){
                      console.log(data);
                      if (data.resultado === 'eliminado' && data.newCsrfToken ) {
                       $('[name="csrf_token"]').val(data.newCsrfToken);
-                        $('#cerrar3').click();
                          $('#cerrar3').click();
                         tablaMenu();
                           Swal.fire({

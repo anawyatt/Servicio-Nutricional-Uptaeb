@@ -17,6 +17,11 @@
   $sistem = new encryption();
   $NotificacionesServer = new NotificacionesServer();
 
+  $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Usuarios', 'registrar');
+  $permisos = $datosPermisos['permisos'];
+  $payload = $datosPermisos['payload'];
+
+
     if (isset($payload->cedula)) {
         $NotificacionesServer->setCedula($payload->cedula);
     } else {
@@ -31,10 +36,6 @@
         $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
     }
 
-    $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Usuarios', 'registrar');
-    $permisos = $datosPermisos['permisos'];
-    $payload = $datosPermisos['payload'];
-
     $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
     if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
@@ -44,7 +45,7 @@
     }
     
        if(isset($_POST['mostrarC']) && isset($_POST['cedula']) ){
-        $validarC = $object->validarCedula($_POST['cedula']);
+                $validarC = $object->validarCedula($_POST['cedula']);
         if (isset($validarC['resultado']) && $validarC['resultado'] === 'error Cedula') {
             echo json_encode($validarC);
             die();
@@ -86,7 +87,6 @@
      &&  isset($_POST['clave']) && isset($_POST['csrfToken'])){
 
        $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
-       
 
         PostRateMiddleware::verificar('registrar', (array)$payload); 
      $registrarUsuario = $object->registrarUsuario($_POST['cedula'], $_POST['nombre'], $_POST['segNombre'], $_POST['apellido'], 
@@ -111,5 +111,6 @@
   
   }
 
+ 
   ?>
   
