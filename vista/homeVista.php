@@ -87,17 +87,6 @@
               </div>
    </div>
 
-   <div class="col-lg-12" data-aos="fade-up" data-aos-delay="1000">      
-      <div class='row'>
-       <div class='col-md-3'>
-          <div class="card shadow ">
-              <div class="card-body">
-           
-               </div>
-          </div>
-        </div>
-      </div>      
-   </div>
       
      <div class="col-lg-12" data-aos="fade-up" data-aos-delay="1500">            
         <div class="card shadow ">

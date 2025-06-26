@@ -12,6 +12,7 @@ class stockAlimentosModelo extends connectDB
   private $tipoA;
   private $detalle;
   private $payload;
+  private $alimento;
 
 
 
@@ -108,6 +109,32 @@ class stockAlimentosModelo extends connectDB
 
     } catch (\Exception $e) {
       throw new \RuntimeException('Error al mostrar el stock de los alimentos: ' . $e->getMessage());
+    }
+  }
+
+  public function buscarAlimento($alimento)
+  {
+    if (empty($alimento)) {
+      return ['resultado' => 'Ingrese el nombre del alimento'];
+    } else {
+      $this->alimento = $alimento;
+      return $this->mostrarAlimentoBuscador();
+    }
+  }
+  private function mostrarAlimentoBuscador()
+  {
+    $alimentoBuscado='%'.$this->alimento.'%';
+    try {
+      $this->conectarDB();
+      $consultar = $this->conex->prepare("SELECT idAlimento, imgAlimento, nombre, marca, stock, reservado FROM alimento WHERE nombre LIKE ? AND (stock > 0 OR reservado > 0);");
+      $consultar->bindValue(1, $alimentoBuscado );
+      $consultar->execute();
+      $data = $consultar->fetchAll(\PDO::FETCH_OBJ);
+      $this->desconectarDB();
+      return $data;
+
+    } catch (\Exception $e) {
+      throw new \RuntimeException('Error al mostrar el tipo de alimento: ' . $e->getMessage());
     }
   }
 

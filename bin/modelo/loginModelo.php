@@ -101,7 +101,12 @@ class loginModelo extends connectDB
             $url = $user['idRol'] != 1 ? 'horarioComida' : 'home';
             $encryptedURL = urlencode($this->sistem->encryptURL($url));
 
-            return ['resultado' => 'success', 'url' => '?url=' . $encryptedURL];
+            return [ 
+                'resultado' => 'success', 
+                'url' => '?url=' . $encryptedURL,
+                'token' => $token  ];
+
+                
         } catch (\PDOException $e) {
             error_log("Error PDO en loginSistema: " . $e->getMessage());
             return ['resultado' => 'error', 'mensaje' => 'Error interno del sistema. Intente más tarde.'];

@@ -51,8 +51,9 @@ function exportarBD(){
               exportarBaseDatos:true
           },
           success: function (data) {
-
+             
             if(data.resultado == 'exportación BD exitosa'){
+              $('#msjEI').html(data.msj);
                Swal.fire({
                     toast: true,
                     position: 'center',
@@ -91,7 +92,9 @@ function exportarBD(){
               importarBaseDatos:true
           },
           success: function (data) {
+
             if(data.resultado == 'importación BD exitosa'){
+              $('#msjEI').html(data.msj);
                Swal.fire({
                     toast: true,
                     position: 'center',
@@ -121,3 +124,18 @@ function exportarBD(){
       });
 }
 
+mensaje();
+function mensaje(){
+  $.ajax({
+      type: "POST",
+      url: '',
+      dataType: 'json',
+      data: { mensaje: true },
+      success: function (data) {
+          console.log(data);
+          if(data.length > 0){
+              $('#msjEI').html(data[0].acciones);
+          } 
+      }
+  });
+}

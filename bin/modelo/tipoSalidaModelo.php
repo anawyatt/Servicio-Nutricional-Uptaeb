@@ -63,22 +63,18 @@ class tipoSalidaModelo extends connectDB
         }
     }
 
-    public function registrarTipoSalida($tipoS, $returnData = true)
+    public function registrarTipoSalida($tipoS)
     {
         if (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/", $tipoS)) {
             $mensaje = ['resultado' => 'Tipo de salida inválido.'];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
             return $mensaje;
         }
 
         $this->tipoS = $tipoS;
-        return $this->registrar($returnData);
+        return $this->registrar();
     }
 
-    private function registrar($returnData = true)
+    private function registrar()
     {
         try {
             $this->conectarDB();
@@ -97,18 +93,10 @@ class tipoSalidaModelo extends connectDB
 
             // Respuesta en caso de éxito
             $mensaje = ['resultado' => 'registrado'];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
             return $mensaje;
         } catch (\Exception  $e) {
             $this->conex->rollBack();
             $mensaje = ['error' => $e->getMessage()];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
             return $mensaje;
         } finally {
             $this->desconectarDB();
@@ -307,23 +295,19 @@ class tipoSalidaModelo extends connectDB
         }
     }
 
-    public function modificarTipoSalida($tipoS, $id, $returnData = true)
+    public function modificarTipoSalida($tipoS, $id)
     {
         if (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/", $tipoS) || !preg_match("/^\d+$/", $id)) {
             $mensaje = ['resultado' => 'Datos inválidos.'];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
             return $mensaje;
         }
 
         $this->tipoS = $tipoS;
         $this->id = $id;
-        return $this->modificar($returnData);
+        return $this->modificar();
     }
 
-    private function modificar($returnData = true)
+    private function modificar()
     {
         try {
             $this->conectarDB();
@@ -353,19 +337,10 @@ class tipoSalidaModelo extends connectDB
                 $this->conex->rollBack();
                 $mensaje = ['resultado' => 'No se encontró el tipo de salida o no hubo cambios'];
             }
-
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
             return $mensaje;
         } catch (\PDOException $e) {
             $this->conex->rollBack();
             $mensaje = ['error' => $e->getMessage()];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
             return $mensaje;
         } finally {
             $this->desconectarDB();
@@ -376,22 +351,19 @@ class tipoSalidaModelo extends connectDB
 
 
 
-    public function anularTipoSalida($id, $returnData = true)
+    public function anularTipoSalida($id)
     {
         if (!preg_match("/^\d+$/", $id)) {
             $mensaje = ['resultado' => 'ID inválido.'];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
+
             return $mensaje;
         }
 
         $this->id = $id;
-        return $this->anular($returnData);
+        return $this->anular();
     }
 
-    private function anular($returnData = true)
+    private function anular()
     {
         try {
             $this->conectarDB();
@@ -434,19 +406,13 @@ class tipoSalidaModelo extends connectDB
                 $mensaje = ['mensaje' => 'No se encontró el tipo de Salida'];
             }
 
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
+
             return $mensaje;
         } catch (\PDOException $e) {
             // Manejo de errores y rollback
             $this->conex->rollBack();
             $mensaje = ['error' => $e->getMessage()];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
+
             return $mensaje;
         } finally {
             $this->desconectarDB();

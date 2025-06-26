@@ -12,6 +12,12 @@
   if(isset($_POST['importarBaseDatos'])){
        $objetoB->importarBD();
   }
+
+  if(isset($_POST['mensaje'])){
+       $respuesta= $objetoB->mostrarMensaje();
+        echo json_encode($respuesta);
+        die();
+  }
   
 
 	class configuracion{
@@ -32,13 +38,19 @@
               <i class="ri-arrow-up-line icon-24"></i>
                 <span class=""> Exportar la BD </span>
                 </a>
-              </div>' : ''). (isset($this->permisos['Mantenimiento']["Importar"]) ?  
+              </div>
+              ' : ''). (isset($this->permisos['Mantenimiento']["Importar"]) ?  
               ' <div class="btn btn-border d-block" >
                <a type="button" id="importBtn">
               <i class="ri-arrow-down-line icon-24"></i>
                 <span class=""> Importar la BD </span>
                 </a>
-              </div>' : ''). '</div>' : '';
+                 
+              </div>
+              ' : ''). '</div>
+              
+               <p id=msjEI></p>
+              ' : '';
 
 	$configuracion = '
                 <a class="btn btn-fixed-end btn-info btn-icon btn-setting" data-bs-toggle="offcanvas" data-bs-target="#offcanvasExample" role="button" aria-controls="offcanvasExample">
