@@ -33,13 +33,15 @@ function mostrar(){
            method: "post",
            url: "",
            dataType: "json",
-           data: { info: "mostrarInfo", iD },
+           data: { 
+            info: "mostrarInfo",
+             iD },
            success(data) {
-               $("#nombre").val(data[0].nombre);
-               $("#apellido").val(data[0].apellido);
-               $("#correo").val(data[0].correo);
-       
-           }
+            console.log("Respuesta:", data); 
+                $("#nombre").val(data.nombre);
+                $("#apellido").val(data.apellido);
+                $("#correo").val(data.correo);
+            }
        });
 }
 
@@ -221,22 +223,17 @@ $("#nombre").focusout(function(){
  })
 
  $("#password").on("click", function(e) {
-  error_clave2 = false;
-  error_clave3 = false;
+    error_clave = false;
+    error_clave2 = false;
+    error_clave3 = false;
 
-  if (!reset_password_mode) {
-      error_clave = false;
-      chequeo_clave1(); // Solo verificar la clave actual si no está en modo de recuperación
-  }
+    chequeo_clave1();
+    chequeo_clave2(); 
+    chequeo_clave3();
 
-  chequeo_clave2(); // Verificar nueva contraseña
-  chequeo_clave3(); // Verificar repetir contraseña
-
-  if ((!reset_password_mode && !error_clave) && !error_clave2 && !error_clave3) {
-      modificarContraseña();
-  } else if (reset_password_mode && !error_clave2 && !error_clave3) {
-      modificarContraseña(); // En modo recuperación, solo chequeamos clave2 y clave3
-  } else {
+  if (error_clave == false && error_clave2 == false && error_clave3 == false ) {
+   modificarContraseña();
+  }else {
       Swal.fire({
           toast: true,
           position: 'top-end',
@@ -383,7 +380,7 @@ let error_clave3 = false;
          $('.letra5').removeClass('labelE');
          $('.letra5').addClass('label-char');
         } else {
-         $(".error5").html('<i  class="bi bi-exclamation-triangle-fill"</i>La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial permitido (*-_.,;()"@#$=).');
+         $(".error5").html('<i  class="bi bi-exclamation-triangle-fill"></i>La clave debe tener al menos 8 caracteres, incluyendo letras, caracteres especiales y números.');
          $(".error5").show();
          $('#clave2').addClass('errorBorder');
          $('.bar5').removeClass('bar');
@@ -395,31 +392,44 @@ let error_clave3 = false;
         }
       }
 
-      function chequeo_clave3()  {
-        var chequeo=/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\*\-_\.\;\,\(\)\"@#\$=])[A-Za-z\d\*\-_\.\;\,\(\)\"@#\$=]{8,}$/;
-        var nombre = $("#clave3").val();
-        if (chequeo.test(nombre) && nombre !== '') {
-         $(".error6").html("");
-         $(".error6").hide();
-         $('#clave3').removeClass('errorBorder');
-         $('.bar6').addClass('bar');
-         $('.ic6').removeClass('l');
-         $('.ic6').addClass('labelPri');
-         $('.letra6').removeClass('labelE');
-         $('.letra6').addClass('label-char');
-        } else {
-         $(".error6").html('<i  class="bi bi-exclamation-triangle-fill"</i>La contraseña debe tener al menos 8 caracteres, incluir una letra mayúscula, una letra minúscula, un número y un carácter especial permitido (*-_.,;()"@#$=).');
-         $(".error6").show();
-         $('#clave3').addClass('errorBorder');
-         $('.bar6').removeClass('bar');
-         $('.ic6').addClass('l');
-         $('.ic6').removeClass('labelPri');
-         $('.letra6').addClass('labelE');
-         $('.letra6').removeClass('label-char');
-         error_clave3 = true;
+   function chequeo_clave3() {
+    var chequeo = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[\*\-_\.\;\,\(\)\"@#\$=])[A-Za-z\d\*\-_\.\;\,\(\)\"@#\$=]{8,}$/;
+    var nuevaClave = $("#clave2").val();      
+    var confirmarClave = $("#clave3").val();  
+
+    let coincide = (nuevaClave === confirmarClave);
+    let valida = chequeo.test(confirmarClave) && confirmarClave !== '';
+
+    if (valida && coincide) {
+        $(".error6").html("");
+        $(".error6").hide();
+        $('#clave3').removeClass('errorBorder');
+        $('.bar6').addClass('bar');
+        $('.ic6').removeClass('l');
+        $('.ic6').addClass('labelPri');
+        $('.letra6').removeClass('labelE');
+        $('.letra6').addClass('label-char');
+        error_clave3 = false;
+    } else {
+        let mensaje = '<i class="bi bi-exclamation-triangle-fill"></i> ';
+        if (!valida) {
+            mensaje += 'La clave debe tener al menos 8 caracteres, incluyendo letras, caracteres especiales y números.';
+        } else if (!coincide) {
+            mensaje += 'La confirmación no coincide con la nueva clave.';
         }
-      }
-    
+
+        $(".error6").html(mensaje);
+        $(".error6").show();
+        $('#clave3').addClass('errorBorder');
+        $('.bar6').removeClass('bar');
+        $('.ic6').addClass('l');
+        $('.ic6').removeClass('labelPri');
+        $('.letra6').addClass('labelE');
+        $('.letra6').removeClass('label-char');
+        error_clave3 = true;
+    }
+}
+
 
        function primary2(){
          $(".error4, .error5, .error6").html("");
@@ -464,55 +474,59 @@ let error_clave3 = false;
     });
 
 
-       function modificarUsuario(){
+       function modificarUsuario() {
+            let nombre = cambiarFormato($("#nombre").val());
+            let apellido = cambiarFormato($("#apellido").val());
+            let correo = cambiarFormato($("#correo").val());
 
-                let nombre = cambiarFormato($("#nombre").val());
-                let apellido = cambiarFormato($("#apellido").val());
-                let correo = cambiarFormato($("#correo").val());
-            
-                $.ajax({
-                    type: "post",
-                    url: "", 
-                    dataType: "json",
-                    data: {
-                        nombre: nombre,
-                        apellido: apellido,
-                        correo: correo,
-                        },
-                        success(data){
-                            if (data.resultado == 'success' && data.url) {
-                
-          
-                            Swal.fire({
-                                toast: true,
-                                position: 'top-end',
-                                icon:'success',
-                                title:'Modificación exitosa!',
-                                showConfirmButton:false,
-                                timer:2000,
-                                timerProgressBar:true,
-              
-                            })
-                             setTimeout(function () {
-                                 location = data.url;
-                             }, 2000);
-                         
-                          }
-                            }
-                 
-                         })
-             }
+            $.ajax({
+                type: "post",
+                url: "", 
+                dataType: "json",
+                data: {
+                    nombre: nombre,
+                    apellido: apellido,
+                    correo: correo,
+                },
+                success(data) {
+                    if (data.resultado === 'success' && data.url) {
+                        Swal.fire({
+                            toast: true,
+                            position: 'top-end',
+                            icon: 'success',
+                            title: 'Modificación exitosa!',
+                            showConfirmButton: false,
+                            timer: 2000,
+                            timerProgressBar: true,
+                        });
+                        setTimeout(function () {
+                            window.location.href = data.url; 
+                        }, 2000);
+                    } else {
+                        Swal.fire({
+                            icon: 'error',
+                            title: 'Error',
+                            text: data.mensaje || 'Ocurrió un error inesperado',
+                        });
+                    }
+                },
+                error(xhr, status, error) {
+                    Swal.fire({
+                        icon: 'error',
+                        title: 'Error en la petición',
+                        text: error || 'No se pudo conectar con el servidor',
+                    });
+                    console.error(xhr.responseText);
+                }
+            });
+        }
+
 
 
              function modificarContraseña() {
-              let clave = $("#clave1").val(); // Contraseña antigua
-              let nuevaClave = $("#clave2").val(); // Nueva contraseña
-              let repetirClave = $("#clave3").val(); // Repetir nueva contraseña
-          
-              // Si el modo de recuperación de contraseña está activo, no pedir la antigua contraseña
-              if (typeof reset_password_mode !== 'undefined' && reset_password_mode === true) {
-                  clave = null; // No se enviará la contraseña actual en modo de recuperación
-              }
+              let clave = $("#clave1").val(); 
+              let nuevaClave = $("#clave2").val(); 
+              let repetirClave = $("#clave3").val(); 
           
               $.ajax({
                   type: "post",
@@ -570,14 +584,7 @@ let error_clave3 = false;
                           });
                            $('.limpiar3').click()
           
-                          // Si está en modo recuperación, cerrar la sesión y redirigir al login
-                          if (typeof reset_password_mode !== 'undefined' && reset_password_mode === true) {
-                              setTimeout(function() {
-                                   location = data.url; // Redirigir al login
-                              }, 2000); // Espera de 2 segundos antes de la redirección
-                          } else {
-                              $('.limpiar3').click(); // Limpiar los campos si no está en modo recuperación
-                          }
+                        
                       }
                   }
               });
@@ -586,74 +593,195 @@ let error_clave3 = false;
 
  // ------------------------------ IMAGEN -------------------------------
 
+ $("#eliminarIMG").on("click", function () {
+    borrarIMG();
+});
 
-      $("#eliminarIMG").on("click", function(){
-        borrarIMG();
-     })
+function borrarIMG() {
+    $.ajax({
+        type: "post",
+        url: "", 
+        dataType: "json",
+        data: { borrar: true },
+        success(data) {
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: data.resultado === 'success' ? 'success' : 'error',
+                title: data.mensaje,
+                showConfirmButton: false,
+                timer: 1000,
+                timerProgressBar: true
+            });
 
-     function borrarIMG(){
+            if (data.resultado === 'success') {
+                const nuevaImg = data.img || "assets/images/perfil/user.png";
+                $("#imgPerfil").attr("src", nuevaImg + "?v=" + new Date().getTime());
 
-      $.ajax({
-          type: "post",
-          url: "", 
-          dataType: "json",
-          data: {
-              borrar : true
-              },
-              success(data){
-                  Swal.fire({
-                      toast: true,
-                      position: 'top-end',
-                      icon:'success',
-                      title:'Imagen eliminada Exitosamente!',
-                      showConfirmButton:false,
-                      timer:1000,
-                      timerProgressBar:true,
-    
-                  })
-                   setTimeout(function () {
-                    location.reload(true);
-                   }, 1000);
-               
+                if (nuevaImg.includes("user.png")) {
+                    $("#eliminarIMG").hide();
                 }
-       
-               })
+
+                setTimeout(() => {
+                location.reload();
+            }, 1600);
+            }
+        }
+    });
+}
+
+const fileInput0 = document.getElementById('imagen');  
+const container0 = document.getElementById('container0'); 
+const defaultImage = document.createElement('img'); 
+defaultImage.src = "assets/images/perfil/user.png";  
+let error_imagen = false;  
+
+function validarPesoImagen0(input) {
+    if (input.files && input.files[0]) {
+        const imagen = input.files[0];
+        const pesoMb = imagen.size / 1024 / 1024; // tamaño en MB
+
+        if (pesoMb > 2) {
+            container0.innerHTML = '';
+            container0.appendChild(defaultImage);
+            $(".error0").html('<i class="bi bi-exclamation-triangle-fill"></i> La imagen excede el peso máximo de 2MB!');
+            $(".error0").show();
+            $('#imagen').addClass('errorBorder');
+            error_imagen = true;
+            input.value = "";
+            return false;
+        } else {
+            $(".error0").html("");
+            $(".error0").hide();
+            $('#imagen').removeClass('errorBorder');
+            error_imagen = false;
+            return true;
+        }
+    }
+    return false;
+}
+
+function validarExtension(file) {
+    const extensionesPermitidas = ['jpg', 'jpeg', 'png', 'gif'];
+    const nombreArchivo = file.name.toLowerCase();
+    const extension = nombreArchivo.split('.').pop();
+    return extensionesPermitidas.includes(extension);
+}
+
+function validarContenidoImagen(file) {
+    return new Promise((resolve) => {
+        const img = new Image();
+        img.onload = () => resolve(true);   // cargó bien => es imagen válida
+        img.onerror = () => resolve(false); // error => no es imagen válida
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            img.src = e.target.result;
+        };
+        reader.readAsDataURL(file);
+    });
+}
+
+
+async function chequeoImagen() {
+    if (fileInput0.files.length > 0) {
+        if (!validarPesoImagen0(fileInput0)) return;
+
+        const file = fileInput0.files[0];
+
+        if (!validarExtension(file)) {
+            container0.innerHTML = '';
+            container0.appendChild(defaultImage);
+            $(".error0").html('<i class="bi bi-exclamation-triangle-fill"></i> Solo formatos de imagen permitidos (JPG, PNG, GIF)');
+            $(".error0").show();
+            $('#imagen').addClass('errorBorder');
+            error_imagen = true;
+            fileInput0.value = "";
+            return;
+        }
+
+        const esImagenValida = await validarContenidoImagen(file);
+        if (!esImagenValida) {
+            container0.innerHTML = '';
+            container0.appendChild(defaultImage);
+            $(".error0").html('<i class="bi bi-exclamation-triangle-fill"></i> El archivo no es una imagen válida');
+            $(".error0").show();
+            $('#imagen').addClass('errorBorder');
+            error_imagen = true;
+            fileInput0.value = "";
+            return;
+        }
+
+        // Si todo ok, mostrar imagen
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            container0.innerHTML = '';
+            const image = document.createElement('img');
+            image.src = e.target.result;
+            image.classList.add('rounded-circle', 'mb-2');
+            image.width = 250;
+            image.height = 250;
+            container0.appendChild(image);
+            $(".error0").html("");
+            $(".error0  ").hide();
+            $('#imagen').removeClass('errorBorder');
+            error_imagen = false;
+        };
+        reader.readAsDataURL(file);
+    }
+}
+
+$("#imagen").on("change", function () {
+    chequeoImagen();
+});
+
+$("#editarIMG").click((e) => {
+    if (error_imagen) {
+        Swal.fire({
+            icon: 'error',
+            title: 'Imagen inválida',
+            text: 'Por favor selecciona una imagen válida y con tamaño menor a 2MB.'
+        });
+        return;
+    }
+
+    const datos = new FormData();
+    datos.append("accion", "imagenPerfil");
+    if ($("#imagen")[0].files[0]) {
+        datos.append("imagen", $("#imagen")[0].files[0]);
+    }
+    editarIMg(datos);
+});
+
+
+function editarIMg(datos) {
+    $.ajax({
+        url: "",
+        type: "POST",
+        contentType: false,
+        data: datos,
+        processData: false,
+        cache: false,
+        success: function(response) {
+            const res = JSON.parse(response);
+
+            Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: res.resultado === 'success' ? 'success' : 'error',
+                title: res.mensaje,
+                showConfirmButton: false,
+                timer: 1500,
+                timerProgressBar: true,
+            });
+
+            if (res.resultado === 'success' && res.img) {
+                $("#imgPerfil").attr("src", res.img + "?v=" + new Date().getTime());
             }
 
-
-      $("#editarIMG").click((e) => {
-        var datos = new FormData();
-        datos.append("accion", "imagenPerfil");
-        if ($("#imagen")[0].files[0] != null) {
-        datos.append("imagen", $("#imagen")[0].files[0]);
+            setTimeout(() => {
+                location.reload();
+            }, 1600);
         }
-          editarIMg(datos);
-        }); 
-
-      
-        function editarIMg(datos) {
-          $.ajax({
-          url: "",
-          type: "POST",
-          contentType: false,
-          data: datos,
-          processData: false,
-          cache: false,
-          success: function(response) {
-          var res = JSON.parse(response);
-                 Swal.fire({
-                      toast: true,
-                      position: 'top-end',
-                      icon:'success',
-                      title:'Imagen Editada Exitosamente!',
-                      showConfirmButton:false,
-                      timer:1500,
-                      timerProgressBar:true,
-                  })
-                  
-                   setTimeout(function () {
-                    location.reload(true);
-                   }, 1500);
-}
-});
+    });
 }
