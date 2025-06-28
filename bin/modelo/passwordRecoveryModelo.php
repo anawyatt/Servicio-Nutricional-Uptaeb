@@ -30,6 +30,7 @@ class passwordRecoveryModelo extends connectDB
 
         public function recuperContraseñas($correo) {
             $this->correo = trim($correo);
+            $this->correo = ucfirst(strtolower($this->correo));
 
             if (!preg_match("/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/", $this->correo)) {
                 return ['resultado' => 'error', 'mensaje' => 'Correo inválido'];
