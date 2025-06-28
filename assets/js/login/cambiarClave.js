@@ -108,7 +108,6 @@ function validarConfirmacion() {
 $("#formnuevaClave").on("submit", function (e) {
     e.preventDefault();
      console.log("Formulario enviado, JS funciona!");
-     alert("Formulario capturado por JS");
 
     validarCodigo();
     validarClave();
