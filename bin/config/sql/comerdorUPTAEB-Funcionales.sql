@@ -103,6 +103,9 @@
             tipoSalida VARCHAR(50) NOT NULL,
             status TINYINT(1) NOT NULL
         ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+        
+        INSERT INTO `tipoSalidas` (`tipoSalida`, `status`) VALUES
+        ('Menú', 1);
 
 
         -- Tabla salidaAlimentos
@@ -410,6 +413,164 @@
 
                             END $$
                             DELIMITER ;
+
+                                 --Menu
+                         DELIMITER $$
+
+                        -- Verificar si un tipo de alimento existe y tiene stock
+                        CREATE PROCEDURE verificar_existencia_tipo_alimento (
+                            IN tipoA INT
+                        )
+                        BEGIN
+                            SELECT idTipoA
+                            FROM tipoalimento
+                            WHERE idTipoA = tipoA
+                            AND idTipoA IN (
+                                SELECT idTipoA
+                                FROM alimento
+                                WHERE status = 1 AND stock > 0
+                            );
+                        END $$
+
+                        -- Verificar si un alimento está disponible
+                        CREATE PROCEDURE proceVerificarAlimentoDisponible (
+                            IN p_idAlimento INT
+                        )
+                        BEGIN
+                            SELECT idAlimento
+                            FROM alimento
+                            WHERE status = 1
+                            AND idAlimento = p_idAlimento
+                            AND stock > 0;
+                        END $$
+
+                        -- Mostrar alimentos por tipo que estén disponibles en stock
+                        CREATE PROCEDURE proceMostrarAlimentosPorTipo (
+                            IN tipoA INT
+                        )
+                        BEGIN
+                            SELECT DISTINCT 
+                                a.idAlimento, 
+                                a.codigo, 
+                                a.imgAlimento,
+                                a.nombre, 
+                                a.unidadMedida, 
+                                a.marca, 
+                                a.stock 
+                            FROM tipoalimento ta 
+                            INNER JOIN alimento a ON ta.idTipoA = a.idTipoA 
+                            WHERE a.idTipoA = tipoA 
+                            AND a.stock > 0 
+                            AND a.idAlimento IN (
+                                SELECT idAlimento FROM detalleentradaa WHERE status = 1
+                            );
+                        END $$
+
+                        DELIMITER ;
+
+                                                -- Tipos de alimentos con stock positivo
+                        CREATE VIEW vistaTiposAlimentosConStock AS 
+                        SELECT DISTINCT ta.idTipoA, ta.tipo
+                        FROM tipoalimento ta 
+                        INNER JOIN alimento a ON ta.idTipoA = a.idTipoA 
+                        WHERE a.idAlimento IN (
+                            SELECT idAlimento 
+                            FROM detalleentradaa 
+                            WHERE status = 1 AND stock > 0
+                        );
+
+                        -- Tipos de alimentos usados en menús
+                        CREATE VIEW vista_tipo_alimentos_por_menu AS
+                        SELECT 
+                            ta.idTipoA, 
+                            ta.tipo, 
+                            m.idMenu, 
+                            m.feMenu, 
+                            m.horarioComida
+                        FROM detallesalidamenu dsm
+                        INNER JOIN alimento a ON a.idAlimento = dsm.idAlimento
+                        INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA
+                        INNER JOIN menu m ON m.idMenu = dsm.idMenu
+                        GROUP BY ta.idTipoA, ta.tipo, m.idMenu, m.feMenu, m.horarioComida;
+
+                        -- Detalle de alimentos por menú
+                       CREATE VIEW vista_detalle_alimentos_por_menu AS
+                        SELECT 
+                            a.idAlimento, 
+                            a.imgAlimento, 
+                            a.nombre, 
+                            a.marca, 
+                            a.unidadMedida, 
+                            dsm.cantidad, 
+                            ta.idTipoA, 
+                            ta.tipo, 
+                            m.idMenu, 
+                            m.feMenu, 
+                            m.horarioComida, 
+                            m.cantPlatos, 
+                            sa.descripcion, 
+                            sa.idSalidaA
+                        FROM salidaalimentos sa
+                        INNER JOIN detallesalidamenu dsm ON dsm.idSalidaA = sa.idSalidaA
+                        INNER JOIN alimento a ON a.idAlimento = dsm.idAlimento
+                        INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA
+                        INNER JOIN menu m ON m.idMenu = dsm.idMenu
+                        WHERE m.status = 1 AND sa.status = 1;
+
+
+                        -- Tipos de alimentos por evento
+                     CREATE VIEW vista_tipo_alimento_evento AS 
+                            SELECT DISTINCT 
+                                ta.idTipoA, 
+                                ta.tipo, 
+                                e.nomEvent, 
+                                e.idEvento,
+                                e.idMenu, 
+                                m.feMenu, 
+                                m.horarioComida
+                        FROM evento e 
+                        INNER JOIN menu m ON m.idMenu = e.idMenu AND m.status = 1
+                        LEFT JOIN detallesalidamenu dsm ON dsm.idMenu = m.idMenu AND dsm.status = 1
+                        LEFT JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA AND sa.status = 1
+                        LEFT JOIN alimento a ON a.idAlimento = dsm.idAlimento AND a.status = 1
+                        LEFT JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA AND ta.status = 1
+                        WHERE e.status = 1;
+
+
+                        -- Detalle de alimentos por evento
+                       CREATE VIEW vista_detalle_alimentos_evento AS
+                        SELECT
+                            a.idAlimento,
+                            a.imgAlimento,
+                            a.nombre,
+                            a.marca,
+                            a.unidadMedida,
+                            dsm.cantidad,
+                            ta.idTipoA,
+                            ta.tipo,
+                            m.idMenu,
+                            m.feMenu,
+                            m.horarioComida,
+                            m.cantPlatos,
+                            sa.descripcion, 
+                            sa.idSalidaA,
+                            e.idEvento,
+                            e.nomEvent,
+                            e.descripEvent,
+                            e.idMenu AS idMenuEvento
+                        FROM evento e
+                        INNER JOIN menu m ON e.idMenu = m.idMenu AND m.status = 1
+                        INNER JOIN detallesalidamenu dsm ON dsm.idMenu = m.idMenu AND dsm.status = 1
+                        INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA AND sa.status = 1
+                        INNER JOIN alimento a ON a.idAlimento = dsm.idAlimento AND a.status = 1
+                        INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA AND ta.status = 1
+                        WHERE e.status = 1;
+
+
+                       CREATE INDEX idx_menufecha_horario ON menu (feMenu, horarioComida, status);
+                       CREATE INDEX idx_evento_idMenu ON evento (idMenu);
+                       CREATE INDEX idx_detalleentradaa_idAli ON detalleentradaa (idAlimento);
+                       CREATE INDEX idx_alimento_idTipoA ON alimento (idTipoA);
 
 
 

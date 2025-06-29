@@ -17,6 +17,11 @@
     $sistem = new encryption();
     $NotificacionesServer = new NotificacionesServer();
 
+    $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Eventos', 'registrar');
+    $permisos = $datosPermisos['permisos'];
+    $payload = $datosPermisos['payload'];
+
+
     if (isset($payload->cedula)) {
         $NotificacionesServer->setCedula($payload->cedula);
     } else {
@@ -31,10 +36,7 @@
         $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
     }
 
-    $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Eventos', 'registrar');
-    $permisos = $datosPermisos['permisos'];
-    $payload = $datosPermisos['payload'];
-
+ 
     $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
     if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
@@ -96,13 +98,21 @@
 
       $registrarE= $object->registrarEvento( $_POST['feMenu'], $_POST['horarioComida'] , $_POST['cantPlatos'], $_POST['nomEvent'], $_POST['descripEvent'], $_POST['descripcion']); 
       if (!isset($registrarE['resultado']) || $registrarE['resultado'] !== 'registrado') {
-              echo json_encode(['resultado' => 'error', 'mensaje' => $registrarE, 'newCsrfToken' => $csrf['newToken']]);
+              echo json_encode([
+                'resultado' => 'error', 
+                'mensaje' => $registrarE, 
+                'newCsrfToken' => $csrf['newToken']]);
               die();
           }
-
-          echo json_encode(['resultado' => 'registrado', 'mensaje' => $registrarE, 'newCsrfToken' => $csrf['newToken']]);
+          echo json_encode([
+              'resultado' => 'exitoso',
+              'eventId' => $registrarE['eventId'],
+              'menuId' => $registrarE['menuId'],
+              'salidaId' => $registrarE['salidaId'],
+              'newCsrfToken' => $csrf['newToken']
+          ]);
           die();
-        }
+      }
       
   
     if(isset($_POST['alimento'])  && isset($_POST['cantidad']) && isset($_POST['menuId'])  && isset($_POST['salidaId']) ){

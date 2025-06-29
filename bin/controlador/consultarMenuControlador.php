@@ -17,6 +17,11 @@
     $sistem = new encryption();
     $NotificacionesServer = new NotificacionesServer();
 
+    $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Menú', 'consultar');
+    $permisos = $datosPermisos['permisos'];
+    $payload = $datosPermisos['payload'];
+
+
     if (isset($payload->cedula)) {
         $NotificacionesServer->setCedula($payload->cedula);
     } else {
@@ -31,10 +36,7 @@
         $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
     }
 
-    $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Menú', 'consultar');
-    $permisos = $datosPermisos['permisos'];
-    $payload = $datosPermisos['payload'];
-
+  
      $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
     if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
@@ -50,20 +52,19 @@
     }
 
       //---------------- MOSTRAR INFO ----------------
+    if(isset($_POST['infoMenu']) && isset($_POST['id']) && isset($datosPermisos['permiso']['consultar'])){
+      $verificarExistencia = $object->verificarExistencia($_POST['id']);
 
-        if(isset($_POST['infoMenu']) && isset($_POST['id']) && isset($datosPermisos['permiso']['consultar'])){
-       $verificarExistencia= $object->verificarExistencia( $_POST['id']);
-
-         if (isset($verificarExistencia['resultado']) && $verificarExistencia['resultado'] === 'si existe') {
-            $mostrarMenu = $object->menu($_POST['id']);
-            echo json_encode($mostrarMenu);
-            die();
+      if (isset($verificarExistencia['resultado']) && $verificarExistencia['resultado'] === 'si existe') {
+        $mostrarMenu = $object->menu($_POST['id']);
+        echo json_encode([ 'resultado' => 'success', 'data' => $mostrarMenu]);
+        die();
         } else {
-            echo json_encode($verificarExistencia); 
-            die();
+          echo json_encode(['resultado' => 'error', 'mensaje' => 'El menú ya no existe']);
+        die();
         }
     }
-    
+
 
         if(isset($_POST['infoAlimento']) && isset($_POST['idTipoA']) && isset($_POST['idMenu'])
         && isset($datosPermisos['permiso']['consultar'])){

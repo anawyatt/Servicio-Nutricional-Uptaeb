@@ -9,7 +9,7 @@
             idRol INT AUTO_INCREMENT PRIMARY KEY,
             nombreRol VARCHAR(1000) CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci NOT NULL,
             status tinyint(1) NOT NULL
-        )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+        )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci; 
 
         INSERT INTO `rol` (`idRol`, `nombreRol`, `status`) VALUES
         (1, 'Super Usuario', 1);
@@ -129,7 +129,7 @@
         )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 
         INSERT INTO `usuario` (`cedula`, `img`, `nombre`, `segNombre`, `apellido`, `segApellido`, `correo`, `telefono`, `clave`, `idRol`, `status`) VALUES
-        (12345678, 'assets/images/perfil/user.png', 'Servicio', 'Andres', 'Nutricional ', 'Eloy', 'servicionutricional2024@gmail.com', '0424 - 0000099', '$2y$10$M.vMxIOMqGZGDDW6RLoOOOkmDC5AIDzAkM0J2WeNtlGeV6OwcHYL.', 1, 1);
+        (12345678, 'assets/images/perfil/user.png', 'Servicio', 'Andres', 'Nutricional ', 'Eloy', 'ydjYy701fmCFBES2ecJ1SZm0WBfzpLfIVL0IAnlf52VBbvcNHQ/Ey1csGeE6ASwN', '0424 - 0000099', '$2y$10$M.vMxIOMqGZGDDW6RLoOOOkmDC5AIDzAkM0J2WeNtlGeV6OwcHYL.', 1, 1);
 
         CREATE TABLE bitacora(
             idBitacora INT AUTO_INCREMENT PRIMARY KEY,
@@ -308,6 +308,78 @@ DELIMITER ;
 
         DELIMITER ;
 
+
+          -- Índices en la tabla usuario
+        CREATE INDEX idx_usuario_correo ON usuario(correo);
+        CREATE INDEX idx_usuario_telefono ON usuario(telefono);
+        CREATE INDEX idx_usuario_status ON usuario(status);
+
+
+        -- Índice en la tabla rol
+        CREATE INDEX idx_rol_idRol ON rol(idRol);
+
+          DELIMITER //
+
+        CREATE PROCEDURE proceRegistrarUsuario (
+            IN p_cedula INT,
+            IN p_img VARCHAR(255),
+            IN p_nombre VARCHAR(100),
+            IN p_segNombre VARCHAR(100),
+            IN p_apellido VARCHAR(100),
+            IN p_segApellido VARCHAR(100),
+            IN p_correo VARCHAR(500),
+            IN p_telefono VARCHAR(200),
+            IN p_clave VARCHAR(255),
+            IN p_idRol INT
+        )
+        BEGIN
+            DECLARE existe INT;
+
+            SELECT COUNT(*) INTO existe FROM usuario WHERE cedula = p_cedula AND status = 0;
+
+            IF existe > 0 THEN
+                UPDATE usuario 
+                SET img = p_img, 
+                    nombre = p_nombre, 
+                    segNombre = p_segNombre, 
+                    apellido = p_apellido,
+                    segApellido = p_segApellido, 
+                    correo = p_correo, 
+                    telefono = p_telefono, 
+                    clave = p_clave, 
+                    idRol = p_idRol,
+                    status = 1 
+                WHERE cedula = p_cedula AND status = 0;
+            ELSE
+                INSERT INTO usuario (
+                    cedula, img, nombre, segNombre, apellido, segApellido,
+                    correo, telefono, clave, idRol, status
+                )
+                VALUES (
+                    p_cedula, p_img, p_nombre, p_segNombre, p_apellido,
+                    p_segApellido, p_correo, p_telefono, p_clave, p_idRol, 1
+                );
+            END IF;
+        END //
+
+        DELIMITER ;
+
+        CREATE VIEW vista_usuarios_info AS 
+            SELECT  
+                u.cedula, 
+                u.img, 
+                u.nombre, 
+                u.segNombre, 
+                u.apellido, 
+                u.segApellido, 
+                u.correo, 
+                u.telefono, 
+                u.status, 
+                r.idRol, 
+                r.nombreRol
+            FROM usuario u 
+            INNER JOIN rol r ON u.idRol = r.idRol 
+            WHERE r.idRol != 1 AND u.status != 0;
 
 
         COMMIT;

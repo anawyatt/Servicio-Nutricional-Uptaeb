@@ -30,25 +30,31 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-if (!isset($_POST['datos'])) {
+if (!isset($_POST['consultarStockTotal'])) {
     http_response_code(400);
     echo json_encode(['resultado' => 'error', 'mensaje' => 'Faltan datos cifrados']);
     exit;
 }
 else{
-try {
-    $data = decryptionAsyncHelpers::decryptPayload($_POST['datos']);
+    try{
 
-    if (!isset($data['mostrarAlimentos']) || !isset($data['alimento'])) {
+    $data = decryptionAsyncHelpers::decryptPayload($_POST['consultarStockTotal']);
+
+    if (!isset($data['mostrarAlimentosTotal']) ) {
         http_response_code(400);
-        echo json_encode(['resultado' => 'error', 'mensaje' => 'Parámetros requeridos faltantes']);
+        echo json_encode(['resultado' => 'error', 'mensaje' => 'Parámetros requeridos faltantes para el reporte']);
         exit;
     }
-    $resultado = $objeto->buscarAlimento($data['alimento']);
-
+    $tipoA='Seleccionar';
+    $resultado = $objeto->mostrarAlimentos($tipoA);
     echo json_encode($resultado);
-} catch (Exception $e) {
-    http_response_code(400);
-    echo json_encode(['resultado' => 'error', 'mensaje' => $e->getMessage()]);
+
+
+    }catch(Exception $e) {
+        http_response_code(400);
+        echo json_encode(['resultado' => 'error', 'mensaje' => $e->getMessage()]);
+    }
 }
-}
+
+
+

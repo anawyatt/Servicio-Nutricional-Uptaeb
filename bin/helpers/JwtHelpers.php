@@ -4,6 +4,8 @@ namespace helpers;
 
 use Firebase\JWT\JWT;
 use Firebase\JWT\Key;
+use Firebase\JWT\ExpiredException;
+
 
 class JwtHelpers
 {
@@ -19,19 +21,25 @@ class JwtHelpers
         return self::$key;
     }
 
+
+
     public static function generarToken(array $payload)
-    {
-        $time = time();
+{
+    $time = time();
 
-        // Añadir claims estándar
-        $tokenPayload = array_merge($payload, [
-            'iat' => $time,
-            'exp' => $time + self::$expTiempo,
-            'jti' => uniqid('jti_'),
-        ]);
-
-        return JWT::encode($tokenPayload, self::getKey(), self::$algo);
+    if (!isset($payload['iat'])) {
+        $payload['iat'] = $time;
     }
+
+    if (!isset($payload['exp'])) {
+        $payload['exp'] = $time + self::$expTiempo;
+    }
+
+    $payload['jti'] = uniqid('jti_');
+
+    return JWT::encode($payload, self::getKey(), self::$algo);
+}
+
 
     public static function validarToken(string $token)
     {
@@ -42,4 +50,18 @@ class JwtHelpers
             return null;
         }
     }
+
+    public static function verificarTokenPersonalizado($token){
+        try {
+            $decoded = JWT::decode($token, new Key(self::getKey(), self::$algo));
+            return (array)$decoded;
+        }catch (\Exception $e) {
+           error_log("Error al verificar token personalizado: " . $e->getMessage());
+           return false;
+        }
+
+    }
+
+
+
 }

@@ -187,65 +187,63 @@ class eventoModelo extends connectDB {
                 }
           }
 
-      
+          public function registrarEvento($feMenu, $horarioComida, $cantPlatos, $nomEvent, $descripEvent, $descripcion) {
+            if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
+                return ['Ingresar Fecha del Menú en formato YYYY-MM-DD'];
+            }
+        
+            if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $horarioComida)) {
+                return ['Seleccionar Horario del Menú'];
+            }
+        
+            if (!preg_match("/^[0-9]{1,}$/", $cantPlatos)) {
+                return  ['Ingresar cantidad de Platos'];
+            }
+        
+            if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $nomEvent)) {
+                return  ['Ingresar Nombre del evento'];
+            }
+        
+            if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripEvent)) {
+                return  ['Ingresar Descripción del evento'];
+            }
+        
+            if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripcion)) {
+              return  ['Ingresar Descripción del Menú'];
+            }
 
-        public function registrarEvento($feMenu, $horarioComida, $cantPlatos, $nomEvent, $descripEvent, $descripcion) {
-          if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
-              return ['Ingresar Fecha del Menú en formato YYYY-MM-DD'];
+        
+            $this->feMenu = $feMenu;
+            $this->horarioComida = $horarioComida;
+            $this->cantPlatos = $cantPlatos;
+            $this->nomEvent = $nomEvent;
+            $this->descripEvent = $descripEvent;
+            $this->descripcion = $descripcion;
+        
+            return $this->evento();
           }
-      
-          if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $horarioComida)) {
-              return ['Seleccionar Horario del Menú'];
-          }
-      
-          if (!preg_match("/^[0-9]{1,}$/", $cantPlatos)) {
-              return  ['Ingresar cantidad de Platos'];
-          }
-      
-          if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $nomEvent)) {
-              return  ['Ingresar Nombre del evento'];
-          }
-      
-          if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripEvent)) {
-              return  ['Ingresar Descripción del evento'];
-          }
-      
-          if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripcion)) {
-             return  ['Ingresar Descripción del Menú'];
-          }
-
-      
-          $this->feMenu = $feMenu;
-          $this->horarioComida = $horarioComida;
-          $this->cantPlatos = $cantPlatos;
-          $this->nomEvent = $nomEvent;
-          $this->descripEvent = $descripEvent;
-          $this->descripcion = $descripcion;
-      
-          return $this->evento();
-      }
 
        private function evento(){
         
         try{
           $this->conectarDB();
 
-        $this->conex->beginTransaction();
+          $this->conex->beginTransaction();
 
-        $idTipoSalidas = $this->tipoSalida();
-        $menuId = $this->infoMenu();
-        $eventId = $this->infoEvento($menuId);
-        $salidaId = $this->salidaAlimentos($idTipoSalidas);
+          $idTipoSalidas = $this->tipoSalida();
+          $menuId = $this->infoMenu();
+          $eventId = $this->infoEvento($menuId);
+          $salidaId = $this->salidaAlimentos($idTipoSalidas);
 
-        $bitacora = new bitacoraModelo;
-        $bitacora->registrarBitacora('Eventos', 'Se registró un evento para el dia: '.$this->feMenu.' n° comensales: '.$this->cantPlatos, $this->payload->cedula);
-       
-        $this->conex->commit();
-
-        $this->notificaciones($this->horarioComida, $this->descripcion, $this->cantPlatos, $this->feMenu,  $this->nomEvent, $this->descripEvent);
-        $this->notificaciones2($this->horarioComida, $this->descripcion, $this->cantPlatos, $this->feMenu,  $this->nomEvent, $this->descripEvent);
+          $bitacora = new bitacoraModelo;
+          $bitacora->registrarBitacora('Eventos', 'Se registró un evento para el dia: '.$this->feMenu.' n° comensales: '.$this->cantPlatos, $this->payload->cedula);
         
-        return ['resultado' => 'registrado', 'eventId' => $eventId, 'menuId' => $menuId, 'salidaId' => $salidaId];
+          $this->conex->commit();
+
+          $this->notificaciones($this->horarioComida, $this->descripcion, $this->cantPlatos, $this->feMenu,  $this->nomEvent, $this->descripEvent);
+          $this->notificaciones2($this->horarioComida, $this->descripcion, $this->cantPlatos, $this->feMenu,  $this->nomEvent, $this->descripEvent);
+          
+          return ['resultado' => 'registrado', 'eventId' => $eventId, 'menuId' => $menuId, 'salidaId' => $salidaId];
 
            } catch (Exception $error) {
                 $this->conex->rollBack();
@@ -316,44 +314,49 @@ class eventoModelo extends connectDB {
         $this->salidaId = $salidaId;
     
         return $this->registrarDetalle();
-    }
+      }
        
     
       private function registrarDetalle() {
-      try {
-        $this->conectarDB();
-          $this->conex->beginTransaction();
+        try {
+              $this->conectarDB();
+              $this->conex->beginTransaction();
 
-          $this->detalleSalidaMenu();
-          list($nombreAlimento, $unidadMedida) = $this->obtenerDatosAlimento();        
-          $this->actualizarStock($this->alimento, $this->cantidad);
-          $this->actualizarReservado($this->alimento, $this->cantidad);
-   
-          $bitacora = new bitacoraModelo;
-          $bitacora->registrarBitacora('Menú', 'Se despachó el alimento '.$nombreAlimento.' cantidad: '.$this->cantidad.' '.$unidadMedida, $this->payload->cedula);
 
-          $this->conex->commit();
+              $this->detalleSalidaMenu();
+              
+                list($nombreAlimento, $unidadMedida) = $this->obtenerDatosAlimento();        
+                $resultado = $this->actualizarStockYReservado($this->alimento, $this->cantidad);
+                if (isset($resultado['error'])) 
+                return $resultado;
 
-          return ['resultado' => 'exitoso'];
+    
+              $bitacora = new bitacoraModelo;
+              $bitacora->registrarBitacora('Evento', 'Se despachó el alimento '.$nombreAlimento.' cantidad: '.$this->cantidad.' '.$unidadMedida, $this->payload->cedula);
 
-            } catch (Exception $error) {
-                  $this->conex->rollBack();
-                  return ['error' => $error->getMessage()]; 
-          }
-          finally {
-          $this->desconectarDB();
+            $this->conex->commit();
+
+            return ['resultado' => 'exitoso'];
+
+              } catch (Exception $error) {
+                    $this->conex->rollBack();
+                    return ['error' => $error->getMessage()]; 
+            }
+            finally {
+            $this->desconectarDB();
+        }
       }
-      }
+
 
       private function detalleSalidaMenu() {
-        $new = $this->conex->prepare("INSERT INTO detallesalidamenu(idDetalleSalidaMenu, cantidad, idMenu, idAlimento, idSalidaA, status) 
-        VALUES (DEFAULT, ?, ?, ?, ?, 1)");
-        
-        $new->bindValue(1, $this->cantidad);
-        $new->bindValue(2, $this->menuId);
-        $new->bindValue(3, $this->alimento);
-        $new->bindValue(4, $this->salidaId);
-        $new->execute();
+          $new = $this->conex->prepare("INSERT INTO detallesalidamenu(idDetalleSalidaMenu, cantidad, idMenu, idAlimento, idSalidaA, status) 
+          VALUES (DEFAULT, ?, ?, ?, ?, 1)");
+          
+          $new->bindValue(1, $this->cantidad);
+          $new->bindValue(2, $this->menuId);
+          $new->bindValue(3, $this->alimento);
+          $new->bindValue(4, $this->salidaId);
+          $new->execute();
       }    
 
       private function obtenerDatosAlimento() {
@@ -362,64 +365,41 @@ class eventoModelo extends connectDB {
         $infoAlimento->execute();
         $alimento = $infoAlimento->fetch(PDO::FETCH_ASSOC);
         return [$alimento['nombre'], $alimento['unidadMedida']];
-          }
-          private function actualizarStock($idAlimento, $cantidad){
-            $this->alimento=$idAlimento;
-            $this->cantidad=$cantidad;
-          try {
-        
-              $info= $this->infoAlimento2($this->alimento);
-              $actualizarStock= $info[0]["stock"] - $this->cantidad;
-              $registrar=$this->conex->prepare("UPDATE `alimento` SET stock = ? WHERE `idAlimento` = ?;");
-              $registrar->bindValue(1, $actualizarStock);
-              $registrar->bindValue(2, $this->alimento);
-              $registrar->execute();
-          }
-          
-          catch(exection $error){
-                    return array("Sistema", "¡Error Sistema!");
-        
-          }
-    
-      }
-                                     
-      private function actualizarReservado($idAlimento, $cantidad){
-          $this->alimento=$idAlimento;
-          $this->cantidad=$cantidad;
-
-          try {
-            $info= $this->infoAlimento2($this->alimento);
-            $actualizarReservado= $info[0]["reservado"] + $this->cantidad;
-            $registrar=$this->conex->prepare("UPDATE `alimento` SET  reservado = ? WHERE `idAlimento` = ?;");
-            $registrar->bindValue(1, $actualizarReservado);
-            $registrar->bindValue(2, $this->alimento);
-            $registrar->execute();
-          }
-        
-        catch(exection $error){
-                  return array("Sistema", "¡Error Sistema!");
-      
-        }
-      
       }
 
-      private function infoAlimento2($alimento){
-        $this->alimento=$alimento;
-        
-          try{
-              $mostrar = $this->conex->prepare("SELECT idAlimento, codigo, imgAlimento, nombre, unidadMedida, marca,
-                stock, idTipoA  FROM alimento WHERE status = 1 AND idAlimento = ?");
-              $mostrar->bindValue(1, $this->alimento);
-              $mostrar->execute();
-              $data = $mostrar->fetchAll();
-                return $data;
-            
-            }catch(\PDOException $e){
-              return $e;
+      private function actualizarStockYReservado($idAlimento, $cantidad) {
+          try {
+              $query = $this->conex->prepare("SELECT stock, reservado FROM alimento WHERE idAlimento = ? FOR UPDATE");
+              $query->bindValue(1, $idAlimento);
+              $query->execute();
+              $data = $query->fetch(PDO::FETCH_ASSOC);
+
+              if (!$data) {
+                  throw new Exception("Alimento no encontrado.");
+              }
+
+              $nuevoStock = $data['stock'] - $cantidad;
+              $nuevoReservado = $data['reservado'] + $cantidad;
+
+              if ($nuevoStock < 0) {
+                  throw new Exception("No hay stock suficiente.");
+              }
+
+              $update = $this->conex->prepare("UPDATE alimento SET stock = ?, reservado = ? WHERE idAlimento = ?");
+              $update->bindValue(1, $nuevoStock);
+              $update->bindValue(2, $nuevoReservado);
+              $update->bindValue(3, $idAlimento);
+              $update->execute();
+
+              return true;
+
+          } catch (Exception $error) {
+              return ['error' => $error->getMessage()];
           }
       }
+
       
-//$this->notificaciones($this->horarioComida, $this->descripcion, $this->cantPlatos, $this->feMenu,  $this->nomEvent = $nomEvent, $this->descripEvent);
+    //$this->notificaciones($this->horarioComida, $this->descripcion, $this->cantPlatos, $this->feMenu,  $this->nomEvent = $nomEvent, $this->descripEvent);
         private function notificaciones() {
           $this->conectarDBSeguridad();
           try {
@@ -491,7 +471,7 @@ class eventoModelo extends connectDB {
               
               error_log("Error al enviar notificación a través de WebSocket: " . $e->getMessage());
           }
-      }
+        }
   
   
 
