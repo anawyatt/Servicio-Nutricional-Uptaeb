@@ -50,7 +50,8 @@ function recuperarCorreo() {
         url: "",
         dataType: "json",
         data: { 
-            enviar: true, 
+            enviar: true,
+            tipo:'sistema',
             correo
          },
         success(data) {

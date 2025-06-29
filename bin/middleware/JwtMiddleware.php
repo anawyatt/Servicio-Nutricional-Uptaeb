@@ -3,14 +3,12 @@
 namespace middleware;
 
 use helpers\JwtHelpers;
-use helpers\encryption as encryption;
 use helpers\BlacklistHelper;
 
 class JwtMiddleware
 {
     public static function verificarToken()
     {
-        $sistem = new encryption();
         $token = null;
 
         // Intentar obtener el token desde la cabecera Authorization
@@ -52,4 +50,5 @@ class JwtMiddleware
         // Retornar el payload
         return $decoded;
     }
+
 }

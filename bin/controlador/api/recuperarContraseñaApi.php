@@ -10,7 +10,8 @@ use helpers\decryptionAsyncHelpers;
 
 header('Access-Control-Allow-Origin: *'); 
 header('Access-Control-Allow-Methods: POST, OPTIONS');
-header('Access-Control-Allow-Headers: Content-Type');
+header('Access-Control-Allow-Headers: Content-Type, Authorization');
+header('Access-Control-Allow-Credentials: true'); 
 
 header('Content-Type: application/json');
 
@@ -32,14 +33,14 @@ try {
 
     $data = decryptionAsyncHelpers::decryptPayload($_POST['datos']);
 
-    if (!isset($data['enviar']) || !isset($data['correo'])) {
+    if (!isset($data['enviar']) || !isset($data['tipo']) || !isset($data['correo'])) {
         http_response_code(400);
         echo json_encode(['resultado' => 'error', 'mensaje' => 'Enviar y Correo son requeridos']);
         exit;
     }
 
     $objecto = new passwordRecovery();
-    $respuesta = $objecto->recuperContraseñas($data['correo']);
+    $respuesta = $objecto->recuperContraseñas($data['tipo'], $data['correo']);
     echo json_encode($respuesta);
 
 } catch (Exception $e) {

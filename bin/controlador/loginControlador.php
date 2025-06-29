@@ -16,8 +16,8 @@
     die();  
    }
    
-  if (isset($_POST['enviar']) && isset($_POST['correo'])) {
-    $respuesta = $objecto->recuperContraseñas($_POST['correo']);
+  if (isset($_POST['enviar']) && isset($_POST['tipo'])  && isset($_POST['correo'])) {
+    $respuesta = $objecto->recuperContraseñas($_POST['tipo'], $_POST['correo']);
     echo json_encode($respuesta);
     die();
   }
