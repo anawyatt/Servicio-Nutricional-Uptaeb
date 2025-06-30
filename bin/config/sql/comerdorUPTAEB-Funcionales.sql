@@ -294,6 +294,9 @@
                 START TRANSACTION;
             
                 -- Vistas
+
+                CREATE OR REPLACE VIEW vista_resumen_general AS SELECT  (SELECT COUNT(a.idAsistencia) FROM asistencia a INNER JOIN menu m ON a.idMenu = m.idMenu WHERE a.status = 1 AND a.fecha = CURDATE() ) AS asistencias_hoy, (SELECT COUNT(idMenu) FROM menu WHERE status = 1 ) AS menus_activos,(SELECT COUNT(e.idEvento) FROM evento e INNER JOIN menu m ON e.idMenu = m.idMenu WHERE e.status = 1 ) AS eventos_activos, Alimentos con stock o reserva (SELECT COUNT(*) FROM alimento WHERE status = 1 AND (stock > 0 OR reservado > 0) ) AS alimentos_disponibles, (SELECT COUNT(*) FROM utensilios WHERE status = 1 AND stock > 0 ) AS utensilios_disponibles;
+
                 CREATE OR REPLACE VIEW vista_estudiantes_con_secciones AS
                 SELECT 
                     e.cedEstudiante,
