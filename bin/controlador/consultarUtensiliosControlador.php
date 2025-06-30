@@ -8,14 +8,24 @@
  use component\NotificacionesServer as NotificacionesServer;
  use helpers\encryption as encryption;
  use helpers\permisosHelper as permisosHelper;
+ use helpers\csrfTokenHelper;
+ use middleware\csrfMiddleware;
  use modelo\consultarUtensiliosModelo as consultarUtensilios;
+
 
  $objeto = new consultarUtensilios;
  $sistem = new encryption();
  $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Utensilios', 'consultar');
  $permisos = $datosPermisos['permisos'];
-  $payload = $datosPermisos['payload'];
+ $payload = $datosPermisos['payload'];
  $NotificacionesServer = new NotificacionesServer();
+ $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
+
+ if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
+    $resultadoToken = csrfMiddleware::verificarYRenovar($_POST['csrfToken'], $payload->cedula);
+    echo json_encode(['message' => 'Token renovado','newCsrfToken' => $resultadoToken['newToken']]);
+    die();
+  }
 
     if (isset($payload->cedula)) {
           $NotificacionesServer->setCedula($payload->cedula);
@@ -31,6 +41,12 @@
       if (isset($_POST['notificacionId'])) {
           $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
     }
+
+if(isset($_POST['mostrarU'])){
+ $mostrarTabla= $objeto->mostrarUtensilios();
+  echo json_encode($mostrarTabla);
+      die();
+}
 
 if (isset($datosPermisos['permiso']['consultar'])) {
   if (isset($_POST['infoUtensilio'], $_POST['id'])) {
@@ -66,11 +82,13 @@ if (isset($datosPermisos['permiso']['modificar'])) {
   }
 
   if (
-    isset($_POST['modificarINFO'], $_POST['id'], $_POST['tipoU'], $_POST['utensilio'], $_POST['material'])
+    isset($_POST['modificarINFO'], $_POST['id'], $_POST['tipoU'], $_POST['utensilio'], $_POST['material'], $_POST['csrfToken'])
   ) {
+
+    $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
     $verificarUtensilio = $objeto->verificarUtensilio($_POST['id'], $_POST['tipoU'], $_POST['utensilio'], $_POST['material']);
     $modificar = $objeto->modificarUtensilio($_POST['id'], $_POST['tipoU'], $_POST['utensilio'], $_POST['material']);
-    echo json_encode($modificar);
+    echo json_encode(['mensaje'=>$modificar, 'newCsrfToken' => $csrf['newToken']]);
     exit;
   }
 
@@ -82,9 +100,10 @@ if (isset($datosPermisos['permiso']['modificar'])) {
 }
 
 if (isset($datosPermisos['permiso']['eliminar'])) {
-  if (isset($_POST['id'], $_POST['borrar'])) {
+  if (isset($_POST['id'], $_POST['borrar'], $_POST['csrfToken'])) {
+    $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
     $eliminar = $objeto->anularUtensilio($_POST['id']);
-    echo json_encode($eliminar);
+    echo json_encode(['mensaje'=>$eliminar, 'newCsrfToken' => $csrf['newToken']]);
     exit;
   }
 }

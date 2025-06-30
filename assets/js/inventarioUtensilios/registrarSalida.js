@@ -870,13 +870,17 @@ function registrar(){
 	var hora = $("#hora").val();
 	var tipoS = $("#tipoS").val();
 	var descripcion = $("#descripcion").val();
+  let token = $('[name="csrf_token"]').val();
+   if(token) {
 	$.ajax({
 		url:"",
 		method:"post",
 		dataType:"json",
-		data:{registrar:true, fecha, hora,tipoS, descripcion},
+		data:{registrar:true, fecha, hora,tipoS, descripcion, csrfToken: token},
     success(data){
-              registrarDetalle(data.id);
+      if(data.mensaje && data.newCsrfToken){
+              registrarDetalle(data.mensaje.id);
+           
               Swal.fire({
                toast: true,
                position: 'top-end',
@@ -890,14 +894,14 @@ function registrar(){
              $('#cancelar').click();
              $('.tabla tbody tr').remove();
              $('#ani').hide();
+             $('[name="csrf_token"]').val(data.newCsrfToken);
+             console.log('Token CSRF renovado:', data.newCsrfToken);
              
-          
+        }
        }
-		
-
-
 
 	});
+}
 }
 
 //----------------------------- REGISTRAR DETALLE -----------------------------

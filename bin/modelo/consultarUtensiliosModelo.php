@@ -2,7 +2,7 @@
 
 namespace modelo;
 use config\connect\connectDB as connectDB;
-use helpers\JwtHelpers;
+use helpers\JwtHelpers as JwtHelpers;
 use \PDO;
 
 
@@ -227,31 +227,46 @@ private function consultarUtensilio() {
             ? ['resultado' => 'existe'] 
             : null;
 
-    } catch (\Exception $e) {
-        $this->desconectarDB();
-        return ['error' => '¡Error en el sistema!'];
-    }
+    } catch (\PDOException $e) {
+    $this->desconectarDB();
+    error_log("Error en consultarUtensilio: " . $e->getMessage());
+
+    return ['error' => 'Error al consultar utensilio: ' . $e->getMessage()];
+
+}
 }
 
 private function modificarU() {
     try {
         $this->conectarDB();
-        $modificar = $this->conex->prepare("CALL modificar_utensilio(?, ?, ?, ?)");
-        $modificar->bindValue(1, $this->utensilio);
-        $modificar->bindValue(2, $this->material);
-        $modificar->bindValue(3, $this->tipoU);
-        $modificar->bindValue(4, $this->id);
-        $modificar->execute();
+        $this->conex->beginTransaction();
+
+        $stmt = $this->conex->prepare("CALL sp_modificar_utensilio(?, ?, ?, ?)");
+        $stmt->bindValue(1, $this->id);
+        $stmt->bindValue(2, $this->utensilio);
+        $stmt->bindValue(3, $this->material);
+        $stmt->bindValue(4, $this->tipoU);
+        $stmt->execute();
+
         $bitacora = new bitacoraModelo;
-        $bitacora->registrarBitacora('Utensilios', 'Modificó el Utensilio llamado: ' . $this->utensilio, $this->payload->cedula); 
+        $bitacora->registrarBitacora('Utensilios', 'Modificó el Utensilio llamado: ' . $this->utensilio, $this->payload->cedula);
+
+        $this->conex->commit();
         $this->desconectarDB();
 
         return ['resultado' => 'modificado'];
-    } catch (\Exception $e) {
+    } catch (\PDOException $e) {
+        if ($this->conex->inTransaction()) {
+            $this->conex->rollBack();
+        }
         $this->desconectarDB();
-        return ['error' => '¡Error en el sistema!'];
+
+        return ['error' => $e->getMessage()];
     }
 }
+
+
+
 
 public function modificarImagen($imagenTmp, $id) {
     $info = $this->infoUtensilio($id, true);
@@ -278,38 +293,45 @@ public function modificarImagen($imagenTmp, $id) {
 private function actualizarImagenDB() {
     try {
         $this->conectarDB();
+        $this->conex->beginTransaction();
 
-        $stmt = $this->conex->prepare("SELECT imgUtensilios FROM utensilios WHERE idUtensilios = ?");
+
+        $stmt = $this->conex->prepare("SELECT imgUtensilios FROM utensilios WHERE idUtensilios = ? FOR UPDATE");
         $stmt->bindValue(1, $this->id);
         $stmt->execute();
         $data = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-if (!empty($data['imgUtensilios'])) {
-    $nombreImagen = basename($data['imgUtensilios']);
-
-    if ($nombreImagen !== 'utensiliospredeterminados.png') {
-        $rutaImagen = __DIR__ . '/../../' . $data['imgUtensilios'];
-
-        if (file_exists($rutaImagen)) {
-            unlink($rutaImagen);
+        if (!empty($data['imgUtensilios'])) {
+            $nombreImagen = basename($data['imgUtensilios']);
+            if ($nombreImagen !== 'utensiliospredeterminados.png') {
+                $rutaImagen = __DIR__ . '/../../' . $data['imgUtensilios'];
+                if (file_exists($rutaImagen)) {
+                    unlink($rutaImagen);
+                }
+            }
         }
-    }
-}
 
-        // Actualizar ruta de la nueva imagen en la base de datos
         $update = $this->conex->prepare("UPDATE utensilios SET imgUtensilios = ? WHERE idUtensilios = ? AND status = 1");
         $update->bindValue(1, $this->imagen);
         $update->bindValue(2, $this->id);
         $update->execute();
 
+        $bitacora = new bitacoraModelo;
+        $bitacora->registrarBitacora('Utensilios', 'Actualizó la imagen del utensilio con ID: ' . $this->id, $this->payload->cedula);
+
+        $this->conex->commit();
         $this->desconectarDB();
 
         return ['resultado' => 'imagen modificada'];
     } catch (\PDOException $e) {
+        if ($this->conex->inTransaction()) {
+            $this->conex->rollBack();
+        }
         $this->desconectarDB();
         return ['error' => 'Error en el sistema: ' . $e->getMessage()];
     }
 }
+
 
 private function generarCodigo($palabra1, $palabra2) {
     $palabra1 = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $this->quitarAcentos($palabra1)));
@@ -352,33 +374,43 @@ private function generarCodigo($palabra1, $palabra2) {
 private function anular() {
     try {
         $this->conectarDB();
+        $this->conex->beginTransaction();
 
-        $query = $this->conex->prepare("SELECT imgUtensilios FROM utensilios WHERE idUtensilios = ?");
+        $query = $this->conex->prepare("SELECT imgUtensilios FROM utensilios WHERE idUtensilios = ? FOR UPDATE");
         $query->bindValue(1, $this->id);
         $query->execute();
         $data = $query->fetch(\PDO::FETCH_ASSOC);
 
         if (!empty($data['imgUtensilios'])) {
             $nombreImagen = basename($data['imgUtensilios']);
-            if ($nombreImagen !== 'utensiliospredetereminado.png') {
+            if ($nombreImagen !== 'utensiliospredeterminados.png') {
                 $ruta = __DIR__ . '/../../' . $data['imgUtensilios'];
-                $this->delete($ruta);
+                if (file_exists($ruta)) {
+                    unlink($ruta);
+                }
             }
         }
 
         $stmt = $this->conex->prepare("UPDATE utensilios SET status = 0 WHERE idUtensilios = ?");
         $stmt->bindValue(1, $this->id);
         $stmt->execute();
-        $bitacora = new bitacoraModelo;
-        $bitacora->registrarBitacora('Utensilios', 'Se anuló un Utensilio' . $this->payload->cedula);
 
+        $bitacora = new bitacoraModelo;
+        $bitacora->registrarBitacora('Utensilios', 'Se anuló un Utensilio con ID: ' . $this->id, $this->payload->cedula);
+
+        $this->conex->commit();
         $this->desconectarDB();
+
         return ['resultado' => 'eliminado'];
     } catch (\PDOException $e) {
+        if ($this->conex->inTransaction()) {
+            $this->conex->rollBack();
+        }
         $this->desconectarDB();
         return ['error' => '¡Error en el sistema!'];
     }
 }
+
 
 private function delete($rutaImagen) {
     if (file_exists($rutaImagen)) {

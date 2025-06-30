@@ -2,7 +2,8 @@
 
 namespace modelo;
 use config\connect\connectDB as connectDB;
-use helpers\JwtHelpers;
+use helpers\JwtHelpers as JwtHelpers;
+
 use \PDO;
 
 
