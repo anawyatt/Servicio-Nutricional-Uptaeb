@@ -19,10 +19,13 @@ class loginModelo extends connectDB
     private $apellido;
     private $segApellido;
     private $sistem;
+    private $encryption;
+
 
     public function __construct()
     {
         parent::__construct();
+         $this->encryption = new encryption(); 
     }
 
     public function loginSistema($cedula, $clave)
@@ -30,6 +33,7 @@ class loginModelo extends connectDB
         $this->cedula = trim($cedula);
         $this->clave = $clave;
         $this->sistem = new encryption();
+
 
         // Validar inputs antes de llamar login privada
         if (empty($this->cedula) || empty($this->clave)) {
@@ -77,6 +81,8 @@ class loginModelo extends connectDB
             if (!password_verify($this->clave, $user['clave'])) {
                 return ['resultado' => 'error', 'mensaje' => 'Usuario o contraseña incorrectos'];
             }
+            
+            $user['correo'] = $this->encryption->decryptData($user['correo']);
 
             // Login correcto, crear payload JWT
             $payload = [
