@@ -158,7 +158,7 @@
                         
                                       </div>
                                       <div class="modal-body mb-2">
-                                     
+                                      <input type="hidden" name="csrf_token" id="tokenCsrfModificar" value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                                           <input type="hidden" name="" id="idd">
 
 
@@ -377,6 +377,8 @@
                                           <button type="button" class="btn-close btn-primary" aria-label="Close" data-bs-dismiss="modal"></button>
                                       </div>
                                 <form method="POST" id="eliminarU">
+                                <input type="hidden" name="csrf_token" id="tokenCsrfEliminar" value="<?php echo htmlspecialchars($tokenCsrf); ?>">
+
 
                  <div class="modal-body mb-2">
                   <div align="center">

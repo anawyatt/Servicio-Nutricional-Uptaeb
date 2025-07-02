@@ -8,6 +8,8 @@
  use component\NotificacionesServer as NotificacionesServer;
  use helpers\encryption as encryption;
  use helpers\permisosHelper as permisosHelper;
+ use helpers\csrfTokenHelper;
+ use middleware\csrfMiddleware;
 
 
  use modelo\salidaUtensiliosModelo as salidaUtensilios;
@@ -20,11 +22,18 @@
  $payload = $datosPermisos['payload'];
  $NotificacionesServer = new NotificacionesServer();
 
+ $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
+
+if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
+    $resultadoToken = csrfMiddleware::verificarYRenovar($_POST['csrfToken'], $payload->cedula);
+    echo json_encode(['message' => 'Token renovado','newCsrfToken' => $resultadoToken['newToken']]);
+    die();
+}
+
   if (isset($payload->cedula)) {
         $NotificacionesServer->setCedula($payload->cedula);
     } else {
-        echo json_encode(['error' => 'Cédula no encontrada en el token']);
-        exit;
+         die("<script>window.location='?url=" .urlencode( $sistem->encryptURL('login')) . "'</script>");
     }
 
     if (isset($_POST['notificaciones'])) {
@@ -86,9 +95,10 @@ if (isset($datosPermisos['permiso']['consultar'])) {
 }
   //------------------- REGISTRAR -----------------------
 if (isset($datosPermisos['permiso']['registrar'])) {
-  if (isset($_POST['registrar']) && isset($_POST['fecha']) && isset($_POST['hora']) && isset($_POST['tipoS']) && isset($_POST['descripcion'])) {
-      $registrarU = $objeto->registrarSalidaU($_POST['fecha'], $_POST['hora'], $_POST['tipoS'], $_POST['descripcion']);
-      echo json_encode($registrarU);
+  if (isset($_POST['registrar']) && isset($_POST['fecha']) && isset($_POST['hora']) && isset($_POST['tipoS']) && isset($_POST['descripcion']) && isset($_POST['csrfToken'])) {
+    $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);  
+    $registrarU = $objeto->registrarSalidaU($_POST['fecha'], $_POST['hora'], $_POST['tipoS'], $_POST['descripcion']);
+      echo json_encode(['mensaje'=>$registrarU, 'newCsrfToken' => $csrf['newToken']]);
       exit;
   }
 

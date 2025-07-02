@@ -13,6 +13,7 @@ class PermisoModelo extends connectDB
     private $modulos;
     private $datos;
     private $payload;
+    private $idRol;
 
 
     public function __construct()
@@ -141,6 +142,31 @@ class PermisoModelo extends connectDB
             $this->desconectarDB();
         }
     }
+
+     public function permisosApp($rol)
+    {
+        $this->idRol = $rol;
+        return $this->consultarPermisoApp();
+    }
+    
+    private function consultarPermisoApp()
+    {
+        try {
+            $this->conectarDBSeguridad();
+            $stmt = $this->conex2->prepare('SELECT * FROM `permiso` WHERE nombrePermiso IN (?, ?) AND idRol = ? AND idModulo IN (8, 9, 10, 13, 16)');
+            $stmt->bindValue(1, 'Registrar');
+            $stmt->bindValue(2, 'Consultar');
+            $stmt->bindValue(3, $this->idRol);
+            $stmt->execute();
+            $data = $stmt->fetchAll(\PDO::FETCH_OBJ);
+            $this->desconectarDB();
+            return $data;
+        } catch (\Exception $e) {
+            throw new \RuntimeException('Error al obtener los permisos: ' . $e->getMessage());
+        }
+    }
+
+
 
 
 

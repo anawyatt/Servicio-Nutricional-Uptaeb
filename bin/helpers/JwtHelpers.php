@@ -55,11 +55,11 @@ class JwtHelpers
         try {
             $decoded = JWT::decode($token, new Key(self::getKey(), self::$algo));
             return (array)$decoded;
-        } catch (\Firebase\JWT\ExpiredException $e) {
-            return false;
-        } catch (\Exception $e) {
-            return false;
+        }catch (\Exception $e) {
+           error_log("Error al verificar token personalizado: " . $e->getMessage());
+           return false;
         }
+
     }
 
 

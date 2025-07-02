@@ -190,9 +190,9 @@ public function registrarEntradaU($fecha, $hora, $descripcion) {
 
 private function registrar() {
     $this->conectarDB();
-    $this->conex->beginTransaction();
-
     try {
+        $this->conex->beginTransaction();
+
         $stmt = $this->conex->prepare("INSERT INTO `entradau`(`idEntradaU`, `fecha`, `hora`, `descripcion`, `status`) VALUES(DEFAULT, ?, ?, ?, 1)");
         $stmt->bindValue(1, $this->fecha);
         $stmt->bindValue(2, $this->hora);
@@ -200,21 +200,28 @@ private function registrar() {
         $stmt->execute();
 
         $bitacora = new bitacoraModelo;
-        $bitacora->registrarBitacora('Entrada Utensilios', 'Registró una entrada de Utensilios el día '.$this->fecha.' a la hora '.$this->hora.' con la siguiente descripción: '.$this->descripcion, $this->payload->cedula);
+        $bitacora->registrarBitacora(
+            'Entrada Utensilios',
+            'Registró una entrada de Utensilios el día ' . $this->fecha . ' a la hora ' . $this->hora . ' con la siguiente descripción: ' . $this->descripcion,
+            $this->payload->cedula
+        );
+
+        $this->id = $this->conex->lastInsertId();
+        $this->conex->commit(); 
 
         $this->notificaciones($this->fecha, $this->hora, $this->descripcion);
 
-        $this->id = $this->conex->lastInsertId();
-        $this->conex->commit();
-
         return ['id' => $this->id];
     } catch (Exception $e) {
-        $this->conex->rollBack();
+        if ($this->conex->inTransaction()) {
+            $this->conex->rollBack();
+        }
         return ['error' => '¡Error en el sistema!'];
     } finally {
         $this->desconectarDB();
     }
 }
+
 
 public function registrarDetalleEntradaU($utensilio, $cantidad, $id) {
     $this->utensilio = $utensilio;
@@ -231,58 +238,40 @@ public function registrarDetalleEntradaU($utensilio, $cantidad, $id) {
 private function registrarDetalle() {
     try {
         $this->conectarDB();
-        $this->conex->beginTransaction();
 
-        $stmt = $this->conex->prepare("INSERT INTO `detalleentradau`(`idDetalleU`, `cantidad`, `idUtensilios`, `idEntradaU`, `status`) VALUES(DEFAULT, ?, ?, ?, 1)");
+        $stmt = $this->conex->prepare("CALL sp_registrarDetalleEntrada(?, ?, ?)");
         $stmt->bindValue(1, $this->cantidad);
         $stmt->bindValue(2, $this->utensilio);
         $stmt->bindValue(3, $this->id);
         $stmt->execute();
 
-        $this->conex->commit();
-
-        $this->actualizarStock($this->utensilio, $this->cantidad);
-
+        $this->desconectarDB();
         return ['resultado' => 'exitoso'];
     } catch (Exception $e) {
-        $this->conex->rollBack();
-        return ['error' => '¡Error en el sistema!'];
-    } finally {
-        $this->desconectarDB();
+        return ['error' => '¡Error en el sistema!', 'detalle' => $e->getMessage()];
     }
 }
+
 
 private function actualizarStock($idUtensilio, $cantidad) {
-    $this->utensilio = $idUtensilio;
-    $this->cantidad = $cantidad;
-
     try {
-        $this->conex->beginTransaction();
-
-        $info = $this->infoUtensilio2($this->utensilio);
-        $nuevoStock = $info[0]["stock"] + $this->cantidad;
-
-        $stmt = $this->conex->prepare("UPDATE `utensilios` SET stock = ? WHERE `idUtensilios` = ?");
-        $stmt->bindValue(1, $nuevoStock);
-        $stmt->bindValue(2, $this->utensilio);
+        $stmt = $this->conex->prepare("SELECT stock FROM utensilios WHERE status = 1 AND idUtensilios = ? FOR UPDATE");
+        $stmt->bindValue(1, $idUtensilio);
         $stmt->execute();
+        $info = $stmt->fetch(\PDO::FETCH_ASSOC);
 
-        $this->conex->commit();
+        if (!$info) {
+            throw new Exception('Utensilio no encontrado');
+        }
+
+        $nuevoStock = $info["stock"] + $cantidad;
+
+        $update = $this->conex->prepare("UPDATE utensilios SET stock = ? WHERE idUtensilios = ?");
+        $update->bindValue(1, $nuevoStock);
+        $update->bindValue(2, $idUtensilio);
+        $update->execute();
     } catch (Exception $e) {
-        $this->conex->rollBack();
-    }
-}
-
-private function infoUtensilio2($utensilio) {
-    $this->utensilio = $utensilio;
-
-    try {
-        $stmt = $this->conex->prepare("SELECT * FROM utensilios WHERE status = 1 AND idUtensilios = ?");
-        $stmt->bindValue(1, $this->utensilio);
-        $stmt->execute();
-        return $stmt->fetchAll();
-    } catch (\PDOException $e) {
-        return [];
+        throw $e;
     }
 }
 

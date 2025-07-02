@@ -463,7 +463,9 @@ function verificarTipoU(){
 
 
 function registrar(datos){
-  
+    let token = $('[name="csrf_token"]').val();
+    datos.append('csrfToken', token); 
+    if(token) {
 	 $.ajax({
       url: "",
       type: "POST",
@@ -471,6 +473,10 @@ function registrar(datos){
       processData: false,
       contentType: false,
       success: function(datos) {
+        datos = typeof datos === 'string' ? JSON.parse(datos) : datos;
+        
+      if(datos.mensaje.resultado === 'registrado' && datos.newCsrfToken ){
+
         Swal.fire({
                toast: true,
                position: 'top-end',
@@ -483,18 +489,40 @@ function registrar(datos){
             $('.formu').trigger('reset'); 
             
             primary();
-            
+      }      
       }, complete(){
-        
+      
+        container0.innerHTML = ''; 
+        container0.appendChild(defaultImage);
       }
+
     });
+  }
 }
                   
 $('#ute1').addClass('active');
 $('#ute2').addClass('text-primary');
 $('.ute2').addClass('active')
 
-      
+setInterval(function() {
+  $.ajax({
+     url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+      success(data){
+      if (data.newCsrfToken) {
+      $('[name="csrf_token"]').val(data.newCsrfToken);
+        console.log('Token CSRF renovado');
+      } else {
+        console.log('No se pudo renovar el token CSRF');
+      }
+    },
+    error: function(err) {
+      console.error('Error renovando token CSRF:', err);
+    }
+  });
+}, 240000);     
 
 
 

@@ -285,57 +285,50 @@ class salidaUtensiliosModelo extends connectDB {
     private function registrarDetalle() {
         try {
             $this->conectarDB();
-    
-            $registrar = $this->conex->prepare("INSERT INTO `detallesalidau`(`cantidad`, `idUtensilios`, `idSalidaU`, `status`) VALUES (?, ?, ?, 1)");
-            $registrar->bindValue(1, $this->cantidad);
-            $registrar->bindValue(2, $this->utensilio);
-            $registrar->bindValue(3, $this->id);
-            $registrar->execute();
-    
-            // Actualizar stock
-            $this->actualizarStock($this->utensilio, $this->cantidad);
-            $this->notificaciones2($this->utensilio);
-    
+
+            $stmt = $this->conex->prepare("CALL sp_registrar_detalle_salida(?, ?, ?)");
+            $stmt->bindValue(1, $this->utensilio);
+            $stmt->bindValue(2, $this->cantidad);
+            $stmt->bindValue(3, $this->id);
+            $stmt->execute();
+
+            $this->notificaciones2($this->utensilio); 
             $this->desconectarDB();
-    
+
             return ['resultado' => 'exitoso'];
-        } catch (\Exception $error) {
+        } catch (\PDOException $error) {
             $this->desconectarDB();
             return ['error' => 'Error en la base de datos', 'detalle' => $error->getMessage()];
         }
     }
-    
-    private function actualizarStock($idUtensilio, $cantidad) {
-        $this->utensilio = $idUtensilio;
-        $this->cantidad = $cantidad;
-    
-        try {
-            $info = $this->infoUtensilio2($this->utensilio);
-            if (!empty($info)) {
-                $actualizarStock = $info[0]["stock"] - $this->cantidad;
-                $registrar = $this->conex->prepare("UPDATE `utensilios` SET stock = ? WHERE `idUtensilios` = ?");
-                $registrar->bindValue(1, $actualizarStock);
-                $registrar->bindValue(2, $this->utensilio);
-                $registrar->execute();
-            }
-        } catch (\Exception $error) {
-            
-            return ['error' => 'Error actualizando stock'];
+
+
+private function actualizarStock($idUtensilio, $cantidad) {
+    try {
+        
+        $stmt = $this->conex->prepare("SELECT stock FROM utensilios WHERE status = 1 AND idUtensilios = ? FOR UPDATE");
+        $stmt->bindValue(1, $idUtensilio);
+        $stmt->execute();
+        $info = $stmt->fetch(\PDO::FETCH_ASSOC);
+
+        if (!$info) {
+            throw new Exception('Utensilio no encontrado o inactivo');
         }
-    }
-    
-    private function infoUtensilio2($utensilio) {
-        $this->utensilio = $utensilio;
-        try {
-            $mostrar = $this->conex->prepare("SELECT * FROM utensilios WHERE status = 1 AND idUtensilios = ?");
-            $mostrar->bindValue(1, $this->utensilio);
-            $mostrar->execute();
-            return $mostrar->fetchAll();
-        } catch (\PDOException $e) {
-            return [];
+
+        $nuevoStock = $info['stock'] - $cantidad;
+        if ($nuevoStock < 0) {
+            throw new Exception('Stock insuficiente para realizar la salida');
         }
+
+        $update = $this->conex->prepare("UPDATE utensilios SET stock = ? WHERE idUtensilios = ?");
+        $update->bindValue(1, $nuevoStock);
+        $update->bindValue(2, $idUtensilio);
+        $update->execute();
+    } catch (\Exception $e) {
+        throw $e; // Se propaga a registrarDetalle()
     }
-    
+}
+
 
      private function notificaciones($fecha, $hora, $descripcion) {
         try {

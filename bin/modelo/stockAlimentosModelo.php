@@ -84,7 +84,7 @@ class stockAlimentosModelo extends connectDB
     return $consulta->fetchAll(\PDO::FETCH_OBJ);
   }
 
-  private function consultarTodosLosAlimentos()
+ private function consultarTodosLosAlimentos()
   {
     $consulta = $this->conex->prepare(" SELECT * FROM alimento a INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE a.status = 1 AND (a.stock > 0 OR a.reservado > 0)");
     $consulta->execute();

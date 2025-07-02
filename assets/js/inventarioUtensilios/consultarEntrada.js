@@ -256,16 +256,19 @@ function valAnulacion(idd){
   //-----------------------------------------------------------------------------------------
   
   $('#borrar').click((e)=>{
+    let token = $('[name="csrf_token"]').val();
+    if(token){
 
     e.preventDefault();
     $.ajax({
       url: '',
       method: 'post',
       dataType: 'json',
-      data:{id , borrar: 'borrar'},
+      data:{id , borrar: 'borrar', csrfToken: token},
       success(data){
         console.log(data);
-      if (data.resultado === 'eliminado'){
+      if (data.mensaje.resultado === 'eliminado' && data.newCsrfToken){
+        $('[name="csrf_token"]').val(data.newCsrfToken);
         $('#cerrar3').click();
         tablaEntradaUtensilios();
           Swal.fire({
@@ -280,7 +283,8 @@ function valAnulacion(idd){
       }
     }
   })
-    })
+}
+})
 
 
   ///-----------------------DESCARGAR PDF 1
@@ -504,3 +508,24 @@ $('#iu2').addClass('active');
 $('.iu2').addClass('active')
 $('#eu3').addClass('text-primary');
 $('.eu3').addClass('active')
+
+
+  setInterval(function() {
+    $.ajax({
+        url: '',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+        success(data){
+        if (data.newCsrfToken) {
+        $('[name="csrf_token"]').val(data.newCsrfToken);
+            console.log('Token CSRF renovado');
+        } else {
+            console.log('No se pudo renovar el token CSRF');
+        }
+        },
+        error: function(err) {
+        console.error('Error renovando token CSRF:', err);
+        }
+    });
+    }, 240000);

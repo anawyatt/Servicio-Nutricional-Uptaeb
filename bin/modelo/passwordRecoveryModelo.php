@@ -17,6 +17,7 @@ class passwordRecoveryModelo extends connectDB
     private $encryption;  
     private $baseUrl;  
     private $sistem;
+    private $tipo;
 
 
     public function __construct()
@@ -28,8 +29,13 @@ class passwordRecoveryModelo extends connectDB
         $this->sistem = new encryption();  
     }
 
-        public function recuperContraseñas($correo) {
+        public function recuperContraseñas($tipo, $correo) {
+            if (!in_array($tipo, ['sistema', 'app'], true)) {
+                return ['resultado' => 'error', 'mensaje' => "Tipo inválido. Solo se permite 'sistema' o 'app'"];
+            }
+            $this->tipo = $tipo;
             $this->correo = trim($correo);
+            $this->correo = ucfirst(strtolower($this->correo));
 
             if (!preg_match("/^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/", $this->correo)) {
                 return ['resultado' => 'error', 'mensaje' => 'Correo inválido'];
@@ -82,13 +88,14 @@ class passwordRecoveryModelo extends connectDB
 
             $token = JwtHelpers::generarToken($payload);
 
-            $rutaCifrada = urlencode($this->sistem->encryptURL("cambiarClave"));
-            $enlace = $this->baseUrl . "?url=" . $rutaCifrada . "&token=" . urlencode($token);
+                $rutaCifrada = urlencode($this->sistem->encryptURL("cambiarClave"));
+                $enlace = $this->baseUrl . "?url=" . $rutaCifrada . "&token=" . urlencode($token);
+            
 
-            return $this->enviarCorreo($nombreCompleto, $codigo, $enlace);
+            return $this->enviarCorreo($nombreCompleto, $codigo, $enlace, $this->tipo, $token);
         }
         
-        protected function enviarCorreo($nombreCompleto, $codigo, $enlace){
+        protected function enviarCorreo($nombreCompleto, $codigo, $enlace, $tipo, $token) {
             try {
                 $mail = new PHPMailer(true);
                 $mail->isSMTP();
@@ -130,10 +137,10 @@ class passwordRecoveryModelo extends connectDB
                             <h2 style="text-align:center; color:#003aa5; font-size:28px; margin:5px 0;">' . htmlspecialchars($codigo) . '</h2>
 
                             <p>Recuerda que el código es válido por <strong>10 minutos</strong>. Si el tiempo expira, tendrás que solicitar un nuevo código.</p>
-
+                           '. ($tipo === 'sistema' ? '
                             <p style="text-align:center; margin:30px 0;">
-                                <a href="' . htmlspecialchars($enlace) . '" style="background:#003aa5; color:#fff; padding:12px 25px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">Restablecer Contraseña</a>
-                            </p>
+                                <a href="'. htmlspecialchars($enlace) . '" style="background:#003aa5; color:#fff; padding:12px 25px; text-decoration:none; border-radius:6px; font-weight:bold; display:inline-block;">Restablecer Contraseña</a>
+                            </p>': '').'
                         </div>
 
                         <p style="font-size:14px; color:#000000; text-align:center; margin-top:20px;">
@@ -154,6 +161,10 @@ class passwordRecoveryModelo extends connectDB
                 $mail->Body = $body;
 
                 $mail->send();
+
+                if($tipo === 'app') {
+                  return ['resultado' => 'ok', 'mensaje' => 'Correo de recuperación enviado', 'tokenRC' => $token];
+                }
 
                 return ['resultado' => 'ok', 'mensaje' => 'Correo de recuperación enviado'];
                 } catch (Exception $e) {

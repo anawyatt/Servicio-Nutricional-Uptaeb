@@ -134,6 +134,21 @@ class homeModelo extends connectDB {
         }
     }
 
+    public function cantTodos() {
+        try {
+            $this->conectarDB();
+            $mostrar = $this->conex->prepare("SELECT * FROM vista_resumen_general;");
+            $mostrar->execute();
+            $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
+            $this->desconectarDB();
+            echo json_encode($data);
+            die();
+        } catch(\PDOException $e) {
+            return $e;
+        }
+    }
+
+
     // Método para trabajar con los gráficos de asistencia
     public function asistencias() {
         try {
@@ -175,6 +190,20 @@ class homeModelo extends connectDB {
                                               INNER JOIN alimento a ON ta.idTipoA = a.idTipoA 
                                               WHERE a.stock > 0 
                                               GROUP BY ta.tipo;");
+            $mostrar->execute();
+            $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
+            $this->desconectarDB();
+            echo json_encode($data);
+            die();
+        } catch(\PDOException $e) {
+            return $e;
+        }
+    }
+
+     public function menusH() {
+        try {
+            $this->conectarDB();
+            $mostrar = $this->conex->prepare("SELECT horarioComida AS nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM menu WHERE status = 1)), 2) AS porcentaje FROM menu WHERE status = 1 GROUP BY horarioComida ORDER BY cantidad DESC;");
             $mostrar->execute();
             $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
             $this->desconectarDB();

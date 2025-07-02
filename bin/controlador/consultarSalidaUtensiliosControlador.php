@@ -9,6 +9,9 @@
  use helpers\encryption as encryption;
  use helpers\permisosHelper as permisosHelper;
  use modelo\consultarSalidaUtensiliosModelo as consultarSalidaUtensilios;
+ use helpers\csrfTokenHelper;
+ use middleware\csrfMiddleware;
+
 
  $objeto = new consultarSalidaUtensilios;
  $sistem = new encryption();
@@ -18,11 +21,18 @@
  $payload = $datosPermisos['payload'];
  $NotificacionesServer = new NotificacionesServer();
 
+ $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
+
+if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
+    $resultadoToken = csrfMiddleware::verificarYRenovar($_POST['csrfToken'], $payload->cedula);
+    echo json_encode(['message' => 'Token renovado','newCsrfToken' => $resultadoToken['newToken']]);
+    die();
+}
+
     if (isset($payload->cedula)) {
           $NotificacionesServer->setCedula($payload->cedula);
       } else {
-          echo json_encode(['error' => 'Cédula no encontrada en el token']);
-          exit;
+          die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
       }
 
       if (isset($_POST['notificaciones'])) {
@@ -61,16 +71,18 @@ if (isset($datosPermisos['permiso']['consultar'])) {
   }
 }
 //--------ANULAR-----------------
-if (isset($datosPermisos['permiso']['anular'])) {
+if (isset($datosPermisos['permiso']['eliminar'])) {
   if (isset($_POST['valAnulacion'], $_POST['id'])) {
+    
     $resultado = $objeto->verificarAnulacion($_POST['id']);
     exit(json_encode($resultado));
   }
 
-  if (isset($_POST['id'], $_POST['borrar'])) {
+  if (isset($_POST['id'], $_POST['borrar'], $_POST['csrfToken'])) {
+    $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
     $resultado = $objeto->anularSalidaUtensilios($_POST['id'], false);
-    echo json_encode($resultado);
-    exit;
+    echo json_encode(['mensaje'=>$resultado, 'newCsrfToken' => $csrf['newToken']]);
+    exit();
   }
 }
 //-----------------REPORTE-------------------

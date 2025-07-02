@@ -646,13 +646,18 @@ function registrar(){
 	var fecha = $("#fecha").val();
 	var descripcion = $("#descripcion").val();
   var hora =$('#hora').val();
+  let token = $('[name="csrf_token"]').val();
+   if(token){
 	$.ajax({
 		url:"",
 		method:"post",
 		dataType:"json",
-		data:{registrar:true, fecha, hora , descripcion},
+		data:{registrar:true, fecha, hora , descripcion, csrfToken: token},
     success(data){
-              registrarDetalle(data.id);
+        let datos = data;
+      if(datos.mensaje && datos.newCsrfToken) { 
+
+              registrarDetalle(datos.mensaje.id);
         
               Swal.fire({
                toast: true,
@@ -667,13 +672,13 @@ function registrar(){
              $('#cancelar').click();
              $('.tabla tbody tr').remove();
              $('#ani').hide();
+             $('[name="csrf_token"]').val(datos.newCsrfToken);
           
        }
-		
+      }
 
-
-
-	});
+	  });
+  }
 }
 
 //----------------------------- REGISTRAR DETALLE -----------------------------
@@ -699,3 +704,24 @@ $('#iu2').addClass('active');
 $('.iu2').addClass('active')
 $('#eu2').addClass('text-primary');
 $('.eu2').addClass('active')
+
+
+  setInterval(function() {
+    $.ajax({
+        url: '',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+        success(data){
+        if (data.newCsrfToken) {
+        $('[name="csrf_token"]').val(data.newCsrfToken);
+            console.log('Token CSRF renovado');
+        } else {
+            console.log('No se pudo renovar el token CSRF');
+        }
+        },
+        error: function(err) {
+        console.error('Error renovando token CSRF:', err);
+        }
+    });
+    }, 240000);

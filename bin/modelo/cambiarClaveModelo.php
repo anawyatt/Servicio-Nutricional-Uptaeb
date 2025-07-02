@@ -29,17 +29,12 @@ class cambiarClaveModelo extends connectDB
 
             $datos = JwtHelpers::verificarTokenPersonalizado($token);
 
-            if (!$datos) {
-                return ['resultado' => 'error', 'mensaje' => 'Token inválido o expirado'];
-            }
-
-            if ($datos['tipo'] !== 'recuperacion') {
-                return ['resultado' => 'error', 'mensaje' => 'Token inválido'];
-            }
-
-            if ($datos['codigo'] != $this->codigo) {
+              if ($datos['tipo'] !== 'recuperacion') {
+                 return ['resultado' => 'error', 'mensaje' => 'Token inválido'];
+             }
+             if ($datos['codigo'] != $this->codigo) {
                 return ['resultado' => 'error', 'mensaje' => 'Código incorrecto'];
-            }
+             }
 
             if ($this->nuevaClave !== $this->confirmarClave) {
                 return ['resultado' => 'error', 'mensaje' => 'Las contraseñas no coinciden'];
@@ -51,6 +46,16 @@ class cambiarClaveModelo extends connectDB
 
             return $this->validarYActualizarClave($datos['correo']);
         }
+         
+
+          public function actualizarClaveRecuperacionApp($codigo, $nuevaClave, $confirmarClave, $correo){
+            $this->codigo = trim($codigo);
+            $this->nuevaClave = trim($nuevaClave);
+            $this->confirmarClave = trim($confirmarClave);
+            $this->correo=$correo;
+            return $this->validarYActualizarClave($this->correo);
+          }
+       
 
         private function validarYActualizarClave($correo){
             try {

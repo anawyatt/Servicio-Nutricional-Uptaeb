@@ -264,14 +264,26 @@
             $this->cedula = $this->payload->cedula;
             $rand = rand(1, 10000);
             $this->img = $img;
-            $ruta = "assets/images/perfil/";
-            $imagen = $ruta . $this->cedula . $rand . '.png';
-            $this->imagen = $imagen;
 
-            move_uploaded_file($this->img, $this->imagen);
+            // Ruta absoluta donde se guardará la imagen
+            $directorio = __DIR__ . '/../../assets/images/perfil/';
+            $nombreArchivo = $this->cedula . $rand . '.png';
+            $rutaCompleta = $directorio . $nombreArchivo;
+
+            // Ruta relativa que se guardará en la base de datos
+            $this->imagen = 'assets/images/perfil/' . $nombreArchivo;
+
+            // Mover imagen al servidor
+            if (!move_uploaded_file($this->img, $rutaCompleta)) {
+                return [
+                    'resultado' => 'error',
+                    'mensaje' => 'No se pudo guardar la imagen en el servidor.'
+                ];
+            }
 
             return $this->editar();
         }
+
 
         private function editar() {
             try {

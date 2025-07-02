@@ -2,8 +2,8 @@
 
 namespace modelo;
 use config\connect\connectDB as connectDB;
-use helpers\JwtHelpers;
 use \PDO;
+use helpers\JwtHelpers;
 use modelo\reporteModelo as reporte; 
 
 
@@ -174,6 +174,7 @@ private function muestraU() {
 }
 
 public function verificarAnulacion($id) {
+    
     if (!preg_match("/^[0-9]+$/", $id)) {
         return ['resultado' => 'ID de entrada no válido'];
     }

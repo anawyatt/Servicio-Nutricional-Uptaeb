@@ -62,6 +62,7 @@
             <div class="card shadow" data-aos="fade-up" data-aos-delay="700">
                 <div class="card-body">
                     <form class="formu form1">
+                        <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                         <div class="form-card text-start">
                             <div class="row container">
                                 <div id="container0" class="contai"></div>

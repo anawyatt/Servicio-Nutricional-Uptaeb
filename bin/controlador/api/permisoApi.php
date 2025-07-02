@@ -15,10 +15,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
     exit();
 }
 
-use modelo\stockAlimentosModelo as stockAlimentos;
+use modelo\PermisoModelo;
 use middleware\JwtMiddleware;
 use helpers\decryptionAsyncHelpers;
- $objeto = new stockAlimentos();
+ $objeto = new PermisoModelo();
 
 $decodedToken = JwtMiddleware::verificarToken();
 
@@ -39,12 +39,12 @@ else{
 try {
     $data = decryptionAsyncHelpers::decryptPayload($_POST['datos']);
 
-    if (!isset($data['mostrarAlimentos']) || !isset($data['alimento'])) {
+    if (!isset($data['mostrarPermisos'])  || !isset($data['idRol'])) {
         http_response_code(400);
-        echo json_encode(['resultado' => 'error', 'mensaje' => 'Parámetros requeridos faltantes']);
+        echo json_encode(['resultado' => 'error', 'mensaje' => 'Parámetros requeridos faltantes permisos']);
         exit;
     }
-    $resultado = $objeto->buscarAlimento($data['alimento']);
+    $resultado = $objeto->permisosApp($data['idRol']);
 
     echo json_encode($resultado);
 } catch (Exception $e) {

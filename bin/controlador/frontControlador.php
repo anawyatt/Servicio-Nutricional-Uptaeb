@@ -50,11 +50,11 @@ class frontControlador extends configSistema
     private function _loadPage($url, $request)
 {
     $publicRoutes = ['login', 'cambiarClave'];
+    $loginURL = urlencode($this->cipher->encryptURL('login'));
 
     if (!in_array($url, $publicRoutes)) {
         $this->jwtPayload = JwtMiddleware::verificarToken();
         if (!$this->jwtPayload) {
-            $loginURL = urlencode($this->cipher->encryptURL('login'));
             die("<script>window.location='?url=" . $loginURL . "'</script>");
         }
 
@@ -64,11 +64,11 @@ class frontControlador extends configSistema
             $token = $request["token"];
             $payload = JwtHelpers::verificarTokenPersonalizado($token); 
             if (!$payload || $payload['tipo'] !== 'recuperacion') {
-                die("Token inválido o expirado.");
+                   die("<script>window.location='?url=" . $loginURL . "'</script>");
             }
             $this->jwtPayload = $payload;
         } else {
-            die("Token no proporcionado.");
+               die("<script>window.location='?url=" . $loginURL . "'</script>");
         }
     }
 
