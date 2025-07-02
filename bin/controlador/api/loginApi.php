@@ -25,9 +25,9 @@ if (!isset($_POST['payload'])) {
     echo json_encode(['resultado' => 'error', 'mensaje' => 'Faltan datos cifrados']);
     exit;
 }
+else{
 
-
-
+    
 try {
 
     $data = decryptionAsyncHelpers::decryptPayload($_POST['payload']);
@@ -43,15 +43,14 @@ try {
 
     $login = new loginModelo();
     $respuesta = $login->loginSistema($cedula, $clave);
-
-    if ($respuesta['resultado'] === 'success') {
-        http_response_code(200);
-        echo json_encode($respuesta);
-    } else {
-        http_response_code(401);
-        echo json_encode($respuesta);
-    }
+    echo json_encode($respuesta);
+    
 } catch (Exception $e) {
     http_response_code(400);
     echo json_encode(['resultado' => 'error', 'mensaje' => $e->getMessage()]);
 }
+
+
+}
+
+

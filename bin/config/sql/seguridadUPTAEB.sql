@@ -364,6 +364,38 @@ DELIMITER ;
 
         DELIMITER ;
 
+        DELIMITER //
+
+CREATE PROCEDURE sp_registrar_bitacora(
+    IN p_modulo VARCHAR(100),
+    IN p_acciones TEXT,
+    IN p_cedula VARCHAR(20)
+)
+BEGIN
+    INSERT INTO bitacora (modulo, acciones, fecha, hora, cedula, status)
+    VALUES (p_modulo, p_acciones, DEFAULT, DEFAULT, p_cedula, 1);
+END;
+//
+
+-- Agregar protección contra UPDATE y DELETE
+CREATE TRIGGER before_update_bitacora
+BEFORE UPDATE ON bitacora
+FOR EACH ROW
+BEGIN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se permiten actualizaciones en bitacora.';
+END;
+//
+
+CREATE TRIGGER before_delete_bitacora
+BEFORE DELETE ON bitacora
+FOR EACH ROW
+BEGIN
+    SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'No se permiten eliminaciones en bitacora.';
+END;
+//
+
+DELIMITER ;
+
         CREATE VIEW vista_usuarios_info AS 
             SELECT  
                 u.cedula, 
@@ -380,6 +412,8 @@ DELIMITER ;
             FROM usuario u 
             INNER JOIN rol r ON u.idRol = r.idRol 
             WHERE r.idRol != 1 AND u.status != 0;
+
+            
 
 
         COMMIT;
