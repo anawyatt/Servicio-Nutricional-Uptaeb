@@ -60,6 +60,7 @@
             <div class="card-body">
               <form class="formu form1">
                 <div class="form-card text-start">
+                   <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                   <div class="row container">
                     <div class="wave-group p-2 my-2 mb-2">
                       <div id="container0" class="contai">
@@ -124,6 +125,7 @@
                   <!-- fieldsets -->
                   <fieldset class="contenido" id="form1">
                               <form>
+                                 <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                                 <div class="form-card text-start">
                               <div class="row">
             <div class="wave-group p-2 col-md-6 my-2">
@@ -177,6 +179,7 @@
                            <!--/ fieldsets Contraseña/-->
                            <fieldset id="form2">
                               <form>
+                                 <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                                 <div class="form-card text-start mostrar" id="ante">
                                         <center>
                                             <div class="wave-group col-12 row">
