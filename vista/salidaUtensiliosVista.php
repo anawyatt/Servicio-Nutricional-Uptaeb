@@ -67,7 +67,7 @@
                         <div class="card-body">
                         
                               <form class="formu form1">
-
+                                <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                                   <div class="wave-group p-2 my-2 " id="sel" style="margin-top: 1.7vw!important">
 
                 <select class="input tipoU" id="tipoU">

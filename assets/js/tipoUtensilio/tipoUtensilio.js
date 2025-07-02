@@ -246,52 +246,56 @@ $(document).ready(function () {
     function registrar() {
         const tipo = capitalizarYEliminarEspaciosExtras($("#tipo").val());
         $("#registrar").prop("disabled", true);
-    
-        $.ajax({
-            type: "POST",
-            dataType: "json",
-            url: "",
-            data: { registrar: true, tipo },
-            success(data) {
-                if (data.resultado === 'exitoso') {
-                    $('.limpiar').click();
-                    $('#cerrar').click();
-                    primary();
-                    delete mostrar;
-                    rellenar();
-                    Swal.fire({
-                        toast: true,
-                        position: 'top-end',
-                        icon: 'success',
-                        title: `El tipo de utensilio ha sido <b class="text-primary fw-bold">${tipo}</b> Registrado Exitosamente!`,
-                        showConfirmButton: false,
-                        timer: 2500,
-                        timerProgressBar: true,
-                    });
-                } else if (data.error) {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Error',
-                        text: data.error || 'Hubo un error inesperado.',
-                    });
-                }
-            },
-            complete() {
-                $("#registrar").prop("disabled", false);
-            }
-        });
+        let token = $('[name="csrf_token"]').val();
+        if(token){
+                $.ajax({
+                    type: "POST",
+                    dataType: "json",
+                    url: "",
+                    data: { registrar: true, tipo, csrfToken: token },
+                    success(data) {
+                        if (data.mensaje.resultado === 'exitoso' && data.newCsrfToken) {
+                            $('.limpiar').click();
+                            $('#cerrar').click();
+                            $('[name="csrf_token"]').val(data.newCsrfToken);
+                            primary();
+                            delete mostrar;
+                            rellenar();
+                            Swal.fire({
+                                toast: true,
+                                position: 'top-end',
+                                icon: 'success',
+                                title: `El tipo de utensilio ha sido <b class="text-primary fw-bold">${tipo}</b> Registrado Exitosamente!`,
+                                showConfirmButton: false,
+                                timer: 2500,
+                                timerProgressBar: true,
+                            });
+                        } else if (data.error) {
+                            Swal.fire({
+                                icon: 'error',
+                                title: 'Error',
+                                text: data.error || 'Hubo un error inesperado.',
+                            });
+                        }
+                    },
+                    complete() {
+                        $("#registrar").prop("disabled", false);
+                    }
+                });
+        }
     }
     
 
     function modificar() {
         $("#modificar").prop("disabled", true);
         const tipo2 = capitalizarYEliminarEspaciosExtras($("#tipo2").val());
-    
+        let token = $('[name="csrf_token"]').val();
+        if(token){
         $.ajax({
             type: "post",
             url: "",
             dataType: 'json',
-            data: { tipo2, id },
+            data: { tipo2, id , csrfToken: token},
             success(data) {
                 if (data.resultado === 'ya no existe') {
                     $('#cerrar2').click();
@@ -337,6 +341,7 @@ $(document).ready(function () {
                 $("#modificar").prop("disabled", false);
             }
         });
+        }
     }
 
     function valModificar() {
@@ -455,13 +460,15 @@ $(document).ready(function () {
     // Eliminar
     $('#borrar').click((e) => {
         e.preventDefault();
+        let token = $('[name="csrf_token"]').val();
         $("#borrar").prop("disabled", true);
+        if (token) {
         
         $.ajax({
             url: '',
             method: 'post',
             dataType: 'json',
-            data: { eliminar: 'borrar', id },
+            data: { eliminar: 'borrar', id, csrfToken: token},
             success(data) {
                 $('#cerrar3').click();
                 delete mostrar;
@@ -503,6 +510,7 @@ $(document).ready(function () {
                 $("#borrar").prop("disabled", false);
             }
         });
+    }
     });
     
 
@@ -551,6 +559,28 @@ $(document).ready(function () {
         });
     });
 
+      
+
     // Quitar botones después de un tiempo
     setTimeout(quitarBotones, 500);
 });
+
+  setInterval(function() {
+    $.ajax({
+        url: '',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+        success(data){
+        if (data.newCsrfToken) {
+        $('[name="csrf_token"]').val(data.newCsrfToken);
+            console.log('Token CSRF renovado');
+        } else {
+            console.log('No se pudo renovar el token CSRF');
+        }
+        },
+        error: function(err) {
+        console.error('Error renovando token CSRF:', err);
+        }
+    });
+    }, 240000);

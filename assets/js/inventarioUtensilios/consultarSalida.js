@@ -240,16 +240,19 @@ function valAnulacion(idd){
   //-----------------------------------------------------------------------------------------
   
   $('#borrar').click((e)=>{
+    let token = $('[name="csrf_token"]').val();
+    if(token){
 
     e.preventDefault();
     $.ajax({
       url: '',
       method: 'post',
       dataType: 'json',
-      data:{id , borrar: 'borrar'},
+      data:{id , borrar: 'borrar', csrfToken: token},
       success(data){
         console.log(data);
-      if (data.resultado === 'eliminado'){
+      if (data.mensaje.resultado === 'eliminado' && data.newCsrfToken){
+        $('[name="csrf_token"]').val(data.newCsrfToken);
         $('#cerrar3').click();
         tablaSalidaUtensilios();
           Swal.fire({
@@ -261,10 +264,11 @@ function valAnulacion(idd){
                timer:2500,
                timerProgressBar:true,
             })
-      }
-    }
-  })
+            }
+        }
     })
+    }
+})
 
 
 
