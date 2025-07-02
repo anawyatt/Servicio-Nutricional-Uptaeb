@@ -27,7 +27,6 @@ if (!isset($_POST['payload'])) {
 }
 
 
-
 try {
 
     $data = decryptionAsyncHelpers::decryptPayload($_POST['payload']);
