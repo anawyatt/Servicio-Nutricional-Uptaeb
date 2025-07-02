@@ -972,16 +972,35 @@ class consultarMenuModelo extends connectDB {
             }
         }
         
-        private function obtenerInfoMenu($idMenu) {
-            $this->conectarDB();
-            $info = $this->conex->prepare("SELECT * FROM menu m INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu 
-            INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA WHERE m.idMenu = ?");
-            $info->bindValue(1, $idMenu);
-            $info->execute();
-            $data=$info->fetchAll(\PDO::FETCH_OBJ);
-            $this->desconectarDB();
-            return $data;
 
+        public function infoApp($idMenu) {
+            if (!preg_match("/^[0-9]{1,}$/", $idMenu)) {
+                return ['Ingresar Menú'];
+            }
+
+            $this->idMenu = $idMenu;
+            return $this->mostarApp();
+        }
+
+
+        private function mostarApp(){
+            try {
+                $this->conectarDB();
+                $query = $this->conex->prepare("SELECT a.idAlimento, a.imgAlimento,a.nombre, a.marca, a.unidadMedida, 
+                dsm.cantidad, ta.idTipoA, ta.tipo, m.idMenu, sa.descripcion, sa.idSalidaA FROM salidaalimentos sa
+                INNER JOIN detallesalidamenu dsm ON dsm.idSalidaA = sa.idSalidaA INNER JOIN alimento a ON a.idAlimento = dsm.idAlimento
+                INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA INNER JOIN menu m ON m.idMenu = dsm.idMenu
+                WHERE m.idMenu = ? AND m.status = 1 AND sa.status = 1;");
+
+                $query->bindValue(1, $this->idMenu);
+                $query->execute();
+                $resultado = $query->fetchAll(PDO::FETCH_ASSOC); 
+                 $this->desconectarDB();
+        
+                return $resultado;
+            } catch (\PDOException $e) {
+                return $e->getMessage();
+            }
         }
         
     

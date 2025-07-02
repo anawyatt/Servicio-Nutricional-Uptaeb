@@ -190,8 +190,9 @@
                 }
 
                 if ($this->nuevaClave !== $this->repetirClave) {
-                    return ['resultado' => 'no son iguales'];
+                    return ['resultado' => 'error', 'mensaje' => 'Las nuevas contraseñas no coinciden'];
                 }
+
 
                 $this->nuevaContraseña = password_hash($this->nuevaClave, PASSWORD_BCRYPT);
                 $this->conectarDBSeguridad();

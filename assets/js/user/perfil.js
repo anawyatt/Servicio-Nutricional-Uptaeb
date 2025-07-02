@@ -560,7 +560,7 @@ let error_clave3 = false;
                               toast: true,
                               position: 'top-end',
                               icon: 'error',
-                              title: '<span class="text-rojo">Las contraseñas no son iguales!</span>',
+                              title: '<span class="text-rojo">Las nuevas contraseñas no coinciden!</span>',
                               showConfirmButton: false,
                               timer: 3000,
                               timerProgressBar: 3000,
