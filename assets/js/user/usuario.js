@@ -474,7 +474,7 @@ $(document).ready(function () {
       }
 
       function chequeo_telefono() {
-        var campo = /^0\d{3} \d{7}$/;
+        var campo = /^0\d{10}$/;
         var telefono = $("#telefono").val();
         if (campo.test(telefono) ) {
          $(".error7").html("");
@@ -486,7 +486,7 @@ $(document).ready(function () {
          $('.letra7').removeClass('labelE');
          $('.letra7').addClass('label-char');
         } else {
-         $(".error7").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese el número de teléfono <b>(0400 0000000)</b"');
+         $(".error7").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese un número de teléfono válido sin espacios, por ejemplo: <b>04120000000</b>');
          $(".error7").show();
          $('#telefono').addClass('errorBorder');
          $('.bar7').removeClass('bar');

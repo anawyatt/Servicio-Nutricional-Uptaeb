@@ -229,6 +229,7 @@ class eventoModelo extends connectDB {
           $this->conectarDB();
 
           $this->conex->beginTransaction();
+          $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
 
           $idTipoSalidas = $this->tipoSalida();
           $menuId = $this->infoMenu();
@@ -321,7 +322,8 @@ class eventoModelo extends connectDB {
         try {
               $this->conectarDB();
               $this->conex->beginTransaction();
-
+              
+              $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
 
               $this->detalleSalidaMenu();
               

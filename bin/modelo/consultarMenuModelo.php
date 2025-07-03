@@ -476,6 +476,8 @@ class consultarMenuModelo extends connectDB {
                 $this->conectarDB();
                 $this->conex->beginTransaction();
 
+                $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
+
                 $bitacora = new bitacoraModelo();
 
                 $idTipoSalidas = $this->tipoSalidaMenu();
@@ -638,13 +640,11 @@ class consultarMenuModelo extends connectDB {
         
                 $this->actualizarStock($this->alimento, $this->cantidad);
                 $this->actualizarReservado($this->alimento, $this->cantidad);
-                $this->desconectarDB();
-                 return ['resultado' => 'modificado alimentos exitosamente'];
             
+                return ['resultado' => 'modificado alimentos exitosamente'];
 
             }catch (Exception $error) {
-                  $this->conex->rollBack();
-                  return ['error' => $error->getMessage()];     
+                 throw $error;    
                }
                finally {
                    $this->desconectarDB();
@@ -789,6 +789,8 @@ class consultarMenuModelo extends connectDB {
             try {
                 $this->conectarDB();
                 $this->conex->beginTransaction();
+
+                $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
         
                 $mostrar = $this->conex->prepare("SELECT sa.idSalidaA FROM menu m INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa 
                 ON sa.idSalidaA = dsm.idSalidaA WHERE m.idMenu = ? FOR UPDATE;");
