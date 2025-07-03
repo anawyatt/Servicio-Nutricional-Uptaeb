@@ -491,9 +491,8 @@ class consultarEventosModelo extends connectDB {
         private function modiEvento() {
             try {
                 $this->conectarDB();
-                $this->conex->beginTransaction();
-
                 $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
+                $this->conex->beginTransaction();
 
                 $bitacora = new bitacoraModelo;
         
@@ -819,10 +818,8 @@ class consultarEventosModelo extends connectDB {
         private function eliminar() {
             try {
                 $this->conectarDB();
-                $this->conex->beginTransaction();
-
                 $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
-         
+                $this->conex->beginTransaction();
                 $mostrar = $this->conex->prepare("SELECT m.idMenu, sa.idSalidaA FROM evento e INNER JOIN menu m ON m.idMenu = e.idMenu INNER JOIN detallesalidamenu dsm 
                 ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA WHERE e.idEvento = ? FOR UPDATE;");
                 $mostrar->bindValue(1, $this->id);

@@ -227,9 +227,8 @@ class eventoModelo extends connectDB {
         
         try{
           $this->conectarDB();
-
-          $this->conex->beginTransaction();
           $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
+          $this->conex->beginTransaction();
 
           $idTipoSalidas = $this->tipoSalida();
           $menuId = $this->infoMenu();
@@ -321,9 +320,8 @@ class eventoModelo extends connectDB {
       private function registrarDetalle() {
         try {
               $this->conectarDB();
-              $this->conex->beginTransaction();
-              
               $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
+              $this->conex->beginTransaction();
 
               $this->detalleSalidaMenu();
               

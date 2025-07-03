@@ -221,10 +221,8 @@
         private function menu(){
           try {
               $this->conectarDB();
-              $this->conex->beginTransaction();
-
               $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
-
+              $this->conex->beginTransaction();
               $idTipoSalidas = $this->tipoSalida();
               $menuId = $this->infoMenu();
               $salidaId = $this->salidaAlimentos($idTipoSalidas);
@@ -303,10 +301,8 @@
         private function registrarDetalle() {
           try {
               $this->conectarDB();
-              $this->conex->beginTransaction();
-
               $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
-
+              $this->conex->beginTransaction();
               $this->detalleSalidaMenu();
               list($nombreAlimento, $unidadMedida) = $this->obtenerDatosAlimento();        
               $resultado = $this->actualizarStockYReservado($this->alimento, $this->cantidad);
