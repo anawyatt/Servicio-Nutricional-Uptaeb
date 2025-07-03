@@ -224,6 +224,7 @@ class consultarSalidaUtensiliosModelo extends connectDB {
     private function anular() {
     try {
         $this->conectarDB();
+        $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
         $this->conex->beginTransaction();
 
         $stmt = $this->conex->prepare("UPDATE salidautensilios SET status = 0 WHERE idSalidaU = ?");

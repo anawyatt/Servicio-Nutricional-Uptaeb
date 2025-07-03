@@ -286,7 +286,7 @@
                 CREATE INDEX idx_salidaalimentos_tiposalida ON salidaalimentos(idTipoSalidaA);
                 
 
-
+                CREATE INDEX idx_tipoStatus ON tipoutensilios (status, idTipoU);
 
 
                COMMIT;
@@ -349,7 +349,9 @@
                     CREATE OR REPLACE VIEW vista_alimentos_entrada AS SELECT ea.idEntradaA, ea.fecha, ea.hora, ea.descripcion, ea.status, a.idAlimento, a.imgAlimento, a.codigo, a.nombre, a.marca, a.unidadMedida, ta.idTipoA, ta.tipo, dea.cantidad FROM entradaalimento ea INNER JOIN detalleentradaa dea ON dea.idEntradaA = ea.idEntradaA INNER JOIN alimento a ON a.idAlimento = dea.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA;
                     CREATE OR REPLACE VIEW vista_salida_alimentos AS SELECT sa.idSalidaA, sa.fecha, sa.hora, sa.descripcion, sa.status, sa.idTipoSalidaA, ts.tipoSalida FROM salidaalimentos sa INNER JOIN tiposalidas ts ON ts.idTipoSalidas = sa.idTipoSalidaA WHERE ts.tipoSalida != 'Menú' AND sa.status = 1;
                     CREATE OR REPLACE VIEW vista_detalle_salida_alimentos AS SELECT sa.idSalidaA, sa.fecha, sa.hora, sa.descripcion, ts.tipoSalida, a.idAlimento, a.nombre, a.codigo, a.marca, a.unidadMedida, a.stock, a.imgAlimento, ta.idTipoA, ta.tipo, dsa.cantidad, dsa.status AS statusDetalle FROM salidaalimentos sa INNER JOIN tiposalidas ts ON ts.idTipoSalidas = sa.idTipoSalidaA INNER JOIN detallesalidaa dsa ON dsa.idSalidaA = sa.idSalidaA INNER JOIN alimento a ON a.idAlimento = dsa.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA;
-                    
+
+                    CREATE OR REPLACE VIEW vista_tipos_utensilios_activos AS SELECT * FROM tipoutensilios WHERE status != 0;
+
                     
                     DELIMITER $$
 
@@ -574,6 +576,225 @@
                        CREATE INDEX idx_evento_idMenu ON evento (idMenu);
                        CREATE INDEX idx_detalleentradaa_idAli ON detalleentradaa (idAlimento);
                        CREATE INDEX idx_alimento_idTipoA ON alimento (idTipoA);
+
+                        DELIMITER //
+
+                        CREATE PROCEDURE registrar_tipo_utensilio(
+                            IN p_tipo VARCHAR(50),
+                            OUT p_resultado VARCHAR(100)
+                        )
+                        BEGIN
+                            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+                            BEGIN
+                                ROLLBACK;
+                                SET p_resultado = 'Error en la inserción';
+                            END;
+
+                            START TRANSACTION;
+
+                            INSERT INTO tipoutensilios (tipo, status) VALUES (p_tipo, 1);
+
+                            COMMIT;
+                            SET p_resultado = 'exitoso';
+                        END //
+
+                        DELIMITER ;
+
+                        DELIMITER //
+
+                        CREATE PROCEDURE actualizar_tipo_utensilio (
+                            IN p_id INT,
+                            IN p_nuevo_tipo VARCHAR(50),
+                            OUT p_resultado VARCHAR(100)
+                        )
+                        BEGIN
+                            DECLARE v_filas_afectadas INT DEFAULT 0;
+
+                            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+                            BEGIN
+                                ROLLBACK;
+                                SET p_resultado = 'Error al actualizar el tipo';
+                            END;
+
+                            START TRANSACTION;
+
+                            UPDATE tipoutensilios 
+                            SET tipo = p_nuevo_tipo 
+                            WHERE idTipoU = p_id;
+
+                            SET v_filas_afectadas = ROW_COUNT();
+
+                            IF v_filas_afectadas > 0 THEN
+                                COMMIT;
+                                SET p_resultado = 'actualizado';
+                            ELSE
+                                ROLLBACK;
+                                SET p_resultado = 'no encontrado o sin cambios';
+                            END IF;
+                        END //
+
+                        DELIMITER ;
+
+                        DELIMITER //
+
+                        CREATE PROCEDURE anular_tipo_utensilio (
+                            IN p_id INT,
+                            OUT p_resultado VARCHAR(100),
+                            OUT p_tipo_nombre VARCHAR(50)
+                        )
+                        BEGIN
+                            DECLARE v_tipo_nombre VARCHAR(50);
+                            DECLARE v_filas_afectadas INT DEFAULT 0;
+
+                            DECLARE EXIT HANDLER FOR SQLEXCEPTION
+                            BEGIN
+                                ROLLBACK;
+                                SET p_resultado = 'Error al anular el tipo';
+                            END;
+
+                            START TRANSACTION;
+
+                            SELECT tipo INTO v_tipo_nombre
+                            FROM tipoutensilios
+                            WHERE idTipoU = p_id AND status = 1
+                            LIMIT 1;
+
+                            IF v_tipo_nombre IS NOT NULL THEN
+                                UPDATE tipoutensilios SET status = 0 WHERE idTipoU = p_id;
+                                SET v_filas_afectadas = ROW_COUNT();
+
+                                IF v_filas_afectadas > 0 THEN
+                                    COMMIT;
+                                    SET p_resultado = 'anulado';
+                                    SET p_tipo_nombre = v_tipo_nombre;
+                                ELSE
+                                    ROLLBACK;
+                                    SET p_resultado = 'no encontrado o sin cambios';
+                                END IF;
+                            ELSE
+                                ROLLBACK;
+                                SET p_resultado = 'no encontrado o ya anulado';
+                            END IF;
+                        END //
+                        DELIMITER ;
+
+                       DELIMITER //
+
+                        CREATE PROCEDURE sp_registrar_utensilio (
+                            IN p_img VARCHAR(255),
+                            IN p_nombre VARCHAR(50),
+                            IN p_material VARCHAR(30),
+                            IN p_tipoU INT
+                        )
+                        BEGIN
+                            -- Verificar que el tipo de utensilio exista
+                            IF EXISTS (
+                                SELECT 1 FROM tipoutensilios WHERE idTipoU = p_tipoU
+                            ) THEN
+
+                                -- Insertar utensilio
+                                INSERT INTO utensilios (imgUtensilios, nombre, material, stock, idTipoU, status)
+                                VALUES (p_img, p_nombre, p_material, 0, p_tipoU, 1);
+                            ELSE
+                                -- Si el tipo no existe, lanzar error
+                                SIGNAL SQLSTATE '45000'
+                                SET MESSAGE_TEXT = 'El tipo de utensilio no existe';
+                            END IF;
+                        END //
+
+                        DELIMITER ;
+
+                        DELIMITER //
+                        
+                        CREATE PROCEDURE sp_modificar_utensilio (
+                            IN p_id INT,
+                            IN p_nombre VARCHAR(50),
+                            IN p_material VARCHAR(30),
+                            IN p_tipoU INT
+                        )
+                        BEGIN
+                            DECLARE utensilioExiste INT DEFAULT 0;
+
+                            -- Bloquear fila para evitar modificaciones concurrentes
+                            SELECT COUNT(*) INTO utensilioExiste 
+                            FROM utensilios 
+                            WHERE idUtensilios = p_id 
+                            FOR UPDATE;
+
+                            IF utensilioExiste = 0 THEN
+                                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Utensilio no encontrado';
+                            ELSE
+                                UPDATE utensilios 
+                                SET nombre = p_nombre, material = p_material, idTipoU = p_tipoU
+                                WHERE idUtensilios = p_id;
+                            END IF;
+                        END //
+
+                        DELIMITER ;
+
+                        DELIMITER //
+
+                        CREATE PROCEDURE sp_registrar_detalle_salida (
+                            IN p_idUtensilio INT,
+                            IN p_cantidad INT,
+                            IN p_idSalidaU INT
+                        )
+                        BEGIN
+                            DECLARE stockActual INT DEFAULT 0;
+
+                            START TRANSACTION;
+
+                            -- Obtener stock actual con bloqueo
+                            SELECT stock INTO stockActual FROM utensilios WHERE idUtensilios = p_idUtensilio AND status = 1 FOR UPDATE;
+
+                            IF stockActual < p_cantidad THEN
+                                ROLLBACK;
+                                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Stock insuficiente para la salida';
+                            ELSE
+                                -- Insertar detalle
+                                INSERT INTO detallesalidau (cantidad, idUtensilios, idSalidaU, status)
+                                VALUES (p_cantidad, p_idUtensilio, p_idSalidaU, 1);
+
+                                -- Actualizar stock
+                                UPDATE utensilios
+                                SET stock = stockActual - p_cantidad
+                                WHERE idUtensilios = p_idUtensilio;
+
+                                COMMIT;
+                            END IF;
+                        END //
+
+                        DELIMITER ;
+
+                        DELIMITER //
+
+                        CREATE PROCEDURE sp_registrarDetalleEntrada(
+                            IN p_cantidad INT,
+                            IN p_idUtensilio INT,
+                            IN p_idEntrada INT
+                        )
+                        BEGIN
+                            DECLARE currentStock INT;
+
+                            START TRANSACTION;
+
+                            INSERT INTO detalleentradau (cantidad, idUtensilios, idEntradaU, status) VALUES (p_cantidad, p_idUtensilio, p_idEntrada, 1);
+
+                            SELECT stock INTO currentStock FROM utensilios WHERE idUtensilios = p_idUtensilio AND status = 1 FOR UPDATE;
+
+                            IF currentStock IS NULL THEN
+                                ROLLBACK;
+                                SIGNAL SQLSTATE '45000' SET MESSAGE_TEXT = 'Utensilio no encontrado o inactivo';
+                            ELSE
+                                UPDATE utensilios SET stock = currentStock + p_cantidad WHERE idUtensilios = p_idUtensilio;
+                                COMMIT;
+                            END IF;
+                        END //
+
+                        DELIMITER ;
+
+
+
 
 
 

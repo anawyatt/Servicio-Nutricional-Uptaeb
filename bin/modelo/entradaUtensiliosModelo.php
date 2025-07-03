@@ -189,8 +189,10 @@ public function registrarEntradaU($fecha, $hora, $descripcion) {
 }
 
 private function registrar() {
-    $this->conectarDB();
+    
     try {
+        $this->conectarDB();
+        $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
         $this->conex->beginTransaction();
 
         $stmt = $this->conex->prepare("INSERT INTO `entradau`(`idEntradaU`, `fecha`, `hora`, `descripcion`, `status`) VALUES(DEFAULT, ?, ?, ?, 1)");
@@ -238,7 +240,7 @@ public function registrarDetalleEntradaU($utensilio, $cantidad, $id) {
 private function registrarDetalle() {
     try {
         $this->conectarDB();
-
+        $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
         $stmt = $this->conex->prepare("CALL sp_registrarDetalleEntrada(?, ?, ?)");
         $stmt->bindValue(1, $this->cantidad);
         $stmt->bindValue(2, $this->utensilio);
