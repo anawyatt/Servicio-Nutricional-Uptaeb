@@ -494,6 +494,7 @@ class estudiantesModelo extends connectDB
     {
         try {
             $this->conectarDB();
+            $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
             $this->conex->beginTransaction();
 
             $exists = $this->verificarEstudianteExistente($this->cedula);

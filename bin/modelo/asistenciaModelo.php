@@ -238,6 +238,7 @@ class asistenciaModelo extends connectDB
     {
         try {
             $this->conectarDB();
+            $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
             $this->conex->beginTransaction();
 
             $registrar = $this->conex->prepare("INSERT INTO `asistencia` (`cedEstudiante`, `fecha`, `hora`, `idMenu`, `status`) VALUES (?, DEFAULT, DEFAULT, ?, 1)");
@@ -466,6 +467,7 @@ class asistenciaModelo extends connectDB
     {
         try {
             $this->conectarDB();
+            $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
             $this->conex->beginTransaction();
 
             // Registrar estudiante
@@ -656,6 +658,7 @@ class asistenciaModelo extends connectDB
     {
         try {
             $this->conectarDB();
+            $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
             $this->conex->beginTransaction();
 
             // Registrar asistencia
