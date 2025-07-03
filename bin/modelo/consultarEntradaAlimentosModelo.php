@@ -234,6 +234,7 @@ class consultarEntradaAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
+      $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
       $this->conex->beginTransaction();
       $query = $this->conex->prepare("SELECT * FROM entradaalimento WHERE idEntradaA = ? FOR UPDATE ");
       $query->bindValue(1, $this->id);

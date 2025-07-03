@@ -182,8 +182,8 @@ class registrarEntradaAlimentosModelo extends connectDB
 
     try {
       $this->conectarDB();
+      $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
       $this->conex->beginTransaction();
-
       $registrar = $this->conex->prepare(" INSERT INTO `entradaalimento`(`idEntradaA`,`fecha`, `hora`, `descripcion`, `status`) VALUES(DEFAULT, ?,?, ?, 1)");
       $registrar->bindValue(1, $this->fecha);
       $registrar->bindValue(2, $this->hora);
@@ -234,6 +234,7 @@ class registrarEntradaAlimentosModelo extends connectDB
 
     try {
       $this->conectarDB();
+      $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
       $this->conex->beginTransaction();
       $registrar = $this->conex->prepare(" INSERT INTO `detalleentradaa`(`idDetalleA`, `cantidad`, `idAlimento`,`idEntradaA`, `status`) VALUES(DEFAULT, ?, ?,?, 1)");
       $registrar->bindValue(1, $this->cantidad);
