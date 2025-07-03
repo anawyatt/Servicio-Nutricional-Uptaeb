@@ -48,7 +48,7 @@ CREATE TABLE `alimento` (
 
 LOCK TABLES `alimento` WRITE;
 /*!40000 ALTER TABLE `alimento` DISABLE KEYS */;
-INSERT INTO `alimento` VALUES (1,'CAMSIN62','assets/images/alimentos/CAMSIN62.png','Cambur','Kl','Sin Marca',0,0,5,1),(2,'FRESIN49','assets/images/alimentos/FRESIN49.png','Fresa','Kl','Sin Marca',100,0,5,1),(3,'GUASIN40','assets/images/alimentos/GUASIN40.png','Guanabana','Kl','Sin Marca',40,0,5,1),(4,'GUASIN28','assets/images/alimentos/GUASIN90.png','Guayaba','Kl','Sin Marca',40,0,5,1),(5,'LECSIN44','assets/images/alimentos/LECSIN44.png','Lechoza','Kl','Sin Marca',-50,0,5,1),(6,'MANSIN83','assets/images/alimentos/MANSIN83.png','Mango','Kl','Sin Marca',38,0,5,1),(7,'CRELAB56','assets/images/alimentos/CRELAB56.png','Crema De Leche','Unidad','La Baragueña',100,2,2,1),(8,'HUESIN50','assets/images/alimentos/HUESIN50.png','Huevo','Unidad','Sin Marca',98,55,2,1),(9,'QUESIN27','assets/images/alimentos/QUESIN27.png','Queso Amarillo','Kl','Sin Marca',173,27,2,1),(10,'QUESIN40','assets/images/alimentos/QUESIN40.png','Queso Blanco','Kl','Sin Marca',-90,0,2,1),(11,'SUESAN96','assets/images/alimentos/SUESAN96.png','Suero','Unidad','San Pedro',0,0,2,1),(12,'BISSIN97','assets/images/alimentos/BISSIN97.png','Bistec','Kl','Sin Marca',167,23,4,1),(13,'POLSIN80','assets/images/alimentos/POLSIN80.png','Pollo Entero','Kl','Sin Marca',125,0,4,1),(14,'JAMSIN37','assets/images/alimentos/JAMSIN37.png','Jamon Arepero','Kl','Sin Marca',90,5,4,1),(15,'JAMPLU55','assets/images/alimentos/JAMPLU55.png','Jamon De Espalda','Kl','Plumrose',-90,0,4,1),(16,'PATSIN90','assets/images/alimentos/PATSIN90.png','Pata De Pollo','Kl','Sin Marca',0,0,4,1),(17,'ACECOA88','assets/images/alimentos/ACECOA88.png','Aceite Natural','Unidad','Coamo',543,0,3,1),(18,'AVEQUA51','assets/images/alimentos/AVEQUA51.png','Avena','Unidad','Quaker',118,12,3,1),(19,'CARELM88','assets/images/alimentos/CARELM37.png','Caraotas','Unidad','El Maizalito',1,13,3,1),(20,'CHERIK32','assets/images/alimentos/CHERIK32.png','Cheddar','Unidad','Rikesa',87,1,3,1),(21,'HARROB11','assets/images/alimentos/HARROB11.png','Harina De Trigo Con Leudante','Kl','Robin Hood',26,12,3,1),(22,'ARRMAR92','assets/images/alimentos/ARRMAR92.png','Arroz','Kl','Mary',88,0,3,1),(23,'PASLAE82','assets/images/alimentos/PASLAE82.png','Pasta Larga','Kl','La Especial',43,0,3,1),(24,'HARPAN63','assets/images/alimentos/HARPAN63.png','Harina De Maiz','Kl','Pan',85,0,3,1),(25,'JAMDIA92','assets/images/alimentos/JAMDIA92.png','Jamon Enlatado','Unidad','Diablitos Under Wood',0,0,3,1),(26,'LENELM94','assets/images/alimentos/LENELM94.png','Lentejas','Kl','El Maizalito',0,0,3,1),(27,'MANMAV56','assets/images/alimentos/MANMAV56.png','Mantequilla','Unidad','Mavesa',30,0,3,1),(28,'MAYKRA74','assets/images/alimentos/MAYKRA74.png','Mayonesa','Unidad','Kraft',30,0,3,1),(29,'AJISIN47','assets/images/alimentos/AJISIN45.png','Aji Dulce','Kl','Sin Marca',0,0,6,1),(30,'AUYSIN37','assets/images/alimentos/AUYSIN37.png','Auyama','Kl','Sin Marca',50,0,6,1),(31,'BERSIN43','assets/images/alimentos/BERSIN43.png','Berengena','Kl','Sin Marca',13,5,6,1),(32,'CALSIN71','assets/images/alimentos/CALSIN42.png','Calabazin','Kl','Sin Marca',15,0,6,1),(33,'CEBSIN38','assets/images/alimentos/CEBSIN38.png','Cebolla','Kl','Sin Marca',-20,0,6,1),(34,'TOMSIN13','assets/images/alimentos/TOMSIN13.png','Tomate Rojo','Kl','Sin Marca',-60,0,6,1),(35,'PAPSIN15','assets/images/alimentos/PAPSIN15.png','Papa','Kl','Sin Marca',-70,0,6,1),(36,'PEPSIN29','assets/images/alimentos/PEPSIN80.png','Pepino','Kl','Sin Marca',0,0,6,1),(37,'PLASIN34','assets/images/alimentos/PLASIN49.png','Platano','Kl','Sin Marca',0,0,5,1),(38,'REPSIN86','assets/images/alimentos/REPSIN86.png','Repollo','Kl','Sin Marca',0,0,6,1),(39,'ZANSIN24','assets/images/alimentos/ZANSIN31.png','Zanahoria','Kl','Sin Marca',0,0,6,1),(46,'SARMAR10','assets/images/alimentos/SARMAR93.png','Sardina','Unidad','Margarita',5,0,3,1),(47,'HJNSIN40','assets/images/alimentos/alimentoPredeterminado.png','Hjnkkjk','Ml','Sin Marca',0,0,2,0),(48,'TAMSIN35','assets/images/alimentos/TAMSIN35.png','Tamarindo','Gr','Sin Marca',0,0,5,0),(49,'MANSIN98','assets/images/alimentos/MANSIN98.png','Mandarina','Kl','Sin Marca',200,0,5,1),(50,'QUESIN10','assets/images/alimentos/QUESIN68.png','Queso Crema','Kl','Sin Marca',0,0,2,1),(51,'HOLSIN17','assets/images/alimentos/alimentoPredeterminado.png','Hola','Lt','Sin Marca',0,0,2,0),(52,'CALSIN11','assets/images/alimentos/alimentoPredeterminado.png','Calabazina','Gr','Sin Marca',0,0,3,0);
+INSERT INTO `alimento` VALUES (1,'CAMSIN62','assets/images/alimentos/CAMSIN62.png','Cambur','Kl','Sin Marca',0,0,5,1),(2,'FRESIN49','assets/images/alimentos/FRESIN49.png','Fresa','Kl','Sin Marca',90,10,5,1),(3,'GUASIN40','assets/images/alimentos/GUASIN40.png','Guanabana','Kl','Sin Marca',40,0,5,1),(4,'GUASIN28','assets/images/alimentos/GUASIN90.png','Guayaba','Kl','Sin Marca',40,0,5,1),(5,'LECSIN44','assets/images/alimentos/LECSIN44.png','Lechoza','Kl','Sin Marca',-50,0,5,1),(6,'MANSIN83','assets/images/alimentos/MANSIN83.png','Mango','Kl','Sin Marca',38,0,5,1),(7,'CRELAB56','assets/images/alimentos/CRELAB56.png','Crema De Leche','Unidad','La Baragueña',90,12,2,1),(8,'HUESIN50','assets/images/alimentos/HUESIN50.png','Huevo','Unidad','Sin Marca',98,55,2,1),(9,'QUESIN27','assets/images/alimentos/QUESIN27.png','Queso Amarillo','Kl','Sin Marca',173,27,2,1),(10,'QUESIN40','assets/images/alimentos/QUESIN40.png','Queso Blanco','Kl','Sin Marca',-90,0,2,1),(11,'SUESAN96','assets/images/alimentos/SUESAN96.png','Suero','Unidad','San Pedro',0,0,2,1),(12,'BISSIN97','assets/images/alimentos/BISSIN97.png','Bistec','Kl','Sin Marca',157,33,4,1),(13,'POLSIN80','assets/images/alimentos/POLSIN80.png','Pollo Entero','Kl','Sin Marca',120,5,4,1),(14,'JAMSIN37','assets/images/alimentos/JAMSIN37.png','Jamon Arepero','Kl','Sin Marca',90,5,4,1),(15,'JAMPLU55','assets/images/alimentos/JAMPLU55.png','Jamon De Espalda','Kl','Plumrose',-90,0,4,1),(16,'PATSIN90','assets/images/alimentos/PATSIN90.png','Pata De Pollo','Kl','Sin Marca',0,0,4,1),(17,'ACECOA88','assets/images/alimentos/ACECOA88.png','Aceite Natural','Unidad','Coamo',541,2,3,1),(18,'AVEQUA51','assets/images/alimentos/AVEQUA51.png','Avena','Unidad','Quaker',118,12,3,1),(19,'CARELM88','assets/images/alimentos/CARELM37.png','Caraotas','Unidad','El Maizalito',1,13,3,1),(20,'CHERIK32','assets/images/alimentos/CHERIK32.png','Cheddar','Unidad','Rikesa',87,1,3,1),(21,'HARROB11','assets/images/alimentos/HARROB11.png','Harina De Trigo Con Leudante','Kl','Robin Hood',26,12,3,1),(22,'ARRMAR92','assets/images/alimentos/ARRMAR92.png','Arroz','Kl','Mary',88,0,3,1),(23,'PASLAE82','assets/images/alimentos/PASLAE82.png','Pasta Larga','Kl','La Especial',43,0,3,1),(24,'HARPAN63','assets/images/alimentos/HARPAN63.png','Harina De Maiz','Kl','Pan',85,0,3,1),(25,'JAMDIA92','assets/images/alimentos/JAMDIA92.png','Jamon Enlatado','Unidad','Diablitos Under Wood',0,0,3,1),(26,'LENELM94','assets/images/alimentos/LENELM94.png','Lentejas','Kl','El Maizalito',0,0,3,1),(27,'MANMAV56','assets/images/alimentos/MANMAV56.png','Mantequilla','Unidad','Mavesa',30,0,3,1),(28,'MAYKRA74','assets/images/alimentos/MAYKRA74.png','Mayonesa','Unidad','Kraft',30,0,3,1),(29,'AJISIN47','assets/images/alimentos/AJISIN45.png','Aji Dulce','Kl','Sin Marca',0,0,6,1),(30,'AUYSIN37','assets/images/alimentos/AUYSIN37.png','Auyama','Kl','Sin Marca',50,0,6,1),(31,'BERSIN43','assets/images/alimentos/BERSIN43.png','Berengena','Kl','Sin Marca',13,5,6,1),(32,'CALSIN71','assets/images/alimentos/CALSIN42.png','Calabazin','Kl','Sin Marca',15,0,6,1),(33,'CEBSIN38','assets/images/alimentos/CEBSIN38.png','Cebolla','Kl','Sin Marca',-20,0,6,1),(34,'TOMSIN13','assets/images/alimentos/TOMSIN13.png','Tomate Rojo','Kl','Sin Marca',-60,0,6,1),(35,'PAPSIN15','assets/images/alimentos/PAPSIN15.png','Papa','Kl','Sin Marca',-70,0,6,1),(36,'PEPSIN29','assets/images/alimentos/PEPSIN80.png','Pepino','Kl','Sin Marca',0,0,6,1),(37,'PLASIN34','assets/images/alimentos/PLASIN49.png','Platano','Kl','Sin Marca',0,0,5,1),(38,'REPSIN86','assets/images/alimentos/REPSIN86.png','Repollo','Kl','Sin Marca',0,0,6,1),(39,'ZANSIN24','assets/images/alimentos/ZANSIN31.png','Zanahoria','Kl','Sin Marca',0,0,6,1),(46,'SARMAR10','assets/images/alimentos/SARMAR93.png','Sardina','Unidad','Margarita',5,0,3,1),(47,'HJNSIN40','assets/images/alimentos/alimentoPredeterminado.png','Hjnkkjk','Ml','Sin Marca',0,0,2,0),(48,'TAMSIN35','assets/images/alimentos/TAMSIN35.png','Tamarindo','Gr','Sin Marca',0,0,5,0),(49,'MANSIN98','assets/images/alimentos/MANSIN98.png','Mandarina','Kl','Sin Marca',200,0,5,1),(50,'QUESIN10','assets/images/alimentos/QUESIN68.png','Queso Crema','Kl','Sin Marca',0,0,2,1),(51,'HOLSIN17','assets/images/alimentos/alimentoPredeterminado.png','Hola','Lt','Sin Marca',0,0,2,0),(52,'CALSIN11','assets/images/alimentos/alimentoPredeterminado.png','Calabazina','Gr','Sin Marca',0,0,3,0);
 /*!40000 ALTER TABLE `alimento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -103,7 +103,7 @@ CREATE TABLE `detalleentradaa` (
   KEY `idx_detalleentradaa_idAlimento` (`idAlimento`),
   CONSTRAINT `detalleentradaa_ibfk_1` FOREIGN KEY (`idAlimento`) REFERENCES `alimento` (`idAlimento`),
   CONSTRAINT `detalleentradaa_ibfk_2` FOREIGN KEY (`idEntradaA`) REFERENCES `entradaalimento` (`idEntradaA`)
-) ENGINE=InnoDB AUTO_INCREMENT=85 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=88 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,7 +112,7 @@ CREATE TABLE `detalleentradaa` (
 
 LOCK TABLES `detalleentradaa` WRITE;
 /*!40000 ALTER TABLE `detalleentradaa` DISABLE KEYS */;
-INSERT INTO `detalleentradaa` VALUES (69,100,7,21,1),(70,100,8,21,1),(71,100,9,21,1),(72,100,13,21,1),(73,100,18,21,1),(74,100,17,22,1),(75,100,12,22,1),(76,100,1,22,1),(77,100,2,22,1),(78,50,39,23,0),(79,100,30,23,0),(80,100,38,23,0),(81,100,35,23,0),(82,50,39,24,0),(83,50,38,24,0),(84,50,36,24,0);
+INSERT INTO `detalleentradaa` VALUES (69,100,7,21,1),(70,100,8,21,1),(71,100,9,21,1),(72,100,13,21,1),(73,100,18,21,1),(74,100,17,22,1),(75,100,12,22,1),(76,100,1,22,1),(77,100,2,22,1),(78,50,39,23,0),(79,100,30,23,0),(80,100,38,23,0),(81,100,35,23,0),(82,50,39,24,0),(83,50,38,24,0),(84,50,36,24,0),(85,100,19,25,0),(86,100,1,25,0),(87,100,21,25,0);
 /*!40000 ALTER TABLE `detalleentradaa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -168,7 +168,7 @@ CREATE TABLE `detallesalidaa` (
   KEY `idx_detallesalidaa_idSalidaA_idAlimento` (`idSalidaA`,`idAlimento`),
   CONSTRAINT `detallesalidaa_ibfk_1` FOREIGN KEY (`idAlimento`) REFERENCES `alimento` (`idAlimento`),
   CONSTRAINT `detallesalidaa_ibfk_2` FOREIGN KEY (`idSalidaA`) REFERENCES `salidaalimentos` (`idSalidaA`)
-) ENGINE=InnoDB AUTO_INCREMENT=18 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=19 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -177,7 +177,7 @@ CREATE TABLE `detallesalidaa` (
 
 LOCK TABLES `detallesalidaa` WRITE;
 /*!40000 ALTER TABLE `detallesalidaa` DISABLE KEYS */;
-INSERT INTO `detallesalidaa` VALUES (15,2,8,48,1),(16,1,7,51,0),(17,2,8,52,1);
+INSERT INTO `detallesalidaa` VALUES (15,2,8,48,1),(16,1,7,51,0),(17,2,8,52,1),(18,2,8,54,0);
 /*!40000 ALTER TABLE `detallesalidaa` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -202,7 +202,7 @@ CREATE TABLE `detallesalidamenu` (
   CONSTRAINT `detallesalidamenu_ibfk_1` FOREIGN KEY (`idMenu`) REFERENCES `menu` (`idMenu`),
   CONSTRAINT `detallesalidamenu_ibfk_2` FOREIGN KEY (`idAlimento`) REFERENCES `alimento` (`idAlimento`),
   CONSTRAINT `detallesalidamenu_ibfk_3` FOREIGN KEY (`idSalidaA`) REFERENCES `salidaalimentos` (`idSalidaA`)
-) ENGINE=InnoDB AUTO_INCREMENT=103 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=108 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -211,7 +211,7 @@ CREATE TABLE `detallesalidamenu` (
 
 LOCK TABLES `detallesalidamenu` WRITE;
 /*!40000 ALTER TABLE `detallesalidamenu` DISABLE KEYS */;
-INSERT INTO `detallesalidamenu` VALUES (99,10,37,7,49,1),(100,15,37,13,49,1),(101,8,38,7,50,1),(102,10,38,13,50,1);
+INSERT INTO `detallesalidamenu` VALUES (99,10,37,7,49,1),(100,15,37,13,49,1),(101,8,38,7,50,1),(102,10,38,13,50,1),(103,10,39,12,53,1),(104,10,39,2,53,1),(105,5,39,13,53,1),(106,10,39,7,53,1),(107,2,39,17,53,1);
 /*!40000 ALTER TABLE `detallesalidamenu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -261,7 +261,7 @@ CREATE TABLE `entradaalimento` (
   `status` tinyint(1) NOT NULL,
   PRIMARY KEY (`idEntradaA`),
   KEY `idx_entradaalimento_status_fecha` (`status`,`fecha`)
-) ENGINE=InnoDB AUTO_INCREMENT=25 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=26 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -270,7 +270,7 @@ CREATE TABLE `entradaalimento` (
 
 LOCK TABLES `entradaalimento` WRITE;
 /*!40000 ALTER TABLE `entradaalimento` DISABLE KEYS */;
-INSERT INTO `entradaalimento` VALUES (21,'2024-12-01','19:19:00','lacteos y proteinas',1),(22,'2024-12-02','20:03:00','compras',1),(23,'2025-06-14','13:26:00','verduras',0),(24,'2025-06-14','19:07:00','compra de verduras',0);
+INSERT INTO `entradaalimento` VALUES (21,'2024-12-01','19:19:00','lacteos y proteinas',1),(22,'2024-12-02','20:03:00','compras',1),(23,'2025-06-14','13:26:00','verduras',0),(24,'2025-06-14','19:07:00','compra de verduras',0),(25,'2025-07-02','20:53:00','compra de alimentos',0);
 /*!40000 ALTER TABLE `entradaalimento` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -461,7 +461,7 @@ CREATE TABLE `menu` (
   `cantPlatos` int(11) NOT NULL,
   `status` tinyint(1) NOT NULL,
   PRIMARY KEY (`idMenu`)
-) ENGINE=InnoDB AUTO_INCREMENT=39 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=40 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -470,7 +470,7 @@ CREATE TABLE `menu` (
 
 LOCK TABLES `menu` WRITE;
 /*!40000 ALTER TABLE `menu` DISABLE KEYS */;
-INSERT INTO `menu` VALUES (37,'2024-12-01','Almuerzo',60,1),(38,'2024-12-02','Almuerzo',50,1);
+INSERT INTO `menu` VALUES (37,'2024-12-01','Almuerzo',60,1),(38,'2024-12-02','Almuerzo',50,1),(39,'2025-07-19','Almuerzo',100,1);
 /*!40000 ALTER TABLE `menu` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -492,7 +492,7 @@ CREATE TABLE `salidaalimentos` (
   KEY `idTipoSalidaA` (`idTipoSalidaA`),
   KEY `idx_salidaalimentos_idSalidaA_status` (`idSalidaA`,`status`),
   CONSTRAINT `salidaalimentos_ibfk_1` FOREIGN KEY (`idTipoSalidaA`) REFERENCES `tiposalidas` (`idTipoSalidas`)
-) ENGINE=InnoDB AUTO_INCREMENT=53 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
+) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_general_ci;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -501,7 +501,7 @@ CREATE TABLE `salidaalimentos` (
 
 LOCK TABLES `salidaalimentos` WRITE;
 /*!40000 ALTER TABLE `salidaalimentos` DISABLE KEYS */;
-INSERT INTO `salidaalimentos` VALUES (48,'2024-12-01','19:32:00','se daño',2,1),(49,'0000-00-00','19:35:49','Pollo en crema',1,1),(50,'0000-00-00','19:44:17','Pollo en crema',1,1),(51,'2025-06-14','14:33:00','se daño',2,0),(52,'2025-06-14','19:19:00','se rompio',2,1);
+INSERT INTO `salidaalimentos` VALUES (48,'2024-12-01','19:32:00','se daño',2,1),(49,'0000-00-00','19:35:49','Pollo en crema',1,1),(50,'0000-00-00','19:44:17','Pollo en crema',1,1),(51,'2025-06-14','14:33:00','se daño',2,0),(52,'2025-06-14','19:19:00','se rompio',2,1),(53,'0000-00-00','19:04:58','picadillo en crema con fresas',1,1),(54,'2025-07-02','21:02:00','se partieron',2,0);
 /*!40000 ALTER TABLE `salidaalimentos` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -714,6 +714,60 @@ SET character_set_client = utf8;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary table structure for view `vista_detalle_alimentos_evento`
+--
+
+DROP TABLE IF EXISTS `vista_detalle_alimentos_evento`;
+/*!50001 DROP VIEW IF EXISTS `vista_detalle_alimentos_evento`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vista_detalle_alimentos_evento` AS SELECT
+ 1 AS `idAlimento`,
+  1 AS `imgAlimento`,
+  1 AS `nombre`,
+  1 AS `marca`,
+  1 AS `unidadMedida`,
+  1 AS `cantidad`,
+  1 AS `idTipoA`,
+  1 AS `tipo`,
+  1 AS `idMenu`,
+  1 AS `feMenu`,
+  1 AS `horarioComida`,
+  1 AS `cantPlatos`,
+  1 AS `descripcion`,
+  1 AS `idSalidaA`,
+  1 AS `idEvento`,
+  1 AS `nomEvent`,
+  1 AS `descripEvent`,
+  1 AS `idMenuEvento` */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vista_detalle_alimentos_por_menu`
+--
+
+DROP TABLE IF EXISTS `vista_detalle_alimentos_por_menu`;
+/*!50001 DROP VIEW IF EXISTS `vista_detalle_alimentos_por_menu`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vista_detalle_alimentos_por_menu` AS SELECT
+ 1 AS `idAlimento`,
+  1 AS `imgAlimento`,
+  1 AS `nombre`,
+  1 AS `marca`,
+  1 AS `unidadMedida`,
+  1 AS `cantidad`,
+  1 AS `idTipoA`,
+  1 AS `tipo`,
+  1 AS `idMenu`,
+  1 AS `feMenu`,
+  1 AS `horarioComida`,
+  1 AS `cantPlatos`,
+  1 AS `descripcion`,
+  1 AS `idSalidaA` */;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Temporary table structure for view `vista_detalle_salida_alimentos`
 --
 
@@ -781,6 +835,22 @@ SET character_set_client = utf8;
 SET character_set_client = @saved_cs_client;
 
 --
+-- Temporary table structure for view `vista_resumen_general`
+--
+
+DROP TABLE IF EXISTS `vista_resumen_general`;
+/*!50001 DROP VIEW IF EXISTS `vista_resumen_general`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vista_resumen_general` AS SELECT
+ 1 AS `asistencias_hoy`,
+  1 AS `menus_activos`,
+  1 AS `eventos_activos`,
+  1 AS `alimentos_disponibles`,
+  1 AS `utensilios_disponibles` */;
+SET character_set_client = @saved_cs_client;
+
+--
 -- Temporary table structure for view `vista_salida_alimentos`
 --
 
@@ -796,6 +866,53 @@ SET character_set_client = utf8;
   1 AS `status`,
   1 AS `idTipoSalidaA`,
   1 AS `tipoSalida` */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vista_tipo_alimento_evento`
+--
+
+DROP TABLE IF EXISTS `vista_tipo_alimento_evento`;
+/*!50001 DROP VIEW IF EXISTS `vista_tipo_alimento_evento`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vista_tipo_alimento_evento` AS SELECT
+ 1 AS `idTipoA`,
+  1 AS `tipo`,
+  1 AS `nomEvent`,
+  1 AS `idEvento`,
+  1 AS `idMenu`,
+  1 AS `feMenu`,
+  1 AS `horarioComida` */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vista_tipo_alimentos_por_menu`
+--
+
+DROP TABLE IF EXISTS `vista_tipo_alimentos_por_menu`;
+/*!50001 DROP VIEW IF EXISTS `vista_tipo_alimentos_por_menu`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vista_tipo_alimentos_por_menu` AS SELECT
+ 1 AS `idTipoA`,
+  1 AS `tipo`,
+  1 AS `idMenu`,
+  1 AS `feMenu`,
+  1 AS `horarioComida` */;
+SET character_set_client = @saved_cs_client;
+
+--
+-- Temporary table structure for view `vistatiposalimentosconstock`
+--
+
+DROP TABLE IF EXISTS `vistatiposalimentosconstock`;
+/*!50001 DROP VIEW IF EXISTS `vistatiposalimentosconstock`*/;
+SET @saved_cs_client     = @@character_set_client;
+SET character_set_client = utf8;
+/*!50001 CREATE VIEW `vistatiposalimentosconstock` AS SELECT
+ 1 AS `idTipoA`,
+  1 AS `tipo` */;
 SET character_set_client = @saved_cs_client;
 
 --
@@ -830,6 +947,42 @@ SET character_set_client = @saved_cs_client;
 /*!50001 CREATE ALGORITHM=UNDEFINED */
 /*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
 /*!50001 VIEW `vista_alimentos_entrada` AS select `ea`.`idEntradaA` AS `idEntradaA`,`ea`.`fecha` AS `fecha`,`ea`.`hora` AS `hora`,`ea`.`descripcion` AS `descripcion`,`ea`.`status` AS `status`,`a`.`idAlimento` AS `idAlimento`,`a`.`imgAlimento` AS `imgAlimento`,`a`.`codigo` AS `codigo`,`a`.`nombre` AS `nombre`,`a`.`marca` AS `marca`,`a`.`unidadMedida` AS `unidadMedida`,`ta`.`idTipoA` AS `idTipoA`,`ta`.`tipo` AS `tipo`,`dea`.`cantidad` AS `cantidad` from (((`entradaalimento` `ea` join `detalleentradaa` `dea` on(`dea`.`idEntradaA` = `ea`.`idEntradaA`)) join `alimento` `a` on(`a`.`idAlimento` = `dea`.`idAlimento`)) join `tipoalimento` `ta` on(`a`.`idTipoA` = `ta`.`idTipoA`)) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vista_detalle_alimentos_evento`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vista_detalle_alimentos_evento`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vista_detalle_alimentos_evento` AS select `a`.`idAlimento` AS `idAlimento`,`a`.`imgAlimento` AS `imgAlimento`,`a`.`nombre` AS `nombre`,`a`.`marca` AS `marca`,`a`.`unidadMedida` AS `unidadMedida`,`dsm`.`cantidad` AS `cantidad`,`ta`.`idTipoA` AS `idTipoA`,`ta`.`tipo` AS `tipo`,`m`.`idMenu` AS `idMenu`,`m`.`feMenu` AS `feMenu`,`m`.`horarioComida` AS `horarioComida`,`m`.`cantPlatos` AS `cantPlatos`,`sa`.`descripcion` AS `descripcion`,`sa`.`idSalidaA` AS `idSalidaA`,`e`.`idEvento` AS `idEvento`,`e`.`nomEvent` AS `nomEvent`,`e`.`descripEvent` AS `descripEvent`,`e`.`idMenu` AS `idMenuEvento` from (((((`evento` `e` join `menu` `m` on(`e`.`idMenu` = `m`.`idMenu` and `m`.`status` = 1)) join `detallesalidamenu` `dsm` on(`dsm`.`idMenu` = `m`.`idMenu` and `dsm`.`status` = 1)) join `salidaalimentos` `sa` on(`sa`.`idSalidaA` = `dsm`.`idSalidaA` and `sa`.`status` = 1)) join `alimento` `a` on(`a`.`idAlimento` = `dsm`.`idAlimento` and `a`.`status` = 1)) join `tipoalimento` `ta` on(`a`.`idTipoA` = `ta`.`idTipoA` and `ta`.`status` = 1)) where `e`.`status` = 1 */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vista_detalle_alimentos_por_menu`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vista_detalle_alimentos_por_menu`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vista_detalle_alimentos_por_menu` AS select `a`.`idAlimento` AS `idAlimento`,`a`.`imgAlimento` AS `imgAlimento`,`a`.`nombre` AS `nombre`,`a`.`marca` AS `marca`,`a`.`unidadMedida` AS `unidadMedida`,`dsm`.`cantidad` AS `cantidad`,`ta`.`idTipoA` AS `idTipoA`,`ta`.`tipo` AS `tipo`,`m`.`idMenu` AS `idMenu`,`m`.`feMenu` AS `feMenu`,`m`.`horarioComida` AS `horarioComida`,`m`.`cantPlatos` AS `cantPlatos`,`sa`.`descripcion` AS `descripcion`,`sa`.`idSalidaA` AS `idSalidaA` from ((((`salidaalimentos` `sa` join `detallesalidamenu` `dsm` on(`dsm`.`idSalidaA` = `sa`.`idSalidaA`)) join `alimento` `a` on(`a`.`idAlimento` = `dsm`.`idAlimento`)) join `tipoalimento` `ta` on(`a`.`idTipoA` = `ta`.`idTipoA`)) join `menu` `m` on(`m`.`idMenu` = `dsm`.`idMenu`)) where `m`.`status` = 1 and `sa`.`status` = 1 */;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
@@ -889,6 +1042,24 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET collation_connection      = @saved_col_connection */;
 
 --
+-- Final view structure for view `vista_resumen_general`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vista_resumen_general`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vista_resumen_general` AS select (select count(`a`.`idAsistencia`) from (`asistencia` `a` join `menu` `m` on(`a`.`idMenu` = `m`.`idMenu`)) where `a`.`status` = 1 and `a`.`fecha` = curdate()) AS `asistencias_hoy`,(select count(`menu`.`idMenu`) from `menu` where `menu`.`status` = 1) AS `menus_activos`,(select count(`e`.`idEvento`) from (`evento` `e` join `menu` `m` on(`e`.`idMenu` = `m`.`idMenu`)) where `e`.`status` = 1) AS `eventos_activos`,(select count(0) from `alimento` where `alimento`.`status` = 1 and (`alimento`.`stock` > 0 or `alimento`.`reservado` > 0)) AS `alimentos_disponibles`,(select count(0) from `utensilios` where `utensilios`.`status` = 1 and `utensilios`.`stock` > 0) AS `utensilios_disponibles` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
 -- Final view structure for view `vista_salida_alimentos`
 --
 
@@ -905,6 +1076,60 @@ SET character_set_client = @saved_cs_client;
 /*!50001 SET character_set_client      = @saved_cs_client */;
 /*!50001 SET character_set_results     = @saved_cs_results */;
 /*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vista_tipo_alimento_evento`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vista_tipo_alimento_evento`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vista_tipo_alimento_evento` AS select distinct `ta`.`idTipoA` AS `idTipoA`,`ta`.`tipo` AS `tipo`,`e`.`nomEvent` AS `nomEvent`,`e`.`idEvento` AS `idEvento`,`e`.`idMenu` AS `idMenu`,`m`.`feMenu` AS `feMenu`,`m`.`horarioComida` AS `horarioComida` from (((((`evento` `e` join `menu` `m` on(`m`.`idMenu` = `e`.`idMenu` and `m`.`status` = 1)) left join `detallesalidamenu` `dsm` on(`dsm`.`idMenu` = `m`.`idMenu` and `dsm`.`status` = 1)) left join `salidaalimentos` `sa` on(`sa`.`idSalidaA` = `dsm`.`idSalidaA` and `sa`.`status` = 1)) left join `alimento` `a` on(`a`.`idAlimento` = `dsm`.`idAlimento` and `a`.`status` = 1)) left join `tipoalimento` `ta` on(`a`.`idTipoA` = `ta`.`idTipoA` and `ta`.`status` = 1)) where `e`.`status` = 1 */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vista_tipo_alimentos_por_menu`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vista_tipo_alimentos_por_menu`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vista_tipo_alimentos_por_menu` AS select `ta`.`idTipoA` AS `idTipoA`,`ta`.`tipo` AS `tipo`,`m`.`idMenu` AS `idMenu`,`m`.`feMenu` AS `feMenu`,`m`.`horarioComida` AS `horarioComida` from (((`detallesalidamenu` `dsm` join `alimento` `a` on(`a`.`idAlimento` = `dsm`.`idAlimento`)) join `tipoalimento` `ta` on(`a`.`idTipoA` = `ta`.`idTipoA`)) join `menu` `m` on(`m`.`idMenu` = `dsm`.`idMenu`)) group by `ta`.`idTipoA`,`ta`.`tipo`,`m`.`idMenu`,`m`.`feMenu`,`m`.`horarioComida` */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
+
+--
+-- Final view structure for view `vistatiposalimentosconstock`
+--
+
+/*!50001 DROP VIEW IF EXISTS `vistatiposalimentosconstock`*/;
+/*!50001 SET @saved_cs_client          = @@character_set_client */;
+/*!50001 SET @saved_cs_results         = @@character_set_results */;
+/*!50001 SET @saved_col_connection     = @@collation_connection */;
+/*!50001 SET character_set_client      = utf8mb4 */;
+/*!50001 SET character_set_results     = utf8mb4 */;
+/*!50001 SET collation_connection      = utf8mb4_unicode_ci */;
+/*!50001 CREATE ALGORITHM=UNDEFINED */
+/*!50013 DEFINER=`root`@`localhost` SQL SECURITY DEFINER */
+/*!50001 VIEW `vistatiposalimentosconstock` AS select distinct `ta`.`idTipoA` AS `idTipoA`,`ta`.`tipo` AS `tipo` from (`tipoalimento` `ta` join `alimento` `a` on(`ta`.`idTipoA` = `a`.`idTipoA`)) where `a`.`idAlimento` in (select `detalleentradaa`.`idAlimento` from `detalleentradaa` where `detalleentradaa`.`status` = 1 and `a`.`stock` > 0) */;
+/*!50001 SET character_set_client      = @saved_cs_client */;
+/*!50001 SET character_set_results     = @saved_cs_results */;
+/*!50001 SET collation_connection      = @saved_col_connection */;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -915,4 +1140,4 @@ SET character_set_client = @saved_cs_client;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2025-06-15 18:38:38
+-- Dump completed on 2025-07-02 21:57:30
