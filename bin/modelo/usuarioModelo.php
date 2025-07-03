@@ -85,8 +85,8 @@
         }
 
         public function validarTelefono($telefono) {
-            if (!preg_match("/^0\d{3} \d{7}$/", $telefono)) {
-                return ['resultado' => 'Ingresar Teléfono'];
+            if (!preg_match("/^0\d{10}$/", $telefono)) {
+                    return ['resultado' => 'Ingresar Teléfono válido sin espacios'];
             }
 
             $this->telefono = trim($telefono);
@@ -98,9 +98,8 @@
         private function validarT() {
             try {
                 $this->conectarDBSeguridad();
-                $telefonoCifrado = $this->encryption->encryptData($this->telefono);
                 $validar = $this->conex2->prepare("SELECT `telefono` FROM `usuario` WHERE `telefono` = ? AND status != 0");
-                $validar->bindValue(1, $telefonoCifrado);
+                $validar->bindValue(1, $this->telefono);
                 $validar->execute();
                 $data = $validar->fetch(); 
                 $this->desconectarDB();
@@ -161,7 +160,7 @@
                 ['campo' => $datos['apellido'],    'patron' => "/^[a-zA-ZÀ-ÿ\s]{3,}$/",                             'mensaje' => 'Ingresar apellido'],
                 ['campo' => $datos['segApellido'], 'patron' => "/^[a-zA-ZÀ-ÿ\s]{0,}$/",                             'mensaje' => 'Ingresar segundo apellido'],
                 ['campo' => $datos['correo'],      'patron' => "/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{1,}$/",   'mensaje' => 'Ingresar Correo'],
-                ['campo' => $datos['telefono'],    'patron' => "/^0\d{3} \d{7}$/",                                  'mensaje' => 'Ingresar Telefono'],
+                ['campo' => $datos['telefono'],    'patron' => "/^0\d{10}$/",                                         'mensaje' => 'Ingresar Teléfono válido sin espacios'],
                 ['campo' => $datos['idRol'],       'patron' => "/^[0-9]{1,}$/",                                      'mensaje' => 'Seleccionar rol'],
                 ['campo' => $datos['clave'],       'patron' => "/^[A-Za-z0-9\*\-_\.\;\,\(\)\"@#\$=\xF1\xD1À-ÿ]{8,}$/", 'mensaje' => 'Ingresar clave'],
             ];
@@ -213,8 +212,8 @@
                 $this->clave = password_hash($this->clave, PASSWORD_BCRYPT);
 
                 $correoCifrado = $this->encryption->encryptData($this->correo);
-                $telefonoCifrado = $this->encryption->encryptData($this->telefono);
-
+               
+              
                 $new = $this->conex2->prepare("CALL proceRegistrarUsuario(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
                 $new->bindValue(1, $this->cedula);
                 $new->bindValue(2, $this->img);
@@ -223,7 +222,7 @@
                 $new->bindValue(5, $this->apellido);
                 $new->bindValue(6, $this->segApellido);
                 $new->bindValue(7, $correoCifrado);
-                $new->bindValue(8, $telefonoCifrado);
+                $new->bindValue(8, $this->telefono);
                 $new->bindValue(9, $this->clave);
                 $new->bindValue(10, $this->idRol);
 

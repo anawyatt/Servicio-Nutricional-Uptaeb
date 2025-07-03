@@ -238,6 +238,7 @@ class salidaUtensiliosModelo extends connectDB {
     private function registrar() {
         try {
             $this->conectarDB();
+            $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
             $this->conex->beginTransaction();
     
             $registrar = $this->conex->prepare("INSERT INTO `salidautensilios`(`fecha`, `descripcion`, `idTipoSalidas`, `status`) VALUES (?, ?, ?, 1)");

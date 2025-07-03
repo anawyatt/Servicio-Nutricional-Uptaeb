@@ -222,6 +222,7 @@ public function anularEntradaUtensilios($id) {
 
     try {
         $this->conectarDB();
+        $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
         $this->conex->beginTransaction();
 
         $stmt = $this->conex->prepare("UPDATE entradau SET status = 0 WHERE idEntradaU = ?");

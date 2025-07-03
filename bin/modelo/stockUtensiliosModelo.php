@@ -14,21 +14,12 @@ class stockUtensiliosModelo extends connectDB {
   private $id;
   private $payload;
 
-  public function __construct() {
+  public function __construct()
+  {
     parent::__construct();
-
-    $headers = getallheaders();
-    $authHeader = $headers['Authorization'] ?? null;
-
-    if (!$authHeader || !str_starts_with($authHeader, 'Bearer ')) {
-        http_response_code(401);
-        echo json_encode(['mensaje' => 'Token no proporcionado']);
-        exit;
-    }
-
-    $token = str_replace('Bearer ', '', $authHeader);
+    $token = $_COOKIE['jwt'];
     $this->payload = JwtHelpers::validarToken($token);
-  }   
+  }
 
   public function mostrarUtensilios() {
     try {

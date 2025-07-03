@@ -91,7 +91,6 @@ class consultarUsuarioModelo extends connectDB{
             
              if ($data) {
                 $data->correo = $this->encryption->decryptData($data->correo);
-                $data->telefono = $this->encryption->decryptData($data->telefono);
             }
 
 
@@ -153,7 +152,6 @@ class consultarUsuarioModelo extends connectDB{
     }
 
     public function validarTelefono($telefono, $cedula) {
-         $telefono = str_replace(' ', '', $telefono);
 
         if (!preg_match("/^0\d{10}$/", $telefono)) {
             return  ['resultado' => 'Ingresar Telefono']; 
@@ -173,9 +171,8 @@ class consultarUsuarioModelo extends connectDB{
     private function validarT(){
        try {
             $this->conectarDBSeguridad();
-            $telefonoCifrado = $this->encryption->encryptData($this->telefono);
             $validar=$this->conex2->prepare("SELECT `telefono` FROM `usuario` WHERE `telefono`= ? and cedula != ? and status !=0 ");
-            $validar->bindValue(1, $telefonoCifrado);
+            $validar->bindValue(1, $this->telefono);
             $validar->bindValue(2, $this->cedula);
             $validar->execute();
             $data=$validar->fetchAll();
@@ -198,7 +195,7 @@ class consultarUsuarioModelo extends connectDB{
             ['campo' => $datos['apellido'],    'patron' => "/^[a-zA-ZÀ-ÿ\s]{3,}$/",                             'mensaje' => 'Ingresar apellido'],
             ['campo' => $datos['segApellido'], 'patron' => "/^[a-zA-ZÀ-ÿ\s]{0,}$/",                             'mensaje' => 'Ingresar segundo apellido'],
             ['campo' => $datos['correo'],      'patron' => "/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{1,}$/",  'mensaje' => 'Ingresar Correo'],
-            ['campo' => $datos['telefono'],    'patron' => "/^0\d{3} \d{7}$/",                                  'mensaje' => 'Ingresar Telefono'],
+            ['campo' => $datos['telefono'],    'patron' => "/^0\d{10}$/",                                        'mensaje' => 'Ingresar Telefono'],
             ['campo' => $datos['idRol'],       'patron' => "/^[0-9]{1,}$/",                                     'mensaje' => 'Seleccionar rol'],
             ['campo' => $datos['estado'],      'patron' => "/^[0-9]{1,}$/",                                     'mensaje' => 'Ingresar estado'],
         ];
@@ -247,7 +244,6 @@ class consultarUsuarioModelo extends connectDB{
             $lock->execute();
 
             $correoCifrado = $this->encryption->encryptData($this->correo);
-            $telefonoCifrado = $this->encryption->encryptData($this->telefono);
 
             $update = $this->conex2->prepare("UPDATE `usuario` SET `nombre`= ?, `segNombre`= ?, `apellido`= ?, 
             `segApellido`= ?,`correo`=?, `telefono`= ? ,`idRol`= ?, `status` = ?  WHERE `cedula` = ?");
@@ -257,7 +253,7 @@ class consultarUsuarioModelo extends connectDB{
             $update->bindValue(3, $this->apellido);
             $update->bindValue(4, $this->segApellido);
             $update->bindValue(5, $correoCifrado);
-            $update->bindValue(6, $telefonoCifrado);
+            $update->bindValue(6, $this->telefono);
             $update->bindValue(7, $this->idRol);
             $update->bindValue(8, $this->estado);
             $update->bindValue(9, $this->cedula);

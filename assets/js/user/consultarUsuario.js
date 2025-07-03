@@ -591,7 +591,7 @@ $("#editar").on("click", function(e){
   }
 
   function chequeo_telefono() {
-    var campo = /^0\d{3} \d{7}$/;
+    var campo = /^0\d{10}$/;
     var telefono = $("#telefono").val();
     if (campo.test(telefono) ) {
      $(".error7").html("");
