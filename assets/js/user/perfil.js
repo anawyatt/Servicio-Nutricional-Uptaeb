@@ -478,6 +478,7 @@ let error_clave3 = false;
             let nombre = cambiarFormato($("#nombre").val());
             let apellido = cambiarFormato($("#apellido").val());
             let correo = cambiarFormato($("#correo").val());
+            let token = $('[name="csrf_token"]').val();
 
             $.ajax({
                 type: "post",
@@ -487,9 +488,11 @@ let error_clave3 = false;
                     nombre: nombre,
                     apellido: apellido,
                     correo: correo,
+                    csrfToken: token
                 },
                 success(data) {
-                    if (data.resultado === 'success' && data.url) {
+                    if (data.respuesta.resultado === 'success' && data.respuesta.url && data.newCsrfToken) {
+                        $('[name="csrf_token"]').val(data.newCsrfToken); 
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
@@ -500,13 +503,13 @@ let error_clave3 = false;
                             timerProgressBar: true,
                         });
                         setTimeout(function () {
-                            window.location.href = data.url; 
+                            window.location.href = data.respuesta.url; 
                         }, 2000);
                     } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error',
-                            text: data.mensaje || 'Ocurrió un error inesperado',
+                            text: data.respuesta.mensaje || 'Ocurrió un error inesperado',
                         });
                     }
                 },
@@ -527,6 +530,7 @@ let error_clave3 = false;
               let clave = $("#clave1").val(); 
               let nuevaClave = $("#clave2").val(); 
               let repetirClave = $("#clave3").val(); 
+              let token = $('[name="csrf_token"]').val();
           
               $.ajax({
                   type: "post",
@@ -536,9 +540,10 @@ let error_clave3 = false;
                       clave: clave,
                       nuevaClave: nuevaClave,
                       repetirClave: repetirClave,
+                      csrfToken: token
                   },
                   success(data) {
-                      if (data.resultado === 'error') {
+                      if (data.respuesta2.resultado === 'error') {
                           Swal.fire({
                               toast: true,
                               position: 'top-end',
@@ -555,12 +560,12 @@ let error_clave3 = false;
                           $('#clave1').removeClass('is-valid');
                           $('.bie').addClass('danger');
                           $('.bie').removeClass('pri');
-                      } else if (data.resultado === 'no son iguales') {
+                      } else if (data.respuesta2.resultado === 'no son iguales') {
                           Swal.fire({
                               toast: true,
                               position: 'top-end',
                               icon: 'error',
-                              title: '<span class="text-rojo">Las contraseñas no son iguales!</span>',
+                              title: '<span class="text-rojo">Las nuevas contraseñas no coinciden!</span>',
                               showConfirmButton: false,
                               timer: 3000,
                               timerProgressBar: 3000,
@@ -572,7 +577,7 @@ let error_clave3 = false;
                           $('#clave3, #clave2').removeClass('is-valid');
                           $('.bie3, .bie2').addClass('danger');
                           $('.bie3, .bie2').removeClass('pri');
-                      } else if (data.resultado === 'clave Editada correctamente.' && data.url ) {
+                      } else if (data.respuesta2.resultado === 'clave Editada correctamente.' && data.respuesta2.url && data.newCsrfToken) {
                           Swal.fire({
                               toast: true,
                               position: 'top-end',
@@ -583,6 +588,7 @@ let error_clave3 = false;
                               timerProgressBar: true,
                           });
                            $('.limpiar3').click()
+                            $('[name="csrf_token"]').val(data.newCsrfToken);
           
                         
                       }
@@ -598,33 +604,36 @@ let error_clave3 = false;
 });
 
 function borrarIMG() {
+    let token = $('[name="csrf_token"]').val();
     $.ajax({
         type: "post",
         url: "", 
         dataType: "json",
-        data: { borrar: true },
+        data: { borrar: true, csrfToken: token },
         success(data) {
+
             Swal.fire({
                 toast: true,
                 position: 'top-end',
-                icon: data.resultado === 'success' ? 'success' : 'error',
-                title: data.mensaje,
+                icon: data.respuesta3.resultado === 'success' ? 'success' : 'error',
+                title: data.respuesta3.mensaje,
                 showConfirmButton: false,
-                timer: 1000,
+                timer: 1500,
                 timerProgressBar: true
             });
 
-            if (data.resultado === 'success') {
+            if (data.respuesta3.resultado === 'success' && data.newCsrfToken) {
                 const nuevaImg = data.img || "assets/images/perfil/user.png";
                 $("#imgPerfil").attr("src", nuevaImg + "?v=" + new Date().getTime());
 
                 if (nuevaImg.includes("user.png")) {
                     $("#eliminarIMG").hide();
                 }
+                $('[name="csrf_token"]').val(data.newCsrfToken); 
 
                 setTimeout(() => {
                 location.reload();
-            }, 1600);
+                }, 1600);
             }
         }
     });
@@ -749,6 +758,7 @@ $("#editarIMG").click((e) => {
     datos.append("accion", "imagenPerfil");
     if ($("#imagen")[0].files[0]) {
         datos.append("imagen", $("#imagen")[0].files[0]);
+        datos.append("csrfToken", $('[name="csrf_token"]').val());
     }
     editarIMg(datos);
 });
@@ -768,14 +778,15 @@ function editarIMg(datos) {
             Swal.fire({
                 toast: true,
                 position: 'top-end',
-                icon: res.resultado === 'success' ? 'success' : 'error',
-                title: res.mensaje,
+                icon: res.respuesta4.resultado === 'success' ? 'success' : 'error',
+                title: res.respuesta4.mensaje,
                 showConfirmButton: false,
                 timer: 1500,
                 timerProgressBar: true,
             });
 
-            if (res.resultado === 'success' && res.img) {
+            if (res.respuesta4.resultado === 'success' && res.respuesta4.img && res.newCsrfToken) {
+                $('[name="csrf_token"]').val(res.newCsrfToken);
                 $("#imgPerfil").attr("src", res.img + "?v=" + new Date().getTime());
             }
 

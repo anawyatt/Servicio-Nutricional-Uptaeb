@@ -1023,11 +1023,38 @@ class consultarEventosModelo extends connectDB {
              $this->desconectarDB();
              return $dta;
         }
+          
         
-     
-       
+         public function infoAppEvento($idEvento) {
+            if (!preg_match("/^[0-9]{1,}$/", $idEvento)) {
+                return ['Ingresar Evenot'];
+            }
+
+            $this->idEvento = $idEvento;
+            return $this->mostrarAppEvento();
+        }
+
+
+        private function mostrarAppEvento(){
+            try {
+                $this->conectarDB();
+                $query = $this->conex->prepare("SELECT a.idAlimento, a.imgAlimento, a.nombre, a.marca, a.unidadMedida, dsm.cantidad,
+                ta.idTipoA, ta.tipo, m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, sa.descripcion, sa.idSalidaA, e.idEvento,
+                e.nomEvent, e.descripEvent, e.idMenu AS idMenuEvento FROM evento e INNER JOIN menu m ON e.idMenu = m.idMenu AND m.status = 1
+                INNER JOIN detallesalidamenu dsm ON dsm.idMenu = m.idMenu AND dsm.status = 1 LEFT JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA AND sa.status = 1
+                INNER JOIN alimento a ON a.idAlimento = dsm.idAlimento AND a.status = 1 INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA AND ta.status = 1
+                WHERE e.status = 1 AND e.idEvento = ?;");
+
+                $query->bindValue(1, $this->idEvento);
+                $query->execute();
+                $resultado = $query->fetchAll(PDO::FETCH_ASSOC); 
+                 $this->desconectarDB();
         
-        
+                return $resultado;
+            } catch (\PDOException $e) {
+                return $e->getMessage();
+            }
+        }
         
         
         
