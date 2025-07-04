@@ -35,7 +35,7 @@ try {
 
     if (!isset($data['enviar']) || !isset($data['tipo']) || !isset($data['correo'])) {
         http_response_code(400);
-        echo json_encode(['resultado' => 'error', 'mensaje' => 'Enviar y Correo son requeridos']);
+        echo json_encode(['resultado' => 'error', 'mensaje' => 'Correo es requerido']);
         exit;
     }
 
