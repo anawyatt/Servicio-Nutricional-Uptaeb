@@ -32,10 +32,13 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 try {
-    // Verificar token JWT
     $decodedToken = JwtMiddleware::verificarToken();
+    if (!$decodedToken) {
+        http_response_code(401);
+        echo json_encode(['resultado' => 'error', 'mensaje' => 'Token no válido o expirado']);
+        exit;
+    }
 
-    // Instanciar el modelo
     $objet = new perfil();
     if (!$objet) {
         throw new Exception('Error al instanciar el modelo de perfil');

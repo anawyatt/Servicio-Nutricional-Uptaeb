@@ -50,7 +50,6 @@ try {
     echo json_encode(['resultado' => 'error', 'mensaje' => $e->getMessage()]);
 }
 
-
 }
 
 
