@@ -203,6 +203,7 @@ INNER JOIN
 WHERE 
     b.status = 1;
 
+        
 -- Procedure actualizado con paginación
 DELIMITER //
 
@@ -364,6 +365,23 @@ DELIMITER ;
 
         DELIMITER ;
 
+         CREATE OR REPLACE VIEW vista_usuarios_info AS 
+            SELECT  
+                u.cedula, 
+                u.img, 
+                u.nombre, 
+                u.segNombre, 
+                u.apellido, 
+                u.segApellido, 
+                u.correo, 
+                u.telefono, 
+                u.status, 
+                r.idRol, 
+                r.nombreRol
+            FROM usuario u 
+            INNER JOIN rol r ON u.idRol = r.idRol 
+            WHERE r.idRol != 1 AND u.status != 0;
+
         DELIMITER //
 
 CREATE PROCEDURE sp_registrar_bitacora(
@@ -394,26 +412,3 @@ BEGIN
 END;
 //
 
-DELIMITER ;
-
-        CREATE VIEW vista_usuarios_info AS 
-            SELECT  
-                u.cedula, 
-                u.img, 
-                u.nombre, 
-                u.segNombre, 
-                u.apellido, 
-                u.segApellido, 
-                u.correo, 
-                u.telefono, 
-                u.status, 
-                r.idRol, 
-                r.nombreRol
-            FROM usuario u 
-            INNER JOIN rol r ON u.idRol = r.idRol 
-            WHERE r.idRol != 1 AND u.status != 0;
-
-            
-
-
-        COMMIT;

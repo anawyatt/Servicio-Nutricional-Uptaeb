@@ -29,10 +29,11 @@ class passwordRecoveryModelo extends connectDB
         $this->sistem = new encryption();  
     }
 
-        public function recuperContraseñas($tipo, $correo) {
+        public function recuperContraseñas($tipo, $correo){
             if (!in_array($tipo, ['sistema', 'app'], true)) {
                 return ['resultado' => 'error', 'mensaje' => "Tipo inválido. Solo se permite 'sistema' o 'app'"];
             }
+
             $this->tipo = $tipo;
             $this->correo = trim($correo);
             $this->correo = ucfirst(strtolower($this->correo));
@@ -41,23 +42,34 @@ class passwordRecoveryModelo extends connectDB
                 return ['resultado' => 'error', 'mensaje' => 'Correo inválido'];
             }
 
-            $verificacion = conteoRecuperarHelpers::verificarBloqueo($this->correo);
+            $verificacion = ConteoRecuperarHelpers::verificarBloqueo($this->correo);
             if ($verificacion['bloqueado']) {
                 return ['resultado' => 'error', 'mensaje' => $verificacion['mensaje']];
             }
 
+            $verificarLimite = ConteoRecuperarHelpers::verificarLimiteDiarioExitoso($this->correo);
+            if ($verificarLimite['bloqueado']) {
+                return ['resultado' => 'error', 'mensaje' => $verificarLimite['mensaje']];
+            }
+
+            // Registrar intento exitoso antes del envío
+            ConteoRecuperarHelpers::registrarIntentoExitoso($this->correo);
+
             $resultadoEnvio = $this->enviarCorreoRecuperacion();
 
             if ($resultadoEnvio['resultado'] === 'no existe' || $resultadoEnvio['resultado'] === 'error') {
-                $intento = conteoRecuperarHelpers::registrarIntento($this->correo);
+                // Revertir intento exitoso si falla
+                ConteoRecuperarHelpers::restarIntentoExitoso($this->correo);
+
+                $intento = ConteoRecuperarHelpers::registrarIntento($this->correo);
                 $mensajeExtra = isset($intento['mensaje']) ? ' ' . $intento['mensaje'] : '';
+
                 return ['resultado' => 'error', 'mensaje' => $resultadoEnvio['mensaje'] . $mensajeExtra];
             }
 
-            conteoRecuperarHelpers::resetearIntentos($this->correo);
+            ConteoRecuperarHelpers::resetearIntentos($this->correo);
             return $resultadoEnvio;
         }
-
 
 
         protected function enviarCorreoRecuperacion() {
