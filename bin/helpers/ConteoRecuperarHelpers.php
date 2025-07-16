@@ -126,4 +126,59 @@ class ConteoRecuperarHelpers
     {
         file_put_contents(self::$filePath, json_encode($data, JSON_PRETTY_PRINT));
     }
+
+    public static function verificarLimiteDiarioExitoso($correo)
+    {
+        self::limpiezaAutomatica(); // Limpieza previa
+
+        $data = self::leerArchivo();
+        $hash = self::hashCorreo($correo);
+        $hoy = date('Y-m-d');
+
+        if (!isset($data[$hash]['exitosos'])) {
+            return ['bloqueado' => false, 'mensaje' => '', 'registro' => true];
+        }
+
+        $registro = $data[$hash]['exitosos'];
+
+        // Si es otro día, reiniciar
+        if ($registro['fecha'] !== $hoy) {
+            $data[$hash]['exitosos'] = [
+                'contador' => 1,
+                'fecha' => $hoy,
+                'bloqueado_hasta' => null,
+            ];
+            self::guardarArchivo($data);
+            return ['bloqueado' => false, 'mensaje' => '', 'registro' => true];
+        }
+
+        if (isset($registro['bloqueado_hasta']) && time() < $registro['bloqueado_hasta']) {
+            $horas = ceil(($registro['bloqueado_hasta'] - time()) / 3600);
+            return ['bloqueado' => true, 'mensaje' => "Ha superado el número de solicitudes permitidas. Intente nuevamente en $horas horas."];
+        }
+
+        if ($registro['contador'] >= 3) {
+            $data[$hash]['exitosos']['bloqueado_hasta'] = time() + (24 * 60 * 60); // 24 horas
+            self::guardarArchivo($data);
+            return ['bloqueado' => true, 'mensaje' => "Ha superado el número de solicitudes permitidas. Intente nuevamente mañana."];
+        }
+
+        return ['bloqueado' => false, 'mensaje' => '', 'registro' => true];
+    }
+
+   public static function restarIntentoExitoso($correo)
+    {
+        $data = self::leerArchivo();
+        $hash = self::hashCorreo($correo);
+        $hoy = date('Y-m-d');
+
+        if (isset($data[$hash]['exitosos']) && $data[$hash]['exitosos']['fecha'] === $hoy) {
+            if ($data[$hash]['exitosos']['contador'] > 0) {
+                $data[$hash]['exitosos']['contador']--;
+                self::guardarArchivo($data);
+            }
+        }
+    }
+
+
 }

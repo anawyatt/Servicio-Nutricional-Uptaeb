@@ -485,7 +485,7 @@
                         );
 
                         -- Tipos de alimentos usados en menús
-                        CREATE VIEW vista_tipo_alimentos_por_menu AS
+                        CREATE OR REPLACE VIEW vista_tipo_alimentos_por_menu AS
                         SELECT 
                             ta.idTipoA, 
                             ta.tipo, 
@@ -499,7 +499,7 @@
                         GROUP BY ta.idTipoA, ta.tipo, m.idMenu, m.feMenu, m.horarioComida;
 
                         -- Detalle de alimentos por menú
-                       CREATE VIEW vista_detalle_alimentos_por_menu AS
+                       CREATE OR REPLACE VIEW vista_detalle_alimentos_por_menu AS
                         SELECT 
                             a.idAlimento, 
                             a.imgAlimento, 
@@ -524,7 +524,7 @@
 
 
                         -- Tipos de alimentos por evento
-                     CREATE VIEW vista_tipo_alimento_evento AS 
+                     CREATE OR REPLACE VIEW vista_tipo_alimento_evento AS 
                             SELECT DISTINCT 
                                 ta.idTipoA, 
                                 ta.tipo, 
@@ -543,7 +543,7 @@
 
 
                         -- Detalle de alimentos por evento
-                       CREATE VIEW vista_detalle_alimentos_evento AS
+                       CREATE OR REPLACE VIEW vista_detalle_alimentos_evento AS
                         SELECT
                             a.idAlimento,
                             a.imgAlimento,
