@@ -19,72 +19,41 @@ class ConteoRecuperarHelpers
         return hash('sha256', strtolower(trim($correo)) . self::getKey());
     }
 
-    public static function verificarBloqueo($correo)
+    private static function leerArchivo()
     {
-        self::limpiezaAutomatica();
-
-        $data = self::leerArchivo();
-        $hash = self::hashCorreo($correo);
-
-        if (!isset($data[$hash])) {
-            return ['bloqueado' => false, 'mensaje' => ''];
+        if (!file_exists(self::$filePath)) {
+            return [];
         }
 
-        if ($data[$hash]['bloqueado_hasta'] && time() < $data[$hash]['bloqueado_hasta']) {
-            $minutos = ceil(($data[$hash]['bloqueado_hasta'] - time()) / 60);
-            return ['bloqueado' => true, 'mensaje' => "Usuario bloqueado. Intente nuevamente en $minutos minutos."];
+        $fp = fopen(self::$filePath, 'r');
+        if (!$fp) {
+            return [];
         }
 
-        if ($data[$hash]['bloqueado_hasta'] && time() >= $data[$hash]['bloqueado_hasta']) {
-            unset($data[$hash]);
-            self::guardarArchivo($data);
-        }
+        flock($fp, LOCK_SH);
+        $content = stream_get_contents($fp);
+        flock($fp, LOCK_UN);
+        fclose($fp);
 
-        return ['bloqueado' => false, 'mensaje' => ''];
+        return json_decode($content, true) ?? [];
     }
 
-    public static function registrarIntento($correo)
+    private static function guardarArchivo($data)
     {
-        $data = self::leerArchivo();
-        $hash = self::hashCorreo($correo);
-
-        if (isset($data[$hash]) && $data[$hash]['bloqueado_hasta'] && time() >= $data[$hash]['bloqueado_hasta']) {
-            unset($data[$hash]);
+        $fp = fopen(self::$filePath, 'c+');
+        if (!$fp) {
+            throw new \Exception("No se pudo abrir el archivo para guardar los intentos.");
         }
 
-        if (!isset($data[$hash])) {
-            $data[$hash] = [
-                'intentos' => 0,
-                'bloqueado_hasta' => null,
-                'primer_intento' => time(),
-            ];
-        }
+        flock($fp, LOCK_EX);
 
-        if ($data[$hash]['intentos'] < 4 && !$data[$hash]['bloqueado_hasta']) {
-            $data[$hash]['intentos']++;
-        }
+        ftruncate($fp, 0);
+        rewind($fp);
+        fwrite($fp, json_encode($data, JSON_PRETTY_PRINT));
 
-        if ($data[$hash]['intentos'] >= 4) {
-            $data[$hash]['intentos'] = 4;
-            $data[$hash]['bloqueado_hasta'] = time() + 300; // Bloqueo 5 minutos
-            self::guardarArchivo($data);
-            return ['bloqueado' => true, 'mensaje' => 'Usuario bloqueado por múltiples intentos fallidos.'];
-        }
-
-        self::guardarArchivo($data);
-        return ['bloqueado' => false, 'mensaje' => "Intento registrado. Le quedan " . (4 - $data[$hash]['intentos']) . " intentos."];
-    }
-
-    public static function resetearIntentos($correo)
-    {
-        $data = self::leerArchivo();
-        $hash = self::hashCorreo($correo);
-
-        if (isset($data[$hash])) {
-            unset($data[$hash]);
-        }
-
-        self::guardarArchivo($data);
+        fflush($fp);
+        flock($fp, LOCK_UN);
+        fclose($fp);
     }
 
     private static function limpiezaAutomatica()
@@ -95,13 +64,19 @@ class ConteoRecuperarHelpers
         $cambios = false;
 
         foreach ($data as $hash => $info) {
-            if ($info['bloqueado_hasta'] && $tiempoActual >= $info['bloqueado_hasta']) {
+            if (isset($info['bloqueado_hasta']) && $tiempoActual >= $info['bloqueado_hasta']) {
                 unset($data[$hash]);
                 $cambios = true;
                 continue;
             }
-            if (!$info['bloqueado_hasta'] && isset($info['primer_intento'])) {
-                if ($tiempoActual - $info['primer_intento'] > $unDia) {
+
+            if (isset($info['exitosos']['bloqueado_hasta']) && $tiempoActual >= $info['exitosos']['bloqueado_hasta']) {
+                unset($data[$hash]['exitosos']);
+                $cambios = true;
+            }
+
+            if (!isset($info['bloqueado_hasta']) && (!isset($info['exitosos']['bloqueado_hasta']))) {
+                if (isset($info['primer_intento']) && ($tiempoActual - $info['primer_intento'] > $unDia)) {
                     unset($data[$hash]);
                     $cambios = true;
                 }
@@ -113,27 +88,86 @@ class ConteoRecuperarHelpers
         }
     }
 
-    private static function leerArchivo()
+    public static function verificarBloqueo($correo)
     {
-        if (!file_exists(self::$filePath)) {
-            return [];
+        self::limpiezaAutomatica();
+        $data = self::leerArchivo();
+        $hash = self::hashCorreo($correo);
+
+        if (!isset($data[$hash])) {
+            return ['bloqueado' => false, 'mensaje' => ''];
         }
-        $content = file_get_contents(self::$filePath);
-        return json_decode($content, true) ?? [];
+
+        if (isset($data[$hash]['bloqueado_hasta']) && time() < $data[$hash]['bloqueado_hasta']) {
+            $minutos = ceil(($data[$hash]['bloqueado_hasta'] - time()) / 60);
+            return ['bloqueado' => true, 'mensaje' => "Usuario bloqueado por intentos fallidos. Intente en $minutos minutos."];
+        }
+
+        return ['bloqueado' => false, 'mensaje' => ''];
     }
 
-    private static function guardarArchivo($data)
+    public static function registrarIntento($correo)
     {
-        file_put_contents(self::$filePath, json_encode($data, JSON_PRETTY_PRINT));
+        self::limpiezaAutomatica();
+        $data = self::leerArchivo();
+        $hash = self::hashCorreo($correo);
+        $now = time();
+
+        if (isset($data[$hash]['bloqueado_hasta']) && $now >= $data[$hash]['bloqueado_hasta']) {
+            unset($data[$hash]);
+        }
+
+        if (!isset($data[$hash])) {
+            $data[$hash] = [
+                'intentos' => 1,
+                'primer_intento' => $now,
+                'bloqueado_hasta' => null,
+            ];
+        } else {
+            if ($now - $data[$hash]['primer_intento'] > 300) { 
+                $data[$hash]['intentos'] = 1;
+                $data[$hash]['primer_intento'] = $now;
+                $data[$hash]['bloqueado_hasta'] = null;
+            } else {
+                $data[$hash]['intentos']++;
+            }
+        }
+
+        if ($data[$hash]['intentos'] >= 2) {
+            $data[$hash]['bloqueado_hasta'] = $now + 300; 
+            self::guardarArchivo($data);
+            return ['bloqueado' => true, 'mensaje' => 'Usuario bloqueado por múltiples intentos fallidos. Intente en 5 minutos.'];
+        }
+
+        self::guardarArchivo($data);
+        return ['bloqueado' => false, 'mensaje' => "Intento fallido registrado. Le quedan " . (2 - $data[$hash]['intentos']) . " intentos."];
+    }
+
+    public static function resetearIntentos($correo)
+    {
+        $data = self::leerArchivo();
+        $hash = self::hashCorreo($correo);
+
+        if (isset($data[$hash])) {
+
+            unset($data[$hash]['intentos']);
+            unset($data[$hash]['primer_intento']);
+            unset($data[$hash]['bloqueado_hasta']);
+
+            if (empty($data[$hash])) {
+                unset($data[$hash]);
+            }
+            self::guardarArchivo($data);
+        }
     }
 
     public static function verificarLimiteDiarioExitoso($correo)
     {
-        self::limpiezaAutomatica(); // Limpieza previa
-
+        self::limpiezaAutomatica();
         $data = self::leerArchivo();
         $hash = self::hashCorreo($correo);
         $hoy = date('Y-m-d');
+        $now = time();
 
         if (!isset($data[$hash]['exitosos'])) {
             return ['bloqueado' => false, 'mensaje' => '', 'registro' => true];
@@ -141,10 +175,14 @@ class ConteoRecuperarHelpers
 
         $registro = $data[$hash]['exitosos'];
 
-        // Si es otro día, reiniciar
+        if (isset($registro['bloqueado_hasta']) && $now < $registro['bloqueado_hasta']) {
+            $horas = ceil(($registro['bloqueado_hasta'] - $now) / 3600);
+            return ['bloqueado' => true, 'mensaje' => "Ha superado el número de solicitudes permitidas. Intente nuevamente en $horas horas."];
+        }
+
         if ($registro['fecha'] !== $hoy) {
             $data[$hash]['exitosos'] = [
-                'contador' => 1,
+                'contador' => 0,
                 'fecha' => $hoy,
                 'bloqueado_hasta' => null,
             ];
@@ -152,13 +190,8 @@ class ConteoRecuperarHelpers
             return ['bloqueado' => false, 'mensaje' => '', 'registro' => true];
         }
 
-        if (isset($registro['bloqueado_hasta']) && time() < $registro['bloqueado_hasta']) {
-            $horas = ceil(($registro['bloqueado_hasta'] - time()) / 3600);
-            return ['bloqueado' => true, 'mensaje' => "Ha superado el número de solicitudes permitidas. Intente nuevamente en $horas horas."];
-        }
-
-        if ($registro['contador'] >= 3) {
-            $data[$hash]['exitosos']['bloqueado_hasta'] = time() + (24 * 60 * 60); // 24 horas
+        if ($registro['contador'] >= 2) {
+            $data[$hash]['exitosos']['bloqueado_hasta'] = $now + (24 * 60 * 60); // 24 horas
             self::guardarArchivo($data);
             return ['bloqueado' => true, 'mensaje' => "Ha superado el número de solicitudes permitidas. Intente nuevamente mañana."];
         }
@@ -166,19 +199,47 @@ class ConteoRecuperarHelpers
         return ['bloqueado' => false, 'mensaje' => '', 'registro' => true];
     }
 
-   public static function restarIntentoExitoso($correo)
+    public static function registrarIntentoExitoso($correo)
+    {
+        $data = self::leerArchivo();
+        $hash = self::hashCorreo($correo);
+        $hoy = date('Y-m-d');
+        $now = time();
+
+        if (!isset($data[$hash]['exitosos'])) {
+            $data[$hash]['exitosos'] = [
+                'contador' => 1,
+                'fecha' => $hoy,
+                'bloqueado_hasta' => null,
+            ];
+        } else {
+            if ($data[$hash]['exitosos']['fecha'] !== $hoy) {
+                $data[$hash]['exitosos']['contador'] = 1;
+                $data[$hash]['exitosos']['fecha'] = $hoy;
+                $data[$hash]['exitosos']['bloqueado_hasta'] = null;
+            } else {
+                $data[$hash]['exitosos']['contador']++;
+
+                if ($data[$hash]['exitosos']['contador'] > 2) {
+                    $data[$hash]['exitosos']['bloqueado_hasta'] = $now + (24 * 60 * 60);
+                }
+            }
+        }
+
+        self::guardarArchivo($data);
+    }
+
+    public static function restarIntentoExitoso($correo)
     {
         $data = self::leerArchivo();
         $hash = self::hashCorreo($correo);
         $hoy = date('Y-m-d');
 
-        if (isset($data[$hash]['exitosos']) && $data[$hash]['exitosos']['fecha'] === $hoy) {
+        if (isset($data[$hash]['exitosos']) && isset($data[$hash]['exitosos']['fecha']) && $data[$hash]['exitosos']['fecha'] === $hoy) {
             if ($data[$hash]['exitosos']['contador'] > 0) {
                 $data[$hash]['exitosos']['contador']--;
                 self::guardarArchivo($data);
             }
         }
     }
-
-
 }

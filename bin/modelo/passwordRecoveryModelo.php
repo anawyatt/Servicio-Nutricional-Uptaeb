@@ -29,7 +29,7 @@ class passwordRecoveryModelo extends connectDB
         $this->sistem = new encryption();  
     }
 
-        public function recuperContraseñas($tipo, $correo){
+        public function recuperContraseñas($tipo, $correo) {
             if (!in_array($tipo, ['sistema', 'app'], true)) {
                 return ['resultado' => 'error', 'mensaje' => "Tipo inválido. Solo se permite 'sistema' o 'app'"];
             }
@@ -52,25 +52,24 @@ class passwordRecoveryModelo extends connectDB
                 return ['resultado' => 'error', 'mensaje' => $verificarLimite['mensaje']];
             }
 
-            // Registrar intento exitoso antes del envío
-            ConteoRecuperarHelpers::registrarIntentoExitoso($this->correo);
-
             $resultadoEnvio = $this->enviarCorreoRecuperacion();
 
-            if ($resultadoEnvio['resultado'] === 'no existe' || $resultadoEnvio['resultado'] === 'error') {
-                // Revertir intento exitoso si falla
-                ConteoRecuperarHelpers::restarIntentoExitoso($this->correo);
+            if ($resultadoEnvio['resultado'] === 'ok') {
 
-                $intento = ConteoRecuperarHelpers::registrarIntento($this->correo);
-                $mensajeExtra = isset($intento['mensaje']) ? ' ' . $intento['mensaje'] : '';
+                ConteoRecuperarHelpers::registrarIntentoExitoso($this->correo);
 
-                return ['resultado' => 'error', 'mensaje' => $resultadoEnvio['mensaje'] . $mensajeExtra];
-            }
+                ConteoRecuperarHelpers::resetearIntentos($this->correo);
 
-            ConteoRecuperarHelpers::resetearIntentos($this->correo);
-            return $resultadoEnvio;
+                return $resultadoEnvio;
+                } else {
+                    ConteoRecuperarHelpers::restarIntentoExitoso($this->correo);
+
+                    $intento = ConteoRecuperarHelpers::registrarIntento($this->correo);
+                    $mensajeExtra = isset($intento['mensaje']) ? ' ' . $intento['mensaje'] : '';
+
+                    return ['resultado' => 'error', 'mensaje' => $resultadoEnvio['mensaje'] . $mensajeExtra];
+                }
         }
-
 
         protected function enviarCorreoRecuperacion() {
             $this->conectarDBSeguridad();
