@@ -22,19 +22,20 @@ class cambiarClaveModelo extends connectDB
         $this->encryption = new encryption();
     }
 
-        public function actualizarClaveRecuperacion($token, $codigo, $nuevaClave, $confirmarClave){
+        public function actualizarClaveRecuperacion($token, $codigo, $nuevaClave, $confirmarClave) {
             $this->codigo = trim($codigo);
             $this->nuevaClave = trim($nuevaClave);
             $this->confirmarClave = trim($confirmarClave);
 
-            $datos = JwtHelpers::verificarTokenPersonalizado($token);
+            $datos = \helpers\JwtHelpers::verificarTokenPersonalizado($token);
 
-              if ($datos['tipo'] !== 'recuperacion') {
-                 return ['resultado' => 'error', 'mensaje' => 'Token inválido'];
-             }
-             if ($datos['codigo'] != $this->codigo) {
+            if (!$datos || $datos['tipo'] !== 'recuperacion') {
+                return ['resultado' => 'error', 'mensaje' => 'Token inválido'];
+            }
+
+            if ($datos['codigo'] != $this->codigo) {
                 return ['resultado' => 'error', 'mensaje' => 'Código incorrecto'];
-             }
+            }
 
             if ($this->nuevaClave !== $this->confirmarClave) {
                 return ['resultado' => 'error', 'mensaje' => 'Las contraseñas no coinciden'];
@@ -44,18 +45,28 @@ class cambiarClaveModelo extends connectDB
                 return ['resultado' => 'error', 'mensaje' => 'La contraseña no cumple con los requisitos mínimos de seguridad'];
             }
 
-            return $this->validarYActualizarClave($datos['correo']);
-        }
-         
+            $respuesta = $this->validarYActualizarClave($datos['correo']);
 
-          public function actualizarClaveRecuperacionApp($codigo, $nuevaClave, $confirmarClave, $correo){
+            if ($respuesta['resultado'] === 'ok') {
+                if (!empty($datos['jti']) && !empty($datos['exp'])) {
+                    \helpers\BlacklistHelper::addToBlacklist($datos['jti'], $datos['exp']);
+                }
+
+                setcookie('jwt', '', time() - 3600, '/', '', false, true);
+                unset($_COOKIE['jwt']);
+            }
+
+            return $respuesta;
+        }
+
+        public function actualizarClaveRecuperacionApp($codigo, $nuevaClave, $confirmarClave, $correo){
             $this->codigo = trim($codigo);
             $this->nuevaClave = trim($nuevaClave);
             $this->confirmarClave = trim($confirmarClave);
-            $this->correo=$correo;
+            $this->correo = $correo;
+
             return $this->validarYActualizarClave($this->correo);
-          }
-       
+        }   
 
         private function validarYActualizarClave($correo){
             try {
