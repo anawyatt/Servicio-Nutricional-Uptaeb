@@ -65,8 +65,12 @@ class tipoAlimentoModelo extends connectDB
     if (!$this->validarTipoA($tipoA)) {
       return ['resultado' => 'Ingresar el tipo de alimento correctamente'];
     } else {
+      if ($this->verificarTA() === true) {
+        return ['resultado' => 'error tipo'];
+      } else {
       $this->tipoA = $tipoA;
       return $this->registrar();
+      }
     }
 
   }
@@ -190,7 +194,7 @@ class tipoAlimentoModelo extends connectDB
 
   }
 
-  public function verificarTipoA2($tipoA, $id, $returnJson = true)
+  public function verificarTipoA2($tipoA, $id)
   {
     $errores = [];
 
@@ -243,6 +247,16 @@ class tipoAlimentoModelo extends connectDB
     if (!empty($errores)) {
       return ['resultado' => implode(", ", $errores)];
     } else {
+      if ($this->verificar2() === true) {
+        return ['resultado' => 'error tipo2'];
+      }
+      if ($this->verificarExistencia($id)['resultado'] === 'ya no existe') {
+        return ['resultado' => 'no se puede modificar, ya no existe'];
+      }
+      if ($this->verificarB() === true) {
+        return ['resultado' => 'no se puede modificar, ya tiene alimentos asociados'];
+      }
+      
       $this->tipoA = $tipoA;
       $this->id = $id;
       return $this->modificar();
@@ -286,6 +300,12 @@ class tipoAlimentoModelo extends connectDB
     if (!$this->validarId($id)) {
       return ['resultado' => 'Ingresar el id del tipo de alimento correctamente'];
     } else {
+      if ($this->verificarExistencia($id)['resultado'] === 'ya no existe') {
+        return ['resultado' => 'no se puede anular, ya no existe'];
+      }
+      if ($this->verificarB() === true) {
+        return ['resultado' => 'no se puede anular, ya tiene alimentos asociados'];
+      }
       $this->id = $id;
       return $this->anular();
     }

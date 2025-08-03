@@ -74,7 +74,7 @@
 
                         <div class="wave-group p-2  my-2 mb-2">
 
-                          <input type="file" class=" input imagen" id="fileInput0">
+                          <input type="file" class=" input imagen" id="fileInput0" accept="image/*">
 
                           <span class="bar bar1"></span>
                           <label class="label labelPri ic1">

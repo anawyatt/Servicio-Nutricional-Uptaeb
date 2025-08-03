@@ -82,19 +82,16 @@ $('#ani').hide(1000);
   }
 
 function cambiarFormato(texto) {
-   // Dividir la cadena en palabras utilizando espacios
+   
    const palabras = texto.split(" ");
    let palabrasFormateadas = [];
  
-   // Recorrer las palabras
    for (let i = 0; i < palabras.length; i++) {
-       // Eliminar espacios en blanco adicionales y formatear cada palabra
        if (palabras[i].trim() !== "") {
            palabrasFormateadas.push(palabras[i].charAt(0).toUpperCase() + palabras[i].slice(1).toLowerCase());
        }
    }
- 
-   // Unir las palabras formateadas nuevamente en una cadena
+
    return palabrasFormateadas.join(" ");
  }
 
@@ -146,7 +143,6 @@ $(".error1").hide();
        })
 
          function danger(){
-              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El tipo de alimento ya existe!');
               $(".error1").show();
               $('.tipoA').addClass('errorBorder');
               $('.bar1').removeClass('bar');
@@ -154,7 +150,7 @@ $(".error1").hide();
               $('.ic1').removeClass('labelPri');
               $('.letra').addClass('labelE');
               $('.letra').removeClass('label-char');
-       }
+        }
 
        function primary(){
              $(".error1").html("");
@@ -171,23 +167,10 @@ $(".error1").hide();
           var chequeo = /^[a-zA-ZÀ-ÿ\s\-\_]{5,}$/;
           var nombre = $("#tipoA").val();
           if (chequeo.test(nombre) && nombre !== '') {
-             $(".error1").html("");
-             $(".error1").hide();
-             $('.tipoA').removeClass('errorBorder');
-             $('.bar1').addClass('bar');
-             $('.ic1').removeClass('l');
-             $('.ic1').addClass('labelPri');
-             $('.letra').removeClass('labelE');
-             $('.letra').addClass('label-char');
+             primary();
           } else {
               $(".error1").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese el tipo de Alimento, solo Caracteres!');
-              $(".error1").show();
-              $('.tipoA').addClass('errorBorder');
-              $('.bar1').removeClass('bar');
-              $('.ic1').addClass('l');
-              $('.ic1').removeClass('labelPri');
-              $('.letra').addClass('labelE');
-              $('.letra').removeClass('label-char');
+              danger();
               error_tipoA = true;
           }
       }
@@ -211,11 +194,11 @@ $(".error1").hide();
                            timerProgressBar:3000,
                         })
                      danger();
+                     $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El tipo de alimento ya existe!');
                     error_val=true;
                   } 
                    else{
                    primary();
-     
                  }
 
             }
@@ -274,6 +257,10 @@ let error_tipoA2= false;
 
       $("#tipoA2").on('keyup', function() {
          val_tipoA2();
+         clearTimeout(timer); 
+         timer = setTimeout(function () {
+           validar_tipoA2();
+         }, 500);
       });
 
        $("#editar").on("click", function(e){ 
@@ -299,7 +286,6 @@ let error_tipoA2= false;
        })
         function danger1(){
              $(".error2").show();
-             $('.error2').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El tipo de Alimento ya existe!');
              $('.tipoA2').addClass('errorBorder');
              $('.bar2').removeClass('bar');
              $('.ic2').addClass('l');
@@ -323,23 +309,10 @@ let error_tipoA2= false;
           var chequeo = /^[a-zA-ZÀ-ÿ\s\-\_]{5,}$/;
           var nombre = $("#tipoA2").val();
           if (chequeo.test(nombre) && nombre !== '') {
-              $(".error2").html("");
-              $(".error2").hide();
-              $('.tipoA2').removeClass('errorBorder');
-              $('.bar2').addClass('bar');
-              $('.ic2').removeClass('l');
-              $('.ic2').addClass('labelPri');
-              $('.letra2').removeClass('labelE');
-              $('.letra2').addClass('label-char');
+              primary2()
           } else {
              $(".error2").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese el tipo de alimento, solo Caracteres!');
-             $(".error2").show();
-             $('.tipoA2').addClass('errorBorder');
-             $('.bar2').removeClass('bar');
-             $('.ic2').addClass('l');
-             $('.ic2').removeClass('labelPri');
-             $('.letra2').addClass('labelE');
-             $('.letra2').removeClass('label-char');
+             danger1();
              error_tipoA2 = true;
           }
       }
@@ -419,6 +392,37 @@ $(document).on('click', '.resetear', function() {
   });
 
 
+  function validar_tipoA2(){
+      let tipoA2 = cambiarFormato($('#tipoA2').val());
+       $.ajax({
+        url:"",
+        method:"post",
+        dataType:"json",
+        data:{tipoA2 , id},
+         success(data){
+          if (data.resultado === "error tipo2"){
+             Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon:'error',
+                title:'El Tipo de alimento <b class="fw-bold text-rojo">'+tipoA2+'</b> ya está registrado, ingrese otro tipo de alimento!',
+                showConfirmButton:false,
+                timer:3000,
+                timerProgressBar:3000,
+            })
+              $('#error2').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El tipo de alimento ya existe!');
+             danger1()
+           } 
+           else{
+               primary2();
+            }
+
+            }
+       })
+    }
+
+
+
  //--------------------------------------------------------------------------
 
   function modificarTipoAlimento(){
@@ -448,7 +452,6 @@ $(document).on('click', '.resetear', function() {
             })
         }
         else{
-          
              if (data.resultado === "error tipo2"){
              Swal.fire({
                 toast: true,
@@ -459,7 +462,7 @@ $(document).on('click', '.resetear', function() {
                 timer:3000,
                 timerProgressBar:3000,
             })
-              $('#error2').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El antecedente ya existe!');
+              $('#error2').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El tipo de alimento ya existe!');
              danger1()
            } 
           else if (data.mensaje.resultado === "Editado correctamente" && data.newCsrfToken) {
@@ -487,7 +490,7 @@ $(document).on('click', '.resetear', function() {
                toast: true,
                position: 'top-end',
                icon:'warning',
-               title:'No hubo cambios en el tipo de alimento<b class="text-primary fw-bold">'+tipoA2+'</b>!',
+               title:'No hubo cambios en el tipo de alimento <b class="text-primary fw-bold">'+tipoA2+'</b>!',
                showConfirmButton:false,
                timer:2500,
                timerProgressBar:true,

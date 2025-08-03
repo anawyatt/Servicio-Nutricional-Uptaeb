@@ -120,7 +120,21 @@ if (isset($datosPermisos['permiso']['consultar'])) {
 
 //------------------- Modificar ----------------------
 
+
 if (isset($datosPermisos['permiso']['modificar'])) {
+
+  if(isset($_POST['tipoA2']) && isset($_POST['id'])) {
+    try {
+      $verificar = $objeto->verificarTipoA2($_POST['tipoA2'], $_POST['id']);
+      if ($verificar['resultado'] == 'error tipo2') {
+        echo json_encode($verificar);
+        die();
+      }
+    } catch (\RuntimeException $e) {
+      echo json_encode(['message' => $e->getMessage()]);
+      die();
+    }
+  }
 
   if (isset($_POST['tipoA2']) && isset($_POST['id']) && isset($_POST['csrfToken'])) {
       try {
@@ -132,13 +146,6 @@ if (isset($datosPermisos['permiso']['modificar'])) {
               echo json_encode($verificarExistencia); 
               die();
           }
-
-          $verificarTipoAlimento = $objeto->verificarTipoA2($_POST['tipoA2'], $_POST['id']);
-          if ($verificarTipoAlimento['resultado'] == 'error tipo') {
-              echo json_encode($verificarTipoAlimento); 
-              die();
-          }
-
           $modificar = $objeto->modificarTipoAlimento($_POST['tipoA2'], $_POST['id']);
           echo json_encode(['mensaje'=>$modificar, 'newCsrfToken' => $csrf['newToken']]); 
           die();
