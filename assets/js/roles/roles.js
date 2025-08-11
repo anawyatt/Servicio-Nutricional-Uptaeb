@@ -66,8 +66,6 @@ $('#ani').hide(1000);
                 </tr>`;
             });
             $('.tbody').html(tabla);
-            
-            // Inicializar DataTables sin definir columnas
              mostrar = $('.tabla2').DataTable();
 
              mostrar.on('draw.dt', function () {
@@ -132,7 +130,6 @@ $("#error1").hide();
        })
 
          function danger(){
-              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El rol ya existe!');
               $(".error1").show();
               $('.rol').addClass('errorBorder');
               $('.bar1').removeClass('bar');
@@ -140,7 +137,7 @@ $("#error1").hide();
               $('.ic1').removeClass('labelPri');
               $('.letra').addClass('labelE');
               $('.letra').removeClass('label-char');
-       }
+         }
 
        function primary(){
              $(".error1").html("");
@@ -157,23 +154,10 @@ $("#error1").hide();
           var chequeo = /^[a-zA-ZÀ-ÿ\s\-\_]{3,}$/;
           var nombre = $("#rol").val();
           if (chequeo.test(nombre) && nombre !== '') {
-             $(".error1").html("");
-             $(".error1").hide();
-             $('.rol').removeClass('errorBorder');
-             $('.bar1').addClass('bar');
-             $('.ic1').removeClass('l');
-             $('.ic1').addClass('labelPri');
-             $('.letra').removeClass('labelE');
-             $('.letra').addClass('label-char');
+            primary();
           } else {
+              danger()
               $(".error1").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese el rol, solo Caracteres!');
-              $(".error1").show();
-              $('.rol').addClass('errorBorder');
-              $('.bar1').removeClass('bar');
-              $('.ic1').addClass('l');
-              $('.ic1').removeClass('labelPri');
-              $('.letra').addClass('labelE');
-              $('.letra').removeClass('label-char');
              error_rol = true;
           }
       }
@@ -197,6 +181,7 @@ $("#error1").hide();
                            timerProgressBar:3000,
                         })
                      danger();
+                     $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El rol ya existe!');
                     error_val=true;
                   } 
                  else{
@@ -209,19 +194,15 @@ $("#error1").hide();
     }
 
     function capitalizarYEliminarEspaciosExtras(texto) {
-        // Dividir la cadena en palabras utilizando espacios
         const palabras = texto.split(" ");
         let palabrasFormateadas = [];
     
         // Recorrer las palabras
         for (let i = 0; i < palabras.length; i++) {
-            // Eliminar espacios en blanco adicionales y formatear cada palabra
             if (palabras[i].trim() !== "") {
                 palabrasFormateadas.push(palabras[i].charAt(0).toUpperCase() + palabras[i].slice(1).toLowerCase());
             }
         }
-    
-        // Unir las palabras formateadas nuevamente en una cadena
         return palabrasFormateadas.join(" ");
     }
 
@@ -239,12 +220,11 @@ $("#error1").hide();
         $.ajax({
             type: "post",
             dataType: 'JSON',
-            url: "", // Ajusta la URL según tu aplicación
+            url: "",
             data: { registrar:true, rol: rol, csrfToken: token },
             success(data) {
                 if (data.mensaje.resultado == 'exitoso' && data.newCsrfToken){
                      console.log(data);
-                    // Cerrar el modal y mostrar el mensaje de éxito
                     $('.limpiar').click();
                     $('#cerrar').click();
                     $('[name="csrf_token"]').val(data.newCsrfToken);
@@ -291,6 +271,10 @@ $("#error2").hide();
 
       $("#rol2").on('keyup', function() {
          val_rol2();
+         clearTimeout(timer); 
+         timer = setTimeout(function () {
+           validar_roles2();
+         }, 500);
       });
 
        $("#editar").on("click", function(e){ 
@@ -316,7 +300,6 @@ $("#error2").hide();
        })
         function danger1(){
              $(".error2").show();
-             $('.error2').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El rol ya existe!');
              $('.rol2').addClass('errorBorder');
              $('.bar2').removeClass('bar');
              $('.ic2').addClass('l');
@@ -340,23 +323,10 @@ $("#error2").hide();
           var chequeo = /^[a-zA-ZÀ-ÿ\s\-\_]{3,}$/;
           var nombre = $("#rol2").val();
           if (chequeo.test(nombre) && nombre !== '') {
-              $(".error2").html("");
-              $(".error2").hide();
-              $('.rol2').removeClass('errorBorder');
-              $('.bar2').addClass('bar');
-              $('.ic2').removeClass('l');
-              $('.ic2').addClass('labelPri');
-              $('.letra2').removeClass('labelE');
-              $('.letra2').addClass('label-char');
+            primary2()
           } else {
              $(".error2").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese el rol, solo Caracteres!');
-             $(".error2").show();
-             $('.rol2').addClass('errorBorder');
-             $('.bar2').removeClass('bar');
-             $('.ic2').addClass('l');
-             $('.ic2').removeClass('labelPri');
-             $('.letra2').addClass('labelE');
-             $('.letra2').removeClass('label-char');
+             danger1()
              error_rol2 = true;
           }
       }
@@ -422,6 +392,35 @@ $("#error2").hide();
         });
     });
 
+    function validar_roles2(){
+      const rol2 = $("#rol2").val();
+       $.ajax({
+        url:"",
+        method:"post",
+        dataType:"json",
+        data:{rol2, id},
+         success(data){
+                 if (data.resultado == 'errorRol') {
+                     danger1();
+                     $('.error2').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El rol ya existe!');
+                        Swal.fire({
+                           toast: true,
+                           position: 'top-end',
+                           icon:'error',
+                           title:'El rol <b class="fw-bold text-rojo">'+rol2+'</b> ya esta registrado, ingrese otro rol!',
+                           showConfirmButton:false,
+                           timer:3000,
+                           timerProgressBar:3000,
+                        })
+                    }
+                   else{
+                   primary2();
+                   }
+
+            }
+       })
+    }
+
       function modificar(){
          const rol2 = capitalizarYEliminarEspaciosExtras($("#rol2").val());
          let token = $('[name="csrf_token"]').val();
@@ -452,6 +451,7 @@ $("#error2").hide();
               else{
                    if (data.resultado == 'errorRol') {
                      danger1();
+                     $('.error2').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El rol ya existe!');
                         Swal.fire({
                            toast: true,
                            position: 'top-end',
@@ -512,9 +512,6 @@ $(document).on('click', '.borrar', function() {
     console.log("nombreRol:", nombreRol);
     console.log("rolActual:", rolActual);
 
-   
-
-    // Verificar si es el "super usuario" o el mismo rol de la sesión
     if (nombreRol == 'super usuario' || nombreRol == 'Super Usuario') {
         Swal.fire({
             toast: true,
