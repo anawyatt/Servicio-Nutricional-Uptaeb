@@ -17,7 +17,7 @@ class permisosHelper {
         if (!$payload) {
             die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
         }
-
+    
         $permisos = $objeto->getPermisosRol($payload->rol);
         if (!isset($permisos[$modulo])) {
             die("<script>window.location='?url=" . urlencode($sistem->encryptURL('home')) . "'</script>");

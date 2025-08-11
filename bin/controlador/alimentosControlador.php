@@ -1,5 +1,4 @@
 <?php
-
  use component\initComponents as initComponents;
  use component\navegador as navegador;
  use component\sidebar as sidebar;
