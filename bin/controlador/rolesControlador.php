@@ -101,6 +101,19 @@ if(isset($_POST['info']) && $_POST['id']){
 
 if (isset($datosPermisos['permiso']['modificar'])) {
 
+if(isset($_POST['rol2']) && isset($_POST['id']) ){
+  try{
+    $validar = $objeto->validarRol2($_POST['rol2'], $_POST['id']);
+    if ($validar['resultado'] == 'errorRol') { 
+      echo json_encode($validar);
+      die();
+    }
+  }catch (\RuntimeException $e) {
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+   }    
+}
+
 if(isset($_POST['rol2']) && isset($_POST['id'])  && isset($_POST['csrfToken'])  ){
   try{
     PostRateMiddleware::verificar('modificar', (array)$payload);
@@ -108,11 +121,6 @@ if(isset($_POST['rol2']) && isset($_POST['id'])  && isset($_POST['csrfToken'])  
     $verificarE= $objeto->verificarExistencia($_POST['id']);
     if ($verificarE['resultado'] == 'ya no existe') { 
       echo json_encode($verificarE);
-      die();
-    }
-    $validar = $objeto->validarRol2($_POST['rol2'], $_POST['id']);
-    if ($validar['resultado'] == 'errorRol') { 
-      echo json_encode($validar);
       die();
     }
     $modificar = $objeto->editarRol($_POST['rol2'], $_POST['id']);

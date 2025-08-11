@@ -7,6 +7,7 @@ use \PDO;
 class RolesModelo extends connectDB
 {
     private $id;
+    private $payload;
 
     public function __construct()
     {
@@ -31,6 +32,7 @@ class RolesModelo extends connectDB
         if (!$this->validarDato($rol, 'soloLetras')) {
             return ['error' => 'El nombre debe contener solo letras y no puede estar vacío.'];
         }
+
         $this->rol = $rol;
         $resultado = $this->validarR();
 
@@ -60,6 +62,9 @@ class RolesModelo extends connectDB
             $this->conectarDBSeguridad();
             if (!$this->validarDato($rol, 'soloLetras')) {
                 return ['error' => 'El nombre debe contener solo letras y no puede estar vacío.'];
+            }
+            if ($this->validarR()) {
+                return ['resultado' => 'error2'];
             }
             $this->rol = $rol;
             $idRol = $this->insertarRol();
@@ -274,6 +279,15 @@ class RolesModelo extends connectDB
         if (!$this->validarDato($rol, 'soloLetras')) {
             return ['error' => 'El nombre debe contener solo letras y no puede estar vacío.'];
         }
+        if (!preg_match("/^[0-9]{1,}$/", $id)) {
+            return ['resultado' => 'Ingresar el id del rol'];
+        }
+        if($this->validarR()) {
+            return ['resultado' => 'errorRol'];
+        }
+        if($this->verificarE() === false) {
+            return ['resultado' => 'ya no existe'];
+        }
         $this->rol = $rol;
         $this->id = $id;
         return $this->actualizarRol();
@@ -322,9 +336,16 @@ class RolesModelo extends connectDB
         if ($rolActual == $id) {
             return ['resultado' => 'No puedes eliminar el rol con el que iniciaste sesión.'];
         }
+        if($this->verificarE() === false) {
+            return ['resultado' => 'ya no existe'];
+        }
 
         if ($this->esSuperUsuario($id)) {
             return ['resultado' => 'No puedes eliminar el rol de super usuario.'];
+        }
+
+        if($this->usuariosRegistradosConRol($id)['resultado'] === 'usuarios_asociados') {
+            return ['resultado' => 'No puedes eliminar este rol porque hay usuarios asociados a él.'];
         }
 
         $this->id = $id;

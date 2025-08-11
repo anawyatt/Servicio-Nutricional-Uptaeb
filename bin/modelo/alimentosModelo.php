@@ -24,7 +24,6 @@ class alimentosModelo extends connectDB
         $token = $_COOKIE['jwt'];
         $this->payload = JwtHelpers::validarToken($token);
     }
-
     public function verificarExistenciaTipoA($tipoA)
     {
         if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
@@ -200,7 +199,7 @@ class alimentosModelo extends connectDB
             return ['resultado' => 'Error al subir la imagen'];
         }
         $mime = mime_content_type($imagen['tmp_name']);
-        $formatosValidos = ['image/jpeg', 'image/png'];
+        $formatosValidos = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
 
         if (!in_array($mime, $formatosValidos)) {
             return ['resultado' => 'El archivo no es una imagen válida (JPEG, PNG)!'];
