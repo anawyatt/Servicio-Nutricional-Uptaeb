@@ -77,11 +77,18 @@ $(document).ready(function () {
     
                 $('.tbody').html(tabla);
     
-                if (typeof mostrar !== 'undefined') {
-                    mostrar.destroy(); // evitar múltiples instancias si recarga
+                // Destruir instancia previa si existe
+                if ($.fn.DataTable.isDataTable('.tabla2')) {
+                    $('.tabla2').DataTable().destroy();
                 }
-    
-                mostrar = $('.tabla2').DataTable();
+                // Inicializar DataTable correctamente
+                mostrar = $('.tabla2').DataTable({
+                    language: {
+                        url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
+                    },
+                    autoWidth: false,
+                    responsive: true
+                });
                 mostrar.on('draw.dt', quitarBotones);
                 quitarBotones();
             },

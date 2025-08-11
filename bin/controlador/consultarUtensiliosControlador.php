@@ -92,8 +92,18 @@ if (isset($datosPermisos['permiso']['modificar'])) {
     exit;
   }
 
-  if (isset($_FILES['imagen']['tmp_name'], $_POST['id'])) {
-    $modificar = $objeto->modificarImagen($_FILES['imagen']['tmp_name'], $_POST['id']);
+  if (isset($_FILES['imagen'], $_POST['id'])) {
+    $modificar = $objeto->modificarImagen($_FILES['imagen'], $_POST['id']);
+    // Si la respuesta es un error de validación de imagen, devolverlo como resultado
+    if (isset($modificar['resultado']) && (
+      $modificar['resultado'] === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
+      $modificar['resultado'] === 'La imagen no debe superar los 2MB!' ||
+      $modificar['resultado'] === 'La imagen está dañada o no se puede procesar!' ||
+      $modificar['resultado'] === 'No se recibió imagen'
+    )) {
+      echo json_encode($modificar);
+      exit;
+    }
     echo json_encode($modificar);
     exit;
   }

@@ -43,67 +43,72 @@ fileInput0.addEventListener('change', function() {
 
 
  $("#registrar").on("click", function(e){
- 	  e.preventDefault();
+    e.preventDefault();
 
- 	    error_imagen=false;
-      error_tipoU= false;
-      error_utensilio=false;
-      error_material=false;
-      error_veriTU = false;
-      error_veriU = false;
-     
-      chequeo_tipoU();
-      chequeo_utensilio();
-      verificarTipoU();
-      
-      chequeo_material();
+    error_tipoU = false;
+    error_utensilio = false;
+    error_material = false;
+    error_veriTU = false;
+    error_veriU = false;
+    // NO reiniciar error_imagen aquí, debe persistir si hubo error previo
 
-      let imagen = $("#fileInput0")[0].files.length ? $("#fileInput0")[0].files[0] : null;
+    chequeo_tipoU();
+    chequeo_utensilio();
+    verificarTipoU();
+    chequeo_material();
 
-      if (!imagen) {
+    let imagen = $("#fileInput0")[0].files.length ? $("#fileInput0")[0].files[0] : null;
+    if (!imagen) {
         imgState = 'NO';
-      }
-      else {
+    } else {
         imgState = 'SI';
-      }
-                       
-                
-      if (error_imagen ===false && error_tipoU === false && error_utensilio ===false && error_veriU === false && error_veriTU === false && error_material === false ) {
+    }
+
+    // Si hay error de imagen, bloquear registro
+    if (error_imagen === true) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: '<span class=" text-rojo">Corrija el error de la imagen antes de registrar.</span>',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: 3000,
+            width: '38%',
+        });
+        return;
+    }
+
+    if (error_tipoU === false && error_utensilio === false && error_veriU === false && error_veriTU === false && error_material === false) {
         dupli_utensilio = false;
         verificarUtensilio();
-
         if (dupli_utensilio === false) {
-        
-              let datos = new FormData();
-              let tipoUr = cambiarFormato($("#tipoU").val());
-              let utensilior =cambiarFormato( $("#utensilio").val());
-              let materialr = cambiarFormato($("#material").val());
-              
-              if (imagen !== null) {
+            let datos = new FormData();
+            let tipoUr = cambiarFormato($("#tipoU").val());
+            let utensilior = cambiarFormato($("#utensilio").val());
+            let materialr = cambiarFormato($("#material").val());
+            if (imagen !== null) {
                 datos.append("imagen", imagen);
-              }
-                    datos.append("imgState", imgState);
-                    datos.append("tipoUr", tipoUr);
-                    datos.append("utensilior", utensilior);
-                    datos.append("materialr", materialr);
-                    
-                console.log("datos"); 
-                registrar(datos);   
+            }
+            datos.append("imgState", imgState);
+            datos.append("tipoUr", tipoUr);
+            datos.append("utensilior", utensilior);
+            datos.append("materialr", materialr);
+            console.log("datos");
+            registrar(datos);
         }
-
-
-      }else{
-            Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon:'error',
-                title:'<span class=" text-rojo">Ingrese los Datos Correctamente!</span>',
-                showConfirmButton:false,
-                timer:3000,
-                timerProgressBar:3000,
-                width:'38%',
-            })
-      }
+    } else {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: '<span class=" text-rojo">Ingrese los Datos Correctamente!</span>',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: 3000,
+            width: '38%',
+        });
+    }
                 
               
  });
@@ -135,64 +140,58 @@ function cambiarFormato(texto) {
 
 // validar Imagen---------------------------------------------
 
- function chequeoImagen(){
-  if (fileInput0.files.length === 0) {
-              container0.innerHTML = ''; // Limpiar el contenedor
-              container0.appendChild(defaultImage); 
-              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> Ingrese una imagen (JPG, PNG)!');
-              $(".error1").show();
-              $('#fileInput0').addClass('errorBorder');
-              $('.bar1').removeClass('bar');
-              $('.ic1').addClass('l');
-              $('.ic1').removeClass('labelPri');
-              $('.letra').addClass('labelE');
-              $('.letra').removeClass('label-char');
-             fileInput0.classList.add('changed');
-             error_imagen = true;
- 
-  } 
-  else{
-    validarPesoImagen0(fileInput0);
- 
-    const file = fileInput0.files[0];
-    const reader = new FileReader();
-
-    reader.onload = function(e) {
-        const image = document.createElement('img');
-        image.src = e.target.result;
+function chequeoImagen(){
+    if (fileInput0.files.length === 0) {
         container0.innerHTML = '';
-        container0.appendChild(image);
-    };
-
-    if (file.type.startsWith('image/')) {
-        reader.readAsDataURL(file);
-             $(".error1").html("");
-             $(".error1").hide();
-             $('#fileInput0').removeClass('errorBorder');
-             $('.bar1').addClass('bar');
-             $('.ic1').removeClass('l');
-             $('.ic1').addClass('labelPri');
-             $('.letra').removeClass('labelE');
-             $('.letra').addClass('label-char');
-              fileInput0.classList.remove('changed');
-    } else {
-              container0.innerHTML = ''; // Limpiar el contenedor
-              container0.appendChild(defaultImage); 
-              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la imagen con formato (JPG, PNG)!');
-              $(".error1").show();
-              $('#fileInput0').addClass('errorBorder');
-              $('.bar1').removeClass('bar');
-              $('.ic1').addClass('l');
-              $('.ic1').removeClass('labelPri');
-              $('.letra').addClass('labelE');
-              $('.letra').removeClass('label-char');
-              fileInput0.classList.add('changed');
-            
-        fileInput0.value = '';
+        container0.appendChild(defaultImage);
+        $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> Ingrese una imagen (JPG, PNG)!');
+        $(".error1").show();
+        $('#fileInput0').addClass('errorBorder');
+        $('.bar1').removeClass('bar');
+        $('.ic1').addClass('l');
+        $('.ic1').removeClass('labelPri');
+        $('.letra').addClass('labelE');
+        $('.letra').removeClass('label-char');
+        fileInput0.classList.add('changed');
         error_imagen = true;
+    } else {
+        validarPesoImagen0(fileInput0);
+        const file = fileInput0.files[0];
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const image = document.createElement('img');
+            image.src = e.target.result;
+            container0.innerHTML = '';
+            container0.appendChild(image);
+        };
+        if (file.type.startsWith('image/')) {
+            reader.readAsDataURL(file);
+            $(".error1").html("");
+            $(".error1").hide();
+            $('#fileInput0').removeClass('errorBorder');
+            $('.bar1').addClass('bar');
+            $('.ic1').removeClass('l');
+            $('.ic1').addClass('labelPri');
+            $('.letra').removeClass('labelE');
+            $('.letra').addClass('label-char');
+            fileInput0.classList.remove('changed');
+            error_imagen = false; // Reiniciar error si la imagen es válida
+        } else {
+            container0.innerHTML = '';
+            container0.appendChild(defaultImage);
+            $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la imagen con formato (JPG, PNG)!');
+            $(".error1").show();
+            $('#fileInput0').addClass('errorBorder');
+            $('.bar1').removeClass('bar');
+            $('.ic1').addClass('l');
+            $('.ic1').removeClass('labelPri');
+            $('.letra').addClass('labelE');
+            $('.letra').removeClass('label-char');
+            fileInput0.classList.add('changed');
+            fileInput0.value = '';
+            error_imagen = true;
+        }
     }
-  }
-    
 }
 
 function validarPesoImagen0(input) {
@@ -201,32 +200,31 @@ function validarPesoImagen0(input) {
     const pesoMb = imagen.size / 1024 / 1024; // Convertir el tamaño a MB
 
     if (pesoMb > 2) {
-              container0.innerHTML = ''; // Limpiar el contenedor
-              container0.appendChild(defaultImage); 
-              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> La imagen excede el peso máximo de 2MB!');
-              $(".error1").show();
-              $('#fileInput0').addClass('errorBorder');
-              $('.bar1').removeClass('bar');
-              $('.ic1').addClass('l');
-              $('.ic1').removeClass('labelPri');
-              $('.letra').addClass('labelE');
-              $('.letra').removeClass('label-char');
-              input.classList.add('changed');
-             input.value = "";
-             error_imagen = true;
-    
-               
+        container0.innerHTML = '';
+        container0.appendChild(defaultImage);
+        $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> La imagen excede el peso máximo de 2MB!');
+        $(".error1").show();
+        $('#fileInput0').addClass('errorBorder');
+        $('.bar1').removeClass('bar');
+        $('.ic1').addClass('l');
+        $('.ic1').removeClass('labelPri');
+        $('.letra').addClass('labelE');
+        $('.letra').removeClass('label-char');
+        input.classList.add('changed');
+        input.value = "";
+        error_imagen = true;
     } else {
-             $(".error1").html("");
-             $(".error1").hide();
-             $('#fileInput0').removeClass('errorBorder');
-             $('.bar1').addClass('bar');
-             $('.ic1').removeClass('l');
-             $('.ic1').addClass('labelPri');
-             $('.letra').removeClass('labelE');
-             $('.letra').addClass('label-char');
-              fileInput0.classList.remove('changed');
-     }
+        $(".error1").html("");
+        $(".error1").hide();
+        $('#fileInput0').removeClass('errorBorder');
+        $('.bar1').addClass('bar');
+        $('.ic1').removeClass('l');
+        $('.ic1').addClass('labelPri');
+        $('.letra').removeClass('labelE');
+        $('.letra').addClass('label-char');
+        fileInput0.classList.remove('changed');
+        error_imagen = false; // Reiniciar error si el peso es válido
+    }
    }
   }
 
@@ -317,22 +315,67 @@ function validarPesoImagen0(input) {
 
  // Otros..............
 
- function primary(){
- 	     container0.innerHTML = ''; // Limpiar el contenedor
-         container0.appendChild(defaultImage); 
- 	     $(".error1, .error2, .error3, .error4, .error5").html("");
-         $(".error1, .error2, .error3, .error4, .error5").hide();
-         $('#fileInput0, #utensilio, #material').removeClass('errorBorder');
-          $('#tipoU').removeClass('is-invalid');
-         $('.bar1, .bar2, .bar3, .bar4, .bar5').addClass('bar');
-         $('.ic1, .ic2, .ic3, .ic4, .ic5').removeClass('l');
-         $('.ic1, .ic2, .ic3, .ic4, .ic5').addClass('labelPri');
-         $('.letra, .letra2, .letra3, .letra4, .letra5').removeClass('labelE');
-         $('.letra, .letra2, .letra3, .letra4, .letra5').addClass('label-char');
-         $('#tipoU, #material').val('Seleccionar').trigger('change.select2');
-         fileInput0.classList.remove('changed');
+// Variable global para almacenar los datos originales del utensilio en edición
 
- }
+// Variable global para almacenar los datos originales del utensilio en edición
+let datosOriginalesUtensilio = null;
+
+// Función para cargar los datos originales antes de editar
+function cargarDatosOriginalesUtensilio(tipoU, utensilio, material, imagenUrl) {
+    datosOriginalesUtensilio = {
+        tipoU: tipoU,
+        utensilio: utensilio,
+        material: material,
+        imagenUrl: imagenUrl || null
+    };
+}
+
+// Ejemplo de uso: cuando el usuario hace clic en "modificar" de un utensilio
+// cargarDatosOriginalesUtensilio('Cuchara', 'Cuchara Grande', 'Acero', 'assets/images/cuchara.png');
+
+function primary(){
+    if (datosOriginalesUtensilio) {
+        // Restaurar los datos originales si se está editando
+        $("#tipoU").val(datosOriginalesUtensilio.tipoU).trigger('change.select2');
+        $("#utensilio").val(datosOriginalesUtensilio.utensilio);
+        $("#material").val(datosOriginalesUtensilio.material).trigger('change.select2');
+        // Restaurar imagen original si existe
+        container0.innerHTML = '';
+        if (datosOriginalesUtensilio.imagenUrl) {
+            const img = new Image();
+            img.src = datosOriginalesUtensilio.imagenUrl;
+            container0.appendChild(img);
+        } else {
+            container0.appendChild(defaultImage);
+        }
+        // Limpiar errores y estilos
+        $(".error1, .error2, .error3, .error4, .error5").html("");
+        $(".error1, .error2, .error3, .error4, .error5").hide();
+        $('#fileInput0, #utensilio, #material').removeClass('errorBorder');
+        $('#tipoU').removeClass('is-invalid');
+        $('.bar1, .bar2, .bar3, .bar4, .bar5').addClass('bar');
+        $('.ic1, .ic2, .ic3, .ic4, .ic5').removeClass('l');
+        $('.ic1, .ic2, .ic3, .ic4, .ic5').addClass('labelPri');
+        $('.letra, .letra2, .letra3, .letra4, .letra5').removeClass('labelE');
+        $('.letra, .letra2, .letra3, .letra4, .letra5').addClass('label-char');
+        fileInput0.classList.remove('changed');
+    } else {
+        // Si no hay edición, limpiar todo como antes
+        container0.innerHTML = '';
+        container0.appendChild(defaultImage);
+        $(".error1, .error2, .error3, .error4, .error5").html("");
+        $(".error1, .error2, .error3, .error4, .error5").hide();
+        $('#fileInput0, #utensilio, #material').removeClass('errorBorder');
+        $('#tipoU').removeClass('is-invalid');
+        $('.bar1, .bar2, .bar3, .bar4, .bar5').addClass('bar');
+        $('.ic1, .ic2, .ic3, .ic4, .ic5').removeClass('l');
+        $('.ic1, .ic2, .ic3, .ic4, .ic5').addClass('labelPri');
+        $('.letra, .letra2, .letra3, .letra4, .letra5').removeClass('labelE');
+        $('.letra, .letra2, .letra3, .letra4, .letra5').addClass('label-char');
+        $('#tipoU, #material').val('Seleccionar').trigger('change.select2');
+        fileInput0.classList.remove('changed');
+    }
+}
 
  ////---------------------------MOSTRAR SELECT TIPO DE UTENSILIOS -------------------------------
 mostrarTipoU();
@@ -466,38 +509,64 @@ function registrar(datos){
     let token = $('[name="csrf_token"]').val();
     datos.append('csrfToken', token); 
     if(token) {
-	 $.ajax({
-      url: "",
-      type: "POST",
-      data: datos,
-      processData: false,
-      contentType: false,
-      success: function(datos) {
-        datos = typeof datos === 'string' ? JSON.parse(datos) : datos;
-        
-      if(datos.mensaje.resultado === 'registrado' && datos.newCsrfToken ){
+        $.ajax({
+            url: "",
+            type: "POST",
+            data: datos,
+            processData: false,
+            contentType: false,
+            success: function(datos) {
+                datos = typeof datos === 'string' ? JSON.parse(datos) : datos;
 
-        Swal.fire({
-               toast: true,
-               position: 'top-end',
-               icon:'success',
-               title:'Utensilio Registrado Exitosamente!',
-               showConfirmButton:false,
-               timer:2500,
-               timerProgressBar:true,
-            })
-            $('.formu').trigger('reset'); 
-            
-            primary();
-      }      
-      }, complete(){
-      
-        container0.innerHTML = ''; 
-        container0.appendChild(defaultImage);
-      }
+                // Manejo de errores de imagen igual que en alimentos.js
+                if (
+                    datos.resultado === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
+                    datos.resultado === 'La imagen no debe superar los 2MB!' ||
+                    datos.resultado === 'La imagen está dañada o no se puede procesar!' ||
+                    datos.resultado === 'No se recibió imagen'
+                ) {
+                    container0.innerHTML = '';
+                    container0.appendChild(defaultImage);
+                    $('.error1').html('<i class="bi bi-exclamation-triangle-fill"></i> ' + datos.resultado);
+                    $(".error1").show();
+                    $('#fileInput0').addClass('errorBorder');
+                    $('.bar1').removeClass('bar');
+                    $('.ic1').addClass('l');
+                    $('.ic1').removeClass('labelPri');
+                    $('.letra').addClass('labelE');
+                    $('.letra').removeClass('label-char');
+                    fileInput0.classList.add('changed');
+                    error_imagen = true;
 
-    });
-  }
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: datos.resultado,
+                        showConfirmButton: false,
+                        timer: 2500,
+                        timerProgressBar: true,
+                    });
+                } else if (datos.mensaje && datos.mensaje.resultado === 'registrado' && datos.newCsrfToken) {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon:'success',
+                        title:'Utensilio Registrado Exitosamente!',
+                        showConfirmButton:false,
+                        timer:2500,
+                        timerProgressBar:true,
+                    })
+                    $('.formu').trigger('reset'); 
+                    primary();
+                }
+            },
+            complete(){
+                container0.innerHTML = '';
+                container0.appendChild(defaultImage);
+            }
+        });
+    }
 }
                   
 $('#ute1').addClass('active');

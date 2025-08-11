@@ -73,6 +73,21 @@ if (isset($datosPermisos['permiso']['registrar'])) {
     $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
     $imagen = (isset($_FILES['imagen']) && isset($_FILES['imagen']['tmp_name'])) ? $_FILES['imagen']['tmp_name'] : null;
 
+
+    // Validación de imagen usando el modelo (igual que alimentos)
+    if ($_POST['imgState'] === 'SI') {
+      if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === 0) {
+        $resultado = $objeto->validarImagen($_FILES['imagen']);
+        if ($resultado !== true) {
+          echo json_encode($resultado + ['newCsrfToken' => $csrf['newToken']]);
+          exit;
+        }
+      } else {
+        echo json_encode(['resultado' => 'No se recibió imagen', 'newCsrfToken' => $csrf['newToken']]);
+        exit;
+      }
+    }
+
     $respuesta = $objeto->registrarUtensilio($imagen, $_POST['imgState'], $_POST['tipoUr'], $_POST['utensilior'], $_POST['materialr'], false);
     echo json_encode(['mensaje'=> $respuesta, 'newCsrfToken' => $csrf['newToken']]);
     exit;

@@ -8,11 +8,11 @@ use \PDO;
 
 class consultarUtensiliosModelo extends connectDB {
 
-	private $tipoA;
-	private $alimento;
-	private $material;
-	private $imagen;
-	private $id;
+    private $tipoA;
+    private $alimento;
+    private $material;
+    private $imagen;
+    private $id;
     private $payload;
 
     public function __construct() {
@@ -268,19 +268,35 @@ private function modificarU() {
 
 
 
-public function modificarImagen($imagenTmp, $id) {
+public function modificarImagen($imagen, $id) {
     $info = $this->infoUtensilio($id, true);
 
     if (empty($info)) {
         return ['error' => 'Utensilio no encontrado'];
     }
 
-    $rand = $this->generarCodigo($info[0]->nombre, $info[0]->material);
+    // Validación robusta de imagen dañada, tipo y tamaño (igual que en registro)
+    if (!isset($imagen['tmp_name']) || !file_exists($imagen['tmp_name'])) {
+        return ['resultado' => 'No se recibió imagen'];
+    }
+    $mime = mime_content_type($imagen['tmp_name']);
+    $formatosValidos = ['image/jpeg', 'image/png'];
+    if (!in_array($mime, $formatosValidos)) {
+        return ['resultado' => 'El archivo no es una imagen válida (JPEG, PNG)!'];
+    }
+    if ($imagen['size'] > 2 * 1024 * 1024) {
+        return ['resultado' => 'La imagen no debe superar los 2MB!'];
+    }
+    $dimensiones = getimagesize($imagen['tmp_name']);
+    if ($dimensiones === false) {
+        return ['resultado' => 'La imagen está dañada o no se puede procesar!'];
+    }
 
+    $rand = $this->generarCodigo($info[0]->nombre, $info[0]->material);
     $ruta = "assets/images/utensilios/";
     $nombreArchivo = $ruta . $rand . '.png';
 
-    if (!move_uploaded_file($imagenTmp, $nombreArchivo)) {
+    if (!move_uploaded_file($imagen['tmp_name'], $nombreArchivo)) {
         return ['error' => 'Error al mover la imagen subida'];
     }
 

@@ -135,20 +135,18 @@ $(document).ready(function() {
           error_imagen = true;
       } else {
           validarPesoImagen0(fileInput0);
-          
           const file = fileInput0.files[0];
           const reader = new FileReader();
-          
           reader.onload = function(e) {
               const image = document.createElement('img');
               image.src = e.target.result;
               container0.innerHTML = '';
               container0.appendChild(image);
           };
-          
           if (file.type.startsWith('image/')) {
               reader.readAsDataURL(file);
               limpiarErrorImagen();
+              error_imagen = false; // Reiniciar flag si es válida
           } else {
               resetearImagen();
               mostrarErrorImagen('Ingrese la imagen con formato (JPG, PNG)!');
@@ -162,7 +160,6 @@ $(document).ready(function() {
       if (input.files && input.files[0]) {
           const imagen = input.files[0];
           const pesoMb = imagen.size / 1024 / 1024;
-          
           if (pesoMb > 2) {
               resetearImagen();
               mostrarErrorImagen('La imagen excede el peso máximo de 2MB!');
@@ -170,6 +167,7 @@ $(document).ready(function() {
               error_imagen = true;
           } else {
               limpiarErrorImagen();
+              error_imagen = false; // Reiniciar flag si es válida
           }
       }
   }
@@ -366,7 +364,6 @@ $(document).ready(function() {
        datos.append("csrfToken", token);
        console.log('Token CSRF enviado:', token);
 
-
       $.ajax({
           url: "",
           type: "POST",
@@ -374,20 +371,63 @@ $(document).ready(function() {
           processData: false,
           contentType: false,
           success: function(data) {
-              $('.cerrar2').click();
-              Swal.fire({
+              // Asegurar que data sea un objeto
+              if (typeof data === 'string') {
+                  try {
+                      data = JSON.parse(data);
+                  } catch (e) {
+                      // Si no es JSON válido, mostrar error genérico
+                      Swal.fire({
+                          toast: true,
+                          position: 'top-end',
+                          icon: 'error',
+                          title: 'Error inesperado en la respuesta del servidor.',
+                          showConfirmButton: false,
+                          timer: 2500,
+                          timerProgressBar: true,
+                      });
+                      return;
+                  }
+              }
+              // Manejo de errores de imagen dañada, tipo o tamaño
+              if (
+                data.resultado === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
+                data.resultado === 'La imagen no debe superar los 2MB!' ||
+                data.resultado === 'La imagen está dañada o no se puede procesar!' ||
+                data.resultado === 'No se recibió imagen'
+              ) {
+                $('.cerrar2').click();
+                resetearImagen();
+                mostrarErrorImagen(data.resultado);
+                Swal.fire({
                   toast: true,
                   position: 'top-end',
-                  icon: 'success',
-                  title: 'Imagen del Utensilio Modificado Exitosamente!',
+                  icon: 'error',
+                  title: data.resultado,
                   showConfirmButton: false,
                   timer: 2500,
                   timerProgressBar: true,
-              });
-              delete mostrarU;
-              tablaUtensilios();
-              resetearImagen();
-              primary();
+                });
+                error_imagen = true;
+                return;
+              }
+              if (data.resultado === 'imagen modificada') {
+                error_imagen = false; // Reiniciar flag si fue exitosa
+                $('.cerrar2').click();
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'success',
+                    title: 'Imagen del Utensilio Modificado Exitosamente!',
+                    showConfirmButton: false,
+                    timer: 2500,
+                    timerProgressBar: true,
+                });
+                delete mostrarU;
+                tablaUtensilios();
+                resetearImagen();
+                primary();
+              }
           }
       });
     }

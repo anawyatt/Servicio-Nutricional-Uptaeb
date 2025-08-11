@@ -15,6 +15,28 @@ private $material;
 private $imagen;
 private $payload;
 
+    // Validar imagen igual que en alimentosModelo
+    public function validarImagen($imagen)
+    {
+        if (!isset($imagen['error']) || $imagen['error'] !== UPLOAD_ERR_OK) {
+            return ['resultado' => 'Error al subir la imagen'];
+        }
+        $mime = mime_content_type($imagen['tmp_name']);
+        $formatosValidos = ['image/jpeg', 'image/png'];
+
+        if (!in_array($mime, $formatosValidos)) {
+            return ['resultado' => 'El archivo no es una imagen válida (JPEG, PNG)!'];
+        }
+        if ($imagen['size'] > 2 * 1024 * 1024) {
+            return ['resultado' => 'La imagen no debe superar los 2MB!'];
+        }
+        $dimensiones = getimagesize($imagen['tmp_name']);
+        if ($dimensiones === false) {
+            return ['resultado' => 'La imagen está dañada o no se puede procesar!'];
+        }
+        return true;
+    }
+
     public function __construct() {
         parent::__construct();
         $token = $_COOKIE['jwt'];
