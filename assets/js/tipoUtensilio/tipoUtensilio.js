@@ -1,7 +1,8 @@
+    
 $(document).ready(function () {
     // Variables globales
     let permisos, modificarPermiso, eliminarPermiso, registrarPermiso;
-    let mostrar = '';
+    let tabla = null;
     let id = '';
     let error_tipo = false;
     let error_val = false;
@@ -51,54 +52,54 @@ $(document).ready(function () {
             data: { tipoU: true },
             success(data) {
                 $('#ani').show(2000);
-    
+
                 if (data.resultado || data.error) {
                     $('.tbody').html(`<tr><td colspan="2">${data.resultado || data.error}</td></tr>`);
+                    if (tabla) tabla.clear().draw();
                     return;
                 }
-    
-                let tabla = data.map(row => `
-                    <tr>
-                        <td>${row.tipo}</td>
-                        <td class="text-center accion">
-                            <a class="btn btn-sm btn-icon text-primary editar editar_tipo" 
-                               data-bs-toggle="tooltip" title="Modificar Tipo de Utensilio" 
-                               href="#" id="${row.idTipoU}">
-                                <span class="btn-inner pi"><i class="bi bi-pencil icon-24 t"></i></span>
-                            </a>
-                            <a class="btn btn-sm btn-icon text-danger borrar" 
-                               data-bs-toggle="tooltip" title="Eliminar Tipo de Utensilio" 
-                               href="#" id="${row.idTipoU}">
-                                <span class="btn-inner pi"><i class="bi bi-trash icon-24 t"></i></span>
-                            </a>
-                        </td>
-                    </tr>
-                `).join('');
-    
-                $('.tbody').html(tabla);
-    
-                // Destruir instancia previa si existe
-                if ($.fn.DataTable.isDataTable('.tabla2')) {
-                    $('.tabla2').DataTable().destroy();
+
+                let filas = data.map(row => [
+                    row.tipo,
+                    `<td class="text-center accion">
+                        <a class="btn btn-sm btn-icon text-primary editar editar_tipo" 
+                           data-bs-toggle="tooltip" title="Modificar Tipo de Utensilio" 
+                           href="#" id="${row.idTipoU}">
+                            <span class="btn-inner pi"><i class="bi bi-pencil icon-24 t"></i></span>
+                        </a>
+                        <a class="btn btn-sm btn-icon text-danger borrar" 
+                           data-bs-toggle="tooltip" title="Eliminar Tipo de Utensilio" 
+                           href="#" id="${row.idTipoU}">
+                            <span class="btn-inner pi"><i class="bi bi-trash icon-24 t"></i></span>
+                        </a>
+                    </td>`
+                ]);
+
+                if (!tabla) {
+                    tabla = $('.tabla2').DataTable({
+                        autoWidth: false,
+                        responsive: true,
+                        data: filas,
+                        columns: [
+                            { title: "Tipos de Utensilios" },
+                            { title: "Acciónes", orderable: false }
+                        ]
+                    });
+                    tabla.on('draw.dt', quitarBotones);
+                } else {
+                    tabla.clear();
+                    tabla.rows.add(filas);
+                    tabla.draw();
                 }
-                // Inicializar DataTable correctamente
-                mostrar = $('.tabla2').DataTable({
-                    language: {
-                        url: '//cdn.datatables.net/plug-ins/1.13.4/i18n/es-ES.json'
-                    },
-                    autoWidth: false,
-                    responsive: true
-                });
-                mostrar.on('draw.dt', quitarBotones);
                 quitarBotones();
             },
             error() {
                 $('.tbody').html(`<tr><td colspan="2">Error al cargar los tipos de utensilios.</td></tr>`);
+                if (tabla) tabla.clear().draw();
             }
         });
     }
 
-    // Funciones de ayuda para estilos
     function danger() {
         $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> El tipo de utensilio ya existe!');
         $(".error1").show();
@@ -143,7 +144,6 @@ $(document).ready(function () {
         $('.letra2').addClass('label-char');
     }
 
-    // Funciones de validación
     function val_tipo() {
         var chequeo = /^[a-zA-ZÀ-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{3,}$/;
         var nombre = $("#tipo").val().trim();
@@ -191,7 +191,6 @@ $(document).ready(function () {
         }
     }
 
-    // Función para capitalizar y limpiar texto
     function capitalizarYEliminarEspaciosExtras(texto) {
         const palabras = texto.split(" ");
         let palabrasFormateadas = [];
@@ -249,7 +248,51 @@ $(document).ready(function () {
         });
     }
 
-    // Funciones CRUD
+    function validar_tipos2(callback) {
+        const tipo2 = $("#tipo2").val().trim();
+
+        if (!val_tipo2()) {
+            error_tipo2 = true;
+            callback(false);
+            return;
+        }
+
+        $.ajax({
+            url: "",
+            method: "POST",
+            dataType: "json",
+            data: { validar: true, tipo: tipo2 },
+            success(data) {
+                if (data.resultado === 'Ya existe') {
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon: 'error',
+                        title: `El tipo de utensilio <b class="fw-bold text-rojo">${tipo2}</b> ya está registrado, ingrese otro tipo!`,
+                        showConfirmButton: false,
+                        timer: 3000,
+                        timerProgressBar: true,
+                    });
+                    danger1();
+                    error_val = true;
+                    callback(false);
+                } else {
+                    primary2();
+                    error_val = false;
+                    callback(true);
+                }
+            },
+            error() {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Hubo un problema al validar el tipo de utensilio. Inténtelo de nuevo.',
+                });
+                callback(false);
+            }
+        });
+    }
+
     function registrar() {
         const tipo = capitalizarYEliminarEspaciosExtras($("#tipo").val());
         $("#registrar").prop("disabled", true);
@@ -265,9 +308,11 @@ $(document).ready(function () {
                             $('.limpiar').click();
                             $('#cerrar').click();
                             $('[name="csrf_token"]').val(data.newCsrfToken);
+                            
                             primary();
                             delete mostrar;
                             rellenar();
+                            
                             Swal.fire({
                                 toast: true,
                                 position: 'top-end',
@@ -408,10 +453,10 @@ $(document).ready(function () {
         });
     }
 
-    // Event Listeners
-    // Registrar
     $("#tipo").focusout(val_tipo);
-    $("#tipo").on('keyup', val_tipo);
+    $("#tipo").on('keyup', function() {
+        validar_tipos(function(){});
+}   );
 
     $("#registrar").on("click", function (e) {
         e.preventDefault();
@@ -448,9 +493,11 @@ $(document).ready(function () {
         });
     }
 
-    // Modificar
     $("#tipo2").focusout(val_tipo2);
-    $("#tipo2").on('keyup', val_tipo2);
+    $("#tipo2").on('keyup', function() {
+        val_tipo2();
+        validar_tipos2(function(){});
+    });
 
     $("#editar").on("click", function (e) {
         e.preventDefault();
@@ -532,7 +579,7 @@ $(document).ready(function () {
             data: { info: true, id: id },
             success(data) {
                 primary2();
-                $(".tipo2").val(data[0].nombreRol);
+                $(".tipo2").val(data[0].tipo);
             }
         });
     });

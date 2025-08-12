@@ -13,20 +13,29 @@ use helpers\JwtHelpers;
 
 $objModel = new home;
 $sistem = new encryption();
-$NotificacionesServer = new NotificacionesServer();
+
 
 $datosPermisos = permisosHelper::verificarPermisos($sistem, $objModel, 'Home', 'consultar');
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
 // Si las notificaciones están activas, consultar
-if (isset($_POST['notificaciones'])) {
-    $valor = $NotificacionesServer->consultarNotificaciones();
-}
+ $NotificacionesServer = new NotificacionesServer();
 
-if (isset($_POST['notificacionId'])) {
-    $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-}
+        if (isset($payload->cedula)) {
+        $NotificacionesServer->setCedula($payload->cedula);
+        } else {
+            echo json_encode(['error' => 'Cédula no encontrada en el token']);
+            exit;
+        }
+
+        if (isset($_POST['notificaciones'])) {
+            $valor = $NotificacionesServer->consultarNotificaciones();
+        }
+    
+        if (isset($_POST['notificacionId'])) {
+            $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
+        }
 
 
 if (isset($_POST['mostrar1'])) {
