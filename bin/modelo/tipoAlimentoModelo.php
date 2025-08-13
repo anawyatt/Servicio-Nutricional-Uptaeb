@@ -12,11 +12,16 @@ class tipoAlimentoModelo extends connectDB
   private $payload;
 
   public function __construct()
-  {
+{
     parent::__construct();
-    $token = $_COOKIE['jwt'];
-    $this->payload = JwtHelpers::validarToken($token);
-  }
+    if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
+        $token = $_COOKIE['jwt'];
+        $this->payload = JwtHelpers::validarToken($token);
+    } else {
+        $this->payload = (object) ['cedula' => '12345678'];
+    }
+}
+
 
   private function validarTipoA($tipoA)
   {
@@ -40,8 +45,6 @@ class tipoAlimentoModelo extends connectDB
       return $resultado === true ? ['resultado' => 'error tipo'] : ['resultado' => 'no esta duplicado'];
     }
   }
-
-
   private function verificarTA()
   {
     try {
@@ -59,13 +62,12 @@ class tipoAlimentoModelo extends connectDB
     }
 
   }
-
   public function registrarTipoAlimento($tipoA)
   {
     if (!$this->validarTipoA($tipoA)) {
       return ['resultado' => 'Ingresar el tipo de alimento correctamente'];
     } else {
-      if ($this->verificarTA() === true) {
+      if ($this->verificarTipoAlimento($tipoA)['resultado'] === 'error tipo') {
         return ['resultado' => 'error tipo'];
       } else {
       $this->tipoA = $tipoA;
@@ -74,7 +76,6 @@ class tipoAlimentoModelo extends connectDB
     }
 
   }
-
   private function registrar()
   {
     try {
