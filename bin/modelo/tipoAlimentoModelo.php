@@ -215,8 +215,6 @@ class tipoAlimentoModelo extends connectDB
     }
 
   }
-
-
   private function verificar2()
   {
 
@@ -248,14 +246,14 @@ class tipoAlimentoModelo extends connectDB
     if (!empty($errores)) {
       return ['resultado' => implode(", ", $errores)];
     } else {
-      if ($this->verificar2() === true) {
+      if ($this->verificarTipoA2($tipoA, $id)['resultado'] === 'error tipo2') {
         return ['resultado' => 'error tipo2'];
       }
       if ($this->verificarExistencia($id)['resultado'] === 'ya no existe') {
-        return ['resultado' => 'no se puede modificar, ya no existe'];
+        return ['resultado' => 'ya no existe'];
       }
-      if ($this->verificarB() === true) {
-        return ['resultado' => 'no se puede modificar, ya tiene alimentos asociados'];
+      if ($this->verificarBoton($id)['resultado'] === 'no se puede') {
+        return ['resultado' => 'no se puede'];
       }
       
       $this->tipoA = $tipoA;
@@ -302,10 +300,10 @@ class tipoAlimentoModelo extends connectDB
       return ['resultado' => 'Ingresar el id del tipo de alimento correctamente'];
     } else {
       if ($this->verificarExistencia($id)['resultado'] === 'ya no existe') {
-        return ['resultado' => 'no se puede anular, ya no existe'];
+        return ['resultado' => 'ya no existe'];
       }
-      if ($this->verificarB() === true) {
-        return ['resultado' => 'no se puede anular, ya tiene alimentos asociados'];
+      if ($this->verificarBoton($id)['resultado'] === 'no se puede') {
+        return ['resultado' => 'no se puede'];
       }
       $this->id = $id;
       return $this->anular();
@@ -338,11 +336,11 @@ class tipoAlimentoModelo extends connectDB
 
         } else {
           $this->conex->rollBack();
-          return ['resultado' => 'No se encontró el tipo de Salida o no se pudo anular'];
+          return ['resultado' => 'No se encontró el tipo de alimento o no se pudo anular'];
         }
       } else {
         $this->conex->rollBack();
-        return ['resultado' => 'No se encontró el tipo de Salida'];
+        return ['resultado' => 'No se encontró el tipo de alimento'];
       }
     } catch (\PDOException $e) {
       $this->conex->rollBack();

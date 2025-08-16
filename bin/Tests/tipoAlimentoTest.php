@@ -123,9 +123,7 @@ class tipoAlimentoTest extends TestCase {
         $resultado = $this->objeto->verificarBoton('');
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('Ingresar el id del tipo de alimento correctamente', $resultado['resultado']);
-       
     }
-
      // Prueba para datos erróneos (no cumplen con el patrón)
      public function test_verificarBoton_DatosErroneos() {
         $resultado = $this->objeto->verificarBoton('4r54w3');
@@ -139,7 +137,6 @@ class tipoAlimentoTest extends TestCase {
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('no se puede', $resultado['resultado']);
    }
-
 
   // Prueba para verificar que  permita modificar y anular el tipo de alimento que no este relacionado
   public function test_verificarBoton_DatoSePuede() {
@@ -158,7 +155,7 @@ class tipoAlimentoTest extends TestCase {
 
      // Prueba para datos erróneos (no cumplen con el patrón)
      public function test_verificarExistencia_DatosErroneos() {
-        $resultado = $this->objeto->verificarExistencia('4r54w3');
+        $resultado = $this->objeto->verificarExistencia('23#.;');
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('Ingresar el id del tipo de alimento correctamente', $resultado['resultado']);
     }
@@ -185,26 +182,22 @@ class tipoAlimentoTest extends TestCase {
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertStringContainsString('Ingresar el id del tipo alimento correctamente', $resultado['resultado']);
         $this->assertStringContainsString('Ingresar el tipo correctamente', $resultado['resultado']);
-       
     }
 
      // Prueba para datos erróneos (no cumplen con el patrón)
      public function test_verificarTipoA2_DatosErroneos() {
-        $resultado = $this->objeto->verificarTipoA2('2fd3','5ytyg');
+        $resultado = $this->objeto->verificarTipoA2('2fd*3','5yty@g');
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertStringContainsString('Ingresar el id del tipo alimento correctamente', $resultado['resultado']);
         $this->assertStringContainsString('Ingresar el tipo correctamente', $resultado['resultado']);
-       
     }
     
      // Prueba para datos inexistentes en la base de datos
      public function test_verificarTipoA2_DatoDuplicado() {
         $resultado = $this->objeto->verificarTipoA2('Carnes',2);
         $this->assertArrayHasKey('resultado', $resultado);
-        $this->assertEquals('error tipo', $resultado['resultado']);
+        $this->assertEquals('error tipo2', $resultado['resultado']);
     }
-
-
     // Prueba para datos que existen en la base de datos
     public function test_verificarTipoA2_DatoListo() {
         $resultado = $this->objeto->verificarTipoA2('Nuevo Tipo',15);
@@ -224,14 +217,33 @@ class tipoAlimentoTest extends TestCase {
 
      // Prueba para datos erróneos (no cumplen con el patrón)
      public function test_modificarTipoAlimento_DatosErroneos() {
-        $resultado = $this->objeto->modificarTipoAlimento('22w','k3tr');
+        $resultado = $this->objeto->modificarTipoAlimento('22!w>/','k3t&.r');
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertStringContainsString('Ingresar el id del tipo alimento correctamente', $resultado['resultado']);
         $this->assertStringContainsString('Ingresar el tipo correctamente', $resultado['resultado']);
        
     }
+
+    public function test_modificarTipoAlimento_DatosDuplicados() {
+        $resultado = $this->objeto->modificarTipoAlimento('Bebidas', 1);
+        $this->assertArrayHasKey('resultado', $resultado);
+        $this->assertEquals('error tipo2', $resultado['resultado']);
+    }
+
+    public function test_modificarTipoAlimento_DatosNoExiste() {
+        $resultado = $this->objeto->modificarTipoAlimento('Nuevo Tipo', 16);
+        $this->assertArrayHasKey('resultado', $resultado);
+        $this->assertEquals('ya no existe', $resultado['resultado']);
+    }
+
+     public function test_modificarTipoAlimento_NoModificar() {
+        $resultado = $this->objeto->modificarTipoAlimento('Proteinas', 4);
+        $this->assertArrayHasKey('resultado', $resultado);
+        $this->assertEquals('no se puede', $resultado['resultado']);
+    }
+    
     public function test_modificarTipoAlimento_DatosListos(){
-        $id =15;
+        $id =21;
         $tipoA = 'Nuevo Tipo';
      
         $resultado = $this->objeto->modificarTipoAlimento($tipoA, $id);
@@ -244,7 +256,7 @@ class tipoAlimentoTest extends TestCase {
         $this->assertIsArray($info);
     
         $alimentoInfo = $info[0];
-        $this->assertEquals('Comida', $alimentoInfo['tipo']);
+        $this->assertEquals('Nuevo Tipo', $alimentoInfo['tipo']);
     }
     // ---------------- ANULAR EL TIPO DE ALIMENTO -------------------------//
 
@@ -254,19 +266,31 @@ class tipoAlimentoTest extends TestCase {
         $this->assertArrayHasKey('resultado', $resultado);
        $this->assertEquals('Ingresar el id del tipo de alimento correctamente', $resultado['resultado']);
        
-       
     }
 
      // Prueba para datos erróneos (no cumplen con el patrón)
      public function test_anularTipoAlimento_DatosErroneos() {
-        $resultado = $this->objeto->anularTipoAlimento('22w');
+        $resultado = $this->objeto->anularTipoAlimento('22/w');
         $this->assertArrayHasKey('resultado', $resultado);
        $this->assertEquals('Ingresar el id del tipo de alimento correctamente', $resultado['resultado']);
        
     }
 
+    public function test_anularTipoAlimento_DatosNoExiste() {
+        $resultado = $this->objeto->anularTipoAlimento(19);
+        $this->assertArrayHasKey('resultado', $resultado);
+        $this->assertEquals('ya no existe', $resultado['resultado']);
+    }
+
+     public function test_anularTipoAlimento_NoAnular() {
+        $resultado = $this->objeto->anularTipoAlimento( 8);
+        $this->assertArrayHasKey('resultado', $resultado);
+        $this->assertEquals('no se puede', $resultado['resultado']);
+    }
+
+
     public function test_anularTipoAlimento_DatosListos(){
-        $id = 15;
+        $id = 22;
         $resultado = $this->objeto->anularTipoAlimento($id);
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('anulado correctamente.', $resultado['resultado']);

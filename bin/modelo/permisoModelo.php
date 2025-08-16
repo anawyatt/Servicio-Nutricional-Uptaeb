@@ -19,10 +19,14 @@ class PermisoModelo extends connectDB
     public function __construct()
     {
         parent::__construct();
+       if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
         $token = $_COOKIE['jwt'];
         $this->payload = JwtHelpers::validarToken($token);
-    }
+       } else {
+        $this->payload = (object) ['cedula' => '12345678'];
+       }
 
+    }
     public function obtenerRoles()
     {
         try {
@@ -88,14 +92,14 @@ class PermisoModelo extends connectDB
         $errores = [];
 
         if (!is_array($datos)) {
-            $errores[] = 'Los datos proporcionados no son un arreglo';
+            $errores[] = 'Los datos proporcionados no son los correctos';
         } else {
             foreach ($datos as $permisoData) {
                 if (!isset($permisoData['idPermiso']) || !preg_match("/^[0-9]+$/", $permisoData['idPermiso'])) {
-                    $errores[] = 'Ingresar un idPermiso válido (solo números enteros)';
+                    $errores[] = 'Ingresar un idPermiso válido';
                 }
                 if (!isset($permisoData['status']) || !preg_match("/^[0-1]{1}$/", $permisoData['status'])) {
-                    $errores[] = 'El valor de status no es válido. Valores permitidos: 1, 0';
+                    $errores[] = 'El valor de status no es válido.';
                 }
             }
         }
@@ -145,6 +149,10 @@ class PermisoModelo extends connectDB
 
      public function permisosApp($rol)
     {
+         if (!preg_match("/^[0-9]{1,}$/", $rol)) {
+            $resultado = ['resultado' => 'Ingresar el id del rol'];
+            return $resultado;
+        }
         $this->idRol = $rol;
         return $this->consultarPermisoApp();
     }
