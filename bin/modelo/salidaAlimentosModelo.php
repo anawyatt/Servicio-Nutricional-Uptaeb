@@ -206,7 +206,7 @@ class salidaAlimentosModelo extends connectDB
       $errores[] = 'Ingresar el tipo de salida';
     }
 
-    if (!preg_match("/^[\w\sÀ-ÿ]{5,}$/", $descripcion)) {
+    if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\,\(\)\"\@\#\$\=]{5,}$/", $descripcion)) {
       $errores[] = 'Ingresar una descripción válida con al menos 5 caracteres';
     }
 

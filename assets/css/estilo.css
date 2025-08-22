@@ -129,7 +129,26 @@ select:-webkit-autofill {
   .wave-group .input:focus ~ .bar:after {
     width: 50%;
   }
-  
+  /* Posición inicial del label único */
+.unico-label {
+  position: absolute;
+  top: 10px;
+  left: 15px;
+  display: flex;
+  pointer-events: none;
+  transition: 0.2s ease all;
+}
+
+/* Cuando cantidad o unidad tienen focus o valor */
+#cantidad:focus ~ .unico-label .label-char,
+#cantidad:valid ~ .unico-label .label-char,
+#unidad:focus ~ .unico-label .label-char,
+#unidad:valid ~ .unico-label .label-char {
+  transform: translateY(-20px);
+  font-size: 14px;
+  color: #2074d4;
+}
+
   
 
 

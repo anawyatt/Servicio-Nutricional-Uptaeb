@@ -64,9 +64,9 @@ if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_P
   die();
  }
 
-if ( isset($_POST['tipoA']) && isset($_POST['alimento']) && isset($_POST['marca'])) {
+if (  isset($_POST['alimento']) && isset($_POST['marca']) && isset($_POST['unidad'])) {
   try {
-    $verificarAlimento=  $objeto->verificarAlimento($_POST['tipoA'], $_POST['alimento'], $_POST['marca']);
+    $verificarAlimento=  $objeto->verificarAlimento( $_POST['alimento'], $_POST['marca'], $_POST['unidad']);
     if ($verificarAlimento['resultado'] == 'existe') { 
       echo json_encode($verificarAlimento);
       die();

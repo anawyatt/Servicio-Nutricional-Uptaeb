@@ -25,8 +25,9 @@ $("#tipoA").on('change', function() {
     mostrarAlimento($(this).val());
     chequeo_tipoA()
     if ($(this).val() == 'Seleccionar') {
-      $('#disponibilidad').hide();
+       $('#disponibilidad').hide();
       $('#unidad').val('');
+      $('#cantidad').val('');
     }
  });
 
@@ -36,6 +37,7 @@ $("#alimento").on('change', function() {
   if ($(this).val() == 'Seleccionar') {
       $('#disponibilidad').hide();
       $('#unidad').val('');
+      $('#cantidad').val('');
     }
 
 	mostrar($(this).val());
@@ -289,7 +291,7 @@ function mostrarAlimento(a) {
           if (fila.marca === 'Sin Marca') {
             opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre}</option>`;
           } else {
-            opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre} - ${fila.marca}</option>`;
+            opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre} - ${fila.marca} - ${fila.unidadMedida}</option>`;
           }
         });
         $('#alimento').html(input2 + opE);
@@ -598,7 +600,7 @@ function colocarHoraActualEnCampo(hor) {
 
 
      function chequeo_descripcion() {
-        var chequeo = /^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/;
+        var chequeo = /^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\,\(\)\"\@\#\$\=]{5,}$/;
         var descripcion = $("#descripcion").val();
         if (chequeo.test(descripcion) && descripcion !== '') {
          $(".error6").html("");
@@ -767,24 +769,34 @@ function colocarHoraActualEnCampo(hor) {
 
      }
 
-function newAlimento(idA,imagen, codigo, alimento, marca, cantidad, unidad){
+function newAlimento(idA,imagen, codigo, alimento, marca, cantidad, unidad, contNeto) {
 let unidadMedida;
+let cont;
+
+if (marca === 'Sin Marca') {
+  cont = '';
 if (unidad === 'Unidad' && cantidad > 1) {
  unidadMedida = unidad + 'es';
 }
 else{
   unidadMedida = unidad;
 }
-if (unidad !== 'Unidad' && cantidad > 1) {
-   unidadMedida = unidad + 's';
 }
+else{
+  unidadMedida = 'Unidad';
+  if (cantidad > 1) {
+   unidadMedida = 'Unidades';
+  }
+  cont = `- ${contNeto}`;
+}
+
 let newAlimento = `
 
     <tr class='${codigo}'>
        <td class='d-none'><input class='d-none' id='idAlimento' value='${idA}'></td>
        <td><img src="${imagen}" width="70" height="70"alt="Profile" class=" mb-2"></td>
        <td>${codigo}</td>
-       <td>${alimento}</td>
+       <td>${alimento} ${cont}</td>
        <td>${marca}</td>
        <td>${cantidad} ${unidadMedida}<input class='d-none' id='cantidadA' value='${cantidad}'></td>
        <td>
@@ -800,18 +812,23 @@ let newAlimento = `
 
 }
 
-function mostrarLoQueQueda(imagen, codigo, cantidad, restar, unidad){
-  let unidadMedida;
+function mostrarLoQueQueda(imagen, codigo, nombre, cantidad, restar, unidad, marca) {
+let unidadMedida;
+
+if (marca === 'Sin Marca') {
 if (unidad === 'Unidad' && cantidad > 1) {
  unidadMedida = unidad + 'es';
 }
 else{
   unidadMedida = unidad;
 }
-if (unidad !== 'Unidad' && cantidad > 1) {
-   unidadMedida = unidad + 's';
 }
-
+else{
+  unidadMedida = 'Unidad';
+  if (cantidad > 1) {
+   unidadMedida = 'Unidades';
+  }
+}
 
 let total= cantidad - restar;
 
@@ -819,7 +836,7 @@ let newAlimento = `
 
     <tr class='${codigo}'>
        <td><img src="${imagen}" width="70" height="70"alt="Profile" class=" mb-2"></td>
-       <td>${codigo}</td>
+       <td>${nombre}</td>
        <td>${total} ${unidadMedida}<input class='d-none' id='cantidadA' value='${cantidad}'></td>
     </tr>`;
     return newAlimento;
@@ -833,11 +850,15 @@ let newAlimento = `
       dataType: 'JSON',
       data: {muestra:true, idAlimento}, 
       success(data){
-      if ($('#alimento').val() === 'Seleccionar') {
+     if ($('#alimento').val() === 'Seleccionar') {
       	 $('#unidad').val(' ');
       }
       else{
-      	$('#unidad').val(data[0].unidadMedida);
+      	if(data[0].marca === 'Sin Marca'){
+             $('#unidad').val(data[0].unidadMedida)
+        }else{
+          $('#unidad').val('Unidades')
+        }
       }
       
       }
@@ -853,8 +874,8 @@ function mostrarInfo(alimento, cantidad, unidad){
       dataType: 'JSON',
       data: {muestra:true, idAlimento}, 
       success(data){
-      let newRow= newAlimento(data[0].idAlimento,data[0].imgAlimento, data[0].codigo, data[0].nombre, data[0].marca, cantidad, unidad);
-      let newRow2= mostrarLoQueQueda(data[0].imgAlimento, data[0].codigo,data[0].stock, cantidad,unidad)
+      let newRow= newAlimento(data[0].idAlimento,data[0].imgAlimento, data[0].codigo, data[0].nombre, data[0].marca, cantidad, unidad, data[0].unidadMedida);
+      let newRow2= mostrarLoQueQueda(data[0].imgAlimento, data[0].codigo, data[0].nombre ,data[0].stock, cantidad,unidad, data[0].marca);
       $('#tablaD').show(1000);
       $('.tabla tbody').append(newRow);
       $('.tabla2 tbody').append(newRow2);
@@ -875,22 +896,33 @@ function mostrarInfo(alimento, cantidad, unidad){
       dataType: 'JSON',
       data: {muestra:true, idAlimento}, 
       success(data){
-         if ($('#alimento').val() === 'Seleccionar') {
-      	  	$('#dispo').val('');
-      	  }
+        console.log('disponible', data);
+        let unidad;
+
+            if ($('#alimento').val() === 'Seleccionar') {
+      	  	      $('#dispo').val('');
+      	    }
       	  	else{
-              let unidadMedida;
+              
+              if (data[0].marca === 'Sin Marca') {
               if (data[0].unidadMedida === 'Unidad' && data[0].stock > 1) {
-                 unidadMedida = data[0].unidadMedida + 'es';
+                unidad = data[0].unidadMedida + 'es';
               }
-              if (data[0].unidadMedida !== 'Unidad' && data[0].stock > 1) {
-                   unidadMedida = data[0].unidadMedida + 's';
+              if (data[0].unidadMedida !== 'Unidad') {
+              
+                 unidad = data[0].unidadMedida;
+                
               }
-               else{
-                   unidadMedida = data[0].unidadMedida;
+              
+            }
+            else {
+             unidad = 'Unidad';
+              if (data[0].stock > 1) {
+                unidad = 'Unidades';
               }
+            }
               $('#disponibilidad').show(100);
-      	  		$('#dispo').val(data[0].stock + ' '+unidadMedida);
+      	  		$('#dispo').val(data[0].stock + ' '+unidad);
       	  	}
 
       	  	let cantidad = data[0].stock;

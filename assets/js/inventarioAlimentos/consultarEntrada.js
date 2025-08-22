@@ -99,9 +99,9 @@ function tablaEntradaAlimentos() {
     });
 }
 
-// MOSTRAR INFORMACIÓN ------------------------------------------
 
-      $(document).on('click', '.informacion', function () {
+// MOSTRAR INFORMACIÓN ------------------------------------------
+$(document).on('click', '.informacion', function () {
     let id = this.id;
     $.ajax({
         method: "post",
@@ -111,34 +111,50 @@ function tablaEntradaAlimentos() {
         success(data) {
 
             let tipoA = '';
-            let lista = data;
-            lista.forEach(fila => { 
+            let grupos = {};
+
+            // Agrupamos por tipo
+            data.forEach(fila => {
+                if (!grupos[fila.tipo]) {
+                    grupos[fila.tipo] = [];
+                }
+                grupos[fila.tipo].push(fila);
+            });
+
+            // Armamos la tabla para cada tipo
+            Object.keys(grupos).forEach(tipo => {
+                let filas = grupos[tipo];
+
+                // Verificamos si alguna fila tiene marca válida para mostrar "Cont. Neto"
+                let mostrarContNeto = filas.some(f => f.marca && f.marca !== "Sin Marca");
+                let totalColumnas = 4 + (mostrarContNeto ? 1 : 0);
+
                 tipoA += `
                     <table class="table table-hover table-bordered">
                         <thead class="table-success">
                             <tr>
-                                <th colspan="5" class='blanco fw-bold text-center'>${fila.tipo}</th>
+                                <th colspan="${totalColumnas}" class="blanco fw-bold text-center">${tipo}</th>
                             </tr>
                             <tr>
                                 <th class="blanco">Imagen</th>
-                                <th class="blanco">Codigo</th>
                                 <th class="blanco">Alimento</th>
                                 <th class="blanco">Marca</th>
+                                ${mostrarContNeto ? `<th class="blanco">Cont. Neto</th>` : ""}
                                 <th class="blanco">Cantidad</th>
                             </tr>
                         </thead>
-                        <tbody id="infoA_${fila.idTipoA}" class="infoA"></tbody>
+                        <tbody id="infoA_${filas[0].idTipoA}" class="infoA"></tbody>
                     </table>
                 `;
 
-              
-                mostrarAlimentos(fila.idTipoA, id);
+                mostrarAlimentos(filas[0].idTipoA, id);
             });
 
             $('#tablas').html(tipoA);
         }
     });
 });
+
 
 function mostrarAlimentos(idTipoA, idInventarioA) {
     $.ajax({
@@ -148,51 +164,68 @@ function mostrarAlimentos(idTipoA, idInventarioA) {
         data: { infoAlimento: true, idTipoA, idInventarioA },
         success(data) {
 
-                  let tablita ='';
-                    let fecha = new Date(data[0].fecha);
-                    if (isNaN(fecha)) {
-                        return "Fecha inválida";
-                    }
-    
-                    let dia = fecha.getUTCDate().toString().padStart(2, '0'); // Día del mes
-                    let mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0'); // Mes
-                    let anio = fecha.getUTCFullYear(); // Año
-                 let fechaFormateada = `${dia}-${mes}-${anio}`;
-                  let hora = new Date(`01/01/2000 ${data[0].hora}`);
-                  let horaFormateada = hora.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            let tablita ='';
+            let fecha = new Date(data[0].fecha);
+            if (isNaN(fecha)) {
+                return "Fecha inválida";
+            }
 
-          tablita = `
-                    <tr>
+            let dia = fecha.getUTCDate().toString().padStart(2, '0'); 
+            let mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0'); 
+            let anio = fecha.getUTCFullYear();
+            let fechaFormateada = `${dia}-${mes}-${anio}`;
+            let hora = new Date(`01/01/2000 ${data[0].hora}`);
+            let horaFormateada = hora.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+
+            tablita = `
+                <tr>
                     <td class="text-center">${fechaFormateada}</td>
                     <td class="text-center">${horaFormateada}</td>
                     <td class="">${data[0].descripcion}</td>
-                  </tr>
-                    `;
+                </tr>
+            `;
 
-           $('#tbody3').html(tablita);
+        
+            $('#tbody3').html(tablita);
 
-          // ------------------ DETALLE ----------
+            // ------------------ DETALLE ----------
             let alimento = '';
             let lista = data;
 
-            lista.forEach(fila => { 
+            // Detectar si este tipo de alimento usa columna Cont. Neto
+            let mostrarContNeto = lista.some(f => f.marca && f.marca !== "Sin Marca");
 
-              let unidadMedida;
-              if (fila.unidadMedida === 'Unidad' && fila.cantidad > 1) {
-               unidadMedida = fila.unidadMedida + 'es';
-              }
-              else{
-                unidadMedida = fila.unidadMedida;
-              }
-              if (fila.unidadMedida !== 'Unidad' && fila.cantidad > 1) {
-                 unidadMedida = fila.unidadMedida + 's';
-              }
+            lista.forEach(fila => { 
+                let unidadMedida;
+
+                if (fila.marca === 'Sin Marca') {
+                    if (fila.unidadMedida === 'Unidad' && fila.cantidad > 1) {
+                        unidadMedida = fila.unidadMedida + 'es';
+                    } else {
+                        unidadMedida = fila.unidadMedida;
+                    }
+                    
+                } else {
+                    unidadMedida = 'Unidad';
+                    if (fila.cantidad > 1) {
+                        unidadMedida = 'Unidades';
+                    }
+                }
+
+                // Si la tabla requiere columna Cont. Neto, siempre insertamos <td>
+                let contNetoColumna = "";
+                if (mostrarContNeto) {
+                    contNetoColumna = (fila.marca !== "Sin Marca") 
+                        ? `<td>${fila.unidadMedida}</td>` 
+                        : `<td class="text-muted">N/A</td>`; // vacío o N/A
+                }
+
                 alimento += `
                     <tr>
                         <td><img src="${fila.imgAlimento}" width="70" height="70" alt="Profile" class="mb-2"></td>
-                        <td>${fila.codigo}</td>
                         <td>${fila.nombre}</td>
                         <td>${fila.marca}</td>
+                        ${contNetoColumna}
                         <td>${fila.cantidad} ${unidadMedida}</td>
                     </tr>
                 `;
@@ -202,6 +235,8 @@ function mostrarAlimentos(idTipoA, idInventarioA) {
         }
     });
 }
+
+
 
 
 

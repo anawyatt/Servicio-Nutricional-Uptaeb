@@ -43,6 +43,7 @@ class consultarMenuModelo extends connectDB {
         $this->payload = JwtHelpers::validarToken($token);
         }
 
+
         public function mostrarM($fechaInicio, $fechaFin) {
             if (!preg_match("/^(?:\s*|((19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])))$/", $fechaInicio)) {
                 return ['La fecha de inicio debe estar en formato YYYY-MM-DD o estar vacía'];
@@ -189,10 +190,11 @@ class consultarMenuModelo extends connectDB {
         
         }
 
+
         private function mostrar() {
             try {
                 $this->conectarDB();
-                $info = $this->conex->prepare("SELECT idTipoA, tipo, feMenu, horarioComida FROM vista_tipo_alimentos_por_menu WHERE idMenu = ?;");
+                $info = $this->conex->prepare("SELECT idTipoA, tipo, feMenu, horarioComida, marca FROM vista_tipo_alimentos_por_menu WHERE idMenu = ?;");
             
                 $info->bindValue(1, $this->id);
                 $info->execute();

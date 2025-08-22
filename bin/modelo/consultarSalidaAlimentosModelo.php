@@ -141,7 +141,7 @@ class consultarSalidaAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
-      $query = $this->conex->prepare("SELECT DISTINCT ta.idTipoA, ta.tipo FROM salidaalimentos sa INNER JOIN detallesalidaa dsa ON dsa.idSalidaA = sa.idSalidaA INNER JOIN alimento a ON a.idAlimento = dsa.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE sa.idSalidaA = ?");
+      $query = $this->conex->prepare("SELECT DISTINCT ta.idTipoA, ta.tipo, a.marca FROM salidaalimentos sa INNER JOIN detallesalidaa dsa ON dsa.idSalidaA = sa.idSalidaA INNER JOIN alimento a ON a.idAlimento = dsa.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE sa.idSalidaA = ?");
       $query->bindValue(1, $this->id);
       $query->execute();
       $tipoalimento = $query->fetchAll();

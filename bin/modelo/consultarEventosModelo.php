@@ -38,6 +38,8 @@ class consultarEventosModelo extends connectDB {
     private $descripEvent;
     private $payload;
 
+
+
     
    
     public function __construct(){
@@ -199,7 +201,7 @@ class consultarEventosModelo extends connectDB {
         private function mostrarEven() {
             try {
                 $this->conectarDB();
-                $query = $this->conex->prepare("SELECT idTipoA, tipo, nomEvent FROM vista_tipo_alimento_evento WHERE idEvento = ?;");
+                $query = $this->conex->prepare("SELECT idTipoA, tipo, nomEvent, marca FROM vista_tipo_alimento_evento WHERE idEvento = ?;");
                 $query->bindValue(1, $this->id);
                 $query->execute();
                 $data = $query->fetchAll();

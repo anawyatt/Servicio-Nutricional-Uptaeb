@@ -19,15 +19,25 @@
 
             lista.forEach(row => {
                 let unidadMedida;
+                let contNeto;
                 let total = row.stock + row.reservado;
 
+                if (row.marca === 'Sin Marca') {
+                  contNeto = '';
                 if (row.unidadMedida === 'Unidad' && row.stock > 1) {
-                    unidadMedida = row.unidadMedida + 'es';
-                } else if (row.unidadMedida !== 'Unidad' && row.stock > 1) {
-                    unidadMedida = row.unidadMedida + 's';
+                   unidadMedida = row.unidadMedida + 'es';
                 } else {
-                    unidadMedida = row.unidadMedida;
+                   unidadMedida = row.unidadMedida;
                 }
+                } else {
+                 contNeto = row.unidadMedida;
+                 unidadMedida = 'Unidad';
+                  if(  row.stock > 1) {
+                   unidadMedida = 'Unidades';
+                  }
+                }
+                  
+
 
                 tabla += `
                     <tr>
@@ -35,6 +45,7 @@
                         <td><img src="${row.imgAlimento}" width="70" height="70" alt="Profile" class="mb-2"></td>
                         <td>${row.nombre}</td>
                         <td>${row.marca}</td>
+                        <td>${contNeto}</td>
                         <td>${row.stock} ${unidadMedida}</td>
                         <td>${row.reservado} ${unidadMedida}</td>
                         <td>${total} ${unidadMedida}</td>

@@ -15,6 +15,8 @@ class consultarAlimentosModelo extends connectDB
   private $imagen;
   private $id;
   private $payload;
+  private $codigo;
+  
 
   public function __construct()
   {
@@ -109,19 +111,44 @@ class consultarAlimentosModelo extends connectDB
 
 
   private function infoA()
-  {
+{
     try {
-      $this->conectarDB();
-      $query = $this->conex->prepare("SELECT * FROM vista_alimentos WHERE idAlimento=?");
-      $query->bindValue(1, $this->id);
-      $query->execute();
-      $data = $query->fetchAll();
-      $this->desconectarDB();
-      return $data;
+        $this->conectarDB();
+        $query = $this->conex->prepare("SELECT * FROM vista_alimentos WHERE idAlimento=?");
+        $query->bindValue(1, $this->id);
+        $query->execute();
+        $data = $query->fetchAll(\PDO::FETCH_ASSOC);
+        $this->desconectarDB();
+
+        // Procesar campo unidadMedida
+        foreach ($data as &$row) {
+            if (!empty($row['unidadMedida'])) {
+                $valor = trim($row['unidadMedida']);
+            
+                if (preg_match('/^(\d+)\s*([a-zA-Z]+)$/', $valor, $matches)) {
+                    $row['cantidad'] = $matches[1];
+                    $row['unidad']   = $matches[2];
+
+                } elseif (preg_match('/^([a-zA-Z]+)$/', $valor, $matches)) {
+                    $row['cantidad'] = null;
+                    $row['unidad']   = $matches[1];
+                } else {
+                    $row['cantidad'] = null;
+                    $row['unidad']   = null;
+                }
+            } else {
+                $row['cantidad'] = null;
+                $row['unidad']   = null;
+            }
+        }
+
+        return $data;
+
     } catch (\Exception $e) {
-      throw new \RuntimeException('Error al mostrar la informacion del alimento: ' . $e->getMessage());
+        throw new \RuntimeException('Error al mostrar la informacion del alimento: ' . $e->getMessage());
     }
-  }
+}
+
 
 
   public function verificarExistenciaTipoA($tipoA)
@@ -193,14 +220,11 @@ class consultarAlimentosModelo extends connectDB
 
   }
 
-  public function verificarAlimento($id, $tipoA, $alimento, $marca)
+  public function verificarAlimento($id,  $alimento, $marca, $unidad)
   {
     $errores = [];
     if (!preg_match("/^[0-9]{1,}$/", $id)) {
       $errores[] = 'Ingresar el codigo del alimento';
-    }
-    if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
-      $errores[] = 'Ingresar un tipo alimento correctamente';
     }
     if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $alimento)) {
       $errores[] = 'Ingresar un alimento correctamente';
@@ -209,14 +233,19 @@ class consultarAlimentosModelo extends connectDB
     if (!preg_match("/^(Sin Marca|[a-zA-ZÀ-ÿ\s]{3,})$/", trim($marca))) {
       $errores[] = 'Ingresar una marca correctamente';
     }
+    if (!preg_match("/^\d*\s*[a-zA-Z]+$/", $unidad)) {  
+      $errores[] = 'Ingresar la unidad correctamente';
+    }
 
     if (!empty($errores)) {
       return ['resultado' => implode(", ", $errores)];
-    } else {
+    } 
 
-      $this->tipoA = $tipoA;
+    else {
+
       $this->alimento = $alimento;
       $this->marca = $marca;
+      $this->unidad = $unidad;
       $this->id = $id;
       $resultado = $this->verificarA();
       return $resultado === true ? ['resultado' => 'existe'] : ['resultado' => 'no esta duplicado'];
@@ -227,10 +256,10 @@ class consultarAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
-      $verificar = $this->conex->prepare("SELECT nombre FROM alimento WHERE status =1  and idTipoA =? and nombre =? and marca =? and idAlimento !=? ");
-      $verificar->bindValue(1, $this->tipoA);
-      $verificar->bindValue(2, $this->alimento);
-      $verificar->bindValue(3, $this->marca);
+      $verificar = $this->conex->prepare("SELECT nombre FROM alimento WHERE status =1  and  nombre =? and marca =? and unidadMedida=? and idAlimento !=? ");;
+      $verificar->bindValue(1, $this->alimento);
+      $verificar->bindValue(2, $this->marca);
+      $verificar->bindValue(3, $this->unidad);
       $verificar->bindValue(4, $this->id);
       $verificar->execute();
       $data = $verificar->fetchAll();
@@ -262,14 +291,18 @@ class consultarAlimentosModelo extends connectDB
     if (!preg_match("/^(Sin Marca|[a-zA-ZÀ-ÿ\s]{3,})$/", $marca)) {
       $errores[] = 'Ingresar una marca correctamente';
     }
-    if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{2,}$/", $unidad)) {
-      $errores[] = 'Ingresar la unidad correctamente';
+   if (!preg_match("/^\d*\s*[a-zA-Z]+$/", $unidad)) {
+            $errores[] = 'Ingresar la unidad correctamente';
     }
-
     if (!empty($errores)) {
       var_dump($errores);
       return ['resultado' => implode(", ", $errores)];
-    } else {
+    }
+    if ($this->verificarAlimento($id, $alimento, $marca, $unidad)['resultado'] == 'existe') {
+      return ['resultado' => 'existe'];
+    }
+    
+    else {
       $codigo = $this->generarCodigo($alimento, $marca);
       $this->codigo = $codigo;
       $this->tipoA = $tipoA;
@@ -317,37 +350,54 @@ class consultarAlimentosModelo extends connectDB
   }
 
 
-  public function modificarImagen($imagen, $id)
-  {
+ public function modificarImagen($imagen, $id)
+{
     $errores = [];
-    if (!preg_match("/^[0-9]{1,}$/", $id)) {
-      $errores[] = 'Ingresar el id del alimento correctamente';
-    }
-    if (!isset($_FILES['imagen']) || $_FILES['imagen']['error'] !== UPLOAD_ERR_OK) {
-      $errores[] = 'Error al cargar el archivo. Asegúrate de subir una imagen válida.';
-    } else {
-      $tipoArchivo = $_FILES['imagen']['type'];
-      $tiposPermitidos = ['image/jpeg', 'image/png'];
 
-      if (!in_array($tipoArchivo, $tiposPermitidos)) {
-        $errores[] = 'Ingresar una imagen correctamente (jpg, jpeg, png)';
-      }
+    // Validar ID
+    if (!preg_match("/^[0-9]+$/", $id)) {
+        $errores[] = 'Ingresar el id del alimento correctamente';
     }
-    if (!empty($errores)) {
-      var_dump($errores);
-      return ['resultado' => implode(", ", $errores)];
+
+    // Validar archivo subido
+    if (!isset($_FILES['imagen']) || $_FILES['imagen']['error'] !== UPLOAD_ERR_OK) {
+        $errores[] = 'Error al cargar el archivo. Asegúrate de subir una imagen válida.';
     } else {
-      $info = $this->infoAlimento($id, false);
-      $rand = $this->generarCodigo($info[0]['nombre'], $info[0]['marca']);
-      $this->img = $imagen;
-      $ruta = "assets/images/alimentos/";
-      $imagen = $ruta . $rand . '.png';
-      $this->imagen = $imagen;
-      move_uploaded_file($this->img, $this->imagen);
-      $this->id = $id;
-      return $this->modificarI();
+        $tipoArchivo = $_FILES['imagen']['type'];
+        $tiposPermitidos = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+
+        if (!in_array($tipoArchivo, $tiposPermitidos)) {
+            $errores[] = 'Ingresar una imagen correctamente (jpg, jpeg, png, gif, webp)';
+        }
     }
-  }
+
+    // Retornar errores si los hay
+    if (!empty($errores)) {
+        var_dump($errores);
+        return ['resultado' => implode(", ", $errores)];
+    }
+
+    // Procesar la imagen
+    $info = $this->infoAlimento($id, false);
+    $rand = $this->generarCodigo($info[0]['nombre'], $info[0]['marca']);
+    $ruta = "assets/images/alimentos/";
+
+    // Obtener extensión real del archivo
+    $ext = pathinfo($_FILES['imagen']['name'], PATHINFO_EXTENSION);
+    $imagenDestino = $ruta . $rand . '.' . $ext;
+
+    // Mover archivo
+    if (!move_uploaded_file($_FILES['imagen']['tmp_name'], $imagenDestino)) {
+        return ['resultado' => 'Error al mover la imagen al directorio de destino'];
+    }
+
+    // Guardar datos en la clase
+    $this->imagen = $imagenDestino;
+    $this->id = $id;
+
+    return $this->modificarI();
+}
+
 
   private function modificarI()
   {
@@ -397,7 +447,11 @@ class consultarAlimentosModelo extends connectDB
   {
     if (!preg_match("/^[0-9]{1,}$/", $id)) {
       return ['resultado' => 'Seleccionar el  alimento a anular'];
-    } else {
+    } 
+    if (!$this->verificarExistencia($id)['resultado'] == 'si existe') {
+      return ['resultado' => 'el alimento ya no existe'];
+    }
+    else {
       $this->id = $id;
       return $this->anular();
     }
@@ -445,26 +499,27 @@ class consultarAlimentosModelo extends connectDB
     }
   }
 
-  function validarImagen($imagen)
-  {
-    if ($imagen['error'] !== UPLOAD_ERR_OK) {
-      return ['resultado' => 'Error al subir la imagen'];
-    }
-    $mime = mime_content_type($imagen['tmp_name']);
-    $formatosValidos = ['image/jpeg', 'image/png'];
+ 
+    function validarImagen($imagen)
+    {
+        if ($imagen['error'] !== UPLOAD_ERR_OK) {
+            return ['resultado' => 'Error al subir la imagen'];
+        }
+        $mime = mime_content_type($imagen['tmp_name']);
+        $formatosValidos = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
 
-    if (!in_array($mime, $formatosValidos)) {
-      return ['resultado' => 'El archivo no es una imagen válida (JPEG, PNG)!'];
+        if (!in_array($mime, $formatosValidos)) {
+            return ['resultado' => 'El archivo no es una imagen válida (JPEG, PNG)!'];
+        }
+        if ($imagen['size'] > 2 * 1024 * 1024) {
+            return ['resultado' => 'La imagen no debe superar los 2MB!'];
+        }
+        $dimensiones = getimagesize($imagen['tmp_name']);
+        if ($dimensiones === false) {
+            return ['resultado' => 'La imagen está dañada o no se puede procesar!'];
+        }
+        return true;
     }
-    if ($imagen['size'] > 2 * 1024 * 1024) {
-      return ['resultado' => 'La imagen no debe superar los 2MB!'];
-    }
-    $dimensiones = getimagesize($imagen['tmp_name']);
-    if ($dimensiones === false) {
-      return ['resultado' => 'La imagen está dañada o no se puede procesar!'];
-    }
-    return true;
-  }
 
   private function generarCodigo($palabra1, $palabra2)
   {

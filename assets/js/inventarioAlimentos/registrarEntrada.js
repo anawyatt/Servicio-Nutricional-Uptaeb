@@ -258,7 +258,7 @@ function mostrarAlimento(a) {
           if (fila.marca === 'Sin Marca') {
             opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre}</option>`;
           } else {
-            opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre} - ${fila.marca}</option>`;
+            opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre} - ${fila.marca} - ${fila.unidadMedida}</option>`;
           }
         });
         $('#alimento').html(input2 + opE);
@@ -603,16 +603,25 @@ function colocarHoraActualEnCampo(hor) {
          $('#tipoA, #alimento').val('Seleccionar').trigger('change.select2');
      }
 
-function newAlimento(idA,imagen, codigo, alimento, marca, cantidad, unidad){
+function newAlimento(idA,imagen, codigo, alimento, marca, cantidad, unidad, contNeto){
 let unidadMedida;
+let cont;
+
+if (marca === 'Sin Marca') {
+  cont = '';
 if (unidad === 'Unidad' && cantidad > 1) {
  unidadMedida = unidad + 'es';
 }
 else{
   unidadMedida = unidad;
 }
-if (unidad !== 'Unidad' && cantidad > 1) {
-   unidadMedida = unidad + 's';
+}
+else{
+  unidadMedida = 'Unidad';
+  if (cantidad > 1) {
+   unidadMedida = 'Unidades';
+  }
+  cont = `- ${contNeto}`;
 }
 let newAlimento = `
 
@@ -620,7 +629,7 @@ let newAlimento = `
        <td class='d-none'><input class='d-none' id='idAlimento' value='${idA}'></td>
        <td><img src="${imagen}" width="70" height="70"alt="Profile" class=" mb-2"></td>
        <td>${codigo}</td>
-       <td>${alimento}</td>
+       <td>${alimento} ${cont}</td>
        <td>${marca}</td>
        <td>${cantidad} ${unidadMedida}<input class='d-none' id='cantidadA' value='${cantidad}'></td>
        <td>
@@ -641,9 +650,20 @@ let newAlimento = `
       type: 'POST',
       dataType: 'JSON',
       data: {muestra:true, idAlimento}, 
-      success(data){
-      $('#unidad').val(data[0].unidadMedida)
+      success(data){ 
+        
+      if ($('#alimento').val() === 'Seleccionar') {
+      	 $('#unidad').val(' ');
+      }
+      else{
+      	if(data[0].marca === 'Sin Marca'){
+             $('#unidad').val(data[0].unidadMedida)
+        }else{
+          $('#unidad').val('Unidades')
+        }
+      }
 
+        
       }
     })
 
@@ -657,7 +677,7 @@ function mostrarInfo(alimento, cantidad, unidad){
       dataType: 'JSON',
       data: {muestra:true, idAlimento}, 
       success(data){
-      let newRow= newAlimento(data[0].idAlimento,data[0].imgAlimento, data[0].codigo, data[0].nombre, data[0].marca, cantidad, unidad);
+      let newRow= newAlimento(data[0].idAlimento,data[0].imgAlimento, data[0].codigo, data[0].nombre, data[0].marca, cantidad, unidad, data[0].unidadMedida);
       $('.tabla tbody').append(newRow);
       $('#cancelarInventario').click()
       tableContainer.scrollTop = tableContainer.scrollHeight;

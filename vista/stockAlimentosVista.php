@@ -122,12 +122,13 @@
                           <table class="table table-bordered table-hover tabla" >
                               <thead class="table-success">
                                   <tr>
-                                     <th class="blanco fw-bold">Codigo</th>
+                                     <th class="blanco fw-bold ">Codigo</th>
                                     <th class="blanco fw-bold">Imagen</th>
                                     <th class="blanco fw-bold">Alimento</th>
                                     <th class="blanco fw-bold">Marca</th>
-                                    <th class="blanco fw-bold">Cant. Stock</th>
-                                    <th class="blanco fw-bold">Cant. Reservado</th>
+                                     <th class="blanco fw-bold">Cont. Neto</th>
+                                    <th class="blanco fw-bold">Stock</th>
+                                    <th class="blanco fw-bold">Reservado</th>
                                     <th class="blanco fw-bold"> Cant. Total</th>
                                   </tr>
                               </thead>

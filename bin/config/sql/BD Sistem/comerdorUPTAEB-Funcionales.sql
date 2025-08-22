@@ -474,7 +474,7 @@
                         DELIMITER ;
 
                                                 -- Tipos de alimentos con stock positivo
-                        CREATE VIEW vistaTiposAlimentosConStock AS 
+                        CREATE OR REPLACE VIEW vistaTiposAlimentosConStock AS 
                         SELECT DISTINCT ta.idTipoA, ta.tipo
                         FROM tipoalimento ta 
                         INNER JOIN alimento a ON ta.idTipoA = a.idTipoA 
@@ -491,7 +491,8 @@
                             ta.tipo, 
                             m.idMenu, 
                             m.feMenu, 
-                            m.horarioComida
+                            m.horarioComida,
+                            a.marca
                         FROM detallesalidamenu dsm
                         INNER JOIN alimento a ON a.idAlimento = dsm.idAlimento
                         INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA
@@ -532,7 +533,8 @@
                                 e.idEvento,
                                 e.idMenu, 
                                 m.feMenu, 
-                                m.horarioComida
+                                m.horarioComida,
+                                a.marca
                         FROM evento e 
                         INNER JOIN menu m ON m.idMenu = e.idMenu AND m.status = 1
                         LEFT JOIN detallesalidamenu dsm ON dsm.idMenu = m.idMenu AND dsm.status = 1

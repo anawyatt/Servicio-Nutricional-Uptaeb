@@ -169,7 +169,7 @@
    
             </div>
  <div class="row p-2  my-2">
-            <div class="col-9 wave-group ">
+            <div class="col-7 wave-group ">
                 <input required="" type="number" class="input cantidad" id="cantidad">
                     <span class="bar bar4"></span>
                     <label class="label labelPri ic4">
@@ -200,8 +200,9 @@
    
             </div>
 
-               <div class=" col-3 wave-group ">
-                <input required="" disabled="true" type="text" class="input unidad" id="unidad">
+
+               <div class=" col-5 wave-group ">
+                <input required="" disabled="true" type="text" class="input unidad text-center" id="unidad">
                     <span class="bar bar4"></span>
                </div>
              </div>

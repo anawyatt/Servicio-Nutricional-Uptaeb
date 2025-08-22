@@ -68,13 +68,10 @@ class alimentosModelo extends connectDB
     }
 
 
-    public function verificarAlimento($tipoA, $alimento, $marca)
+    public function verificarAlimento( $alimento, $marca, $unidad)
     {
         $errores = [];
 
-        if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
-            $errores[] = 'Ingresar un tipo alimento correctamente';
-        }
         if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $alimento)) {
             $errores[] = 'Ingresar un alimento correctamente';
         }
@@ -82,14 +79,17 @@ class alimentosModelo extends connectDB
         if (!preg_match("/^(Sin Marca|[a-zA-ZÀ-ÿ\s]{3,})$/", trim($marca))) {
             $errores[] = 'Ingresar una marca correctamente';
         }
+        if (!preg_match("/^\d*\s*[a-zA-Z]+$/", trim($unidad))) {
+            $errores[] = 'Ingresar la unidad correctamente';
+        }
 
         if (!empty($errores)) {
             $mensaje = ['resultado' => implode(", ", $errores)];
             return $mensaje;
         } else {
-            $this->tipoA = $tipoA;
             $this->alimento = $alimento;
             $this->marca = $marca;
+            $this->unidad = $unidad;
             $resultado = $this->verificarA();
             return $resultado === true ? ['resultado' => 'existe'] : ['resultado' => 'no esta duplicado'];
 
@@ -102,10 +102,10 @@ class alimentosModelo extends connectDB
 
         try {
             $this->conectarDB();
-            $verificar = $this->conex->prepare("SELECT nombre FROM alimento WHERE status =1  and idTipoA =? and nombre =? and marca =? ");
-            $verificar->bindValue(1, $this->tipoA);
-            $verificar->bindValue(2, $this->alimento);
-            $verificar->bindValue(3, $this->marca);
+            $verificar = $this->conex->prepare("SELECT nombre FROM alimento WHERE status =1  and nombre =? and marca =? and unidadMedida =?");
+            $verificar->bindValue(1, $this->alimento);
+            $verificar->bindValue(2, $this->marca);
+            $verificar->bindValue(3, $this->unidad);
             $verificar->execute();
             $data = $verificar->fetchAll();
             $this->desconectarDB();
@@ -135,14 +135,20 @@ class alimentosModelo extends connectDB
         if (!preg_match("/^(Sin Marca|[a-zA-ZÀ-ÿ\s]{3,})$/", $marca)) {
             $errores[] = 'Ingresar una marca correctamente';
         }
-        if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{2,}$/", $unidad)) {
+        if (!preg_match("/^\d*\s*[a-zA-Z]+$/", $unidad)) {
             $errores[] = 'Ingresar la unidad correctamente';
-        }
+      }
 
         if (!empty($errores)) {
             $mensaje = ['resultado' => implode(", ", $errores)];
             return $mensaje;
-        } else {
+        } 
+        if ($this->verificarAlimento($alimento, $marca, $unidad)['resultado'] == 'existe') {
+            return ['resultado' => 'existe'];
+        }
+        
+        
+        else {
             $this->img = $imagen;
             $codigo = $this->generarCodigo($alimento, $marca);
             $ruta = "assets/images/alimentos/";

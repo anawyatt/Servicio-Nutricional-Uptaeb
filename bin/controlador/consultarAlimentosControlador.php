@@ -121,7 +121,22 @@ if (isset($_POST['valida']) && isset($_POST['tipoA'])) {
       
     }
 
+  
 }
+
+if(isset($_POST['verificarAlimento']) && isset($_POST['id']) && isset($_POST['alimento']) && isset($_POST['marca']) && isset($_POST['unidad']) ) {
+   try {
+
+   $verificarAlimento=  $objeto->verificarAlimento($_POST['id'],  $_POST['alimento'], $_POST['marca'], $_POST['unidad']);
+    if ($verificarAlimento['resultado'] == 'existe') { 
+      echo json_encode($verificarAlimento);
+      die();
+     }
+  } catch (\RuntimeException $e) {  
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
+ }
 
 if (isset($datosPermisos['permiso']['modificar'])) {
 
@@ -131,12 +146,7 @@ if ( isset($_POST['modificarINFO']) && isset($_POST['id']) && isset($_POST['tipo
   try {
     PostRateMiddleware::verificar('modificar', (array)$payload);
     $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
-    $verificarAlimento=  $objeto->verificarAlimento($_POST['id'], $_POST['tipoA'], $_POST['alimento'], $_POST['marca']);
-    if ($verificarAlimento['resultado'] == 'existe') { 
-      echo json_encode($verificarAlimento);
-      die();
-     }
-
+   
      $modificar= $objeto->modificarAlimentos($_POST['id'], $_POST['tipoA'], $_POST['alimento'], $_POST['marca'], $_POST['unidad']);
      echo json_encode(['mensaje'=>$modificar, 'newCsrfToken' => $csrf['newToken']]);
      die();
