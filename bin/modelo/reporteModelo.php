@@ -9,40 +9,25 @@ class reporteModelo extends FPDF
 // Cabecera de página
 public function Header()
 {
-
     // Logo izquierda
     $this->Image('assets/images/logos/logo.png', 10, 8, 38);
-    
     // Logo derecha
-     $this->Image('assets/images/logos/uptaeb.png',167,8,30);
-    // Arial bold 15
+    $this->Image('assets/images/logos/uptaeb.png', 167, 8, 30);
+
+    // Fuente
     $this->SetFont('Helvetica', 'B', 16);
-    // Movernos a la derecha
-    $this->Cell(40);
+
     // Título
-    $this->SetX(0); // Establecer posición X en 0
-    $this->Cell(210, 10, utf8_decode('Servicio Nutricional'), 0, 0, 'C');
-    // Salto de línea
-    $this->Ln(6);
-     // Arial bold 15
-    $this->SetFont('Helvetica','B',12);
-    // Movernos a la derecha
-    $this->Cell(60);
-    //Subtitulos
-    $this->SetX(0);
-    $this->Cell(210,10,utf8_decode('Universidad Politécnica Territorial Andrés Eloy Blanco'), 0, 0,'C');
-    // Salto de línea
-    $this->Ln(6);
-    // Movernos a la derecha
-  
-    $this->Cell(35);
-    //Subtitulos
-    $this->SetX(0);
-    $this->Cell(210,10,'Barquisimeto - Edo - Lara', 0, 0,'C');
- 
-   // Salto de línea
-    $this->Ln(25);
+    $this->SetY(10);
+    $this->Cell(0, 10, utf8_decode('Servicio Nutricional'), 0, 1, 'C');
+
+    $this->SetFont('Helvetica', 'B', 12);
+    $this->Cell(0, 8, utf8_decode('Universidad Politécnica Territorial Andrés Eloy Blanco'), 0, 1, 'C');
+    $this->Cell(0, 8, 'Barquisimeto - Edo - Lara', 0, 1, 'C');
+
+    $this->Ln(5);
 }
+
 
 
 // Pie de página
@@ -61,50 +46,50 @@ public function Footer()
 function entradaAlimentos($data) {
     ob_end_clean(); // Limpiar el búfer de salida
 
+    // Título principal
     $this->SetTextColor(9,85,160);
     $this->SetFont('Helvetica', 'B', 20);
-    // Título
-    $this->SetX(0); // Establecer posición X en 0
+    $this->SetX(0);
     $this->Cell(210, 10, utf8_decode('Entrada de Alimentos'), 0, 0, 'C');
     $this->Ln(25);
 
-    // Datos de la descripción
-    $descripcion = $data['descripcion'];
-    $horaFormateada = date('h:i A', strtotime($descripcion[0]->hora));
-    $dateTime = new \DateTime($descripcion[0]->fecha);
-    $fechaFormateada = $dateTime->format('d-m-y');
+    $descripcion = $data['descripcion'][0];
+    $horaFormateada = date('h:i A', strtotime($descripcion->hora));
+    $fechaFormateada = (new \DateTime($descripcion->fecha))->format('d-m-y');
 
-    // Datos de la descripción general
+    // Datos generales: Fecha, Hora y Descripción
     $this->SetFont('Arial', 'B', 13);
     $this->SetTextColor(30,163,223);
     $this->Cell(15, 7, utf8_decode('Fecha: '), 0, 0, 'L');
     $this->SetFont('Arial', '', 12);
     $this->SetTextColor(0);
     $this->Cell(50, 7, utf8_decode($fechaFormateada), 0, 1, 'L');
+
     $this->SetFont('Arial', 'B', 13);
     $this->SetTextColor(30,163,223);
     $this->Cell(15, 7, utf8_decode('Hora: '), 0, 0, 'L');
     $this->SetFont('Arial', '', 12);
     $this->SetTextColor(0);
     $this->Cell(50, 7, utf8_decode($horaFormateada), 0, 1, 'L');
+
     $this->SetFont('Arial', 'B', 13);
     $this->SetTextColor(30,163,223);
     $this->Cell(30, 7, utf8_decode('Descripción: '), 0, 0, 'L');
     $this->SetFont('Arial', '', 12);
     $this->SetTextColor(0);
-    $this->Cell(0, 8, utf8_decode($descripcion[0]->descripcion), 0, 1, 'L');
-    $this->Ln(10); // Espacio extra después de la descripción
+    $this->Cell(0, 8, utf8_decode($descripcion->descripcion), 0, 1, 'L');
+    $this->Ln(10);
 
     $alimentos = $data['detalle'];
-    $alimentosPorTipo = [];
 
     // Agrupar alimentos por tipo
+    $alimentosPorTipo = [];
     foreach ($alimentos as $alimento) {
         $alimentosPorTipo[$alimento->tipo][] = $alimento;
     }
 
-    // Imprimir los alimentos agrupados por tipo
     foreach ($alimentosPorTipo as $tipo => $detalleAlimentos) {
+        // Encabezado por tipo
         $this->SetFillColor(9,85,160);
         $this->SetTextColor(255);
         $this->SetDrawColor(9,85,160);
@@ -112,37 +97,65 @@ function entradaAlimentos($data) {
         $this->SetFont('Arial', 'B', 14);
         $this->Cell(0, 8, utf8_decode($tipo), 1, 1, 'C', true);
 
+        // Cabecera de columnas
+        $tieneConMarca = false;
+        foreach ($detalleAlimentos as $info) {
+            if (strtolower(trim($info->marca)) !== "sin marca") {
+                $tieneConMarca = true;
+                break;
+            }
+        }
+
         $this->SetFillColor(30,163,223);
         $this->SetTextColor(255);
         $this->SetDrawColor(30,163,223);
         $this->SetLineWidth(.2);
         $this->SetFont('', 'B', 12);
-        $this->Cell(40, 6, utf8_decode('Código'), 1, 0, 'L', true);
-        $this->Cell(55, 6, 'Alimento', 1, 0, 'L', true);
-        $this->Cell(55, 6, 'Marca', 1, 0, 'L', true);
-        $this->Cell(40, 6, 'Cantidad', 1, 1, 'L', true);
 
+        if ($tieneConMarca) {
+            $this->Cell(35, 6, utf8_decode('Código'), 1, 0, 'L', true);
+            $this->Cell(50, 6, 'Alimento', 1, 0, 'L', true);
+            $this->Cell(45, 6, 'Marca', 1, 0, 'L', true);
+            $this->Cell(25, 6, 'Cont Neto', 1, 0, 'L', true);
+            $this->Cell(35, 6, 'Cantidad', 1, 1, 'L', true);
+        } else {
+            $this->Cell(40, 6, utf8_decode('Código'), 1, 0, 'L', true);
+            $this->Cell(55, 6, 'Alimento', 1, 0, 'L', true);
+            $this->Cell(55, 6, 'Marca', 1, 0, 'L', true);
+            $this->Cell(40, 6, 'Cantidad', 1, 1, 'L', true);
+        }
+
+        // Imprimir los alimentos
         $this->SetFillColor(255, 255, 255);
         $this->SetDrawColor(30,163,223);
         $this->SetTextColor(0);
         $this->SetFont('');
 
-        // Imprimir cada alimento en el tipo actual
         foreach ($detalleAlimentos as $info) {
-            $this->Cell(40, 8, utf8_decode($info->codigo), 1, 0, 'L');
-            $this->Cell(55, 8, utf8_decode($info->nombre), 1, 0, 'L');
-            $this->Cell(55, 8, utf8_decode($info->marca), 1, 0, 'L');
-            $this->Cell(40, 8, utf8_decode($info->cantidad . ' ' . $info->unidadMedida), 1, 1, 'L');
+            if (strtolower(trim($info->marca)) !== "sin marca") {
+                $this->Cell(35, 8, utf8_decode($info->codigo), 1, 0, 'L');
+                $this->Cell(50, 8, utf8_decode($info->nombre), 1, 0, 'L');
+                $this->Cell(45, 8, utf8_decode($info->marca), 1, 0, 'L');
+                $this->Cell(25, 8, utf8_decode($info->unidadMedida), 1, 0, 'L');
+
+                $unidadTexto = ($info->cantidad == 1) ? "U." : "U.";
+                $this->Cell(35, 8, utf8_decode($info->cantidad . ' ' . $unidadTexto), 1, 1, 'L');
+            } else {
+                $this->Cell(40, 8, utf8_decode($info->codigo), 1, 0, 'L');
+                $this->Cell(55, 8, utf8_decode($info->nombre), 1, 0, 'L');
+                $this->Cell(55, 8, utf8_decode($info->marca), 1, 0, 'L');
+                $this->Cell(40, 8, utf8_decode($info->cantidad . ' ' . $info->unidadMedida), 1, 1, 'L');
+            }
         }
 
-        $this->Ln(10); // Espacio extra después de cada tipo de alimento
+        $this->Ln(10);
     }
 
     $directorio = 'assets/pdfs/alimentos';
-    $repositorioo = $directorio . '/entradaAlimentos Fecha ' . $descripcion[0]->fecha . '.pdf';
-    $this->Output('F', $repositorioo);
-    $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-    echo json_encode($respuesta);
+    $repositorio = $directorio . '/entradaAlimentos Fecha ' . $descripcion->fecha . '.pdf';
+    $this->Output('F', $repositorio);
+
+    echo json_encode(['respuesta' => 'guardado', 'ruta' => $repositorio]);
     die();
 }
 
@@ -153,210 +166,170 @@ function entradaAlimentos($data) {
 function entradaAlimentosTotal($data){
     ob_end_clean(); // Limpiar el búfer de salida
 
-     $fechaI = $data['fechaI'];
-     $fechaF = $data['fechaF'];
-    // Configurar idioma para strftime
+    $fechaI = $data['fechaI'];
+    $fechaF = $data['fechaF'];
+
     setlocale(LC_TIME, 'es_ES.UTF-8');
 
+    // Encabezado principal
     $this->SetTextColor(9,85,160);
     $this->SetFont('Helvetica', 'B', 20);
-    // Título
-    $this->SetX(0); // Establecer posición X en 0
+    $this->SetX(0);
+    $this->Cell(210, 10, utf8_decode('Entrada Total de Alimentos'), 0, 0, 'C');
 
-    
-    if ($fechaI != '' && $fechaF != '') {
-      if ($fechaI != $fechaF) {
-  
-           $dateTimeI = new \DateTime($fechaI);
-           $dateTimeF = new \DateTime($fechaF);
-
-    // Formatear las fechas al formato d-m-y
-    $fechaFormateadaI = $dateTimeI->format('d-m-y');
-    $fechaFormateadaF = $dateTimeF->format('d-m-y');
-
-      $this->Cell(210, 10, utf8_decode('Entrada Total de Alimentos'), 0, 1, 'C');
-            $this->SetTextColor(0);
-            $this->SetFont('Arial', 'B', 13);
-             $this->Cell(190, 10, utf8_decode('Desde el '. $fechaFormateadaI. ' hasta el '.$fechaFormateadaF), 0, 0, 'C');
-
-      }
-       else{
-      $this->Cell(210, 10, utf8_decode('Entrada Total de Alimentos'), 0, 0, 'C');
-      }
+    // Subtítulo de fechas
+    if ($fechaI && $fechaF && $fechaI != $fechaF) {
+        $fechaFormateadaI = (new DateTime($fechaI))->format('d-m-y');
+        $fechaFormateadaF = (new DateTime($fechaF))->format('d-m-y');
+        $this->SetTextColor(0);
+        $this->SetFont('Arial', 'B', 13);
+        $this->Cell(190, 10, utf8_decode('Desde el '. $fechaFormateadaI. ' hasta el '.$fechaFormateadaF), 0, 0, 'C');
     }
-     else{
-      $this->Cell(210, 10, utf8_decode('Entrada Total de Alimentos'), 0, 0, 'C');
-    }
-   
-   
     $this->Ln(15);
 
-     // Acceder a la propiedad como un objeto
     $alimentos = $data['detalle'];
+    $fechaActual = '';
     $idInventario = '';
-    $fecha='';
 
     foreach($alimentos as $porFecha){
-       if ($fecha != $porFecha->fecha) {
+        if ($fechaActual != $porFecha->fecha) {
+            // Encabezado por fecha
             $this->Ln(5);
             $this->SetTextColor(0);
             $this->SetFont('Arial', 'B', 14);
 
-           setlocale(LC_TIME, 'es_ES.UTF-8', 'es_ES', 'Spanish_Spain', 'Spanish');
+            $fechaFormateada = strftime('%e de %B del %Y', strtotime($porFecha->fecha));
+            $nombreMes = mb_convert_case(strftime('%B', strtotime($porFecha->fecha)), MB_CASE_TITLE, "UTF-8");
+            $fechaFormateada = preg_replace('/\b' . mb_strtolower($nombreMes, 'UTF-8') . '\b/', $nombreMes, mb_strtolower($fechaFormateada, 'UTF-8'));
 
-           $fechaFormateada = strftime('%e de %B del %Y', strtotime($porFecha->fecha));
-           $nombreMes = mb_convert_case(strftime('%B', strtotime($porFecha->fecha)), MB_CASE_TITLE, "UTF-8");
+            $this->Cell(185, 8, utf8_decode($fechaFormateada), 0, 1, 'C');
+            $fechaActual = $porFecha->fecha;
+        }
 
-           $fechaFormateada = preg_replace('/\b' . mb_strtolower($nombreMes, 'UTF-8') . '\b/', $nombreMes, mb_strtolower($fechaFormateada, 'UTF-8'));
+        foreach ($alimentos as $info) {
+            if ($idInventario != $info->idEntradaA && $fechaActual == $info->fecha) {
+                // Detalle de entrada
+                $this->Ln(10);
+                $horaFormateada = date('h:i A', strtotime($info->hora));
 
-            $this->Cell(185, 8, utf8_decode( $fechaFormateada), 0, 1, 'C');
-              $fecha= $porFecha->fecha;
+                $this->SetFillColor(255, 255, 255);
+                $this->SetDrawColor(30,163,223);
 
-             foreach ($alimentos as $info) {
-        if ($idInventario != $info->idEntradaA && $fecha == $info->fecha ) {
-            $this->Ln(10);
-            // Restauración de colores y fuentes
-            $horaFormateada = date('h:i A', strtotime($info->hora));
-            $this->SetFillColor(255, 255, 255);
-            $this->SetDrawColor(30,163,223);
-            $this->SetFont('');
+                $this->SetFont('Arial', 'B', 13);
+                $this->SetTextColor(30,163,223);
+                $this->Cell(15, 7, utf8_decode('Hora: '), 0, 0, 'L', 1);
+                $this->SetFont('Arial', '', 12);
+                $this->SetTextColor(0);
+                $this->Cell(50, 7, utf8_decode($horaFormateada), 0, 1, 'L', 1);
 
-            // Datos de la descripción general en formato de párrafo
-            $this->SetFont('Arial', 'B', 13);
-            $this->SetTextColor(30,163,223);
-            $this->Cell(15, 7, utf8_decode('Hora: '), 0, 0, 'L', 1);
-            $this->SetFont('Arial', '', 12);
-            $this->SetTextColor(0);
-            $this->Cell(50, 7, utf8_decode($horaFormateada), 0, 1, 'L', 1);
-            $this->SetFont('Arial', 'B', 13);
-            $this->SetTextColor(30,163,223);
-            $this->Cell(30, 7, utf8_decode('Descripción: '), 0, 0, 'L', 1);
-            $this->SetFont('Arial', '', 12);
-            $this->SetTextColor(0);
-            $this->Cell(50, 7, utf8_decode($info->descripcion), 0, 1, 'L', 1);
+                $this->SetFont('Arial', 'B', 13);
+                $this->SetTextColor(30,163,223);
+                $this->Cell(30, 7, utf8_decode('Descripción: '), 0, 0, 'L', 1);
+                $this->SetFont('Arial', '', 12);
+                $this->SetTextColor(0);
+                $this->Cell(50, 7, utf8_decode($info->descripcion), 0, 1, 'L', 1);
 
-            $this->Ln(5);
+                $this->Ln(5);
+                $idInventario = $info->idEntradaA;
 
-            $idInventario = $info->idEntradaA;
+                $tiposProcesados = [];
+                foreach ($alimentos as $detalle) {
+                    if ($idInventario == $detalle->idEntradaA && !in_array($detalle->tipo, $tiposProcesados)) {
+                        // Encabezado por tipo
+                        $this->SetFillColor(9,85,160);
+                        $this->SetTextColor(255);
+                        $this->SetDrawColor(9,85,160);
+                        $this->SetLineWidth(.2);
+                        $this->SetFont('Arial', 'B', 14);
+                        $this->Cell(0, 8, utf8_decode($detalle->tipo), 1, 1, 'C', true);
 
-            // Procesar tipos de alimentos por inventario
-            $tiposProcesados = array(); // Array para evitar repetir tipos
+                        // Columnas
+                        $this->SetFillColor(30,163,223);
+                        $this->SetTextColor(255);
+                        $this->SetDrawColor(30,163,223);
+                        $this->SetLineWidth(.2);
+                        $this->SetFont('Arial', 'B', 12);
+                        $this->Cell(30, 6, utf8_decode('Código'), 1, 0, 'L', true);
+                        $this->Cell(55, 6, 'Alimento', 1, 0, 'L', true);
+                        $this->Cell(45, 6, 'Marca', 1, 0, 'L', true);
+                        $this->Cell(25, 6, 'Cont Neto', 1, 0, 'L', true);
+                        $this->Cell(35, 6, 'Cantidad', 1, 1, 'L', true);
 
-            foreach ($alimentos as $detalle) {
-                if ($idInventario == $detalle->idEntradaA && !in_array($detalle->tipo, $tiposProcesados)) {
-                    // Nueva sección para cada tipo de alimento
-                    $this->SetFillColor(9,85,160);
-                    $this->SetTextColor(255);
-                    $this->SetDrawColor(9,85,160);
-                    $this->SetLineWidth(.2);
-                    $this->SetFont('Arial', 'B', 14);
-                    $this->Cell(0, 8, utf8_decode($detalle->tipo), 1, 1, 'C', true);
+                        // Datos
+                        $this->SetFillColor(255, 255, 255);
+                        $this->SetDrawColor(30,163,223);
+                        $this->SetTextColor(0);
+                        $this->SetFont('');
 
-                    $this->SetFillColor(30,163,223);
-                    $this->SetTextColor(255);
-                    $this->SetDrawColor(30,163,223);
-                    $this->SetLineWidth(.2);
-                    $this->SetFont('', 'B', 12);
+                        foreach ($alimentos as $detalleA) {
+                            if ($detalle->tipo == $detalleA->tipo && $idInventario == $detalleA->idEntradaA) {
+                                $this->Cell(30, 8, utf8_decode($detalleA->codigo), 1, 0, 'L');
+                                $this->Cell(55, 8, utf8_decode($detalleA->nombre), 1, 0, 'L');
+                                $this->Cell(45, 8, utf8_decode($detalleA->marca), 1, 0, 'L');
 
-                    // Cabecera de alimentos
-                    $this->Cell(40, 6, utf8_decode('Código'), 1, 0, 'L', true);
-                    $this->Cell(55, 6, 'Alimento', 1, 0, 'L', true);
-                    $this->Cell(55, 6, 'Marca', 1, 0, 'L', true);
-                    $this->Cell(40, 6, 'Cantidad', 1, 1, 'L', true);
+                                // Cont. Neto vacío si la marca es "Sin Marca"
+                                $contNeto = (strtolower(trim($detalleA->marca)) === "sin marca") ? '' : $detalleA->unidadMedida;
+                                $this->Cell(25, 8, utf8_decode($contNeto), 1, 0, 'L');
 
-                    $this->SetFillColor(255, 255, 255);
-                    $this->SetDrawColor(30,163,223);
-                    $this->SetTextColor(0);
-                    $this->SetFont('');
-
-                    // Datos de alimentos
-                    foreach ($alimentos as $detalleA) {
-                        if ($detalle->tipo == $detalleA->tipo && $idInventario == $detalleA->idEntradaA) {
-                            $this->Cell(40, 8, utf8_decode($detalleA->codigo), 1, 0, 'L', true);
-                            $this->Cell(55, 8, utf8_decode($detalleA->nombre), 1, 0, 'L', true);
-                            $this->Cell(55, 8, utf8_decode($detalleA->marca), 1, 0, 'L', true);
-                            $this->Cell(40, 8, utf8_decode($detalleA->cantidad . ' ' . $detalleA->unidadMedida), 1, 1, 'L', true);
+                                $unidadTexto = ($detalleA->cantidad == 1) ? "U." : "U.";
+                                $this->Cell(35, 8, utf8_decode($detalleA->cantidad . ' ' . $unidadTexto), 1, 1, 'L');
+                            }
                         }
-                    }
 
-                    $this->Ln(6);
-                    $tiposProcesados[] = $detalle->tipo; // Marcar tipo como procesado
+                        $this->Ln(6);
+                        $tiposProcesados[] = $detalle->tipo;
+                    }
                 }
             }
         }
     }
-         
-       }
 
-    }
-
-   
-    
-    $this->Ln(6);
-  
+    // Guardar PDF
     $directorio = 'assets/pdfs/alimentos';
-    if ($fechaI != '' && $fechaF != '') {
-      if ($fechaI != $fechaF) {
-          $repositorio = $directorio . '/entradaAlimentosTotal '.$fechaI.' hasta '.$fechaF.'.pdf';
-      }
-      else{
-         $repositorio = $directorio . '/entradaAlimentosTotal.pdf';
-      }
-      }else{
-           $repositorio = $directorio . '/entradaAlimentosTotal.pdf';
-      }
-  
+    if ($fechaI && $fechaF && $fechaI != $fechaF) {
+        $repositorio = $directorio . '/entradaAlimentosTotal '.$fechaI.' hasta '.$fechaF.'.pdf';
+    } else {
+        $repositorio = $directorio . '/entradaAlimentosTotal.pdf';
+    }
     $this->Output('F', $repositorio);
-    $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorio];
-    echo json_encode($respuesta);
+
+    echo json_encode(['respuesta' => 'guardado', 'ruta' => $repositorio]);
     die();
 }
 
 
 
 function stockAlimentos($data){
-     ob_end_clean(); // Limpiar el búfer de salida
+    ob_end_clean(); // Limpiar el búfer de salida
 
-    // Establecer zona horaria de Venezuela
     date_default_timezone_set('America/Caracas');
-    
-    // Array para traducir nombres de meses de inglés a español
+
     $meses_espanol = array(
-        'January' => 'Enero',
-        'February' => 'Febrero',
-        'March' => 'Marzo',
-        'April' => 'Abril',
-        'May' => 'Mayo',
-        'June' => 'Junio',
-        'July' => 'Julio',
-        'August' => 'Agosto',
-        'September' => 'Septiembre',
-        'October' => 'Octubre',
-        'November' => 'Noviembre',
-        'December' => 'Diciembre'
+        'January' => 'Enero', 'February' => 'Febrero', 'March' => 'Marzo',
+        'April' => 'Abril', 'May' => 'Mayo', 'June' => 'Junio',
+        'July' => 'Julio', 'August' => 'Agosto', 'September' => 'Septiembre',
+        'October' => 'Octubre', 'November' => 'Noviembre', 'December' => 'Diciembre'
     );
 
-    // Obtener la fecha y hora actual
-    $mes_actual = date('F'); // Obtener nombre del mes en inglés
-    $mes_actual_spanish = isset($meses_espanol[$mes_actual]) ? $meses_espanol[$mes_actual] : '';
-
+    $mes_actual = date('F'); 
+    $mes_actual_spanish = $meses_espanol[$mes_actual] ?? '';
     $fecha_actual = date('d') . ' de ' . $mes_actual_spanish . ' del ' . date('Y');
     $hora_actual = date('g:i A');
 
     $this->SetTextColor(9,85,160);
     $this->SetFont('Helvetica', 'B', 20);
-    // Título
-    $this->SetX(0); // Establecer posición X en 0
+    $this->SetX(0);
     $this->Cell(210, 10, utf8_decode('Stock de Alimentos'), 0, 1, 'C');
     $this->Ln(6);
     $this->SetTextColor(0);
     $this->SetFont('Helvetica', 'B', 14);
-    // Incluir fecha y hora actual en el encabezado
-    $this->Cell(185, 8, utf8_decode( $fecha_actual), 0, 1, 'C');
-    $this->Cell(185, 8, utf8_decode( $hora_actual), 0, 1, 'C');
-      $this->Ln(25);
+    $this->Cell(185, 8, utf8_decode($fecha_actual), 0, 1, 'C');
+    $this->Cell(185, 8, utf8_decode($hora_actual), 0, 1, 'C');
+    $this->Ln(25);
+
     $alimento = $data['detalle'];
     $alimentoI = '';
+
     foreach ($alimento as $info) {
         if ($alimentoI != $info->tipo) {
             $this->SetFillColor(9,85,160);
@@ -374,12 +347,12 @@ function stockAlimentos($data){
             $this->SetLineWidth(.2);
             $this->SetFont('', 'B',12);
 
-            $this->Cell(30, 6, utf8_decode('Código'), 1, 0, 'L', true);
-            $this->Cell(35, 6, 'Alimento', 1, 0, 'L', true);
+            $this->Cell(51, 6, 'Alimento', 1, 0, 'L', true); // Más ancho
             $this->Cell(35, 6, 'Marca', 1, 0, 'L', true);
-            $this->Cell(30, 6, 'Cant. Stock', 1, 0, 'L', true);
-            $this->Cell(35, 6, 'Cant. Reservado', 1, 0, 'L', true);
-            $this->Cell(25, 6, 'Cant. Total', 1, 1, 'L', true);
+            $this->Cell(25, 6, 'Cont Neto', 1, 0, 'L', true);
+            $this->Cell(27,6, ' Stock', 1, 0, 'L', true);
+            $this->Cell(25,6, ' Reservado', 1, 0, 'L', true);
+            $this->Cell(27, 6, ' Total', 1, 1, 'L', true);
 
             $this->SetFillColor(255, 255, 255);
             $this->SetDrawColor(30,163,223);
@@ -388,16 +361,23 @@ function stockAlimentos($data){
 
             foreach ($alimento as $detalle) {
                 if ($alimentoI == $detalle->tipo) {
-                    $this->Cell(30, 8, utf8_decode($detalle->codigo), 1, 0, 'L', true);
-                    $this->Cell(35, 8, utf8_decode($detalle->nombre), 1, 0, 'L', true);
+                    $contNeto = ($detalle->marca != 'Sin Marca') ? $detalle->unidadMedida : '';
+
+                    $unidadStock = ($detalle->stock == 1) ? ' U.' : ' U.';
+                    $unidadReservado = ($detalle->reservado == 1) ? ' U.' : ' U.';
+                    $unidadTotal = (($detalle->stock + $detalle->reservado) == 1) ? ' U.' : ' U.';
+
+                    $this->Cell(51, 8, utf8_decode($detalle->nombre), 1, 0, 'L', true);
                     $this->Cell(35, 8, utf8_decode($detalle->marca), 1, 0, 'L', true);
-                    $this->Cell(30, 8, utf8_decode($detalle->stock . ' ' . $detalle->unidadMedida), 1, 0, 'L', true);
-                    $this->Cell(35, 8, utf8_decode($detalle->reservado . ' ' . $detalle->unidadMedida), 1, 0, 'L', true);
-                    $this->Cell(25, 8, utf8_decode($detalle->stock +  $detalle->reservado. ' ' . $detalle->unidadMedida), 1, 1, 'L', true);
+                    $this->Cell(25, 8, utf8_decode($contNeto), 1, 0, 'L', true);
+                    $this->Cell(27, 8,utf8_decode($detalle->stock . $unidadStock), 1, 0, 'L', true);
+                    $this->Cell(25, 8, utf8_decode($detalle->reservado . $unidadReservado), 1, 0, 'L', true);
+                    $this->Cell(27, 8, utf8_decode(($detalle->stock +  $detalle->reservado) . $unidadTotal), 1, 1, 'L', true);
                 }
             }
+            $this->Ln(6);
         }
-        $this->Ln(6);
+        
     }
 
     $directorio = 'assets/pdfs/alimentos';
@@ -408,31 +388,30 @@ function stockAlimentos($data){
     die();
 }
 
-    function salidaAlimentos($data){
-     ob_end_clean(); // Limpiar el búfer de salida
 
-    //   $cedula = $data['cedula'];
 
+function salidaAlimentos($data){
+    ob_end_clean(); // Limpiar el búfer de salida
+
+    // Título principal
     $this->SetTextColor(9,85,160);
     $this->SetFont('Helvetica', 'B', 20);
-    // Título
-    $this->SetX(0); // Establecer posición X en 0
+    $this->SetX(0);
     $this->Cell(210, 10, utf8_decode('Salida de Alimentos'), 0, 0, 'C');
     $this->Ln(25);
 
-   // Datos de la descripcion
-    $descripcion = $data['descripcion'];
-    $horaFormateada = date('h:i A', strtotime($descripcion[0]->hora));
-    $dateTime = new \DateTime($descripcion[0]->fecha);
-    $fechaFormateada = $dateTime->format('d-m-y');
+    $descripcion = $data['descripcion'][0];
+    $horaFormateada = date('h:i A', strtotime($descripcion->hora));
+    $fechaFormateada = (new \DateTime($descripcion->fecha))->format('d-m-y');
 
-    // Datos de la descripción general en formato de párrafo
+    // Datos generales
     $this->SetFont('Arial', 'B', 13);
     $this->SetTextColor(30,163,223);
     $this->Cell(15, 7, utf8_decode('Fecha: '), 0, 0, 'L');
     $this->SetFont('Arial', '', 12);
     $this->SetTextColor(0);
     $this->Cell(50, 7, utf8_decode($fechaFormateada), 0, 1, 'L');
+
     $this->SetFont('Arial', 'B', 13);
     $this->SetTextColor(30,163,223);
     $this->Cell(15, 7, utf8_decode('Hora: '), 0, 0, 'L');
@@ -445,241 +424,232 @@ function stockAlimentos($data){
     $this->Cell(30, 7, utf8_decode('Salida por: '), 0, 0, 'L');
     $this->SetFont('Arial', '', 12);
     $this->SetTextColor(0);
-    $this->Cell(0, 8, utf8_decode($descripcion[0]->tipoSalida), 0, 1, 'L');
+    $this->Cell(0, 8, utf8_decode($descripcion->tipoSalida), 0, 1, 'L');
+
     $this->SetFont('Arial', 'B', 13);
     $this->SetTextColor(30,163,223);
     $this->Cell(30, 7, utf8_decode('Descripción: '), 0, 0, 'L');
     $this->SetFont('Arial', '', 12);
     $this->SetTextColor(0);
-    $this->Cell(0, 8, utf8_decode($descripcion[0]->descripcion), 0, 1, 'L');
-
+    $this->Cell(0, 8, utf8_decode($descripcion->descripcion), 0, 1, 'L');
     $this->Ln(5);
 
-   $alimento = $data['detalle'];
-   $alimentoI = '';
-  foreach ($alimento as $info) {
-    if ($alimentoI != $info->tipo) {
-       $this->SetFillColor(9,85,160);
-       $this->SetTextColor(255);
-       $this->SetDrawColor(9,85,160);
-       $this->SetLineWidth(.2);
-       $this->SetFont('Arial', 'B', 14);
-       $alimentoI = $info->tipo;
-   
-       $this->Cell(0, 8, utf8_decode($info->tipo), 1, 1, 'C', true);
-       
-    $this->SetFillColor(30,163,223);
-    $this->SetTextColor(255);
-    $this->SetDrawColor(30,163,223);
-    $this->SetLineWidth(.2);
-    $this->SetFont('', 'B',12);
+    $alimentos = $data['detalle'];
 
-          $this->Cell(40, 6, utf8_decode('Código'), 1, 0, 'L', true);
-          $this->Cell(55, 6, 'Alimento', 1, 0, 'L', true);
-          $this->Cell(55, 6, 'Marca', 1, 0, 'L', true);
-          $this->Cell(40, 6, 'Cantidad', 1, 1, 'L', true);
+    // Agrupar alimentos por tipo
+    $alimentosPorTipo = [];
+    foreach ($alimentos as $alimento) {
+        $alimentosPorTipo[$alimento->tipo][] = $alimento;
+    }
 
-          $this->SetFillColor(255, 255, 255);
-          $this->SetDrawColor(30,163,223);
-          $this->SetTextColor(0);
-          $this->SetFont('');
+    foreach ($alimentosPorTipo as $tipo => $detalleAlimentos) {
+        // Encabezado por tipo
+        $this->SetFillColor(9,85,160);
+        $this->SetTextColor(255);
+        $this->SetDrawColor(9,85,160);
+        $this->SetLineWidth(.2);
+        $this->SetFont('Arial', 'B', 14);
+        $this->Cell(0, 8, utf8_decode($tipo), 1, 1, 'C', true);
 
+        // Cabecera de columnas (siempre Cont Neto)
+        $this->SetFillColor(30,163,223);
+        $this->SetTextColor(255);
+        $this->SetDrawColor(30,163,223);
+        $this->SetLineWidth(.2);
+        $this->SetFont('', 'B', 12);
 
-          foreach ($alimento as $detalle) {
-        if ($alimentoI == $detalle->tipo) {
-             $this->Cell(40, 8, utf8_decode($detalle->codigo),  1, 0, 'L', true);
-              $this->Cell(55, 8, utf8_decode($detalle->nombre),  1, 0, 'L', true);
-               $this->Cell(55, 8, utf8_decode($detalle->marca),  1, 0, 'L', true);
-                $this->Cell(40, 8, utf8_decode($detalle->cantidad.' '. $detalle->unidadMedida),  1, 1, 'L', true);
-           
-           
+        $this->Cell(35, 6, utf8_decode('Código'), 1, 0, 'L', true);
+        $this->Cell(50, 6, 'Alimento', 1, 0, 'L', true);
+        $this->Cell(45, 6, 'Marca', 1, 0, 'L', true);
+        $this->Cell(25, 6, 'Cont Neto', 1, 0, 'L', true);
+        $this->Cell(35, 6, 'Cantidad', 1, 1, 'L', true);
+
+        $this->SetFillColor(255, 255, 255);
+        $this->SetDrawColor(30,163,223);
+        $this->SetTextColor(0);
+        $this->SetFont('');
+
+        // Imprimir cada alimento
+        foreach ($detalleAlimentos as $info) {
+            $this->Cell(35, 8, utf8_decode($info->codigo), 1, 0, 'L');
+            $this->Cell(50, 8, utf8_decode($info->nombre), 1, 0, 'L');
+            $this->Cell(45, 8, utf8_decode($info->marca), 1, 0, 'L');
+
+            // Cont Neto vacío si marca es "Sin Marca"
+            $contNeto = (strtolower(trim($info->marca)) === "sin marca") ? '' : utf8_decode($info->unidadMedida);
+            $this->Cell(25, 8, $contNeto, 1, 0, 'L');
+
+            $unidadTexto = ($info->cantidad == 1) ? "U." : "U.";
+            $this->Cell(35, 8, utf8_decode($info->cantidad . ' ' . $unidadTexto), 1, 1, 'L');
         }
-        
-        
-    }
-       
-           
-        }
-        
-          $this->Ln(6);
+
+        $this->Ln(10);
     }
 
-   $directorio = 'assets/pdfs/alimentos';
-   $repositorioo = $directorio. '/salidaAlimentos Fecha '. $descripcion[0]->fecha .'.pdf';
-   $this->Output('F', $repositorioo);
-   $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-   echo json_encode($respuesta);
-   die();
-    }
+    // Guardar PDF
+    $directorio = 'assets/pdfs/alimentos';
+    $repositorio = $directorio . '/salidaAlimentos Fecha ' . $descripcion->fecha . '.pdf';
+    $this->Output('F', $repositorio);
+
+    echo json_encode(['respuesta' => 'guardado', 'ruta' => $repositorio]);
+    die();
+}
 
 
-    function salidaAlimentosTotal($data){
+  function salidaAlimentosTotal($data){
     ob_end_clean(); // Limpiar el búfer de salida
 
-     $fechaI = $data['fechaI'];
-     $fechaF = $data['fechaF'];
-    // Configurar idioma para strftime
+    $fechaI = $data['fechaI'];
+    $fechaF = $data['fechaF'];
+
     setlocale(LC_TIME, 'es_ES.UTF-8');
 
     $this->SetTextColor(9,85,160);
     $this->SetFont('Helvetica', 'B', 20);
-    // Título
-    $this->SetX(0); // Establecer posición X en 0
+    $this->SetX(0);
 
-    
     if ($fechaI != '' && $fechaF != '') {
-      if ($fechaI != $fechaF) {
-  
-           $dateTimeI = new \DateTime($fechaI);
-           $dateTimeF = new \DateTime($fechaF);
+        if ($fechaI != $fechaF) {
+            $dateTimeI = new \DateTime($fechaI);
+            $dateTimeF = new \DateTime($fechaF);
+            $fechaFormateadaI = $dateTimeI->format('d-m-y');
+            $fechaFormateadaF = $dateTimeF->format('d-m-y');
 
-    // Formatear las fechas al formato d-m-y
-    $fechaFormateadaI = $dateTimeI->format('d-m-y');
-    $fechaFormateadaF = $dateTimeF->format('d-m-y');
-
-      $this->Cell(210, 10, utf8_decode('Salida Total de Alimentos'), 0, 1, 'C');
+            $this->Cell(210, 10, utf8_decode('Salida Total de Alimentos'), 0, 1, 'C');
             $this->SetTextColor(0);
             $this->SetFont('Arial', 'B', 13);
-             $this->Cell(190, 10, utf8_decode('Desde el '. $fechaFormateadaI. ' hasta el '.$fechaFormateadaF), 0, 0, 'C');
+            $this->Cell(190, 10, utf8_decode('Desde el '. $fechaFormateadaI. ' hasta el '.$fechaFormateadaF), 0, 0, 'C');
+        } else {
+            $this->Cell(210, 10, utf8_decode('Salida Total de Alimentos'), 0, 0, 'C');
+        }
+    } else {
+        $this->Cell(210, 10, utf8_decode('Salida Total de Alimentos'), 0, 0, 'C');
+    }
 
-      }
-       else{
-      $this->Cell(210, 10, utf8_decode('Salida Total de Alimentos'), 0, 0, 'C');
-      }
-    }
-     else{
-      $this->Cell(210, 10, utf8_decode('Salida Total de Alimentos'), 0, 0, 'C');
-    }
-   
-   
     $this->Ln(15);
 
-     // Acceder a la propiedad como un objeto
     $alimentos = $data['detalle'];
     $idSalida = '';
-    $fecha='';
+    $fecha = '';
 
     foreach($alimentos as $porFecha){
-       if ($fecha != $porFecha->fecha) {
+        if ($fecha != $porFecha->fecha) {
             $this->Ln(5);
             $this->SetTextColor(0);
             $this->SetFont('Arial', 'B', 14);
 
-           setlocale(LC_TIME, 'es_ES.UTF-8', 'es_ES', 'Spanish_Spain', 'Spanish');
+            setlocale(LC_TIME, 'es_ES.UTF-8', 'es_ES', 'Spanish_Spain', 'Spanish');
 
-           $fechaFormateada = strftime('%e de %B del %Y', strtotime($porFecha->fecha));
-           $nombreMes = mb_convert_case(strftime('%B', strtotime($porFecha->fecha)), MB_CASE_TITLE, "UTF-8");
+            $fechaFormateada = strftime('%e de %B del %Y', strtotime($porFecha->fecha));
+            $nombreMes = mb_convert_case(strftime('%B', strtotime($porFecha->fecha)), MB_CASE_TITLE, "UTF-8");
+            $fechaFormateada = preg_replace('/\b' . mb_strtolower($nombreMes, 'UTF-8') . '\b/', $nombreMes, mb_strtolower($fechaFormateada, 'UTF-8'));
 
-           $fechaFormateada = preg_replace('/\b' . mb_strtolower($nombreMes, 'UTF-8') . '\b/', $nombreMes, mb_strtolower($fechaFormateada, 'UTF-8'));
+            $this->Cell(185, 8, utf8_decode($fechaFormateada), 0, 1, 'C');
+            $fecha = $porFecha->fecha;
 
-            $this->Cell(185, 8, utf8_decode( $fechaFormateada), 0, 1, 'C');
-              $fecha= $porFecha->fecha;
-
-             foreach ($alimentos as $info) {
-        if ($idSalida != $info->idSalidaA && $fecha == $info->fecha ) {
-            $this->Ln(10);
-            // Restauración de colores y fuentes
-            $horaFormateada = date('h:i A', strtotime($info->hora));
-            $this->SetFillColor(255, 255, 255);
-            $this->SetDrawColor(30,163,223);
-            $this->SetFont('');
-
-            // Datos de la descripción general en formato de párrafo
-            $this->SetFont('Arial', 'B', 13);
-            $this->SetTextColor(30,163,223);
-            $this->Cell(15, 7, utf8_decode('Hora: '), 0, 0, 'L', 1);
-            $this->SetFont('Arial', '', 12);
-            $this->SetTextColor(0);
-            $this->Cell(50, 7, utf8_decode($horaFormateada), 0, 1, 'L', 1);
-             $this->SetFont('Arial', 'B', 13);
-            $this->SetTextColor(30,163,223);
-            $this->Cell(30, 7, utf8_decode('Salida por: '), 0, 0, 'L', 1);
-            $this->SetFont('Arial', '', 12);
-            $this->SetTextColor(0);
-            $this->Cell(50, 7, utf8_decode($info->tipoSalida), 0, 1, 'L', 1);
-            $this->SetFont('Arial', 'B', 13);
-            $this->SetTextColor(30,163,223);
-            $this->Cell(30, 7, utf8_decode('Descripción: '), 0, 0, 'L', 1);
-            $this->SetFont('Arial', '', 12);
-            $this->SetTextColor(0);
-            $this->Cell(50, 7, utf8_decode($info->descripcion), 0, 1, 'L', 1);
-
-            $this->Ln(5);
-
-            $idSalida = $info->idSalidaA;
-
-            // Procesar tipos de alimentos por inventario
-            $tiposProcesados = array(); // Array para evitar repetir tipos
-
-            foreach ($alimentos as $detalle) {
-                if ($idSalida == $detalle->idSalidaA && !in_array($detalle->tipo, $tiposProcesados)) {
-                    // Nueva sección para cada tipo de alimento
-                    $this->SetFillColor(9,85,160);
-                    $this->SetTextColor(255);
-                    $this->SetDrawColor(9,85,160);
-                    $this->SetLineWidth(.2);
-                    $this->SetFont('Arial', 'B', 14);
-                    $this->Cell(0, 8, utf8_decode($detalle->tipo), 1, 1, 'C', true);
-
-                    $this->SetFillColor(30,163,223);
-                    $this->SetTextColor(255);
-                    $this->SetDrawColor(30,163,223);
-                    $this->SetLineWidth(.2);
-                    $this->SetFont('', 'B', 12);
-
-                    // Cabecera de alimentos
-                    $this->Cell(40, 6, utf8_decode('Código'), 1, 0, 'L', true);
-                    $this->Cell(55, 6, 'Alimento', 1, 0, 'L', true);
-                    $this->Cell(55, 6, 'Marca', 1, 0, 'L', true);
-                    $this->Cell(40, 6, 'Cantidad', 1, 1, 'L', true);
-
+            foreach ($alimentos as $info) {
+                if ($idSalida != $info->idSalidaA && $fecha == $info->fecha ) {
+                    $this->Ln(10);
+                    $horaFormateada = date('h:i A', strtotime($info->hora));
                     $this->SetFillColor(255, 255, 255);
                     $this->SetDrawColor(30,163,223);
-                    $this->SetTextColor(0);
                     $this->SetFont('');
 
-                    // Datos de alimentos
-                    foreach ($alimentos as $detalleA) {
-                        if ($detalle->tipo == $detalleA->tipo && $idSalida == $detalleA->idSalidaA) {
-                            $this->Cell(40, 8, utf8_decode($detalleA->codigo), 1, 0, 'L', true);
-                            $this->Cell(55, 8, utf8_decode($detalleA->nombre), 1, 0, 'L', true);
-                            $this->Cell(55, 8, utf8_decode($detalleA->marca), 1, 0, 'L', true);
-                            $this->Cell(40, 8, utf8_decode($detalleA->cantidad . ' ' . $detalleA->unidadMedida), 1, 1, 'L', true);
+                    // Datos de la descripción general
+                    $this->SetFont('Arial', 'B', 13);
+                    $this->SetTextColor(30,163,223);
+                    $this->Cell(15, 7, utf8_decode('Hora: '), 0, 0, 'L', 1);
+                    $this->SetFont('Arial', '', 12);
+                    $this->SetTextColor(0);
+                    $this->Cell(50, 7, utf8_decode($horaFormateada), 0, 1, 'L', 1);
+
+                    $this->SetFont('Arial', 'B', 13);
+                    $this->SetTextColor(30,163,223);
+                    $this->Cell(30, 7, utf8_decode('Salida por: '), 0, 0, 'L', 1);
+                    $this->SetFont('Arial', '', 12);
+                    $this->SetTextColor(0);
+                    $this->Cell(50, 7, utf8_decode($info->tipoSalida), 0, 1, 'L', 1);
+
+                    $this->SetFont('Arial', 'B', 13);
+                    $this->SetTextColor(30,163,223);
+                    $this->Cell(30, 7, utf8_decode('Descripción: '), 0, 0, 'L', 1);
+                    $this->SetFont('Arial', '', 12);
+                    $this->SetTextColor(0);
+                    $this->Cell(50, 7, utf8_decode($info->descripcion), 0, 1, 'L', 1);
+
+                    $this->Ln(5);
+                    $idSalida = $info->idSalidaA;
+                    $tiposProcesados = array();
+
+                    foreach ($alimentos as $detalle) {
+                        if ($idSalida == $detalle->idSalidaA && !in_array($detalle->tipo, $tiposProcesados)) {
+                            // Encabezado tipo de alimento
+                            $this->SetFillColor(9,85,160);
+                            $this->SetTextColor(255);
+                            $this->SetDrawColor(9,85,160);
+                            $this->SetLineWidth(.2);
+                            $this->SetFont('Arial', 'B', 14);
+                            $this->Cell(0, 8, utf8_decode($detalle->tipo), 1, 1, 'C', true);
+
+                            // Cabecera de columnas (siempre Cont Neto)
+                            $this->SetFillColor(30,163,223);
+                            $this->SetTextColor(255);
+                            $this->SetDrawColor(30,163,223);
+                            $this->SetLineWidth(.2);
+                            $this->SetFont('', 'B', 12);
+
+                            $this->Cell(30, 6, utf8_decode('Código'), 1, 0, 'L', true);
+                            $this->Cell(65, 6, 'Alimento', 1, 0, 'L', true);
+                            $this->Cell(40, 6, 'Marca', 1, 0, 'L', true);
+                            $this->Cell(25, 6, 'Cont Neto', 1, 0, 'L', true);
+                            $this->Cell(30, 6, 'Cantidad', 1, 1, 'L', true);
+
+                            $this->SetFillColor(255, 255, 255);
+                            $this->SetDrawColor(30,163,223);
+                            $this->SetTextColor(0);
+                            $this->SetFont('');
+
+                            // Datos de alimentos
+                            foreach ($alimentos as $detalleA) {
+                                if ($detalle->tipo == $detalleA->tipo && $idSalida == $detalleA->idSalidaA) {
+                                    $this->Cell(30, 8, utf8_decode($detalleA->codigo), 1, 0, 'L', true);
+                                    $this->Cell(65, 8, utf8_decode($detalleA->nombre), 1, 0, 'L', true);
+                                    $this->Cell(40, 8, utf8_decode($detalleA->marca), 1, 0, 'L', true);
+
+                                    // Cont Neto vacío si marca es "Sin Marca"
+                                    $contNeto = (strtolower(trim($detalleA->marca)) === "sin marca") ? '' : utf8_decode($detalleA->unidadMedida);
+                                    $this->Cell(25, 8, $contNeto, 1, 0, 'L');
+
+                                    $this->Cell(30, 8, utf8_decode($detalleA->cantidad . ' ' . $detalleA->unidadMedida), 1, 1, 'L', true);
+                                }
+                            }
+
+                            $this->Ln(6);
+                            $tiposProcesados[] = $detalle->tipo;
                         }
                     }
-
-                    $this->Ln(6);
-                    $tiposProcesados[] = $detalle->tipo; // Marcar tipo como procesado
                 }
             }
         }
     }
-         
-       }
 
-    }
-
-   
-    
     $this->Ln(6);
-  
+
+    // Guardar PDF
     $directorio = 'assets/pdfs/alimentos';
     if ($fechaI != '' && $fechaF != '') {
-      if ($fechaI != $fechaF) {
-          $repositorio = $directorio . '/salidaAlimentosTotal '.$fechaI.' hasta '.$fechaF.'.pdf';
-      }
-      else{
-         $repositorio = $directorio . '/salidaAlimentosTotal.pdf';
-      }
-      }else{
-           $repositorio = $directorio . '/salidaAlimentosTotal.pdf';
-      }
-  
+        $repositorio = ($fechaI != $fechaF) 
+            ? $directorio . '/salidaAlimentosTotal '.$fechaI.' hasta '.$fechaF.'.pdf'
+            : $directorio . '/salidaAlimentosTotal.pdf';
+    } else {
+        $repositorio = $directorio . '/salidaAlimentosTotal.pdf';
+    }
+
     $this->Output('F', $repositorio);
-    $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorio];
-    echo json_encode($respuesta);
+    echo json_encode(['respuesta' => 'guardado', 'ruta' => $repositorio]);
     die();
 }
+
 
 
 
@@ -978,13 +948,25 @@ function menu($data){
             $this->SetFont('');
 
             foreach ($alimento as $detalle) {
-                if ($alimentoI == $detalle->tipo) {
-                    $this->Cell(40, 8, utf8_decode($detalle->codigo), 1, 0, 'L');
-                    $this->Cell(55, 8, utf8_decode($detalle->nombre), 1, 0, 'L');
-                    $this->Cell(55, 8, utf8_decode($detalle->marca), 1, 0, 'L');
-                    $this->Cell(40, 8, utf8_decode($detalle->cantidad . ' ' . $detalle->unidadMedida), 1, 1, 'L');
-                }
-            }
+    if ($alimentoI == $detalle->tipo) {
+        $this->Cell(40, 8, utf8_decode($detalle->codigo), 1, 0, 'L');
+
+        // Concatenar nombre y unidad solo si no es "Sin Marca"
+        $nombreAlimento = ($detalle->marca != 'Sin Marca') 
+            ? $detalle->nombre . ' - ' . $detalle->unidadMedida 
+            : $detalle->nombre;
+        $this->Cell(55, 8, utf8_decode($nombreAlimento), 1, 0, 'L');
+
+        $this->Cell(55, 8, utf8_decode($detalle->marca), 1, 0, 'L');
+
+        // Concatenar cantidad con "Unidad" solo si no es "Sin Marca"
+        $cantidad = ($detalle->marca != 'Sin Marca') 
+            ? $detalle->cantidad . ' U.' 
+            : $detalle->cantidad . ' ' . $detalle->unidadMedida;
+        $this->Cell(40, 8, utf8_decode($cantidad), 1, 1, 'L');
+    }
+}
+
         }
         $this->Ln(6);
     }
@@ -1056,58 +1038,66 @@ function evento($data){
     $this->SetTextColor(0);
     $this->Cell(130, 7, utf8_decode($descripcion[0]->cantPlatos), 0, 1, 'L');
 
-    $this->SetFont('Arial', 'B', 13);
-    $this->SetTextColor(30,163,223);
-    $this->Cell(30, 7, utf8_decode('Descripción: '), 0, 0, 'L');
-
-    $this->SetFont('Arial', '', 12);
-    $this->SetTextColor(0);
-    $this->Cell(0, 8, utf8_decode($descripcion[0]->descripcion), 0, 1, 'L'); 
-
     $this->Ln(5);
     
     
 
-    $alimento = $data['detalle'];
-    $alimentoI = '';
-    foreach ($alimento as $info) {
-        if ($alimentoI != $info->tipo) {
-            $this->SetFillColor(9,85,160);
-            $this->SetTextColor(255);
-            $this->SetDrawColor(9,85,160);
-            $this->SetLineWidth(.2);
-            $this->SetFont('Arial', 'B', 14);
-            $alimentoI = $info->tipo;
+   $alimento = $data['detalle'];
+$tiposDibujados = [];
 
-            $this->Cell(0, 8, utf8_decode($info->tipo), 1, 1, 'C', true);
+foreach ($alimento as $detalle) {
+    $tipoActual = $detalle->tipo;
+    // Si ya dibujamos este tipo, saltamos
+    if (in_array($tipoActual, $tiposDibujados)) continue;
 
-            $this->SetFillColor(30,163,223);
-            $this->SetTextColor(255);
-            $this->SetDrawColor(30,163,223);
-            $this->SetLineWidth(.2);
-            $this->SetFont('', 'B', 12);
+    $tiposDibujados[] = $tipoActual;
 
-            $this->Cell(40, 6, utf8_decode('Código'), 1, 0, 'L', true);
-            $this->Cell(55, 6, 'Alimento', 1, 0, 'L', true);
-            $this->Cell(55, 6, 'Marca', 1, 0, 'L', true);
-            $this->Cell(40, 6, 'Cantidad', 1, 1, 'L', true);
+    // Dibujar encabezado de tabla
+    $this->SetFillColor(9,85,160);
+    $this->SetTextColor(255);
+    $this->SetDrawColor(9,85,160);
+    $this->SetLineWidth(.2);
+    $this->SetFont('Arial', 'B', 14);
+    $this->Cell(0, 8, utf8_decode($tipoActual), 1, 1, 'C', true);
 
-            $this->SetFillColor(255, 255, 255);
-            $this->SetDrawColor(30,163,223);
-            $this->SetTextColor(0);
-            $this->SetFont('');
+    $this->SetFillColor(30,163,223);
+    $this->SetTextColor(255);
+    $this->SetDrawColor(30,163,223);
+    $this->SetLineWidth(.2);
+    $this->SetFont('', 'B', 12);
 
-            foreach ($alimento as $detalle) {
-                if ($alimentoI == $detalle->tipo) {
-                    $this->Cell(40, 8, utf8_decode($detalle->codigo), 1, 0, 'L');
-                    $this->Cell(55, 8, utf8_decode($detalle->nombre), 1, 0, 'L');
-                    $this->Cell(55, 8, utf8_decode($detalle->marca), 1, 0, 'L');
-                    $this->Cell(40, 8, utf8_decode($detalle->cantidad . ' ' . $detalle->unidadMedida), 1, 1, 'L');
-                }
-            }
+    $this->Cell(40, 6, utf8_decode('Código'), 1, 0, 'L', true);
+    $this->Cell(55, 6, 'Alimento', 1, 0, 'L', true);
+    $this->Cell(55, 6, 'Marca', 1, 0, 'L', true);
+    $this->Cell(40, 6, 'Cantidad', 1, 1, 'L', true);
+
+    $this->SetFillColor(255, 255, 255);
+    $this->SetDrawColor(30,163,223);
+    $this->SetTextColor(0);
+    $this->SetFont('');
+
+    // Dibujar filas solo de este tipo
+    foreach ($alimento as $fila) {
+        if ($fila->tipo == $tipoActual) {
+            $this->Cell(40, 8, utf8_decode($fila->codigo), 1, 0, 'L');
+
+            $nombreAlimento = ($fila->marca != 'Sin Marca') 
+                ? $fila->nombre . ' - ' . $fila->unidadMedida 
+                : $fila->nombre;
+            $this->Cell(55, 8, utf8_decode($nombreAlimento), 1, 0, 'L');
+
+            $this->Cell(55, 8, utf8_decode($fila->marca), 1, 0, 'L');
+
+            $cantidad = ($fila->marca != 'Sin Marca') 
+                ? $fila->cantidad . ' U.' 
+                : $fila->cantidad . ' ' . $fila->unidadMedida;
+            $this->Cell(40, 8, utf8_decode($cantidad), 1, 1, 'L');
         }
-        $this->Ln(6);
     }
+
+    $this->Ln(6);
+}
+
 
     $directorio = 'assets/pdfs/eventos';
     $repositorioo = $directorio . '/Evento del dia ' . $descripcion[0]->feMenu . '.pdf';

@@ -952,28 +952,49 @@ class consultarMenuModelo extends connectDB {
         }
         
 
-        public function fpdf($id) {
-            try {
-                $this->id = $id;
-                $descripcion = $this->obtenerInfoMenu($this->id);
-                $detalle = $this->detalleMenu($this->id);
-               
-                $data = [
-                    'descripcion' => $descripcion,
-                    'detalle' => $detalle
-                ];
-        
-                /*-------fDFD--------*/
-                $reporte = new reporte;
-                $reporte->AddPage();
-                $reporte->menu($data);
-                $reporte->Output();
-        
-            } catch (\PDOException $e) {
-                return $e;
-            }
+       public function fpdf($id) {
+    try {
+        $this->id = $id; // <-- Asignar el ID primero
+        $this->conectarDB();
+
+        $new = $this->conex->prepare("
+            SELECT m.feMenu, sa.descripcion, m.horarioComida, m.cantPlatos 
+            FROM salidaalimentos sa 
+            INNER JOIN detallesalidamenu dsm ON sa.idSalidaA = dsm.idSalidaA 
+            INNER JOIN menu m ON m.idMenu = dsm.idMenu 
+            WHERE m.status=1 AND dsm.status=1 AND sa.status=1 AND m.idMenu=?
+        ");
+        $new->bindValue(1, $this->id, PDO::PARAM_INT);
+        $new->execute();
+        $info = $new->fetchAll(\PDO::FETCH_OBJ);
+
+        $this->desconectarDB();
+
+        // Validar que se obtuvieron resultados
+        if (empty($info)) {
+            throw new \Exception("No se encontró información para el ID de menú: $id");
         }
-        
+
+        $descripcion = $info;
+        $detalle = $this->detalleMenu($this->id); // Asegúrate que este método devuelva datos
+
+        $data = [
+            'descripcion' => $descripcion,
+            'detalle' => $detalle
+        ];
+
+        $reporte = new reporte;
+        $reporte->AddPage();
+        $reporte->menu($data);
+        $reporte->Output();
+
+    } catch (\PDOException $e) {
+        return $e->getMessage();
+    } catch (\Exception $e) {
+        return $e->getMessage();
+    }
+}
+
 
         public function infoApp($idMenu) {
             if (!preg_match("/^[0-9]{1,}$/", $idMenu)) {

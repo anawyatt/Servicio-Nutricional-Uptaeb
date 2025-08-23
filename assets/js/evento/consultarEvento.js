@@ -961,10 +961,11 @@ function modificar() {
                     } 
                     else {
                     actualizarDetalle();  
-                    $('[name="csrf_token"]').val(response.newCsrfToken); delete mostrarE;
+                    $('[name="csrf_token"]').val(response.newCsrfToken); 
+                    $('#cerrar2').click();
+                    delete mostrarE;
                     tablaEvento(); 
                     vaciarTabla();
-                    $('#cerrar2').click();
                     Swal.fire({
                       toast: true,
                       position: 'top-end',
