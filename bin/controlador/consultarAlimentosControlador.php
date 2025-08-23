@@ -5,93 +5,202 @@
  use component\sidebar as sidebar;
  use component\footer as footer;
  use component\configuracion as configuracion;
- use config\componentes\configSistema as configSistema;
+ use helpers\encryption as encryption;
+ use helpers\permisosHelper as permisosHelper;
  use component\NotificacionesServer as NotificacionesServer;
+  use helpers\csrfTokenHelper;
+ use middleware\csrfMiddleware;
+ use middleware\PostRateMiddleware as PostRateMiddleware;
 
  use modelo\consultarAlimentosModelo as consultarAlimentos;
 
  $objeto = new consultarAlimentos;
- $sistem = new configSistema();
+ $sistem = new encryption();
+
+ $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Alimentos', 'consultar');
+ $permisos = $datosPermisos['permisos'];
+ $payload = $datosPermisos['payload'];
+
+
+$tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
+
+if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
+    $resultadoToken = csrfMiddleware::verificarYRenovar($_POST['csrfToken'], $payload->cedula);
+    echo json_encode(['message' => 'Token renovado','newCsrfToken' => $resultadoToken['newToken']]);
+    die();
+}
+
  $NotificacionesServer = new NotificacionesServer();
 
- if (isset($_POST['notificaciones'])) {
-  $valor = $NotificacionesServer->consultarNotificaciones();
-}
+    if (isset($payload->cedula)) {
+        $NotificacionesServer->setCedula($payload->cedula);
+    } else {
+        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+    }
 
-if (isset($_POST['notificacionId'])) {
-  $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-}
+    if (isset($_POST['notificaciones'])) {
+        $valor = $NotificacionesServer->consultarNotificaciones();
+    }
+  
+    if (isset($_POST['notificacionId'])) {
+        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
+    }
 
- if(!isset($_SESSION['idRol'])){
-  die("<script>window.location='?url=" . $sistem->encryptURL('login') . "'</script>");
-}
-$permisos = $objeto->getPermisosRol($_SESSION['idRol']);
- $permiso = $permisos['Alimentos'];
-
-    if(!isset($permiso['consultar'])) die("<script>window.location='?url=" . $sistem->encryptURL('home') . "'</script>");
-
- if(isset($_POST['getPermisos']) && isset($permiso['consultar'])){
-   die(json_encode($permiso));
- }
-
+if (isset($datosPermisos['permiso']['consultar'])) {
  //--------- MOSTRAR TABLA
 
  if(isset($_POST['mostrarAlimentos']) && isset($_POST['tipoA']) ){
- $mostrarTabla= $objeto->mostrarAlimentos($_POST['tipoA']);
+  try {
+    $mostrarTabla= $objeto->mostrarAlimentos($_POST['tipoA']);
+      echo json_encode($mostrarTabla);
+      die();
+  } catch (\RuntimeException $e) {
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
 }
 
 //---------- MOSTRAR INFORMACIÓN
 
 if(isset($_POST['infoAlimento']) && isset($_POST['id'])){
- $verificarExistencia= $objeto->verificarExistencia( $_POST['id']);
-$mostrarInfo= $objeto->infoAlimento($_POST['id']);
+  try {
+    $verificarExistencia= $objeto->verificarExistencia( $_POST['id']);
+    if ($verificarExistencia['resultado'] == 'ya no existe') { 
+      echo json_encode($verificarExistencia);
+      die();
+    }
+    $mostrarInfo= $objeto->infoAlimento($_POST['id']);
+    echo json_encode($mostrarInfo);
+    die();
+  } catch (\RuntimeException $e) {
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
 
 }
 
 // select tipo Alimentos
 
 if (isset($_POST['valida']) && isset($_POST['tipoA'])) {
-  $validarExistenciaTA=  $objeto->verificarExistenciaTipoA($_POST['tipoA']);
-   }
+  try {
+    $validarExistenciaTA=  $objeto->verificarExistenciaTipoA($_POST['tipoA']);
+    if ($validarExistenciaTA['resultado'] == 'no esta') { 
+      echo json_encode($validarExistenciaTA);
+      die();
+     }
+  } catch (\RuntimeException $e) {
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
+  
+}
 
  if (isset($_POST['select'])) {
-
-  $mostrarTipoA= $objeto->mostrarTipoAlimento();
+  try {
+    $mostrarTipoA= $objeto->mostrarTipoAlimento();
+    echo json_encode($mostrarTipoA);
+    die();
+  } catch (\RuntimeException $e) {
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
 }
 
 // validat Boton
 
     if (isset($_POST['modificar']) && isset($_POST['id'])) {
-      $verificarBoton= $objeto->verificarBoton($_POST['id']);
+      try {
+        PostRateMiddleware::verificar('modificar', (array)$payload);
+        $verificarBoton= $objeto->verificarBoton($_POST['id']);
+          echo json_encode($verificarBoton);
+          die();
+      } catch (\RuntimeException $e) {
+        echo json_encode(['message' => $e->getMessage()]);
+        die();
+      }
+      
     }
+
+  
+}
+
+if(isset($_POST['verificarAlimento']) && isset($_POST['id']) && isset($_POST['alimento']) && isset($_POST['marca']) && isset($_POST['unidad']) ) {
+   try {
+
+   $verificarAlimento=  $objeto->verificarAlimento($_POST['id'],  $_POST['alimento'], $_POST['marca'], $_POST['unidad']);
+    if ($verificarAlimento['resultado'] == 'existe') { 
+      echo json_encode($verificarAlimento);
+      die();
+     }
+  } catch (\RuntimeException $e) {  
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
+ }
+
+if (isset($datosPermisos['permiso']['modificar'])) {
 
 // ------ MODIFICAR 
 
-if ( isset($_POST['modificarINFO']) && isset($_POST['id']) && isset($_POST['tipoA']) && isset($_POST['alimento']) && isset($_POST['marca']) && isset($_POST['unidad']) ) {
-   $verificarAlimento=  $objeto->verificarAlimento($_POST['id'], $_POST['tipoA'], $_POST['alimento'], $_POST['marca']);
+if ( isset($_POST['modificarINFO']) && isset($_POST['id']) && isset($_POST['tipoA']) && isset($_POST['alimento']) && isset($_POST['marca']) && isset($_POST['unidad']) && isset($_POST['csrfToken']) ) {
+  try {
+    PostRateMiddleware::verificar('modificar', (array)$payload);
+    $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
+   
+     $modificar= $objeto->modificarAlimentos($_POST['id'], $_POST['tipoA'], $_POST['alimento'], $_POST['marca'], $_POST['unidad']);
+     echo json_encode(['mensaje'=>$modificar, 'newCsrfToken' => $csrf['newToken']]);
+     die();
 
-   $modificar= $objeto->modificarAlimentos($_POST['id'], $_POST['tipoA'], $_POST['alimento'], $_POST['marca'], $_POST['unidad']);
+  } catch (\RuntimeException $e) {
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
 
    }
 
-
-   if (isset($_FILES['imagen']['tmp_name']) && isset($_POST['id'])) {
- $modificar= $objeto->modificarImagen($_FILES['imagen']['tmp_name'], $_POST['id']);
- ;
+if (isset($_FILES['imagen']['tmp_name']) && isset($_POST['id']) && isset($_POST['csrfToken'])) {
+  try {
+     $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
+      if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === 0) {
+            $resultado = $objeto->validarImagen($_FILES['imagen']);
+            if ($resultado !== true) {
+                echo json_encode($resultado);
+                die();
+            }
+        } PostRateMiddleware::verificar('modificar', (array)$payload);
+           $modificar= $objeto->modificarImagen($_FILES['imagen']['tmp_name'], $_POST['id']);
+           echo json_encode(['mensaje'=>$modificar, 'newCsrfToken' => $csrf['newToken']]);
+           die();
+  } catch (\RuntimeException $e) {
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
 }
+
+}
+
+if (isset($datosPermisos['permiso']['eliminar'])) {
 
 //--------ANULAR-----------------
 
- if (isset($_POST['id']) && isset($_POST['borrar'])) {
+ if (isset($_POST['id']) && isset($_POST['borrar']) && isset($_POST['csrfToken'])) {
+  try {
+    PostRateMiddleware::verificar('anular', (array)$payload);
+    $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
     $anular= $objeto->anularAlimento($_POST['id']);
+    echo json_encode(['mensaje'=>$anular, 'newCsrfToken' => $csrf['newToken']]);
+    die();
+  } catch (\RuntimeException $e) {
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
+    
   }
 
-
-
-
+}
 
   $components = new initComponents();
-  $navegador = new navegador();
+  $navegador = new navegador($payload);
   $sidebar = new sidebar($permisos);
   $footer = new footer();
   $configuracion = new configuracion($permisos);
@@ -100,7 +209,7 @@ if ( isset($_POST['modificarINFO']) && isset($_POST['id']) && isset($_POST['tipo
    if (file_exists("vista/consultarAlimentosVista.php")) {
    require_once("vista/consultarAlimentosVista.php");
    }else {
-    die("<script>window.location='?url=" . $sistem->encryptURL('login') . "'</script>");
+    die("<script>window.location='?url=" .urlencode( $sistem->encryptURL('login') ). "'</script>");
   }
 
   ?>

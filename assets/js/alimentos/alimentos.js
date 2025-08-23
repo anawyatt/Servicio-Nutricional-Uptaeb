@@ -7,7 +7,9 @@ let error_alimento=false;
 let error_marca=false;
 let error_unidad=false;
 let error_veriTA = false;
+let error_cantidad = false;
 let error_veriA = false;
+let timer;
 
 
 // Agregar imagen por defecto
@@ -22,46 +24,80 @@ fileInput0.addEventListener('change', function() {
  $("#tipoA").on('change', function() {
     chequeo_tipoA();
     verificarTipoA();
-    verificarAlimento()
  });
 
  $("#alimento").focusout(function(){
     chequeo_alimento();
-    verificarAlimento()
  });
  $("#alimento").on('keyup', function(){
     chequeo_alimento();
-    verificarAlimento()
+    clearTimeout(timer); 
+         timer = setTimeout(function () {
+           verificarAlimento()
+         }, 500);
  });
 
  $("#marca").focusout(function(){
     chequeo_marca();
-    verificarAlimento()
  });
  $("#marca").on('keyup', function(){
     chequeo_marca();
-    verificarAlimento()
+    clearTimeout(timer); 
+         timer = setTimeout(function () {
+           verificarAlimento()
+         }, 500);
+ });
+
+$("#cantidad").focusout(function(){
+    chequeo_cantidad();
+ });
+ $("#cantidad").on('keyup', function(){
+    chequeo_cantidad();
+    clearTimeout(timer); 
+         timer = setTimeout(function () {
+           verificarAlimento()
+         }, 500);
  });
 
  $("#unidad").on('change', function() {
     chequeo_unidad();
+    verificarAlimento();
  });
 
  $('#marca').hide();
+ $('#cant').hide();
+
       $(document).ready(function(){
             $('#acMarca').change(function(){
                 if($(this).is(':checked')){
                     $('#marca').show();
+                    $('#cant').show();
                     $("#marca").focusout(function(){
                       chequeo_marca();
-                      verificarAlimento()
                       });
-                 $("#marca").on('keyup', function(){
-                     chequeo_marca();
-                      verificarAlimento()
-                  });
+                    $("#marca").on('keyup', function(){
+                      chequeo_marca();
+                      clearTimeout(timer);
+                        timer = setTimeout(function () {
+                            verificarAlimento()
+                        }, 500);
+                    });
+                    $("#cantidad").focusout(function(){
+                        chequeo_cantidad();
+                    });
+
+                    $("#cantidad").on('keyup', function(){
+                        chequeo_cantidad();
+                        clearTimeout(timer);        
+                        timer = setTimeout(function () {
+                            verificarAlimento()
+                        }, 500);
+                    });
                 } else {
                     $('#marca').hide();
+                    $('#cant').hide();
+                    $('#marca').val('');
+                    $('#cantidad').val('');
                 }
             });
         });        
@@ -89,6 +125,7 @@ $("#registrar").on("click", function(e) {
     chequeoImagen();
     verificarTipoA();
     verificarAlimento();
+    
 
     let men;
     let imagen = $("#fileInput0")[0].files.length ? $("#fileInput0")[0].files[0] : null;
@@ -101,17 +138,20 @@ $("#registrar").on("click", function(e) {
 
     if ($('#acMarca').is(':checked')) {
         error_marca = false;
+        error_cantidad = false;
         chequeo_marca();
+        chequeo_cantidad();
 
-        if (!error_imagen && !error_tipoA && !error_alimento && !error_unidad && !error_veriA && !error_veriTA && !error_marca) {
+        if (!error_imagen && !error_tipoA && !error_alimento && !error_unidad && !error_veriA && !error_veriTA && !error_marca && !error_cantidad) {
             let datos = new FormData();
             let tipoA = cambiarFormato($("#tipoA").val());
             let alimento = cambiarFormato($("#alimento").val());
             let marca = cambiarFormato($("#marca").val());
-            let unidad = $("#unidad").val();
+            let unidad = $('#cantidad').val() + ' ' + $('#unidad').val();
+
 
             if (imagen !== null) {
-                datos.append("imagen", imagen); // Solo agregamos la imagen si está presente
+                datos.append("imagen", imagen); 
             }
 
             datos.append("men", men);
@@ -136,6 +176,7 @@ $("#registrar").on("click", function(e) {
     } else {
         if (!error_imagen &&!error_tipoA && !error_alimento && !error_unidad && !error_veriA && !error_veriTA) {
             $('#marca').hide();
+            $('#cant').hide();
 
             let datos = new FormData();
             let tipoA = cambiarFormato($("#tipoA").val());
@@ -388,22 +429,49 @@ function chequeo_unidad() {
         }
     }
 
+// validar cantidad
+      function chequeo_cantidad() {
+        var chequeo = /^(0|[1-9]\d{0,2})(\.\d{1,2})?$/; // Permite números desde 0 hasta 999 con hasta dos decimales
+        var cantidad = $("#cantidad").val();
+        if (chequeo.test(cantidad) && cantidad !== '') {
+         $(".error6").html("");
+         $(".error6").hide();
+         $('#cantidad').removeClass('errorBorder');
+         $('.bar6').addClass('bar');
+         $('.ic6').removeClass('l');
+         $('.ic6').addClass('labelPri');
+         $('.letra6').removeClass('labelE');
+         $('.letra6').addClass('label-char');
+        } else {
+         $(".error6").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la cantidad neta!');
+         $(".error6").show();
+         $('#cantidad').addClass('errorBorder');
+         $('.bar6').removeClass('bar');
+         $('.ic6').addClass('l');
+         $('.ic6').removeClass('labelPri');
+         $('.letra6').addClass('labelE');
+         $('.letra6').removeClass('label-char');
+           error_cantidad = true;
+        }
+    }
+
  // Otros..............
 
  function primary(){
  	     container0.innerHTML = ''; // Limpiar el contenedor
          container0.appendChild(defaultImage); 
- 	     $(".error1, .error2, .error3, .error4, .error5").html("");
-         $(".error1, .error2, .error3, .error4, .error5").hide();
-         $('#fileInput0, #alimento, #marca').removeClass('errorBorder');
+ 	     $(".error1, .error2, .error3, .error4, .error5, .error6").html("");
+         $(".error1, .error2, .error3, .error4, .error5, .error6").hide();
+         $('#fileInput0, #alimento, #marca, #cantidad').removeClass('errorBorder');
           $('#tipoA, #unidad').removeClass('is-invalid');
-         $('.bar1, .bar2, .bar3, .bar4, .bar5').addClass('bar');
-         $('.ic1, .ic2, .ic3, .ic4, .ic5').removeClass('l');
-         $('.ic1, .ic2, .ic3, .ic4, .ic5').addClass('labelPri');
-         $('.letra, .letra2, .letra3, .letra4, .letra5').removeClass('labelE');
-         $('.letra, .letra2, .letra3, .letra4, .letra5').addClass('label-char');
+         $('.bar1, .bar2, .bar3, .bar4, .bar5, .bar6').addClass('bar');
+         $('.ic1, .ic2, .ic3, .ic4, .ic5, .ic6').removeClass('l');
+         $('.ic1, .ic2, .ic3, .ic4, .ic5, .ic6').addClass('labelPri');
+         $('.letra, .letra2, .letra3, .letra4, .letra5, .letra6').removeClass('labelE');
+         $('.letra, .letra2, .letra3, .letra4, .letra5, letra6').addClass('label-char');
          $('#tipoA, #unidad').val('Seleccionar').trigger('change.select2');
          $('#marca').hide();
+         $('#cant').hide();
          $('.check').removeClass('is-invalid')
          fileInput0.classList.remove('changed');
 
@@ -461,6 +529,7 @@ $(document).ready(function() {
                           dataType: "json",
                           data:{ valida:'si', tipoA},
                           success(data){
+		                	data = typeof data === 'string' ? JSON.parse(data) : data;
                           	if (data.resultado === 'no esta') {
                           		 delete select;
                                 mostrarTipoA();
@@ -487,9 +556,13 @@ $(document).ready(function() {
 
                 function verificarAlimento(){
                     let marca;
-                    let tipoA = cambiarFormato($("#tipoA").val());
                     let alimento = cambiarFormato($("#alimento").val());
-                
+                    let unidad;
+                    if($('#cantidad').val() === ''){
+                        unidad = $("#unidad").val();
+                    } else {
+                        unidad = $('#cantidad').val() + ' ' + $("#unidad").val();
+                    }
                     // Verifica el estado de #acMarca en el momento de la llamada a la función
                     if ($('#acMarca').is(':checked')) {
                         marca = cambiarFormato($("#marca").val());
@@ -497,39 +570,55 @@ $(document).ready(function() {
                         marca = 'Sin Marca';
                     }
                 
-                    if (tipoA !== 'Seleccionar' && alimento.length >= 3 && marca.length >= 3) {
+                    if (alimento.length >= 3 && marca.length >= 3) {
                         $.ajax({
-                            type: "POST",
                             url: '',
-                            dataType: "json",
-                            data: { tipoA, alimento, marca },
+                            type: 'POST',
+                            dataType: 'JSON',
+                            data: { alimento, marca, unidad },
                             success(data) {
+			                   
                                 if (data.resultado === 'existe') {
+                                    
                                     Swal.fire({
                                         toast: true,
                                         position: 'top-end',
                                         icon: 'error',
-                                        title: 'El alimento <b class="fw-bold text-rojo">' + alimento + '</b> de la marca <b class="fw-bold text-rojo">' + marca + '</b> ya está registrado!',
+                                         title: 'El alimento <b class="fw-bold text-rojo">' + alimento + '</b>' +   (marca !== 'Sin Marca' ? ' de la marca <b class="fw-bold text-rojo">' + marca + '</b>' : '') +  ' ya está registrado!',
                                         showConfirmButton: false,
                                         timer: 3000,
                                         timerProgressBar: 3000,
                                     });
-                                    $('#tipoA').addClass('is-invalid');
-                                    $('#alimento, #marca').addClass('errorBorder');
-                                    $('.bar2, .bar3, .bar4').removeClass('bar');
-                                    $('.ic2, .ic3, .ic4').addClass('l');
-                                    $('.ic2, .ic3, .ic4').removeClass('labelPri');
-                                    $('.letra2, .letra3, .letra4').addClass('labelE');
-                                    $('.letra2, .letra3, .letra4').removeClass('label-char');
+                                   
+                                    $('#alimento, #marca,  #cantidad').addClass('errorBorder');
+                                    $(' .bar3, .bar4, .bar5, .bar6').removeClass('bar');
+                                    $(' .ic3, .ic4, .ic5, .ic6').addClass('l');
+                                    $(' .ic3, .ic4, .ic5, .ic6').removeClass('labelPri');
+                                    $(' .letra3, .letra4, .letra5, .letra6').addClass('labelE');
+                                    $(' .letra3, .letra4, .letra5, .letra6').removeClass('label-char');
+                                      $('#unidad').addClass('is-invalid');
+
+                                       if(marca === 'Sin Marca'){
+                                        $('#marca, #cantidad').removeClass('errorBorder');
+                                        $('.bar4, .bar6').addClass('bar');
+                                        $('.ic4, .ic6').removeClass('l');
+                                        $('.ic4, .ic6').addClass('labelPri');
+                                        $('.letra4, .letra6').removeClass('labelE');
+                                        $('.letra4, .letra6').addClass('label-char');
+
+                                      }
+
+                                    
                                     error_veriA = true;
                                 } else {
-                                    $('#tipoA').removeClass('is-invalid');
+                                   
                                     $('#alimento, #marca').removeClass('errorBorder');
-                                    $('.bar2, .bar3, .bar4').addClass('bar');
-                                    $('.ic2, .ic3, .ic4').removeClass('l');
-                                    $('.ic2, .ic3, .ic4').addClass('labelPri');
-                                    $('.letra2, .letra3, .letra4').removeClass('labelE');
-                                    $('.letra2, .letra3, .letra4').addClass('label-char');
+                                    $(' .bar3, .bar4, .bar5, .bar6').addClass('bar');
+                                    $(' .ic3, .ic4, .ic5, .ic6').removeClass('l');
+                                    $(' .ic3, .ic4, .ic5, .ic6').addClass('labelPri');
+                                    $(' .letra3, .letra4, .letra5, .letra6').removeClass('labelE');
+                                    $(' .letra3, .letra4, .letra5, .letra6').addClass('label-char');
+                                      $('#unidad').removeClass('is-invalid');
                                 }
                             }
                         });
@@ -540,31 +629,66 @@ $(document).ready(function() {
 
    // REGISTRAR ----------------------------------------------------
 
-
 function registrar(datos){
-	 $.ajax({
-      url: "",
-      type: "POST",
-      data: datos,
-      processData: false,
-      contentType: false,
-      success: function(data) {
-        Swal.fire({
-               toast: true,
-               position: 'top-end',
-               icon:'success',
-               title:'Alimento Registrado Exitosamente!',
-               showConfirmButton:false,
-               timer:2500,
-               timerProgressBar:true,
-            })
-            $('.formu').trigger('reset'); 
-            primary();
-        }
-    });
+    let token = $('[name="csrf_token"]').val();
+    datos.append('csrfToken', token); // Agregar el token CSRF a los datos del formulario
+    if(token) {
+	$.ajax({
+		url: "",
+		type: "POST",
+		data: datos,
+		processData: false,
+		contentType: false,
+		success: function(data) {
+			// Asegurarse de que 'data' sea un objeto
+			data = typeof data === 'string' ? JSON.parse(data) : data;
+
+			if (data.resultado == 'El archivo no es una imagen válida (JPEG, PNG)!' || 
+			    data.resultado == 'La imagen no debe superar los 2MB!' || 
+			    data.resultado == 'La imagen está dañada o no se puede procesar!') {
+
+				container0.innerHTML = ''; 
+				container0.appendChild(defaultImage); 
+				$('.error1').html('<i class="bi bi-exclamation-triangle-fill"></i> ' + data.resultado + '!');
+				$(".error1").show();
+				$('#fileInput0').addClass('errorBorder');
+				$('.bar1').removeClass('bar');
+				$('.ic1').addClass('l');
+				$('.ic1').removeClass('labelPri');
+				$('.letra').addClass('labelE');
+				$('.letra').removeClass('label-char');
+				fileInput0.classList.add('changed');
+
+				Swal.fire({
+					toast: true,
+					position: 'top-end',
+					icon: 'error',
+					title: data.resultado,
+					showConfirmButton: false,
+					timer: 2500,
+					timerProgressBar: true,
+				});
+			} else if (data.mensaje.resultado === 'registrado' && data.newCsrfToken) {
+                console.log(data);
+                $('[name="csrf_token"]').val(data.newCsrfToken); // Actualizar el token CSRF en el formulario
+				Swal.fire({
+					toast: true,
+					position: 'top-end',
+					icon: 'success',
+					title: 'Alimento Registrado Exitosamente!',
+					showConfirmButton: false,
+					timer: 2500,
+					timerProgressBar: true,
+				});
+				$('.formu').trigger('reset'); 
+				primary();
+			}
+		}
+	});
+
+    }
 }
-                  
-  
+ 
       
 
 
@@ -572,3 +696,23 @@ function registrar(datos){
 $('#ali1').addClass('active');
 $('#ali2').addClass('text-primary');
 $('.ali2').addClass('active')
+
+setInterval(function() {
+  $.ajax({
+     url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+      success(data){
+      if (data.newCsrfToken) {
+      $('[name="csrf_token"]').val(data.newCsrfToken);
+        console.log('Token CSRF renovado');
+      } else {
+        console.log('No se pudo renovar el token CSRF');
+      }
+    },
+    error: function(err) {
+      console.error('Error renovando token CSRF:', err);
+    }
+  });
+}, 240000);

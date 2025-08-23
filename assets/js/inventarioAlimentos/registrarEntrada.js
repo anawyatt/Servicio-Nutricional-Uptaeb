@@ -258,7 +258,7 @@ function mostrarAlimento(a) {
           if (fila.marca === 'Sin Marca') {
             opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre}</option>`;
           } else {
-            opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre} - ${fila.marca}</option>`;
+            opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre} - ${fila.marca} - ${fila.unidadMedida}</option>`;
           }
         });
         $('#alimento').html(input2 + opE);
@@ -397,6 +397,7 @@ function colocarHoraActualEnCampo(hor) {
         }
     }
 
+    
     function chequeo_cantidad() {
         var chequeo = /^[1-9]\d*$/;
         var cantidad = $("#cantidad").val();
@@ -602,16 +603,25 @@ function colocarHoraActualEnCampo(hor) {
          $('#tipoA, #alimento').val('Seleccionar').trigger('change.select2');
      }
 
-function newAlimento(idA,imagen, codigo, alimento, marca, cantidad, unidad){
+function newAlimento(idA,imagen, codigo, alimento, marca, cantidad, unidad, contNeto){
 let unidadMedida;
+let cont;
+
+if (marca === 'Sin Marca') {
+  cont = '';
 if (unidad === 'Unidad' && cantidad > 1) {
  unidadMedida = unidad + 'es';
 }
 else{
   unidadMedida = unidad;
 }
-if (unidad !== 'Unidad' && cantidad > 1) {
-   unidadMedida = unidad + 's';
+}
+else{
+  unidadMedida = 'Unidad';
+  if (cantidad > 1) {
+   unidadMedida = 'Unidades';
+  }
+  cont = `- ${contNeto}`;
 }
 let newAlimento = `
 
@@ -619,7 +629,7 @@ let newAlimento = `
        <td class='d-none'><input class='d-none' id='idAlimento' value='${idA}'></td>
        <td><img src="${imagen}" width="70" height="70"alt="Profile" class=" mb-2"></td>
        <td>${codigo}</td>
-       <td>${alimento}</td>
+       <td>${alimento} ${cont}</td>
        <td>${marca}</td>
        <td>${cantidad} ${unidadMedida}<input class='d-none' id='cantidadA' value='${cantidad}'></td>
        <td>
@@ -640,9 +650,20 @@ let newAlimento = `
       type: 'POST',
       dataType: 'JSON',
       data: {muestra:true, idAlimento}, 
-      success(data){
-      $('#unidad').val(data[0].unidadMedida)
+      success(data){ 
+        
+      if ($('#alimento').val() === 'Seleccionar') {
+      	 $('#unidad').val(' ');
+      }
+      else{
+      	if(data[0].marca === 'Sin Marca'){
+             $('#unidad').val(data[0].unidadMedida)
+        }else{
+          $('#unidad').val('Unidades')
+        }
+      }
 
+        
       }
     })
 
@@ -656,7 +677,7 @@ function mostrarInfo(alimento, cantidad, unidad){
       dataType: 'JSON',
       data: {muestra:true, idAlimento}, 
       success(data){
-      let newRow= newAlimento(data[0].idAlimento,data[0].imgAlimento, data[0].codigo, data[0].nombre, data[0].marca, cantidad, unidad);
+      let newRow= newAlimento(data[0].idAlimento,data[0].imgAlimento, data[0].codigo, data[0].nombre, data[0].marca, cantidad, unidad, data[0].unidadMedida);
       $('.tabla tbody').append(newRow);
       $('#cancelarInventario').click()
       tableContainer.scrollTop = tableContainer.scrollHeight;
@@ -691,13 +712,18 @@ function registrar(){
 	var fecha = $("#fecha").val();
 	var descripcion = $("#descripcion").val();
   var hora =$('#hora').val();
+   let token = $('[name="csrf_token"]').val();
+   if(token){
+    console.log('Token CSRF encontrado: ' + token);
 	$.ajax({
 		url:"",
 		method:"post",
 		dataType:"json",
-		data:{registrar:true, fecha, hora , descripcion},
+		data:{registrar:true, fecha, hora , descripcion, csrfToken: token},
     success(data){
-              registrarDetalle(data.id);
+       let datos = typeof data === "string" ? JSON.parse(data) : data;
+      if(datos.mensaje && datos.newCsrfToken) {
+              registrarDetalle(datos.mensaje.id);
               Swal.fire({
                toast: true,
                position: 'top-end',
@@ -711,13 +737,13 @@ function registrar(){
              $('#cancelar').click();
              $('.tabla tbody tr').remove();
              $('#ani').hide();
+              $('[name="csrf_token"]').val(datos.newCsrfToken);
+              console.log('Token CSRF renovado: ' + datos.newCsrfToken);
           
        }
-		
-
-
-
+    }
 	});
+}
 }
 
 //----------------------------- REGISTRAR DETALLE -----------------------------
@@ -732,14 +758,35 @@ function registrar(){
 		   dataType:"json",
 		   data:{alimento, cantidad, id},
 		     success(data){
-		     	console.log(data);
-		     }
+            console.log(data);
+         }
 		})
-   })
-  }
+      })
+   }
+
 
 $('#ia1').addClass('active');
 $('#ia2').addClass('active');
 $('.ia2').addClass('active')
 $('#ea2').addClass('text-primary');
 $('.ea2').addClass('active')
+
+setInterval(function() {
+  $.ajax({
+     url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+      success(data){
+      if (data.newCsrfToken) {
+      $('[name="csrf_token"]').val(data.newCsrfToken);
+        console.log('Token CSRF renovado');
+      } else {
+        console.log('No se pudo renovar el token CSRF');
+      }
+    },
+    error: function(err) {
+      console.error('Error renovando token CSRF:', err);
+    }
+  });
+}, 240000);

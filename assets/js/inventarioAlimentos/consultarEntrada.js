@@ -11,7 +11,6 @@ $.ajax({
     }
 }).then(function () {
     eliminarPermiso = (typeof permisos.eliminar === 'undefined') ? 'disabled' : '';
-    $('#enviar').attr(registrarPermiso, '');
 });
 
 function quitarBotones(){
@@ -27,13 +26,19 @@ $(".borrar").remove()
         {
             "data": "fecha",
             "className": "text-center",
-            "render": function(data) {
+            "render": function formatDate(data) {
                 let fecha = new Date(data);
-                let dia = (fecha.getDate() + 1).toString().padStart(2, '0');
-                let mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-                let anio = fecha.getFullYear();
+                if (isNaN(fecha)) {
+                    return "Fecha inválida";
+                }
+
+                let dia = fecha.getUTCDate().toString().padStart(2, '0'); // Día del mes
+                let mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0'); // Mes
+                let anio = fecha.getUTCFullYear(); // Año
                 return `${dia}-${mes}-${anio}`;
             }
+            
+            
         },
         {
             "data": "hora",
@@ -76,6 +81,7 @@ function tablaEntradaAlimentos() {
         dataType: "json",
         data: { mostrarEntradaA: true, fechaInicio, fechaFin },
         success(data) {
+            console.log(data);
             $('#ani').show(2000);
             mostrarEA.clear().rows.add(data).draw();
             mostrarEA.on('draw.dt', function () {
@@ -93,9 +99,9 @@ function tablaEntradaAlimentos() {
     });
 }
 
-// MOSTRAR INFORMACIÓN ------------------------------------------
 
-      $(document).on('click', '.informacion', function () {
+// MOSTRAR INFORMACIÓN ------------------------------------------
+$(document).on('click', '.informacion', function () {
     let id = this.id;
     $.ajax({
         method: "post",
@@ -105,34 +111,50 @@ function tablaEntradaAlimentos() {
         success(data) {
 
             let tipoA = '';
-            let lista = data;
-            lista.forEach(fila => { 
+            let grupos = {};
+
+            // Agrupamos por tipo
+            data.forEach(fila => {
+                if (!grupos[fila.tipo]) {
+                    grupos[fila.tipo] = [];
+                }
+                grupos[fila.tipo].push(fila);
+            });
+
+            // Armamos la tabla para cada tipo
+            Object.keys(grupos).forEach(tipo => {
+                let filas = grupos[tipo];
+
+                // Verificamos si alguna fila tiene marca válida para mostrar "Cont. Neto"
+                let mostrarContNeto = filas.some(f => f.marca && f.marca !== "Sin Marca");
+                let totalColumnas = 4 + (mostrarContNeto ? 1 : 0);
+
                 tipoA += `
                     <table class="table table-hover table-bordered">
                         <thead class="table-success">
                             <tr>
-                                <th colspan="5" class='blanco fw-bold text-center'>${fila.tipo}</th>
+                                <th colspan="${totalColumnas}" class="blanco fw-bold text-center">${tipo}</th>
                             </tr>
                             <tr>
                                 <th class="blanco">Imagen</th>
-                                <th class="blanco">Codigo</th>
                                 <th class="blanco">Alimento</th>
                                 <th class="blanco">Marca</th>
+                                ${mostrarContNeto ? `<th class="blanco">Cont. Neto</th>` : ""}
                                 <th class="blanco">Cantidad</th>
                             </tr>
                         </thead>
-                        <tbody id="infoA_${fila.idTipoA}" class="infoA"></tbody>
+                        <tbody id="infoA_${filas[0].idTipoA}" class="infoA"></tbody>
                     </table>
                 `;
 
-              
-                mostrarAlimentos(fila.idTipoA, id);
+                mostrarAlimentos(filas[0].idTipoA, id);
             });
 
             $('#tablas').html(tipoA);
         }
     });
 });
+
 
 function mostrarAlimentos(idTipoA, idInventarioA) {
     $.ajax({
@@ -142,48 +164,68 @@ function mostrarAlimentos(idTipoA, idInventarioA) {
         data: { infoAlimento: true, idTipoA, idInventarioA },
         success(data) {
 
-                  let tablita ='';
-                 let fecha = new Date(data[0].fecha);
-                 let dia = (fecha.getDate() + 1).toString().padStart(2, '0');
-                 let mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-                 let anio = fecha.getFullYear();
+            let tablita ='';
+            let fecha = new Date(data[0].fecha);
+            if (isNaN(fecha)) {
+                return "Fecha inválida";
+            }
 
-                 let fechaFormateada = `${dia}-${mes}-${anio}`;
-                  let hora = new Date(`01/01/2000 ${data[0].hora}`);
-                  let horaFormateada = hora.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            let dia = fecha.getUTCDate().toString().padStart(2, '0'); 
+            let mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0'); 
+            let anio = fecha.getUTCFullYear();
+            let fechaFormateada = `${dia}-${mes}-${anio}`;
+            let hora = new Date(`01/01/2000 ${data[0].hora}`);
+            let horaFormateada = hora.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
 
-          tablita = `
-                    <tr>
+            tablita = `
+                <tr>
                     <td class="text-center">${fechaFormateada}</td>
                     <td class="text-center">${horaFormateada}</td>
                     <td class="">${data[0].descripcion}</td>
-                  </tr>
-                    `;
+                </tr>
+            `;
 
-           $('#tbody3').html(tablita);
+        
+            $('#tbody3').html(tablita);
 
-          // ------------------ DETALLE ----------
+            // ------------------ DETALLE ----------
             let alimento = '';
             let lista = data;
 
-            lista.forEach(fila => { 
+            // Detectar si este tipo de alimento usa columna Cont. Neto
+            let mostrarContNeto = lista.some(f => f.marca && f.marca !== "Sin Marca");
 
-              let unidadMedida;
-              if (fila.unidadMedida === 'Unidad' && fila.cantidad > 1) {
-               unidadMedida = fila.unidadMedida + 'es';
-              }
-              else{
-                unidadMedida = fila.unidadMedida;
-              }
-              if (fila.unidadMedida !== 'Unidad' && fila.cantidad > 1) {
-                 unidadMedida = fila.unidadMedida + 's';
-              }
+            lista.forEach(fila => { 
+                let unidadMedida;
+
+                if (fila.marca === 'Sin Marca') {
+                    if (fila.unidadMedida === 'Unidad' && fila.cantidad > 1) {
+                        unidadMedida = fila.unidadMedida + 'es';
+                    } else {
+                        unidadMedida = fila.unidadMedida;
+                    }
+                    
+                } else {
+                    unidadMedida = 'Unidad';
+                    if (fila.cantidad > 1) {
+                        unidadMedida = 'Unidades';
+                    }
+                }
+
+                // Si la tabla requiere columna Cont. Neto, siempre insertamos <td>
+                let contNetoColumna = "";
+                if (mostrarContNeto) {
+                    contNetoColumna = (fila.marca !== "Sin Marca") 
+                        ? `<td>${fila.unidadMedida}</td>` 
+                        : `<td class="text-muted">N/A</td>`; // vacío o N/A
+                }
+
                 alimento += `
                     <tr>
                         <td><img src="${fila.imgAlimento}" width="70" height="70" alt="Profile" class="mb-2"></td>
-                        <td>${fila.codigo}</td>
                         <td>${fila.nombre}</td>
                         <td>${fila.marca}</td>
+                        ${contNetoColumna}
                         <td>${fila.cantidad} ${unidadMedida}</td>
                     </tr>
                 `;
@@ -193,6 +235,8 @@ function mostrarAlimentos(idTipoA, idInventarioA) {
         }
     });
 }
+
+
 
 
 
@@ -276,16 +320,19 @@ function valAnulacion(idd){
   //-----------------------------------------------------------------------------------------
   
   $('#borrar').click((e)=>{
-
+ let token = $('[name="csrf_token"]').val();
+ if(token){
+    console.log(token);
     e.preventDefault();
     $.ajax({
       url: '',
       method: 'post',
       dataType: 'json',
-      data:{id , borrar: 'borrar'},
+      data:{id , borrar: 'borrar', csrfToken: token},
       success(data){
         console.log(data);
-      if (data.resultado === 'eliminado'){
+      if (data.mensaje.resultado === 'eliminado' && data.newCsrfToken){
+        $('[name="csrf_token"]').val(data.newCsrfToken);
         $('#cerrar3').click();
         tablaEntradaAlimentos();
           Swal.fire({
@@ -300,6 +347,7 @@ function valAnulacion(idd){
       }
     }
   })
+    }
     })
 
 
@@ -531,3 +579,23 @@ $('#ia2').addClass('active');
 $('.ia2').addClass('active')
 $('#ea3').addClass('text-primary');
 $('.ea3').addClass('active')
+
+setInterval(function() {
+  $.ajax({
+     url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+      success(data){
+      if (data.newCsrfToken) {
+      $('[name="csrf_token"]').val(data.newCsrfToken);
+        console.log('Token CSRF renovado');
+      } else {
+        console.log('No se pudo renovar el token CSRF');
+      }
+    },
+    error: function(err) {
+      console.error('Error renovando token CSRF:', err);
+    }
+  });
+}, 240000);

@@ -34,10 +34,14 @@
                                   <h1 class="fw-bold blanco">Registrar Salida de Alimentos</h1>
                                   <nav>
                                     <ol class="breadcrumb">
-                                           <?php echo '
-                                           <li class="breadcrumb-item fw-bold"><a href="?url='.$sistem->encryptURL('home').'">Inicio</a></li>
-                                           <li class="breadcrumb-item fw-bold"><a href="?url='.$sistem->encryptURL('consultarSalidaAlimentos').'"> Consultar Salida de Alimentos</a></li>';
-                                            ?>
+                                    <?php 
+                                      if(isset($permisos['Home']['consultar']) ){
+                                        echo '<li class="breadcrumb-item fw-bold"><a href="?url='.urlencode($sistem->encryptURL('home')).'">Inicio</a></li>';
+                                      }
+                                      if(isset($permisos['Inventario de Alimentos']['consultar']) ){
+                                        echo '     <li class="breadcrumb-item fw-bold"><a href="?url='.urlencode($sistem->encryptURL('consultarSalidaAlimentos')).'"> Consultar Salida de Alimentos</a></li>';
+                                      }
+                                     ?> 
                                           
                                      </ol>
                                   </nav>
@@ -63,6 +67,16 @@
                         <div class="card-body">
                         
                               <form class="formu form1">
+                                 <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
+                              <div id="alerts" data-aos="fade-up" data-aos-delay="1000">
+                                  <div class="alert alert-top alert-info alert-dismissible fade show h-5" role="alert">
+                                    <p style="font-size: 13px!important;" align="justify">  
+                                    <svg class="icon-30" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.4" d="M4.72251 21.1672C4.70951 21.1672 4.69751 21.1672 4.68351 21.1662C4.36851 21.1502 4.05951 21.0822 3.76551 20.9632C2.31851 20.3752 1.62051 18.7222 2.20751 17.2762L9.52851 4.45025C9.78051 3.99425 10.1625 3.61225 10.6285 3.35425C11.9935 2.59825 13.7195 3.09525 14.4745 4.45925L21.7475 17.1872C21.9095 17.5682 21.9785 17.8782 21.9955 18.1942C22.0345 18.9502 21.7765 19.6752 21.2705 20.2362C20.7645 20.7972 20.0695 21.1282 19.3145 21.1662L4.79451 21.1672H4.72251Z" fill="currentColor"></path>                                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.1245 10.0208C11.1245 9.53875 11.5175 9.14575 11.9995 9.14575C12.4815 9.14575 12.8745 9.53875 12.8745 10.0208V12.8488C12.8745 13.3318 12.4815 13.7238 11.9995 13.7238C11.5175 13.7238 11.1245 13.3318 11.1245 12.8488V10.0208ZM11.1245 16.2699C11.1245 15.7849 11.5175 15.3899 11.9995 15.3899C12.4815 15.3899 12.8745 15.7799 12.8745 16.2589C12.8745 16.7519 12.4815 17.1449 11.9995 17.1449C11.5175 17.1449 11.1245 16.7519 11.1245 16.2699Z" fill="currentColor"></path> </svg>
+                                     Selecciona y agrega los alimentos a sacar!
+                                    <p>
+                                    <button type="button" class="btn-close btn-primary" data-bs-dismiss="alert" aria-label="Close"></button>
+                                  </div>
+                               </div>
 
                                   <div class="wave-group p-2 my-2 " id="sel" style="margin-top: 1.7vw!important">
 
@@ -257,6 +271,17 @@
                         <div class="card-body">
                        
                               <form class="formu form1 ">
+
+                              <div id="alerts" data-aos="fade-up" data-aos-delay="1000">
+                                  <div class="alert alert-top alert-info alert-dismissible fade show h-5" role="alert">
+                                    <p style="font-size: 13px!important;" align="justify">  
+                                    <svg class="icon-30" width="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path opacity="0.4" d="M4.72251 21.1672C4.70951 21.1672 4.69751 21.1672 4.68351 21.1662C4.36851 21.1502 4.05951 21.0822 3.76551 20.9632C2.31851 20.3752 1.62051 18.7222 2.20751 17.2762L9.52851 4.45025C9.78051 3.99425 10.1625 3.61225 10.6285 3.35425C11.9935 2.59825 13.7195 3.09525 14.4745 4.45925L21.7475 17.1872C21.9095 17.5682 21.9785 17.8782 21.9955 18.1942C22.0345 18.9502 21.7765 19.6752 21.2705 20.2362C20.7645 20.7972 20.0695 21.1282 19.3145 21.1662L4.79451 21.1672H4.72251Z" fill="currentColor"></path>                                <path fill-rule="evenodd" clip-rule="evenodd" d="M11.1245 10.0208C11.1245 9.53875 11.5175 9.14575 11.9995 9.14575C12.4815 9.14575 12.8745 9.53875 12.8745 10.0208V12.8488C12.8745 13.3318 12.4815 13.7238 11.9995 13.7238C11.5175 13.7238 11.1245 13.3318 11.1245 12.8488V10.0208ZM11.1245 16.2699C11.1245 15.7849 11.5175 15.3899 11.9995 15.3899C12.4815 15.3899 12.8745 15.7799 12.8745 16.2589C12.8745 16.7519 12.4815 17.1449 11.9995 17.1449C11.5175 17.1449 11.1245 16.7519 11.1245 16.2699Z" fill="currentColor"></path> </svg>
+                                    Ingresa la descripción general de la salida de alimentos!
+                                    <p>
+                                    <button type="button" class="btn-close btn-primary" data-bs-dismiss="alert" aria-label="Close"></button>
+                                  </div>
+                               </div>
+
                                 <div class='row'>
                                 <div class="wave-group p-2  my-2 col-md-6">
                 <input required="" type="date" class="input fecha mt-2" id="fecha">

@@ -22,6 +22,7 @@ console.log(permisos)
 $(".borrar").remove()   
 }
 }
+
     let mostrarA = $('.tabla').DataTable({
     "columns": [
         { "data": "codigo", "className": "text-center" },
@@ -187,18 +188,22 @@ function valModificar(idd){
                               if (data[0].marca === 'Sin Marca') {
                                   $("#acMarca").attr("checked", false);
                                   $('#marca').hide()
+                                  $('#cant').hide()
                                   $("#marca").val(' ');
+                                  $("#cantidad").val(' ');
                                }
                                else{
 
-                                  $('#marca').show()
+                                  $('#marca').show();
+                                  $('#cant').show();
                                   $("#marca").val(data[0].marca);
+                                  $("#cantidad").val(data[0].cantidad);
                                   $("#acMarca").attr("checked", true);
                               }
 
                     $("#tipoA").val(data[0].idTipoA).trigger('change');
                     $("#alimento").val(data[0].nombre);
-                    $("#unidad").val(data[0].unidadMedida).trigger('change');
+                    $("#unidad").val(data[0].unidad).trigger('change');
                    $('#image').html(`<img src="${data[0].imgAlimento}" align="center" width="300">`);
                     $("#idd").val(data[0].idAlimento);
                    }
@@ -236,18 +241,22 @@ function valModificar(idd){
                                if (data[0].marca === 'Sin Marca') {
                                   $("#acMarca").attr("checked", false);
                                   $('#marca').hide()
+                                  $('#cant').hide()
                                   $("#marca").val(' ');
+                                  $("#cantidad").val(' ');
                                }
                                else{
 
-                                  $('#marca').show()
+                                  $('#marca').show();
+                                  $('#cant').show();
                                   $("#marca").val(data[0].marca);
+                                  $("#cantidad").val(data[0].cantidad);
                                   $("#acMarca").attr("checked", true);
                               }
 
                               $("#tipoA").val(data[0].idTipoA).trigger('change');
                               $("#alimento").val(data[0].nombre);
-                              $("#unidad").val(data[0].unidadMedida).trigger('change');
+                              $("#unidad").val(data[0].unidad).trigger('change');
                               $('#image').html(`<img src="${data[0].imgAlimento}" align="center" width="300">`);
                    
                          }
@@ -261,14 +270,29 @@ function valModificar(idd){
             $('#acMarca').change(function(){
                 if($(this).is(':checked')){
                     $('#marca').show();
+                    $('#cant').show();
                     $("#marca").focusout(function(){
                       chequeo_marca();
                       });
                  $("#marca").on('keyup', function(){
                      chequeo_marca();
+                      clearTimeout(timer); 
+                            timer = setTimeout(function () {
+                               verificarAlimento()
+                            }, 500);
+
                   });
+                  $("#cantidad").focusout(function(){
+                      chequeo_cantidad();
+                      
+                      });
+                  $("#cantidad").on('keyup', function(){
+                      chequeo_cantidad();
+                               verificarAlimento()
+                    });
                 } else {
                     $('#marca').hide();
+                    $('#cant').hide();
                 }
             });
         });        
@@ -306,6 +330,9 @@ let error_imagen=false;
 let error_alimento=false;
 let error_marca=false;
 let error_veriTA = false;
+let error_unidad = false;
+let error_cantidad = false;
+let timer;
 
 
 // Agregar imagen por defecto
@@ -323,17 +350,20 @@ fileInput0.addEventListener('change', function() {
 
  $("#alimento").focusout(function(){
     chequeo_alimento();
+    verificarAlimento();
  });
  $("#alimento").on('keyup', function(){
     chequeo_alimento();
+     clearTimeout(timer); 
+         timer = setTimeout(function () {
+           verificarAlimento()
+         }, 500);
  });
 
- $("#marca").focusout(function(){
-    chequeo_marca();
+  $("#unidad").on('change', function() {
+           verificarAlimento();
  });
- $("#marca").on('keyup', function(){
-    chequeo_marca();
- });
+
 
  $("#edita").on("click", function(e){
     e.preventDefault();
@@ -344,10 +374,13 @@ fileInput0.addEventListener('change', function() {
 
                if($('#acMarca').is(':checked')){
                        error_marca=false;
+                       error_cantidad = false;
                        chequeo_marca();
-                 if (error_alimento ===false  && error_veriTA ===false && error_marca === false ) {
+                       chequeo_cantidad();
+        
+                 if (error_alimento ===false  && error_veriTA ===false && error_marca === false && error_cantidad === false ) {
                       let marcaAlimento=$('#marca').val();
-                    modificar(marcaAlimento);
+                      modificar(marcaAlimento);
                   }
                   else{
                       Swal.fire({
@@ -581,6 +614,33 @@ function validarPesoImagen0(input) {
         }
     }
 
+    // validar cantidad
+      function chequeo_cantidad() {
+        var chequeo = /^(0|[1-9]\d{0,2})(\.\d{1,2})?$/; // Permite números desde 0 hasta 999 con hasta dos decimales
+        var cantidad = $("#cantidad").val();
+        if (chequeo.test(cantidad) && cantidad !== '') {
+         $(".error6").html("");
+         $(".error6").hide();
+         $('#cantidad').removeClass('errorBorder');
+         $('.bar6').addClass('bar');
+         $('.ic6').removeClass('l');
+         $('.ic6').addClass('labelPri');
+         $('.letra6').removeClass('labelE');
+         $('.letra6').addClass('label-char');
+        } else {
+         $(".error6").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la cantidad neta!');
+         $(".error6").show();
+         $('#cantidad').addClass('errorBorder');
+         $('.bar6').removeClass('bar');
+         $('.ic6').addClass('l');
+         $('.ic6').removeClass('labelPri');
+         $('.letra6').addClass('labelE');
+         $('.letra6').removeClass('label-char');
+           error_cantidad = true;
+        }
+    }
+
+
 
 
  // Otros..............
@@ -590,13 +650,13 @@ function validarPesoImagen0(input) {
          container0.appendChild(defaultImage); 
        $(".error1, .error2, .error3, .error4, .error5").html("");
          $(".error1, .error2, .error3, .error4, .error5").hide();
-         $('#fileInput0, #alimento, #marca').removeClass('errorBorder');
+         $('#fileInput0, #alimento, #marca, #cantidad').removeClass('errorBorder');
           $('#tipoA, #unidad').removeClass('is-invalid');
-         $('.bar1, .bar2, .bar3, .bar4, .bar5').addClass('bar');
-         $('.ic1, .ic2, .ic3, .ic4, .ic5').removeClass('l');
-         $('.ic1, .ic2, .ic3, .ic4, .ic5').addClass('labelPri');
-         $('.letra, .letra2, .letra3, .letra4, .letra5').removeClass('labelE');
-         $('.letra, .letra2, .letra3, .letra4, .letra5').addClass('label-char');
+         $('.bar1, .bar2, .bar3, .bar4, .bar5, .bar6').addClass('bar');
+         $('.ic1, .ic2, .ic3, .ic4, .ic5, .ic6').removeClass('l');
+         $('.ic1, .ic2, .ic3, .ic4, .ic5, .ic6').addClass('labelPri');
+         $('.letra, .letra2, .letra3, .letra4, .letra5, .letra6').removeClass('labelE');
+         $('.letra, .letra2, .letra3, .letra4, .letra5, .letra6').addClass('label-char');
          $('.check').removeClass('is-invalid')
           fileInput0.classList.remove('changed');
 
@@ -683,41 +743,133 @@ $(document).ready(function() {
   
                 }
 
-// ---------------- MODIFICAR ------------------------
 
+
+   function verificarAlimento(){
+                    let marca;
+                    let alimento = cambiarFormato($("#alimento").val());
+                    let unidad;
+                    let  iD = $('#idd').val();
+                    if($('#cantidad').val() === ''){
+                        unidad = $("#unidad").val();
+                    } else {
+                        unidad = $('#cantidad').val() + ' ' + $("#unidad").val();
+                    }
+                    // Verifica el estado de #acMarca en el momento de la llamada a la función
+                    if ($('#acMarca').is(':checked')) {
+                        marca = cambiarFormato($("#marca").val());
+                    } else {
+                        marca = 'Sin Marca';
+                    }
+                
+                    if (alimento.length >= 3 && marca.length >= 3) {
+                        $.ajax({
+                            url: '',
+                            type: 'POST',
+                            dataType: 'JSON',
+                            data: { verificarAlimento:true, id:iD, alimento, marca, unidad },
+                            success(data) {
+			                   
+                                if (data.resultado === 'existe') {
+                                    
+                                    Swal.fire({
+                                        toast: true,
+                                        position: 'top-end',
+                                        icon: 'error',
+                                         title: 'El alimento <b class="fw-bold text-rojo">' + alimento + '</b>' +   (marca !== 'Sin Marca' ? ' de la marca <b class="fw-bold text-rojo">' + marca + '</b>' : '') +  ' ya está registrado!',
+                                        showConfirmButton: false,
+                                        timer: 3000,
+                                        timerProgressBar: 3000,
+                                    });
+                                   
+                                    $('#alimento, #marca,  #cantidad').addClass('errorBorder');
+                                    $(' .bar3, .bar4, .bar5, .bar6').removeClass('bar');
+                                    $(' .ic3, .ic4, .ic5, .ic6').addClass('l');
+                                    $(' .ic3, .ic4, .ic5, .ic6').removeClass('labelPri');
+                                    $(' .letra3, .letra4, .letra5, .letra6').addClass('labelE');
+                                    $(' .letra3, .letra4, .letra5, .letra6').removeClass('label-char');
+                                      $('#unidad').addClass('is-invalid');
+
+                                       if(marca === 'Sin Marca'){
+                                        $('#marca, #cantidad').removeClass('errorBorder');
+                                        $('.bar4, .bar6').addClass('bar');
+                                        $('.ic4, .ic6').removeClass('l');
+                                        $('.ic4, .ic6').addClass('labelPri');
+                                        $('.letra4, .letra6').removeClass('labelE');
+                                        $('.letra4, .letra6').addClass('label-char');
+
+                                      }
+                                } else {
+                                   
+                                    $('#alimento, #marca').removeClass('errorBorder');
+                                    $(' .bar3, .bar4, .bar5, .bar6').addClass('bar');
+                                    $(' .ic3, .ic4, .ic5, .ic6').removeClass('l');
+                                    $(' .ic3, .ic4, .ic5, .ic6').addClass('labelPri');
+                                    $(' .letra3, .letra4, .letra5, .letra6').removeClass('labelE');
+                                    $(' .letra3, .letra4, .letra5, .letra6').addClass('label-char');
+                                      $('#unidad').removeClass('is-invalid');
+                                }
+                            }
+                        });
+                    }
+                }
+                
+// ---------------- MODIFICAR ------------------------
 
 function modificar(marcaA){
   let tipoA = cambiarFormato($("#tipoA").val());
   let alimento =cambiarFormato( $("#alimento").val());
   let marca = cambiarFormato(marcaA);
-  let unidad=$('#unidad').val();
+  let unidad;
+
+                    if($('#cantidad').val() === ''){
+                        unidad = $("#unidad").val();
+                    } else {
+                        unidad = $('#cantidad').val() + ' ' + $("#unidad").val();
+                    }
   let id= $('#idd').val();
+  let token = $('[name="csrf_token"]').val();
+  if(token) {
+    console.log('Token CSRF enviado:', token);
    $.ajax({
       type: "POST",
       url: '',
       dataType: "json",
-      data:{modificarINFO:'SI', id, tipoA, alimento, marca, unidad},
+      data:{modificarINFO:'SI', id, tipoA, alimento, marca, unidad, csrfToken: token},
       success(dato){
 
-                        if (dato.resultado === 'existe') {
+                        if (dato.mensaje.resultado === 'existe') {
                                 Swal.fire({
                                   toast: true,
                                   position: 'top-end',
                                   icon:'error',
-                                  title:'El alimento <b class="fw-bold text-rojo">'+alimento+'</b> de la marca <b class="fw-bold text-rojo">'+marca+'</b> ya está registrado!',
+                                  title: 'El alimento <b class="fw-bold text-rojo">' + alimento + '</b>' +   (marca !== 'Sin Marca' ? ' de la marca <b class="fw-bold text-rojo">' + marca + '</b>' : '') +  ' ya está registrado!',
                                   showConfirmButton:false,
                                   timer:3000,
                                   timerProgressBar:3000,
                                 })
-                                $('#tipoA').addClass('is-invalid');
-                                $('#alimento, #marca').addClass('errorBorder');
-                                $('.bar2, .bar3, .bar4').removeClass('bar');
-                                $('.ic2, .ic3, .ic4').addClass('l');
-                                $('.ic2, .ic3, .ic4').removeClass('labelPri');
-                                $('.letra2, .letra3, .letra4').addClass('labelE');
-                                $('.letra2, .letra3, .letra4').removeClass('label-char');
+                                $('#alimento, #marca, #cantidad').addClass('errorBorder');
+                                $(' .bar3, .bar4, .bar5, .bar6').removeClass('bar');
+                                $(' .ic3, .ic4, .ic5, .ic6').addClass('l');
+                                $(' .ic3, .ic4, .ic5, .ic6').removeClass('labelPri');
+                                $(' .letra3, .letra4, .letra5, .letra6').addClass('labelE');
+                                $(' .letra3, .letra4, .letra5, .letra6').removeClass('label-char');
+                                $('#unidad').addClass('is-invalid');
+                                  
+                                     if(marca === 'Sin Marca'){
+                                        $('#marca, #cantidad').removeClass('errorBorder');
+                                        $('.bar4, .bar6').addClass('bar');
+                                        $('.ic4, .ic6').removeClass('l');
+                                        $('.ic4, .ic6').addClass('labelPri');
+                                        $('.letra4, .letra6').removeClass('labelE');
+                                        $('.letra4, .letra6').addClass('label-char');
+
+                                      }
+
                             }
-                            else if (dato.resultado === 'modificado'){
+                            else if (dato.mensaje.resultado === 'modificado' && dato.newCsrfToken) {
+                               $('[name="csrf_token"]').val(dato.newCsrfToken);
+                               console.log(dato);
                                $('.cerrar2').click();
                                Swal.fire({
                                       toast: true,
@@ -735,6 +887,7 @@ function modificar(marcaA){
         
       }
     });
+  }
 }
 
 
@@ -745,9 +898,15 @@ function modificarImagen() {
     var datos = new FormData();
     var files = $("#fileInput0")[0].files;
     let id=$('#idd').val();
+    let token = $('[name="csrf_token"]').val();
 
     datos.append("imagen", files[0]); // Solo toma el primer archivo si hay varios
     datos.append("id", id);
+   
+
+    if(token) {
+       datos.append("csrfToken", token);
+       console.log('Token CSRF enviado:', token);
 
     $.ajax({
         url: "",
@@ -756,7 +915,38 @@ function modificarImagen() {
         processData: false,
         contentType: false,
         success: function(data) {
-          $('.cerrar2').click();
+          data = typeof data === 'string' ? JSON.parse(data) : data;
+			if (data.resultado == 'El archivo no es una imagen válida (JPEG, PNG)!' || 
+			    data.resultado == 'La imagen no debe superar los 2MB!' || 
+			    data.resultado == 'La imagen está dañada o no se puede procesar!') {
+
+			      	container0.innerHTML = ''; 
+              container0.appendChild(defaultImage); 
+              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> '+data.resultado+'');
+              $(".error1").show();
+              $('#fileInput0').addClass('errorBorder');
+              $('.bar1').removeClass('bar');
+              $('.ic1').addClass('l');
+              $('.ic1').removeClass('labelPri');
+              $('.letra').addClass('labelE');
+              $('.letra').removeClass('label-char');
+             fileInput0.classList.add('changed');
+             error_imagen = true;
+
+				Swal.fire({
+					toast: true,
+					position: 'top-end',
+					icon: 'error',
+					title: data.resultado,
+					showConfirmButton: false,
+					timer: 2500,
+					timerProgressBar: true,
+				});
+			}
+      else if(data.mensaje.resultado === 'imagen modificado' && data.newCsrfToken) {
+                console.log(data)
+                $('[name="csrf_token"]').val(data.newCsrfToken);
+                $('.cerrar2').click();
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
@@ -771,8 +961,11 @@ function modificarImagen() {
                 container0.innerHTML = ''; // Limpiar el contenedor
                 container0.appendChild(defaultImage);
                 primary();
-            }
+      }
+      }
+          
     });
+  }
 }
 
 
@@ -857,16 +1050,19 @@ function valAnular(idd){
   //-----------------------------------------------------------------------------------------
   
   $('#borrar').click((e)=>{
-
+    let token = $('[name="csrf_token"]').val();
+    if(token){
+      console.log('Token CSRF enviado:', token);
     e.preventDefault();
     $.ajax({
       url: '',
       method: 'post',
       dataType: 'json',
-      data:{id , borrar: 'borrar'},
+      data:{id , borrar: 'borrar', csrfToken: token},
       success(data){
         console.log(data);
-      if (data.resultado === 'eliminado'){
+      if (data.mensaje.resultado === 'eliminado' && data.newCsrfToken){
+        $('[name="csrf_token"]').val(data.newCsrfToken);
         $('#cerrar3').click();
         delete mostrarA;
         tablaAlimentos();
@@ -882,6 +1078,7 @@ function valAnular(idd){
       }
     }
   })
+}
     })
 
 
@@ -938,3 +1135,23 @@ $(document).ready(function () {
 $('#ali1').addClass('active');
 $('#ali3').addClass('text-primary');
 $('.ali3').addClass('active')
+
+setInterval(function() {
+  $.ajax({
+     url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+      success(data){
+      if (data.newCsrfToken) {
+      $('[name="csrf_token"]').val(data.newCsrfToken);
+        console.log('Token CSRF renovado');
+      } else {
+        console.log('No se pudo renovar el token CSRF');
+      }
+    },
+    error: function(err) {
+      console.error('Error renovando token CSRF:', err);
+    }
+  });
+}, 240000);

@@ -6,12 +6,25 @@
  use component\footer as footer;
  use component\NotificacionesServer as NotificacionesServer;
  use component\configuracion as configuracion;
-use config\componentes\configSistema as configSistema;
+ use helpers\encryption as encryption;
+ use helpers\permisosHelper as permisosHelper;
  use modelo\stockAlimentosModelo as stockAlimentos;
+ use middleware\PostRateMiddleware as PostRateMiddleware;
 
  $objeto = new stockAlimentos;
-$sistem = new configSistema();
-$NotificacionesServer = new NotificacionesServer();
+ $sistem = new encryption();
+
+ $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Inventario de Alimentos', 'consultar');
+ $permisos = $datosPermisos['permisos'];
+ $payload = $datosPermisos['payload'];
+
+ $NotificacionesServer = new NotificacionesServer();
+
+    if (isset($payload->cedula)) {
+        $NotificacionesServer->setCedula($payload->cedula);
+    } else {
+        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+    }
 
     if (isset($_POST['notificaciones'])) {
         $valor = $NotificacionesServer->consultarNotificaciones();
@@ -21,33 +34,55 @@ $NotificacionesServer = new NotificacionesServer();
         $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
     }
 
- if(!isset($_SESSION['idRol'])){
- die("<script>window.location='?url=" . $sistem->encryptURL('login') . "'</script>");
+
+ //---- FILTRO---
+
+ if (isset($_POST['select'])) {
+   try {
+      $mostrarTipoA= $objeto->mostrarTipoAlimento();
+      echo json_encode($mostrarTipoA);
+      die();
+    } catch (\RuntimeException $e) {
+      echo json_encode(['message' => $e->getMessage()]);
+      die();
+    }
 }
-$permisos = $objeto->getPermisosRol($_SESSION['idRol']);
- $permiso = $permisos['Inventario de Alimentos'];
 
-    if(!isset($permiso['consultar'])) die("<script>window.location='?url=" . $sistem->encryptURL('home') . "'</script>");
-
- if(isset($_POST['getPermisos']) && isset($permiso['consultar'])){
-   die(json_encode($permiso));
+if (isset($_POST['valida']) && isset($_POST['tipoA'])) {
+   try {
+      $validarExistenciaTA=  $objeto->verificarExistenciaTipoA($_POST['tipoA']);
+      if ($validarExistenciaTA['resultado'] == 'no esta') { 
+       echo json_encode($validarExistenciaTA);
+       die();
+      }
+    } catch (\RuntimeException $e) {
+      echo json_encode(['message' => $e->getMessage()]);
+      die();
+    }
  }
 
  //--------- MOSTRAR TABLA
 
- if(isset($_POST['mostrarStock'])){
- $mostrarTabla= $objeto->mostrarAlimentos();
-}
+ if(isset($_POST['mostrarAlimentos']) && isset($_POST['tipoA']) ){
+   try {
+      $mostrarTabla= $objeto->mostrarAlimentos($_POST['tipoA']);
+      echo json_encode($mostrarTabla);
+      die();
+    } catch (\RuntimeException $e) {
+      echo json_encode(['message' => $e->getMessage()]);
+      die();
+    }
+ }
 
 //  REPORTE DEl PDF //
 
-    if(isset ($_POST['reporte']) ){
-      $reporte = $objeto->fpdf();
+    if(isset ($_POST['reporte']) && isset ($_POST['tipoA'])){
+      $reporte = $objeto->fpdf($_POST['tipoA']);
     }
 
 
   $components = new initComponents();
-  $navegador = new navegador();
+  $navegador = new navegador($payload);
   $sidebar = new sidebar($permisos);
   $footer = new footer();
   $configuracion = new configuracion($permisos);
@@ -55,7 +90,7 @@ $permisos = $objeto->getPermisosRol($_SESSION['idRol']);
    if (file_exists("vista/stockAlimentosVista.php")) {
    require_once("vista/stockAlimentosVista.php");
    }else {
-   die("<script>window.location='?url=" . $sistem->encryptURL('login') . "'</script>");
+   die("<script>window.location='?url=" .urlencode( $sistem->encryptURL('login')) . "'</script>");
   }
 
   ?>
