@@ -18,7 +18,6 @@ class reporteEstadisticoModelo extends connectDB{
 	}
 
 
-
   public function verificarAsistenciasEstudiantes(){
     try{
       $this->conectarDB();
