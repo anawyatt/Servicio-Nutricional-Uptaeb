@@ -397,7 +397,6 @@ function colocarHoraActualEnCampo(hor) {
         }
     }
 
-    
     function chequeo_cantidad() {
         var chequeo = /^[1-9]\d*$/;
         var cantidad = $("#cantidad").val();
@@ -692,18 +691,13 @@ function registrar(){
 	var fecha = $("#fecha").val();
 	var descripcion = $("#descripcion").val();
   var hora =$('#hora').val();
-   let token = $('[name="csrf_token"]').val();
-   if(token){
-    console.log('Token CSRF encontrado: ' + token);
 	$.ajax({
 		url:"",
 		method:"post",
 		dataType:"json",
-		data:{registrar:true, fecha, hora , descripcion, csrfToken: token},
+		data:{registrar:true, fecha, hora , descripcion},
     success(data){
-       let datos = typeof data === "string" ? JSON.parse(data) : data;
-      if(datos.mensaje && datos.newCsrfToken) {
-              registrarDetalle(datos.mensaje.id);
+              registrarDetalle(data.id);
               Swal.fire({
                toast: true,
                position: 'top-end',
@@ -717,13 +711,13 @@ function registrar(){
              $('#cancelar').click();
              $('.tabla tbody tr').remove();
              $('#ani').hide();
-              $('[name="csrf_token"]').val(datos.newCsrfToken);
-              console.log('Token CSRF renovado: ' + datos.newCsrfToken);
           
        }
-    }
+		
+
+
+
 	});
-}
 }
 
 //----------------------------- REGISTRAR DETALLE -----------------------------
@@ -738,35 +732,14 @@ function registrar(){
 		   dataType:"json",
 		   data:{alimento, cantidad, id},
 		     success(data){
-            console.log(data);
-         }
+		     	console.log(data);
+		     }
 		})
-      })
-   }
-
+   })
+  }
 
 $('#ia1').addClass('active');
 $('#ia2').addClass('active');
 $('.ia2').addClass('active')
 $('#ea2').addClass('text-primary');
 $('.ea2').addClass('active')
-
-setInterval(function() {
-  $.ajax({
-     url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
-      success(data){
-      if (data.newCsrfToken) {
-      $('[name="csrf_token"]').val(data.newCsrfToken);
-        console.log('Token CSRF renovado');
-      } else {
-        console.log('No se pudo renovar el token CSRF');
-      }
-    },
-    error: function(err) {
-      console.error('Error renovando token CSRF:', err);
-    }
-  });
-}, 240000);

@@ -692,14 +692,11 @@ function modificar(marcaA){
   let marca = cambiarFormato(marcaA);
   let unidad=$('#unidad').val();
   let id= $('#idd').val();
-  let token = $('[name="csrf_token"]').val();
-  if(token) {
-    console.log('Token CSRF enviado:', token);
    $.ajax({
       type: "POST",
       url: '',
       dataType: "json",
-      data:{modificarINFO:'SI', id, tipoA, alimento, marca, unidad, csrfToken: token},
+      data:{modificarINFO:'SI', id, tipoA, alimento, marca, unidad},
       success(dato){
 
                         if (dato.resultado === 'existe') {
@@ -720,9 +717,7 @@ function modificar(marcaA){
                                 $('.letra2, .letra3, .letra4').addClass('labelE');
                                 $('.letra2, .letra3, .letra4').removeClass('label-char');
                             }
-                            else if (dato.mensaje.resultado === 'modificado' && dato.newCsrfToken) {
-                               $('[name="csrf_token"]').val(dato.newCsrfToken);
-                               console.log(dato);
+                            else if (dato.resultado === 'modificado'){
                                $('.cerrar2').click();
                                Swal.fire({
                                       toast: true,
@@ -740,7 +735,6 @@ function modificar(marcaA){
         
       }
     });
-  }
 }
 
 
@@ -751,15 +745,9 @@ function modificarImagen() {
     var datos = new FormData();
     var files = $("#fileInput0")[0].files;
     let id=$('#idd').val();
-    let token = $('[name="csrf_token"]').val();
 
     datos.append("imagen", files[0]); // Solo toma el primer archivo si hay varios
     datos.append("id", id);
-   
-
-    if(token) {
-       datos.append("csrfToken", token);
-       console.log('Token CSRF enviado:', token);
 
     $.ajax({
         url: "",
@@ -768,38 +756,7 @@ function modificarImagen() {
         processData: false,
         contentType: false,
         success: function(data) {
-          data = typeof data === 'string' ? JSON.parse(data) : data;
-			if (data.resultado == 'El archivo no es una imagen válida (JPEG, PNG)!' || 
-			    data.resultado == 'La imagen no debe superar los 2MB!' || 
-			    data.resultado == 'La imagen está dañada o no se puede procesar!') {
-
-			      	container0.innerHTML = ''; 
-              container0.appendChild(defaultImage); 
-              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> '+data.resultado+'');
-              $(".error1").show();
-              $('#fileInput0').addClass('errorBorder');
-              $('.bar1').removeClass('bar');
-              $('.ic1').addClass('l');
-              $('.ic1').removeClass('labelPri');
-              $('.letra').addClass('labelE');
-              $('.letra').removeClass('label-char');
-             fileInput0.classList.add('changed');
-             error_imagen = true;
-
-				Swal.fire({
-					toast: true,
-					position: 'top-end',
-					icon: 'error',
-					title: data.resultado,
-					showConfirmButton: false,
-					timer: 2500,
-					timerProgressBar: true,
-				});
-			}
-      else if(data.mensaje.resultado === 'imagen modificado' && data.newCsrfToken) {
-                console.log(data)
-                $('[name="csrf_token"]').val(data.newCsrfToken);
-                $('.cerrar2').click();
+          $('.cerrar2').click();
                 Swal.fire({
                     toast: true,
                     position: 'top-end',
@@ -814,11 +771,8 @@ function modificarImagen() {
                 container0.innerHTML = ''; // Limpiar el contenedor
                 container0.appendChild(defaultImage);
                 primary();
-      }
-      }
-          
+            }
     });
-  }
 }
 
 
@@ -903,19 +857,16 @@ function valAnular(idd){
   //-----------------------------------------------------------------------------------------
   
   $('#borrar').click((e)=>{
-    let token = $('[name="csrf_token"]').val();
-    if(token){
-      console.log('Token CSRF enviado:', token);
+
     e.preventDefault();
     $.ajax({
       url: '',
       method: 'post',
       dataType: 'json',
-      data:{id , borrar: 'borrar', csrfToken: token},
+      data:{id , borrar: 'borrar'},
       success(data){
         console.log(data);
-      if (data.mensaje.resultado === 'eliminado' && data.newCsrfToken){
-        $('[name="csrf_token"]').val(data.newCsrfToken);
+      if (data.resultado === 'eliminado'){
         $('#cerrar3').click();
         delete mostrarA;
         tablaAlimentos();
@@ -931,7 +882,6 @@ function valAnular(idd){
       }
     }
   })
-}
     })
 
 
@@ -988,23 +938,3 @@ $(document).ready(function () {
 $('#ali1').addClass('active');
 $('#ali3').addClass('text-primary');
 $('.ali3').addClass('active')
-
-setInterval(function() {
-  $.ajax({
-     url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
-      success(data){
-      if (data.newCsrfToken) {
-      $('[name="csrf_token"]').val(data.newCsrfToken);
-        console.log('Token CSRF renovado');
-      } else {
-        console.log('No se pudo renovar el token CSRF');
-      }
-    },
-    error: function(err) {
-      console.error('Error renovando token CSRF:', err);
-    }
-  });
-}, 240000);

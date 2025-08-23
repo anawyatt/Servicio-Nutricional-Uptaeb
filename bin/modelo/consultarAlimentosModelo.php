@@ -1,294 +1,367 @@
-<?php
+<?php 
 
 namespace modelo;
 use config\connect\connectDB as connectDB;
-use helpers\JwtHelpers;
 use \PDO;
 
-class consultarAlimentosModelo extends connectDB
-{
+class consultarAlimentosModelo extends connectDB {
 
-  private $tipoA;
-  private $alimento;
-  private $marca;
-  private $unidad;
-  private $imagen;
-  private $id;
-  private $payload;
+	private $tipoA;
+	private $alimento;
+	private $marca;
+	private $unidad;
+	private $imagen;
+	private $id;
 
-  public function __construct()
-  {
-    parent::__construct();
-    $token = $_COOKIE['jwt'];
-    $this->payload = JwtHelpers::validarToken($token);
-  }
-
-  public function mostrarAlimentos($tipoA)
-  {
-    if (!preg_match("/^(|Seleccionar|\d+)$/", $tipoA)) {
-      return ['resultado' => 'Seleccionar el tipo de alimento'];
-    } else {
-      $this->tipoA = $tipoA;
-      return $this->mostrarA();
+	 public function __construct(){
+        parent::__construct(); 
     }
+
+     public function mostrarAlimentos($tipoA, $returnJson=true) {
+      if (!preg_match("/^(|Seleccionar|\d+)$/", $tipoA)) {
+        $resultado = ['resultado' => 'Seleccionar el tipo de alimento'];
+        if ($returnJson) {
+            echo json_encode($resultado);
+            die();
+        } 
+        return $resultado; 
+    }
+    else {
+        $this->tipoA=$tipoA;
+        return $this->mostrarA($returnJson);
+       }
+     }
+
+    private function mostrarA($returnJson) {
+        try {
+        $this->conectarDB();
+          if($this->tipoA != 'Seleccionar' && !empty($this->tipoA)){ 
+            $new = $this->conex->prepare(" SELECT * FROM alimento a INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE a.status =1 and ta.idTipoA = ? ");
+            $new->bindValue(1, $this->tipoA);
+            $new->execute();
+            $data = $new->fetchAll(\PDO::FETCH_OBJ);
+
+          }
+          else{
+             $new = $this->conex->prepare(" SELECT * FROM alimento a INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE a.status =1 ");
+            $new->execute();
+            $data = $new->fetchAll(\PDO::FETCH_OBJ);
+          }
+
+          $this->desconectarDB();
+          if ($returnJson) {
+            echo json_encode($data);
+            die();
+          } 
+          return $data; 
+        } catch (\PDOException $e) {
+            
+            return $e;
+        }
+      }  
+
+  public function verificarExistencia($id, $returnJson=true){
+
+    if (!preg_match("/^[0-9]{1,}$/", $id)) {
+      $resultado = ['resultado' => 'id del alimento'];
+      if ($returnJson) {
+          echo json_encode($resultado);
+          die();
+      } 
+      return $resultado; 
+     } else {
+    
+      $this->id=$id;
+      return $this->verificarE($returnJson);
+     }
   }
 
-  private function mostrarA()
-  {
-    try {
+  private function verificarE($returnJson){
+    try{
+      $this->conectarDB();
+      $mostrar=$this->conex->prepare(" SELECT * FROM alimento WHERE idAlimento = ? and status =1");
+      $mostrar->bindValue(1, $this->id);
+      $mostrar->execute();
+      $data = $mostrar->fetchAll();
+      $this->desconectarDB();
       
-      if ($this->tipoA != 'Seleccionar' && !empty($this->tipoA)) {
-        return $this->mostrarAconFiltros();
-      } else {
-        return $this->mostrarAsinFiltros();
+
+       if (!isset( $data[0]["idAlimento"])) {
+          $mensaje = ['resultado' => 'ya no existe'];
+          if ($returnJson) {
+            echo json_encode($mensaje);
+            die();
+          } 
+          return $mensaje; 
+        }
+        else{
+          $mensaje = ['resultado' => 'si existe'];
+          return $mensaje;
+        }
+    }
+    catch(exection $error){
+            return array("Sistema", "¡Error Sistema!");
+
+    }
+  }
+
+  public function infoAlimento($id, $returnJson=true) {
+    if (!preg_match("/^[0-9]{1,}$/", $id)) {
+      $resultado = ['resultado' => 'Seleccionar el  alimento'];
+      if ($returnJson) {
+          echo json_encode($resultado);
+          die();
+      } 
+      return $resultado; 
+     } else {
+       $this->id = $id;
+       return $this->infoA($returnJson);
+     }
+  }
+
+
+  private function infoA($returnJson) {
+
+         try {
+            $this->conectarDB();
+            $query = $this->conex->prepare("SELECT * FROM alimento a INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE  a.idAlimento =?");
+            $query->bindValue(1, $this->id);
+            $query->execute();
+            $data = $query->fetchAll();
+            $this->desconectarDB();
+
+            if ($returnJson) {
+              echo json_encode($data);
+              die();
+            } 
+            return $data; 
+          
+          } catch (\PDOException $e) {
+              return $e;
+          }
+   }
+
+
+    public function verificarExistenciaTipoA($tipoA, $returnJson=true){
+      if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
+        $resultado = ['resultado' => 'Seleccionar el tipo de alimento'];
+        if ($returnJson) {
+            echo json_encode($resultado);
+            die();
+        } 
+        return $resultado; 
+       } else {
+        $this->tipoA=$tipoA;
+        return $this->verificarETA($returnJson);
+       }
+
+    }
+
+    private function verificarETA($returnJson){
+      try{
+        $this->conectarDB();
+        $verificar=$this->conex->prepare("SELECT idTipoA FROM tipoalimento WHERE status=1  and idTipoA=? ");
+        $verificar->bindValue(1, $this->tipoA);
+        $verificar->execute();
+        $data=$verificar->fetchAll();
+        $this->desconectarDB();
+       
+       if (!isset( $data[0]["idTipoA"])) {
+          $mensaje = ['resultado' => 'no esta'];
+          if ($returnJson) {
+            echo json_encode($mensaje);
+            die();
+          } 
+          return $mensaje; 
+        }
+        else{
+          $mensaje = ['resultado' => 'si esta'];
+          return $mensaje;
+        }
       }
-
-    } catch (\Exception $e) {
-      throw new \RuntimeException('Error al mostrar los alimentos: ' . $e->getMessage());
+      catch(exection $error){
+        
+        return array("Sistema", "¡Error Sistema!");
+      }
+      
     }
-  }
 
-  private function mostrarAconFiltros()
-  {
-    $this->conectarDB();
-    $new = $this->conex->prepare(" SELECT * FROM vista_alimentos WHERE idTipoA = ? ");
-    $new->bindValue(1, $this->tipoA);
-    $new->execute();
-    $data = $new->fetchAll(\PDO::FETCH_OBJ);
-    $this->desconectarDB();
-    return $data;
+	 public function mostrarTipoAlimento(){
+        try{
+            $this->conectarDB();
+            $registrar = $this->conex->prepare("SELECT * FROM `tipoalimento` WHERE status =1 ");
+            $registrar->execute();
+            $data = $registrar->fetchAll(\PDO::FETCH_OBJ);
+            $this->desconectarDB();
+            echo json_encode($data);
+            die();
 
-  }
+        }catch(\PDOException $e){
+            return $e;
+         }
+     }
 
-  private function mostrarAsinFiltros()
-  {
-    $this->conectarDB();
-    $new = $this->conex->prepare(" SELECT * FROM vista_alimentos ");
-    $new->execute();
-    $data = $new->fetchAll(\PDO::FETCH_OBJ);
-    $this->desconectarDB();
-    return $data;
+public function verificarBoton($id, $returnJson=true){
+  if (!preg_match("/^[0-9]{1,}$/", $id)) {
+    $resultado = ['resultado' => 'Seleccionar el alimento'];
+    if ($returnJson) {
+        echo json_encode($resultado);
+        die();
+    } 
+    return $resultado; 
+   } else {
+    $this->id=$id;
+    return $this->verificarB($returnJson);
+   }
+}
 
-  }
-
-  public function verificarExistencia($id)
-  {
-    if (!preg_match("/^[0-9]{1,}$/", $id)) {
-      return ['resultado' => 'id del alimento'];
-    } else {
-      $this->id = $id;
-      $resultado = $this->verificarE();
-      return $resultado === true ? ['resultado' => 'si existe'] : ['resultado' => 'ya no existe'];
-    }
-  }
-
-  private function verificarE()
-  {
-    try {
+private function verificarB($returnJson){
+    try{
       $this->conectarDB();
-      $mostrar = $this->conex->prepare(" SELECT * FROM alimento WHERE idAlimento = ? and status =1");
+      $mostrar=$this->conex->prepare(" SELECT idAlimento FROM alimento WHERE idAlimento=? and idAlimento IN (SELECT idAlimento FROM detalleentradaa WHERE status=1)");
       $mostrar->bindValue(1, $this->id);
       $mostrar->execute();
       $data = $mostrar->fetchAll();
       $this->desconectarDB();
-      return !empty($data);
-    } catch (\Exception $e) {
-      throw new \RuntimeException('Error al verificar la existencia de los alimentos: ' . $e->getMessage());
+
+       if (isset( $data[0]["idAlimento"])) {
+      
+          $mensaje = ['resultado' => 'no se puede'];
+          if ($returnJson) {
+            echo json_encode($mensaje);
+            die();
+          } 
+         return $mensaje; 
+        }
+        else{
+          $mensaje = ['resultado' => 'se puede'];
+          if ($returnJson) {
+            echo json_encode($mensaje);
+            die();
+          } 
+         return $mensaje; 
+        }
     }
+    catch(exection $error){
+            return array("Sistema", "¡Error Sistema!");
+
+    }
+    
   }
 
-  public function infoAlimento($id)
-  {
-    if (!preg_match("/^[0-9]{1,}$/", $id)) {
-      return ['resultado' => 'Seleccionar el  alimento'];
-    } else {
-      $this->id = $id;
-      return $this->infoA();
-    }
-  }
-
-
-  private function infoA()
-  {
-    try {
-      $this->conectarDB();
-      $query = $this->conex->prepare("SELECT * FROM vista_alimentos WHERE idAlimento=?");
-      $query->bindValue(1, $this->id);
-      $query->execute();
-      $data = $query->fetchAll();
-      $this->desconectarDB();
-      return $data;
-    } catch (\Exception $e) {
-      throw new \RuntimeException('Error al mostrar la informacion del alimento: ' . $e->getMessage());
-    }
-  }
-
-
-  public function verificarExistenciaTipoA($tipoA)
-  {
-    if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
-      return ['resultado' => 'Seleccionar el tipo de alimento'];
-    } else {
-      $this->tipoA = $tipoA;
-      $resultado = $this->verificarETA();
-      return $resultado === true ? ['resultado' => 'si esta'] : ['resultado' => 'no esta'];
-    }
-
-  }
-
-  private function verificarETA()
-  {
-    try {
-      $this->conectarDB();
-      $verificar = $this->conex->prepare("SELECT idTipoA FROM tipoalimento WHERE status=1  and idTipoA=? ");
-      $verificar->bindValue(1, $this->tipoA);
-      $verificar->execute();
-      $data = $verificar->fetchAll();
-      $this->desconectarDB();
-      return !empty($data);
-    } catch (\Exception $e) {
-      throw new \RuntimeException('Error al verificar la existencia del alimento: ' . $e->getMessage());
-    }
-
-  }
-
-  public function mostrarTipoAlimento()
-  {
-    try {
-      $this->conectarDB();
-      $registrar = $this->conex->prepare("SELECT * FROM `tipoalimento` WHERE status =1 ");
-      $registrar->execute();
-      $data = $registrar->fetchAll(\PDO::FETCH_OBJ);
-      $this->desconectarDB();
-      return $data;
-    } catch (\PDOException $e) {
-      return $e;
-    }
-  }
-
-  public function verificarBoton($id)
-  {
-    if (!preg_match("/^[0-9]{1,}$/", $id)) {
-      return ['resultado' => 'Seleccionar el alimento'];
-    } else {
-      $this->id = $id;
-      $resultado = $this->verificarB();
-      return $resultado === true ? ['resultado' => 'no se puede'] : ['resultado' => 'se puede'];
-    }
-  }
-
-  private function verificarB()
-  {
-    try {
-      $this->conectarDB();
-      $mostrar = $this->conex->prepare(" SELECT idAlimento FROM alimento a WHERE idAlimento=? and EXISTS (SELECT 1 FROM detalleentradaa da WHERE a.idAlimento = da.idAlimento AND  da.status=1)");
-      $mostrar->bindValue(1, $this->id);
-      $mostrar->execute();
-      $data = $mostrar->fetchAll();
-      $this->desconectarDB();
-      return !empty($data);
-    } catch (\Exception $e) {
-      throw new \RuntimeException('Error al verificar el boton de la info del alimento: ' . $e->getMessage());
-    }
-
-  }
-
-  public function verificarAlimento($id, $tipoA, $alimento, $marca)
-  {
+   public function verificarAlimento($id,$tipoA, $alimento, $marca, $returnJson=true){
     $errores = [];
     if (!preg_match("/^[0-9]{1,}$/", $id)) {
       $errores[] = 'Ingresar el codigo del alimento';
-    }
+    }    
     if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
-      $errores[] = 'Ingresar un tipo alimento correctamente';
+        $errores[] = 'Ingresar un tipo alimento correctamente';
     }
     if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $alimento)) {
-      $errores[] = 'Ingresar un alimento correctamente';
+        $errores[] = 'Ingresar un alimento correctamente';
     }
-
+    
     if (!preg_match("/^(Sin Marca|[a-zA-ZÀ-ÿ\s]{3,})$/", trim($marca))) {
       $errores[] = 'Ingresar una marca correctamente';
     }
 
     if (!empty($errores)) {
-      return ['resultado' => implode(", ", $errores)];
-    } else {
-
-      $this->tipoA = $tipoA;
-      $this->alimento = $alimento;
-      $this->marca = $marca;
-      $this->id = $id;
-      $resultado = $this->verificarA();
-      return $resultado === true ? ['resultado' => 'existe'] : ['resultado' => 'no esta duplicado'];
+        $mensaje= ['resultado' => implode(", ", $errores)];
+        if ($returnJson) {
+          echo json_encode($mensaje);
+          die();
+        } 
+        return $mensaje;
+    }
+    else{
+    
+        $this->tipoA=$tipoA;
+        $this->alimento=$alimento;
+        $this->marca=$marca;
+        $this->id=$id;
+        return $this->verificarA($returnJson);
     }
   }
 
-  private function verificarA()
-  {
-    try {
-      $this->conectarDB();
-      $verificar = $this->conex->prepare("SELECT nombre FROM alimento WHERE status =1  and idTipoA =? and nombre =? and marca =? and idAlimento !=? ");
-      $verificar->bindValue(1, $this->tipoA);
-      $verificar->bindValue(2, $this->alimento);
-      $verificar->bindValue(3, $this->marca);
-      $verificar->bindValue(4, $this->id);
-      $verificar->execute();
-      $data = $verificar->fetchAll();
-      $this->desconectarDB();
-      return !empty($data);
-    } catch (\Exception $e) {
-      throw new \RuntimeException('Error al verificar la duplicacion del alimento: ' . $e->getMessage());
+  private function verificarA($returnJson){
+        
+      try{
+        $this->conectarDB();
+        $verificar=$this->conex->prepare("SELECT nombre FROM alimento WHERE status =1  and idTipoA =? and nombre =? and marca =? and idAlimento !=? ");
+        $verificar->bindValue(1, $this->tipoA);
+        $verificar->bindValue(2, $this->alimento);
+        $verificar->bindValue(3, $this->marca);
+        $verificar->bindValue(4, $this->id);
+        $verificar->execute();
+        $data=$verificar->fetchAll();
+        $this->desconectarDB();
+       
+       if (isset($data[0]["nombre"])) {
+          $mensaje = ['resultado' => 'existe'];
+          if ($returnJson) {
+            echo json_encode($mensaje);
+            die();
+          } 
+          return $mensaje;
+        }
+        else{
+          $mensaje = ['resultado' => 'no esta duplicado'];
+          return $mensaje;
+        }
+      }
+      catch(exection $error){
+        
+        return array("Sistema", "¡Error Sistema!");
+      }
     }
+
+
+  public function modificarAlimentos($id, $tipoA, $alimento, $marca,
+  	$unidad, $returnJson=true){
+      $errores = [];
+      if (!preg_match("/^[0-9]{1,}$/", $id)) {
+        $errores[] = 'Ingresar el id del alimento correctamente';
+      }
+      if (!preg_match("/^[0-9]{1,}$/", $tipoA)){
+          $errores[] = 'Ingresar un tipo alimento correctamente';
+      }
+      if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $alimento)) {
+          $errores[] = 'Ingresar un alimento correctamente';
+      }
+      if (!preg_match("/^(Sin Marca|[a-zA-ZÀ-ÿ\s]{3,})$/", $marca)) {
+          $errores[] = 'Ingresar una marca correctamente';
+      }
+      if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{2,}$/", $unidad)) {
+          $errores[] = 'Ingresar la unidad correctamente';
+      }
+  
+      if (!empty($errores)) {
+          var_dump($errores);
+          $mensaje = ['resultado' => implode(", ", $errores)];
+          if ($returnJson) {
+              echo json_encode($mensaje);
+              die();
+          } 
+          return $mensaje;
+      } else {
+  	    $codigo =$this->generarCodigo($alimento, $marca);
+  	    $this->codigo=$codigo;
+        $this->tipoA=$tipoA;
+        $this->alimento=$alimento;
+        $this->marca=$marca;
+        $this->unidad=$unidad;
+        $this->id=$id;
+        return $this->modificarA($returnJson);
+     }
   }
 
-
-  public function modificarAlimentos(
-    $id,
-    $tipoA,
-    $alimento,
-    $marca,
-    $unidad
-  ) {
-    $errores = [];
-    if (!preg_match("/^[0-9]{1,}$/", $id)) {
-      $errores[] = 'Ingresar el id del alimento correctamente';
-    }
-    if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
-      $errores[] = 'Ingresar un tipo alimento correctamente';
-    }
-    if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $alimento)) {
-      $errores[] = 'Ingresar un alimento correctamente';
-    }
-    if (!preg_match("/^(Sin Marca|[a-zA-ZÀ-ÿ\s]{3,})$/", $marca)) {
-      $errores[] = 'Ingresar una marca correctamente';
-    }
-    if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{2,}$/", $unidad)) {
-      $errores[] = 'Ingresar la unidad correctamente';
-    }
-
-    if (!empty($errores)) {
-      var_dump($errores);
-      return ['resultado' => implode(", ", $errores)];
-    } else {
-      $codigo = $this->generarCodigo($alimento, $marca);
-      $this->codigo = $codigo;
-      $this->tipoA = $tipoA;
-      $this->alimento = $alimento;
-      $this->marca = $marca;
-      $this->unidad = $unidad;
-      $this->id = $id;
-      return $this->modificarA();
-    }
-  }
-
-  private function modificarA()
-  {
+  private function modificarA($returnJson){
 
     try {
       $this->conectarDB();
       $this->conex->beginTransaction();
 
-      $modificar = $this->conex->prepare(" UPDATE `alimento` SET `codigo`=?,`nombre`=?,`unidadMedida`=?,`marca`=?,`idTipoA`=? WHERE  idAlimento =?");
+      $modificar=$this->conex->prepare(" UPDATE `alimento` SET `codigo`=?,`nombre`=?,`unidadMedida`=?,`marca`=?,`idTipoA`=? WHERE  idAlimento =?");
       $modificar->bindValue(1, $this->codigo);
       $modificar->bindValue(2, $this->alimento);
       $modificar->bindValue(3, $this->unidad);
@@ -298,298 +371,236 @@ class consultarAlimentosModelo extends connectDB
       $modificar->execute();
 
       if ($modificar->rowCount() > 0) {
-        $bitacora = new bitacoraModelo;
-        $bitacora->registrarBitacora('Consultar Alimentos', 'Se Modificó los datos del Alimento:' . $this->alimento, $this->payload->cedula);
-        $this->conex->commit();
-        return ['resultado' => 'modificado'];
-      } else {
+            
+            $bitacora = new bitacoraModelo;
+            $bitacora->registrarBitacora('Consultar Alimentos', 'Se Modificó los datos del Alimento:' . $this->alimento, $_SESSION['cedula']);
+            $this->conex->commit();
+            $mensaje=['resultado' => 'modificado'];
+            if ($returnJson) {
+              echo json_encode($mensaje);
+              die();
+            } 
+            return $mensaje;
+
+        } else {
+            
+            $this->conex->rollBack();
+            $mensaje=['resultado' => 'No se encontró el alimento o no hubo cambios'];
+            if ($returnJson) {
+              echo json_encode($mensaje);
+            } 
+            return $mensaje;
+        }
+           
+      } catch (\PDOException $e) {
+        
         $this->conex->rollBack();
-        return ['resultado' => 'no hubo cambios'];
-      }
-
-    } catch (\PDOException $e) {
-
-      $this->conex->rollBack();
-      throw new \RuntimeException('Error al modificar el alimento: ' . $e->getMessage());
-    } finally {
-      $this->desconectarDB();
+        echo json_encode(['error' => $e->getMessage()]);
+    }
+    finally {
+         $this->desconectarDB();
     }
   }
 
 
-  public function modificarImagen($imagen, $id)
-  {
+  public function modificarImagen($imagen, $id,$returnJson=true) {
     $errores = [];
     if (!preg_match("/^[0-9]{1,}$/", $id)) {
       $errores[] = 'Ingresar el id del alimento correctamente';
     }
     if (!isset($_FILES['imagen']) || $_FILES['imagen']['error'] !== UPLOAD_ERR_OK) {
       $errores[] = 'Error al cargar el archivo. Asegúrate de subir una imagen válida.';
-    } else {
+     } else {
       $tipoArchivo = $_FILES['imagen']['type'];
-      $tiposPermitidos = ['image/jpeg', 'image/png'];
-
+      $tiposPermitidos = ['image/jpeg', 'image/png', 'image/gif'];
+  
       if (!in_array($tipoArchivo, $tiposPermitidos)) {
-        $errores[] = 'Ingresar una imagen correctamente (jpg, jpeg, png)';
+          $errores[] = 'Ingresar una imagen correctamente (jpg, jpeg, png, gif)';
       }
     }
     if (!empty($errores)) {
       var_dump($errores);
-      return ['resultado' => implode(", ", $errores)];
+      $mensaje = ['resultado' => implode(", ", $errores)];
+      if ($returnJson) {
+          echo json_encode($mensaje);
+          die();
+      } 
+      return $mensaje;
     } else {
-      $info = $this->infoAlimento($id, false);
-      $rand = $this->generarCodigo($info[0]['nombre'], $info[0]['marca']);
-      $this->img = $imagen;
-      $ruta = "assets/images/alimentos/";
-      $imagen = $ruta . $rand . '.png';
-      $this->imagen = $imagen;
-      move_uploaded_file($this->img, $this->imagen);
-      $this->id = $id;
-      return $this->modificarI();
+        $info= $this->infoAlimento($id, false);
+        $rand = $this->generarCodigo($info[0]['nombre'], $info[0]['marca']);
+        $this->img = $imagen;
+        $ruta = "assets/images/alimentos/";
+        $imagen = $ruta . $rand . '.png';
+        $this->imagen = $imagen;
+        move_uploaded_file($this->img, $this->imagen);
+        $this->id = $id;
+        return $this->modificarI($returnJson);
     }
   }
 
-  private function modificarI()
-  {
-    try {
-      $this->conectarDB();
-      $this->conex->beginTransaction();
-      $query = $this->conex->prepare("SELECT imgAlimento FROM  alimento WHERE idAlimento = ?");
-      $query->bindValue(1, $this->id);
-      $query->execute();
-      $data = $query->fetchAll();
-      if (isset($data[0]["imgAlimento"])) {
-        $imagen = $data[0]["imgAlimento"];
-        $this->delete($imagen);
+  private function modificarI($returnJson) {
+        try {
+           $this->conectarDB();
+           $this->conex->beginTransaction();
+            $query = $this->conex->prepare("SELECT imgAlimento FROM  alimento WHERE idAlimento = ?");
+            $query->bindValue(1, $this->id);
+            $query->execute();
+            $data = $query->fetchAll();
+            if (isset($data[0]["imgAlimento"])) {
+                $imagen = $data[0]["imgAlimento"];
+                $this->delete($imagen);
+            }
+            $new = $this->conex->prepare("UPDATE alimento SET imgAlimento = ? WHERE `idAlimento` = ? AND `status` = 1");
+            $new->bindValue(1, $this->imagen);
+            $new->bindValue(2, $this->id);
+            $new->execute();
+            $this->conex->commit();
+            $resultado = ['resultado' => 'imagen modificado'];
+            if ($returnJson) {
+              echo json_encode($resultado);
+              die();
+            } 
+            return $resultado;
+        } catch (\PDOException $e) {
+        
+        $this->conex->rollBack();
+        echo json_encode(['error' => $e->getMessage()]);
+    }
+    finally {
+         $this->desconectarDB();
       }
-      $new = $this->conex->prepare("UPDATE alimento SET imgAlimento = ? WHERE `idAlimento` = ? AND `status` = 1");
-      $new->bindValue(1, $this->imagen);
-      $new->bindValue(2, $this->id);
-      $new->execute();
-      $this->conex->commit();
-      return ['resultado' => 'imagen modificado'];
-
-    } catch (\PDOException $e) {
-      $this->conex->rollBack();
-      throw new \RuntimeException('Error al modifcar la imagen del alimento: ' . $e->getMessage());
-    } finally {
-      $this->desconectarDB();
-    }
 
   }
 
-  function delete($imagen)
-  {
+private function quitarAcentos($cadena) {
+    $acentos = array(
+        'á', 'é', 'í', 'ó', 'ú', 'Á', 'É', 'Í', 'Ó', 'Ú',
+        'à', 'è', 'ì', 'ò', 'ù', 'À', 'È', 'Ì', 'Ò', 'Ù',
+        'ä', 'ë', 'ï', 'ö', 'ü', 'Ä', 'Ë', 'Ï', 'Ö', 'Ü',
+        'â', 'ê', 'î', 'ô', 'û', 'Â', 'Ê', 'Î', 'Ô', 'Û',
+        'ã', 'õ', 'ñ', 'Ã', 'Õ', 'Ñ', 'ç', 'Ç'
+    );
+    $sin_acentos = array(
+        'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U',
+        'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U',
+        'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U',
+        'a', 'e', 'i', 'o', 'u', 'A', 'E', 'I', 'O', 'U',
+        'a', 'o', 'n', 'A', 'O', 'N', 'c', 'C'
+    );
+    return str_replace($acentos, $sin_acentos, $cadena);
+}
+
+private function generarCodigo($palabra1, $palabra2) {
+    // Eliminar acentos
+    $palabra1 = $this->quitarAcentos($palabra1);
+    $palabra2 = $this->quitarAcentos($palabra2);
+    
+    // Eliminar caracteres no alfanuméricos y convertir a mayúsculas
+    $palabra1 = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $palabra1));
+    $palabra2 = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $palabra2));
+    
+    
+    // Obtener los dos primeros caracteres de cada palabra
+    $parte1 = substr($palabra1, 0, 3);
+    $parte2 = substr($palabra2, 0, 3);
+   
+    // Generar dos números aleatorios
+    $numerosAleatorios = rand(10, 99); // Dos dígitos aleatorios entre 10 y 99
+    
+    // Concatenar las partes
+    $codigo = $parte1 . $parte2 . $numerosAleatorios;
+    
+    return $codigo;
+}
+
+function delete($imagen){
     $imagen;
     if (file_exists($imagen)) {
-      if (unlink($imagen)) {
-        return "La imagen ha sido eliminada correctamente.";
-      } else {
-        return "Error al intentar eliminar la imagen.";
-      }
+        if (unlink($imagen)) {
+            return "La imagen ha sido eliminada correctamente.";
+        } else {
+            return "Error al intentar eliminar la imagen.";
+        }
     } else {
-      return "La imagen no existe en el directorio especificado.";
+        return "La imagen no existe en el directorio especificado.";
     }
-  }
+}
 
 
-  public function anularAlimento($id)
-  {
-    if (!preg_match("/^[0-9]{1,}$/", $id)) {
-      return ['resultado' => 'Seleccionar el  alimento a anular'];
-    } else {
-      $this->id = $id;
-      return $this->anular();
-    }
+public function anularAlimento($id, $returnJson=true) {
+  if (!preg_match("/^[0-9]{1,}$/", $id)) {
+    $resultado = ['resultado' => 'Seleccionar el  alimento a anular'];
+    if ($returnJson) {
+        echo json_encode($resultado);
+        die();
+    } 
+    return $resultado; 
+   } else {
+    $this->id=$id;
+    return $this->anular($returnJson);
+   }
+    
+}
 
-  }
-
-  private function anular()
-  {
-
+private function anular($returnJson) {
+  
     try {
-      $this->conectarDB();
-      $this->conex->beginTransaction();
-      $query = $this->conex->prepare("SELECT * FROM vista_alimentos WHERE idAlimento= ?");
-      $query->bindValue(1, $this->id);
-      $query->execute();
-      $data = $query->fetchAll();
+        $this->conectarDB();
+        $this->conex->beginTransaction();
+        $query = $this->conex->prepare("SELECT * FROM  alimento WHERE idAlimento = ?");
+        $query->bindValue(1, $this->id);
+        $query->execute();
+        $data = $query->fetchAll();
 
-      if ($data) {
-        $alimento = $data[0]['nombre'];
-        if (isset($data[0]["imgAlimento"])) {
-          $imagen = $data[0]["imgAlimento"];
-          $this->delete($imagen);
+        if ($data) {
+            $alimento = $data[0]['nombre'];
+        if(isset($data[0]["imgAlimento"]) ){
+           $imagen= $data[0]["imgAlimento"];
+           $this->delete($imagen);
         }
 
-        $new = $this->conex->prepare("UPDATE `alimento` SET status = 0  WHERE `idAlimento` = ? ");
+         $new = $this->conex->prepare("UPDATE `alimento` SET status = 0  WHERE `idAlimento` = ? ");
         $new->bindValue(1, $this->id);
         $new->execute();
 
-        $bitacora = new bitacoraModelo;
-        $bitacora->registrarBitacora('Consultar Alimentos', 'Se anuló un alimento llamado: ' . $alimento, $this->payload->cedula);
+         if ($new->rowCount() > 0) {
+                
+                $bitacora = new bitacoraModelo;
+                $bitacora->registrarBitacora('Tipos de Alimentos', 'Se anuló un Tipo de alimento llamado: ' . $alimento, $_SESSION['cedula']);
 
-        $this->conex->commit();
-        return ['resultado' => 'eliminado'];
-
-      } else {
-        $this->conex->rollBack();
-        return ['mensaje' => 'No se encontró alimentos'];
+                
+            $this->conex->commit();
+            $mensaje = ['resultado' => 'eliminado'];
+            if ($returnJson) {
+              echo json_encode($mensaje);
+              die();
+            } 
+            return $mensaje; 
+           } else {
+                
+                $this->conex->rollBack();
+                $mensaje=['mensaje' => 'No se encontró el alimento o no se pudo anular'];
+                if ($returnJson) {
+                  echo json_encode($mensaje);
+                  die();
+                } 
+                return $mensaje; 
+            }
+       } else {
+            $this->conex->rollBack();
+            echo json_encode(['mensaje' => 'No se encontró alimentos']);
+        }
       }
-    } catch (\PDOException $e) {
-
-      $this->conex->rollBack();
-      throw new \RuntimeException('Error al eliminar el alimento: ' . $e->getMessage());
-    } finally {
-      $this->desconectarDB();
+        catch (\PDOException $e) {
+        
+        $this->conex->rollBack();
+        echo json_encode(['error' => $e->getMessage()]);
     }
-  }
-
-  function validarImagen($imagen)
-  {
-    if ($imagen['error'] !== UPLOAD_ERR_OK) {
-      return ['resultado' => 'Error al subir la imagen'];
-    }
-    $mime = mime_content_type($imagen['tmp_name']);
-    $formatosValidos = ['image/jpeg', 'image/png'];
-
-    if (!in_array($mime, $formatosValidos)) {
-      return ['resultado' => 'El archivo no es una imagen válida (JPEG, PNG)!'];
-    }
-    if ($imagen['size'] > 2 * 1024 * 1024) {
-      return ['resultado' => 'La imagen no debe superar los 2MB!'];
-    }
-    $dimensiones = getimagesize($imagen['tmp_name']);
-    if ($dimensiones === false) {
-      return ['resultado' => 'La imagen está dañada o no se puede procesar!'];
-    }
-    return true;
-  }
-
-  private function generarCodigo($palabra1, $palabra2)
-  {
-    $palabra1 = $this->quitarAcentos($palabra1);
-    $palabra2 = $this->quitarAcentos($palabra2);
-
-    $palabra1 = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $palabra1));
-    $palabra2 = strtoupper(preg_replace('/[^a-zA-Z0-9]/', '', $palabra2));
-
-    $parte1 = substr($palabra1, 0, 3);
-    $parte2 = substr($palabra2, 0, 3);
-
-    $numerosAleatorios = rand(10, 99);
-    $codigo = $parte1 . $parte2 . $numerosAleatorios;
-
-    return $codigo;
-  }
-
-  private function quitarAcentos($cadena)
-  {
-    $acentos = array(
-      'á',
-      'é',
-      'í',
-      'ó',
-      'ú',
-      'Á',
-      'É',
-      'Í',
-      'Ó',
-      'Ú',
-      'à',
-      'è',
-      'ì',
-      'ò',
-      'ù',
-      'À',
-      'È',
-      'Ì',
-      'Ò',
-      'Ù',
-      'ä',
-      'ë',
-      'ï',
-      'ö',
-      'ü',
-      'Ä',
-      'Ë',
-      'Ï',
-      'Ö',
-      'Ü',
-      'â',
-      'ê',
-      'î',
-      'ô',
-      'û',
-      'Â',
-      'Ê',
-      'Î',
-      'Ô',
-      'Û',
-      'ã',
-      'õ',
-      'ñ',
-      'Ã',
-      'Õ',
-      'Ñ',
-      'ç',
-      'Ç'
-    );
-    $sin_acentos = array(
-      'a',
-      'e',
-      'i',
-      'o',
-      'u',
-      'A',
-      'E',
-      'I',
-      'O',
-      'U',
-      'a',
-      'e',
-      'i',
-      'o',
-      'u',
-      'A',
-      'E',
-      'I',
-      'O',
-      'U',
-      'a',
-      'e',
-      'i',
-      'o',
-      'u',
-      'A',
-      'E',
-      'I',
-      'O',
-      'U',
-      'a',
-      'e',
-      'i',
-      'o',
-      'u',
-      'A',
-      'E',
-      'I',
-      'O',
-      'U',
-      'a',
-      'o',
-      'n',
-      'A',
-      'O',
-      'N',
-      'c',
-      'C'
-    );
-    return str_replace($acentos, $sin_acentos, $cadena);
-  }
-
-
-
+    finally {
+         $this->desconectarDB();
+      }
+}
 
 
 

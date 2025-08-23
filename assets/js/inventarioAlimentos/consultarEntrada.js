@@ -11,6 +11,7 @@ $.ajax({
     }
 }).then(function () {
     eliminarPermiso = (typeof permisos.eliminar === 'undefined') ? 'disabled' : '';
+    $('#enviar').attr(registrarPermiso, '');
 });
 
 function quitarBotones(){
@@ -26,19 +27,13 @@ $(".borrar").remove()
         {
             "data": "fecha",
             "className": "text-center",
-            "render": function formatDate(data) {
+            "render": function(data) {
                 let fecha = new Date(data);
-                if (isNaN(fecha)) {
-                    return "Fecha inválida";
-                }
-
-                let dia = fecha.getUTCDate().toString().padStart(2, '0'); // Día del mes
-                let mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0'); // Mes
-                let anio = fecha.getUTCFullYear(); // Año
+                let dia = (fecha.getDate() + 1).toString().padStart(2, '0');
+                let mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                let anio = fecha.getFullYear();
                 return `${dia}-${mes}-${anio}`;
             }
-            
-            
         },
         {
             "data": "hora",
@@ -81,7 +76,6 @@ function tablaEntradaAlimentos() {
         dataType: "json",
         data: { mostrarEntradaA: true, fechaInicio, fechaFin },
         success(data) {
-            console.log(data);
             $('#ani').show(2000);
             mostrarEA.clear().rows.add(data).draw();
             mostrarEA.on('draw.dt', function () {
@@ -149,14 +143,11 @@ function mostrarAlimentos(idTipoA, idInventarioA) {
         success(data) {
 
                   let tablita ='';
-                    let fecha = new Date(data[0].fecha);
-                    if (isNaN(fecha)) {
-                        return "Fecha inválida";
-                    }
-    
-                    let dia = fecha.getUTCDate().toString().padStart(2, '0'); // Día del mes
-                    let mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0'); // Mes
-                    let anio = fecha.getUTCFullYear(); // Año
+                 let fecha = new Date(data[0].fecha);
+                 let dia = (fecha.getDate() + 1).toString().padStart(2, '0');
+                 let mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                 let anio = fecha.getFullYear();
+
                  let fechaFormateada = `${dia}-${mes}-${anio}`;
                   let hora = new Date(`01/01/2000 ${data[0].hora}`);
                   let horaFormateada = hora.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
@@ -285,19 +276,16 @@ function valAnulacion(idd){
   //-----------------------------------------------------------------------------------------
   
   $('#borrar').click((e)=>{
- let token = $('[name="csrf_token"]').val();
- if(token){
-    console.log(token);
+
     e.preventDefault();
     $.ajax({
       url: '',
       method: 'post',
       dataType: 'json',
-      data:{id , borrar: 'borrar', csrfToken: token},
+      data:{id , borrar: 'borrar'},
       success(data){
         console.log(data);
-      if (data.mensaje.resultado === 'eliminado' && data.newCsrfToken){
-        $('[name="csrf_token"]').val(data.newCsrfToken);
+      if (data.resultado === 'eliminado'){
         $('#cerrar3').click();
         tablaEntradaAlimentos();
           Swal.fire({
@@ -312,7 +300,6 @@ function valAnulacion(idd){
       }
     }
   })
-    }
     })
 
 
@@ -544,23 +531,3 @@ $('#ia2').addClass('active');
 $('.ia2').addClass('active')
 $('#ea3').addClass('text-primary');
 $('.ea3').addClass('active')
-
-setInterval(function() {
-  $.ajax({
-     url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
-      success(data){
-      if (data.newCsrfToken) {
-      $('[name="csrf_token"]').val(data.newCsrfToken);
-        console.log('Token CSRF renovado');
-      } else {
-        console.log('No se pudo renovar el token CSRF');
-      }
-    },
-    error: function(err) {
-      console.error('Error renovando token CSRF:', err);
-    }
-  });
-}, 240000);

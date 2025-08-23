@@ -12,7 +12,6 @@ let error_tabla=false;
 let error_hora=false;
 let hoyA= $('#fecha');
 let horaAa=$('#hora');
-let timer;
 $('#disponibilidad').hide();
 $('#tablaD').hide();
 const tableContainer = document.getElementById('totalA');
@@ -74,15 +73,12 @@ $("#alimento").on('change', function() {
  });
 
 
-$(".cantidad").focusout(function(){
+$("#cantidad").focusout(function(){
     chequeo_cantidad();
  });
 
- $(".cantidad").on('keyup', function(){
-         clearTimeout(timer); 
-         timer = setTimeout(function () {
-          chequeo_cantidad();
-         }, 500);
+ $("#cantidad").on('keyup', function(){
+    chequeo_cantidad();
  });
 
 $("#fecha").focusout(function(){
@@ -463,52 +459,62 @@ function colocarHoraActualEnCampo(hor) {
         }
     }
 
-    $("#cantidad").on("input keydown", function (e) {
-      if (e.key === "." || e.key === ",") {
-          e.preventDefault();
-      }
-      this.value = this.value.replace(/[.,]/g, ""); 
+   function chequeo_cantidad() {
+  var chequeo = /^[1-9]\d*$/;
+  let alimento = $('.alimento').val();
+  var cantidad = $("#cantidad").val();
+
+  disponible(alimento).then(mostrarCantidadDisponible => {
+    console.log(mostrarCantidadDisponible);
+    console.log(alimento);
+
+    if (chequeo.test(cantidad) && cantidad !== 0) {
+      $(".error4").html("");
+      $(".error4").hide();
+      $('#cantidad').removeClass('errorBorder');
+      $('.bar4').addClass('bar');
+      $('.ic4').removeClass('l');
+      $('.ic4').addClass('labelPri');
+      $('.letra4').removeClass('labelE');
+      $('.letra4').addClass('label-char');
+    } else {
+      $(".error4").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la cantidad de alimentos!');
+      $(".error4").show();
+      $('#cantidad').addClass('errorBorder');
+      $('.bar4').removeClass('bar');
+      $('.ic4').addClass('l');
+      $('.ic4').removeClass('labelPri');
+      $('.letra4').addClass('labelE');
+      $('.letra4').removeClass('label-char');
+      error_cantidad = true;
+    }
+
+    if (cantidad > mostrarCantidadDisponible) {
+      $(".error4").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese una cantidad igual o inferior a lo que está disponible!');
+      $(".error4").show();
+      $('#cantidad').addClass('errorBorder');
+      $('.bar4').removeClass('bar');
+      $('.ic4').addClass('l');
+      $('.ic4').removeClass('labelPri');
+      $('.letra4').addClass('labelE');
+      $('.letra4').removeClass('label-char');
+      $('#agregarInventario').prop('disabled', true);
+      error_cantidad = true;
+    } else {
+      $(".error4").html("");
+      $(".error4").hide();
+      $('#cantidad').removeClass('errorBorder');
+      $('.bar4').addClass('bar');
+      $('.ic4').removeClass('l');
+      $('.ic4').addClass('labelPri');
+      $('.letra4').removeClass('labelE');
+      $('.letra4').addClass('label-char');
+      $('#agregarInventario').prop('disabled', false);
+    }
+  }).catch(error => {
+    console.error('Error al obtener la cantidad disponible:', error);
   });
-
-    function chequeo_cantidad() { 
-      var chequeo = /^[1-9]\d*$/;
-      let alimento = $('.alimento').val();
-      var cantidad = $("#cantidad").val().replace(/[.,]/g, ""); 
-  
-      if (!chequeo.test(cantidad) || cantidad == 0) {
-          $(".error4").html('<i class="bi bi-exclamation-triangle-fill"></i> Ingrese la cantidad de alimentos válida!');
-          $(".error4").show();
-          $('#cantidad').addClass('errorBorder');
-          $('.bar4').removeClass('bar');
-          $('.ic4').addClass('l');
-          $('.ic4').removeClass('labelPri');
-          $('.letra4').addClass('labelE');
-          $('.letra4').removeClass('label-char');
-          return; 
-      }
-
-      cantidad = parseInt(cantidad, 10);
-  
-      disponible(alimento).then(mostrarCantidadDisponible => {
-          console.log(mostrarCantidadDisponible);
-          console.log(alimento);
-  
-          if (cantidad > mostrarCantidadDisponible) {
-              $(".error4").html('<i class="bi bi-exclamation-triangle-fill"></i> Ingrese una cantidad igual o inferior a lo que está disponible!');
-              $(".error4").show();
-              $('#cantidad').addClass('errorBorder');
-              $('#agregarInventario').prop('disabled', true);
-          } else {
-              $(".error4").html("");
-              $(".error4").hide();
-              $('#cantidad').removeClass('errorBorder');
-              $('#agregarInventario').prop('disabled', false);
-          }
-      }).catch(error => {
-          console.error('Error al obtener la cantidad disponible:', error);
-      });
-  }
-  
+}
 
       
 
@@ -912,8 +918,8 @@ function mostrarInfo(alimento, cantidad, unidad){
       data: { muestra: true, idAlimento }, 
       success(data) {
 
-        let cantA = data[0].stock;
-        resolve(cantA);
+        let cantidad = data[0].stock;
+        resolve(cantidad);
       },
       error(err) {
         reject(err);
@@ -954,18 +960,13 @@ function registrar(){
 	var hora = $("#hora").val();
 	var tipoS = $("#tipoS").val();
 	var descripcion = $("#descripcion").val();
-   let token = $('[name="csrf_token"]').val();
-   if(token) {
-    console.log("Token CSRF encontrado:", token);
 	$.ajax({
 		url:"",
 		method:"post",
 		dataType:"json",
-		data:{registrar:true, fecha, hora,tipoS, descripcion, csrfToken: token},
+		data:{registrar:true, fecha, hora,tipoS, descripcion},
     success(data){
-
-      if(data.mensaje && data.newCsrfToken){
-              registrarDetalle(data.mensaje.id);
+              registrarDetalle(data.id);
               Swal.fire({
                toast: true,
                position: 'top-end',
@@ -979,13 +980,13 @@ function registrar(){
              $('#cancelar').click();
              $('.tabla tbody tr').remove();
              $('#ani').hide();
-              $('[name="csrf_token"]').val(data.newCsrfToken);
-             console.log('Token CSRF renovado:', data.newCsrfToken);
           
        }
-      }
+		
+
+
+
 	});
-}
 }
 
 //----------------------------- REGISTRAR DETALLE -----------------------------
@@ -1013,23 +1014,3 @@ $('#ia4').addClass('active');
 $('.ia4').addClass('active')
 $('#sa2').addClass('text-primary');
 $('.sa2').addClass('active')
-
-setInterval(function() {
-  $.ajax({
-     url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
-      success(data){
-      if (data.newCsrfToken) {
-      $('[name="csrf_token"]').val(data.newCsrfToken);
-        console.log('Token CSRF renovado');
-      } else {
-        console.log('No se pudo renovar el token CSRF');
-      }
-    },
-    error: function(err) {
-      console.error('Error renovando token CSRF:', err);
-    }
-  });
-}, 240000);

@@ -8,7 +8,6 @@ let error_marca=false;
 let error_unidad=false;
 let error_veriTA = false;
 let error_veriA = false;
-let timer;
 
 
 // Agregar imagen por defecto
@@ -28,24 +27,20 @@ fileInput0.addEventListener('change', function() {
 
  $("#alimento").focusout(function(){
     chequeo_alimento();
+    verificarAlimento()
  });
  $("#alimento").on('keyup', function(){
     chequeo_alimento();
-    clearTimeout(timer); 
-         timer = setTimeout(function () {
-           verificarAlimento()
-         }, 500);
+    verificarAlimento()
  });
 
  $("#marca").focusout(function(){
     chequeo_marca();
+    verificarAlimento()
  });
  $("#marca").on('keyup', function(){
     chequeo_marca();
-    clearTimeout(timer); 
-         timer = setTimeout(function () {
-           verificarAlimento()
-         }, 500);
+    verificarAlimento()
  });
 
  $("#unidad").on('change', function() {
@@ -59,13 +54,11 @@ fileInput0.addEventListener('change', function() {
                     $('#marca').show();
                     $("#marca").focusout(function(){
                       chequeo_marca();
+                      verificarAlimento()
                       });
                  $("#marca").on('keyup', function(){
                      chequeo_marca();
-                      clearTimeout(timer); 
-                      timer = setTimeout(function () {
-                         verificarAlimento()
-                      }, 500);
+                      verificarAlimento()
                   });
                 } else {
                     $('#marca').hide();
@@ -118,7 +111,7 @@ $("#registrar").on("click", function(e) {
             let unidad = $("#unidad").val();
 
             if (imagen !== null) {
-                datos.append("imagen", imagen); 
+                datos.append("imagen", imagen); // Solo agregamos la imagen si está presente
             }
 
             datos.append("men", men);
@@ -468,7 +461,6 @@ $(document).ready(function() {
                           dataType: "json",
                           data:{ valida:'si', tipoA},
                           success(data){
-		                	data = typeof data === 'string' ? JSON.parse(data) : data;
                           	if (data.resultado === 'no esta') {
                           		 delete select;
                                 mostrarTipoA();
@@ -512,7 +504,6 @@ $(document).ready(function() {
                             dataType: "json",
                             data: { tipoA, alimento, marca },
                             success(data) {
-			                    data = typeof data === 'string' ? JSON.parse(data) : data;
                                 if (data.resultado === 'existe') {
                                     Swal.fire({
                                         toast: true,
@@ -549,66 +540,31 @@ $(document).ready(function() {
 
    // REGISTRAR ----------------------------------------------------
 
+
 function registrar(datos){
-    let token = $('[name="csrf_token"]').val();
-    datos.append('csrfToken', token); // Agregar el token CSRF a los datos del formulario
-    if(token) {
-	$.ajax({
-		url: "",
-		type: "POST",
-		data: datos,
-		processData: false,
-		contentType: false,
-		success: function(data) {
-			// Asegurarse de que 'data' sea un objeto
-			data = typeof data === 'string' ? JSON.parse(data) : data;
-
-			if (data.resultado == 'El archivo no es una imagen válida (JPEG, PNG)!' || 
-			    data.resultado == 'La imagen no debe superar los 2MB!' || 
-			    data.resultado == 'La imagen está dañada o no se puede procesar!') {
-
-				container0.innerHTML = ''; 
-				container0.appendChild(defaultImage); 
-				$('.error1').html('<i class="bi bi-exclamation-triangle-fill"></i> ' + data.resultado + '!');
-				$(".error1").show();
-				$('#fileInput0').addClass('errorBorder');
-				$('.bar1').removeClass('bar');
-				$('.ic1').addClass('l');
-				$('.ic1').removeClass('labelPri');
-				$('.letra').addClass('labelE');
-				$('.letra').removeClass('label-char');
-				fileInput0.classList.add('changed');
-
-				Swal.fire({
-					toast: true,
-					position: 'top-end',
-					icon: 'error',
-					title: data.resultado,
-					showConfirmButton: false,
-					timer: 2500,
-					timerProgressBar: true,
-				});
-			} else if (data.mensaje.resultado === 'registrado' && data.newCsrfToken) {
-                console.log(data);
-                $('[name="csrf_token"]').val(data.newCsrfToken); // Actualizar el token CSRF en el formulario
-				Swal.fire({
-					toast: true,
-					position: 'top-end',
-					icon: 'success',
-					title: 'Alimento Registrado Exitosamente!',
-					showConfirmButton: false,
-					timer: 2500,
-					timerProgressBar: true,
-				});
-				$('.formu').trigger('reset'); 
-				primary();
-			}
-		}
-	});
-
-    }
+	 $.ajax({
+      url: "",
+      type: "POST",
+      data: datos,
+      processData: false,
+      contentType: false,
+      success: function(data) {
+        Swal.fire({
+               toast: true,
+               position: 'top-end',
+               icon:'success',
+               title:'Alimento Registrado Exitosamente!',
+               showConfirmButton:false,
+               timer:2500,
+               timerProgressBar:true,
+            })
+            $('.formu').trigger('reset'); 
+            primary();
+        }
+    });
 }
- 
+                  
+  
       
 
 
@@ -616,23 +572,3 @@ function registrar(datos){
 $('#ali1').addClass('active');
 $('#ali2').addClass('text-primary');
 $('.ali2').addClass('active')
-
-setInterval(function() {
-  $.ajax({
-     url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
-      success(data){
-      if (data.newCsrfToken) {
-      $('[name="csrf_token"]').val(data.newCsrfToken);
-        console.log('Token CSRF renovado');
-      } else {
-        console.log('No se pudo renovar el token CSRF');
-      }
-    },
-    error: function(err) {
-      console.error('Error renovando token CSRF:', err);
-    }
-  });
-}, 240000);
