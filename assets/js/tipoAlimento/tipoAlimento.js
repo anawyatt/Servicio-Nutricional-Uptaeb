@@ -198,8 +198,10 @@ $(".error1").hide();
                     error_val=true;
                   } 
                    else{
+                    error_val=false;
                    primary();
                  }
+                  $("#registrar").prop("disabled", false);
 
             }
        })
@@ -238,6 +240,7 @@ function registrar(){
                            timerProgressBar:true,
                        })
                   }
+
                     
                 },complete() {
                     $("#registrar").prop("disabled", false);

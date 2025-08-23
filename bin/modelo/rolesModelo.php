@@ -63,7 +63,7 @@ class RolesModelo extends connectDB
             if (!$this->validarDato($rol, 'soloLetras')) {
                 return ['error' => 'El nombre debe contener solo letras y no puede estar vacío.'];
             }
-            if ($this->validarR()) {
+            if ($this->validarRol($rol)['resultado'] === 'error2') {
                 return ['resultado' => 'error2'];
             }
             $this->rol = $rol;
@@ -282,10 +282,10 @@ class RolesModelo extends connectDB
         if (!preg_match("/^[0-9]{1,}$/", $id)) {
             return ['resultado' => 'Ingresar el id del rol'];
         }
-        if($this->validarR()) {
+        if($this->validarRol2($rol, $id)['resultado'] === 'errorRol') {
             return ['resultado' => 'errorRol'];
         }
-        if($this->verificarE() === false) {
+        if($this->verificarExistencia($id)['resultado'] === 'ya no existe') {
             return ['resultado' => 'ya no existe'];
         }
         $this->rol = $rol;
@@ -336,7 +336,7 @@ class RolesModelo extends connectDB
         if ($rolActual == $id) {
             return ['resultado' => 'No puedes eliminar el rol con el que iniciaste sesión.'];
         }
-        if($this->verificarE() === false) {
+        if($this->verificarExistencia($id)['resultado'] === 'ya no existe') {
             return ['resultado' => 'ya no existe'];
         }
 

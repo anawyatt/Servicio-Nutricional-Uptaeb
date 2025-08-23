@@ -107,7 +107,7 @@ $("#error1").hide();
         validar_roles();
         val_rol();
 
-        if (error_rol == false && error_val == false) {
+        if (error_rol == false && error_val === false) {
             registrar();
         }
         else{
@@ -148,6 +148,7 @@ $("#error1").hide();
              $('.ic1').addClass('labelPri');
              $('.letra').removeClass('labelE');
              $('.letra').addClass('label-char');
+              ocultarSpinner();
        }
 
       function val_rol() {
@@ -171,6 +172,7 @@ $("#error1").hide();
         data:{rol},
          success(data){
                  if (data.resultado == 'error2') {
+                    ocultarSpinner();
                      Swal.fire({
                            toast: true,
                            position: 'top-end',
@@ -182,12 +184,15 @@ $("#error1").hide();
                         })
                      danger();
                      $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El rol ya existe!');
+                      
                     error_val=true;
                   } 
                  else{
+                    error_val=false;
                    primary();
      
                  }
+                  $("#registrar").prop("disabled", false);
 
             }
        })
@@ -212,10 +217,10 @@ $("#error1").hide();
         const rol = capitalizarYEliminarEspaciosExtras($("#rol").val());
         let token = $('[name="csrf_token"]').val();
 
-        mostrarSpinner();
         $("#registrar").prop("disabled", true);
 
         if(token){
+         mostrarSpinner();
          console.log(token);
         $.ajax({
             type: "post",

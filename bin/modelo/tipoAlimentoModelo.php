@@ -65,7 +65,7 @@ class tipoAlimentoModelo extends connectDB
     if (!$this->validarTipoA($tipoA)) {
       return ['resultado' => 'Ingresar el tipo de alimento correctamente'];
     } else {
-      if ($this->verificarTA() === true) {
+      if ($this->verificarTipoAlimento($tipoA)['resultado'] === 'error tipo') {
         return ['resultado' => 'error tipo'];
       } else {
       $this->tipoA = $tipoA;
@@ -247,14 +247,14 @@ class tipoAlimentoModelo extends connectDB
     if (!empty($errores)) {
       return ['resultado' => implode(", ", $errores)];
     } else {
-      if ($this->verificar2() === true) {
+      if ($this->verificarTipoA2($tipoA, $id)['resultado'] === 'error tipo2') {
         return ['resultado' => 'error tipo2'];
       }
       if ($this->verificarExistencia($id)['resultado'] === 'ya no existe') {
-        return ['resultado' => 'no se puede modificar, ya no existe'];
+        return ['resultado' => 'ya no existe'];
       }
-      if ($this->verificarB() === true) {
-        return ['resultado' => 'no se puede modificar, ya tiene alimentos asociados'];
+      if ($this->verificarBoton($id)['resultado'] === 'no se puede') {
+        return ['resultado' => 'no se puede'];
       }
       
       $this->tipoA = $tipoA;
@@ -301,10 +301,10 @@ class tipoAlimentoModelo extends connectDB
       return ['resultado' => 'Ingresar el id del tipo de alimento correctamente'];
     } else {
       if ($this->verificarExistencia($id)['resultado'] === 'ya no existe') {
-        return ['resultado' => 'no se puede anular, ya no existe'];
+        return ['resultado' => 'ya no existe'];
       }
-      if ($this->verificarB() === true) {
-        return ['resultado' => 'no se puede anular, ya tiene alimentos asociados'];
+      if ($this->verificarBoton($id)['resultado'] === 'no se puede') {
+        return ['resultado' => 'no se puede'];
       }
       $this->id = $id;
       return $this->anular();
