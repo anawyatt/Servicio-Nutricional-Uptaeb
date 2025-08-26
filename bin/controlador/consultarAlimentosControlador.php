@@ -158,7 +158,7 @@ if ( isset($_POST['modificarINFO']) && isset($_POST['id']) && isset($_POST['tipo
 
    }
 
-if (isset($_FILES['imagen']['tmp_name']) && isset($_POST['id']) && isset($_POST['csrfToken'])) {
+if (isset($_FILES['imagen']) && isset($_POST['id']) && isset($_POST['csrfToken'])) {
   try {
      $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
       if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === 0) {
@@ -168,7 +168,7 @@ if (isset($_FILES['imagen']['tmp_name']) && isset($_POST['id']) && isset($_POST[
                 die();
             }
         } PostRateMiddleware::verificar('modificar', (array)$payload);
-           $modificar= $objeto->modificarImagen($_FILES['imagen']['tmp_name'], $_POST['id']);
+           $modificar= $objeto->modificarImagen($_FILES['imagen'], $_POST['id']);
            echo json_encode(['mensaje'=>$modificar, 'newCsrfToken' => $csrf['newToken']]);
            die();
   } catch (\RuntimeException $e) {
