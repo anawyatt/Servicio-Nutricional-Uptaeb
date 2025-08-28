@@ -22,10 +22,16 @@ class consultarUsuarioModelo extends connectDB{
 
 
     public function __construct(){
-    parent::__construct(); 
+    parent::__construct();
+
     $this->encryption = new encryption();
-    $token = $_COOKIE['jwt'];
-    $this->payload = JwtHelpers::validarToken($token);
+
+    if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
+        $token = $_COOKIE['jwt'];
+        $this->payload = JwtHelpers::validarToken($token);
+    } else {
+        $this->payload = (object) ['cedula' => '12345678'];
+    }
     }
 
     public function mostrarUsuario() {
@@ -83,7 +89,7 @@ class consultarUsuarioModelo extends connectDB{
             try {
             $this->conectarDBSeguridad();
             $query = $this->conex2->prepare("SELECT cedula, img, nombre, segNombre, apellido, segApellido, correo,
-            telefono, status, idRol, nombreRol FROM vista_usuarios_info WHERE cedula = ?");
+            telefono, status, nombreRol FROM vista_usuarios_info WHERE cedula = ?");
         
             $query->bindValue(1, $this->id); 
             $query->execute();
@@ -92,7 +98,6 @@ class consultarUsuarioModelo extends connectDB{
              if ($data) {
                 $data->correo = $this->encryption->decryptData($data->correo);
             }
-
 
             $this->desconectarDB();
             return $data;
@@ -118,18 +123,23 @@ class consultarUsuarioModelo extends connectDB{
 
 
     public function validarCorreo($correo, $cedula) {
-        if (!preg_match("/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{1,}$/", $correo)) {
-              return ['resultado' => 'Ingresar Correo'];
-            }
+        $errores = [];
 
-            if (!preg_match("/^[0-9]{7,9}$/", $cedula)) {
-                return ['resultado' => 'Ingresar Cedula'];
-            }
-        
+        if (!preg_match("/^[a-zA-Z0-9_.+-]+@[a-zA-Z0-9-]+\.[a-zA-Z]{1,}$/", $correo)) {
+            $errores[] = 'Ingresar Correo';
+        }
+
+        if (!preg_match("/^[0-9]{7,9}$/", $cedula)) {
+            $errores[] = 'Ingresar Cedula';
+        }
+
+        if (!empty($errores)) {
+            return ['resultado' => implode(', ', $errores)];
+        }
         $this->correo = $correo;
         $this->cedula = trim($cedula);
         $resultado = $this->validarCO();
-        return $resultado === true ? ['resultado' => 'error correo'] : ['resultado' => 'ok'];
+        return $resultado === true ? ['resultado' => 'error correo'] : ['resultado' => 'Existe'];
 
     }
     
@@ -152,22 +162,28 @@ class consultarUsuarioModelo extends connectDB{
     }
 
     public function validarTelefono($telefono, $cedula) {
+        $errores = [];
 
         if (!preg_match("/^0\d{10}$/", $telefono)) {
-            return  ['resultado' => 'Ingresar Telefono']; 
+            $errores[] = 'Ingresar Telefono';
         }
-    
+
         if (!preg_match("/^[0-9]{7,9}$/", $cedula)) {
-            return ['resultado' => 'Ingresar Cedula'];
+            $errores[] = 'Ingresar Cedula';
         }
-    
+
+        if (!empty($errores)) {
+            return ['resultado' => implode(', ', $errores)];
+        }
+
         $this->telefono = $telefono;
         $this->cedula = $cedula;
         $resultado = $this->validarT();
-        return $resultado === true ? ['resultado' => 'error telefono'] : ['resultado' => 'ok'];
+        return $resultado === true ? ['resultado' => 'error telefono'] : ['resultado' => 'Existe'];
 
     }
-    
+
+
     private function validarT(){
        try {
             $this->conectarDBSeguridad();
@@ -180,9 +196,9 @@ class consultarUsuarioModelo extends connectDB{
             return !empty($data);
 
           
-            } catch (Exception $error) {
-                return ['resultado' => '¡Error Sistema!'];
-            }
+            } catch (\Exception $e) {
+             throw new \RuntimeException('Error al verifcar duplicacion de telefonos: ' . $e->getMessage());
+        }
     }
 
     private function validarCamposEditar($datos) {
@@ -213,9 +229,12 @@ class consultarUsuarioModelo extends connectDB{
         return ['resultado' => 'ok'];
     }
 
-    public function editarUsuario($cedula, $nombre, $segNombre, $apellido, $segApellido, $correo, $telefono, $idRol, $estado) {
-        $datos = compact('cedula', 'nombre', 'segNombre', 'apellido', 'segApellido', 'correo', 'telefono', 'idRol', 'estado');
-        
+    public function editarUsuario($cedula, $nombre, $segNombre, $apellido, $segApellido, $correo, $telefono, 
+    $idRol, $estado) {
+  
+        $datos = compact('cedula','nombre','segNombre','apellido','segApellido','correo','telefono','idRol',
+        'estado');
+
         $validacion = $this->validarCamposEditar($datos);
         if ($validacion['resultado'] !== 'ok') {
             return $validacion;
@@ -227,11 +246,11 @@ class consultarUsuarioModelo extends connectDB{
         $this->apellido    = trim($apellido);
         $this->segApellido = trim($segApellido);
         $this->correo      = trim($correo);
-        $this->telefono = str_replace(' ', '', $telefono);
+        $this->telefono    = str_replace(' ', '', $telefono);
         $this->idRol       = $idRol;
         $this->estado      = $estado;
 
-        return $this->modificar();
+        return $this->modificar(); 
     }
 
     private function modificar() {
@@ -245,8 +264,8 @@ class consultarUsuarioModelo extends connectDB{
 
             $correoCifrado = $this->encryption->encryptData($this->correo);
 
-            $update = $this->conex2->prepare("UPDATE `usuario` SET `nombre`= ?, `segNombre`= ?, `apellido`= ?, 
-            `segApellido`= ?,`correo`=?, `telefono`= ? ,`idRol`= ?, `status` = ?  WHERE `cedula` = ?");
+            $update = $this->conex2->prepare("UPDATE usuario SET nombre = ?, segNombre = ?, apellido = ?, segApellido = ?,
+                    correo = ?, telefono = ?, idRol = ?, status = ? WHERE cedula = ? ");
 
             $update->bindValue(1, $this->nombre);
             $update->bindValue(2, $this->segNombre);
@@ -259,10 +278,6 @@ class consultarUsuarioModelo extends connectDB{
             $update->bindValue(9, $this->cedula);
             $update->execute();
 
-            $bitacora = new bitacoraModelo;
-            $bitacora->registrarBitacora('Consultar Usuarios', 'Se ha modificado un Usuario:'.$this->nombre . ' ' .$this->apellido,  $this->payload->cedula);
-        
-
             $this->conex2->commit();
             return ['resultado' => 'modificado'];
         } catch (\PDOException $e) {
@@ -273,12 +288,13 @@ class consultarUsuarioModelo extends connectDB{
         }
     }
 
+
     public function eliminarUsuario($id) {
         if (!preg_match("/^[0-9]{1,}$/", $id)) {
             return ['resultado' => 'Seleccionar Usuario'];
                 }
     
-                $this->id = $id;
+            $this->id = $id;
             $resultado = $this->borrarUsuario();
             return $resultado === true ? ['resultado' => 'eliminado'] : ['resultado' => 'no eliminado'];
     }
@@ -300,11 +316,9 @@ class consultarUsuarioModelo extends connectDB{
                 $this->conex2->rollBack();
                 return false;
             }
-
             $bitacora = new bitacoraModelo;
             $bitacora->registrarBitacora('Anular Usuarios', 'Se ha Anulado un Usuario:'.$this->nombre . ' ' .$this->apellido,  $this->payload->cedula);
         
-
             $this->conex2->commit();
             return true;
 

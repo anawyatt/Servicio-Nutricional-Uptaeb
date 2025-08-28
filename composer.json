@@ -29,5 +29,8 @@
             "name": "styleWyatt"
         }
     ],
-    "minimum-stability": "beta"
+    "minimum-stability": "beta",
+    "require-dev": {
+        "phpunit/phpunit": "11.5"
+    }
 }
