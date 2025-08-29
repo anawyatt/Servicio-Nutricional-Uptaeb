@@ -39,6 +39,7 @@ class consultarAlimentosModelo extends connectDB
     }
   }
 
+
   private function mostrarA()
   {
     try {

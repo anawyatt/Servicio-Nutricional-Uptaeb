@@ -17,7 +17,7 @@ class consultarSalidaAlimentosTest extends TestCase {
 // ------------------- MOSTRAR SALIDA ALIMENTOS ------------------------
 
 // Prueba para datos erroneos (ingresar fecha de inicio mayor a la fecha fin)
-public function test_mostrarSalidaAlimentos_DatosError() {
+public function test_mostrarSalidaAlimentos_DatosErrorI() {
     $resultado = $this->objeto->mostrarSalidaAlimentos('2025-08-29', '2025-08-12');
 
     $this->assertArrayHasKey('resultado', $resultado);
@@ -59,14 +59,14 @@ public function test_verificarExistencia_DatosVacios() {
 
  // Prueba para datos erróneos (no cumplen con el patrón)
  public function test_verificarExistencia_DatosErroneos() {
-    $resultado = $this->objeto->verificarExistencia('kjk8');
+    $resultado = $this->objeto->verificarExistencia('9h@1');
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('Seleccionar la Salida de alimentos', $resultado['resultado']);
 }
 
  // Prueba para datos inexistentes en la base de datos
  public function test_verificarExistencia_DatosNoExistenBD() {
-    $resultado = $this->objeto->verificarExistencia(90);
+    $resultado = $this->objeto->verificarExistencia(150);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('ya no existe', $resultado['resultado']);
 }
@@ -74,7 +74,7 @@ public function test_verificarExistencia_DatosVacios() {
 
 // Prueba para datos que existen en la base de datos
 public function test_verificarExistencia_DatosExistenBD() {
-    $resultado = $this->objeto->verificarExistencia(5);
+    $resultado = $this->objeto->verificarExistencia(2);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('si existe', $resultado['resultado']);
 
@@ -91,21 +91,21 @@ public function test_tipoalimento_DatosVacios() {
 
  // Prueba para datos erróneos (no cumplen con el patrón)
  public function test_tipoalimento_DatosErroneos() {
-    $resultado = $this->objeto->tipoalimento('HG');
+    $resultado = $this->objeto->tipoalimento('3*G9');
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('Seleccionar los tipos de alimentos del registro', $resultado['resultado']);
 }
 
 // Prueba de que no se obtenga los tipos de alimentos  del registro de una Salida de alimentos anulada
 public function test_tipoalimento_DatosNoExiste() {
-    $resultado = $this->objeto->tipoalimento(70);
+    $resultado = $this->objeto->tipoalimento(165);
     $this->assertIsArray($resultado);
     $this->assertCount(0, $resultado); 
  }
  
 // Prueba si se obtiene los tipos de alimentos  del registro de una Salida de tipoalimentos
  public function test_tipoalimento_DatosExiste() {
-     $resultado = $this->objeto->tipoalimento(10); 
+     $resultado = $this->objeto->tipoalimento(2); 
      $this->assertIsArray($resultado);
      $this->assertNotEmpty($resultado);
  }
@@ -122,7 +122,7 @@ public function test_alimento_DatosVacios() {
 
 // Prueba para datos erróneos (no cumplen con el patrón)
 public function test_alimento_DatosErroneos() {
-    $resultado = $this->objeto->alimento('rt', '7k');
+    $resultado = $this->objeto->alimento('92.', '7k!6');
     $this->assertArrayHasKey('resultado', $resultado);
 
     $this->assertStringContainsString('Ingresar el  id del tipo', $resultado['resultado']);
@@ -131,14 +131,14 @@ public function test_alimento_DatosErroneos() {
 
 // Prueba de que no se obtenga los  alimentos  del registro de una Salida de alimentos 
 public function test_alimento_DatosNoExiste() {
-    $resultado = $this->objeto->alimento(70,54);
+    $resultado = $this->objeto->alimento(10,2);
     $this->assertIsArray($resultado);
     $this->assertCount(0, $resultado); 
  }
  
 // Prueba si se obtiene los alimentos  del registro de una Salida de alimentos
  public function test_alimento_DatosExiste() {
-     $resultado = $this->objeto->alimento(5,11); 
+     $resultado = $this->objeto->alimento(8,2); 
      $this->assertIsArray($resultado);
      $this->assertNotEmpty($resultado);
  }
@@ -155,14 +155,14 @@ public function test_verificarAnulacion_DatosVacios() {
 
  // Prueba para datos erróneos (no cumplen con el patrón)
  public function test_verificarAnulacion_DatosErroneos() {
-    $resultado = $this->objeto->verificarAnulacion('ye');
+    $resultado = $this->objeto->verificarAnulacion('3/5f');
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('Seleccionar el id del registro', $resultado['resultado']);
 }
 
  // Prueba para datos inexistentes en la base de datos
  public function test_verificarAnulacion_DatosNoExistenBD() {
-    $resultado = $this->objeto->verificarAnulacion(14);
+    $resultado = $this->objeto->verificarAnulacion(1);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('no se puede', $resultado['resultado']);
 }
@@ -170,7 +170,7 @@ public function test_verificarAnulacion_DatosVacios() {
 
 // Prueba para datos que existen en la base de datos
 public function test_verificarAnulacion_DatosExistenBD() {
-    $resultado = $this->objeto->verificarAnulacion(9);
+    $resultado = $this->objeto->verificarAnulacion(3);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('se puede', $resultado['resultado']);
 
@@ -187,18 +187,31 @@ public function test_anularSalidaAlimento_DatosVacios() {
 
  // Prueba para datos erróneos (no cumplen con el patrón)
  public function test_anularSalidaAlimento_DatosErroneos() {
-    $resultado = $this->objeto->anularSalidaAlimento('7fd');
+    $resultado = $this->objeto->anularSalidaAlimento('78@3');
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('Seleccionar el id del registro a anular', $resultado['resultado']);
 }
 
+ public function test_anularSalidaAlimento_DatosNoExistenBD() {
+    $resultado = $this->objeto->anularSalidaAlimento(150);
+    $this->assertArrayHasKey('resultado', $resultado);
+    $this->assertEquals('ya no existe', $resultado['resultado']);
+}
+ public function test_anularSalidaAlimento_DatosDuplicado() {
+    $resultado = $this->objeto->anularSalidaAlimento(1);
+    $this->assertArrayHasKey('resultado', $resultado);
+    $this->assertEquals('no se puede', $resultado['resultado']);
+}
+
 public function test_anularSalidaAlimentoListo(){
-    $id = 12;
+    $id = 3;
  
     $resultado = $this->objeto->anularSalidaAlimento($id);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('eliminado', $resultado['resultado']);
 }
+
+
 
 
 }
