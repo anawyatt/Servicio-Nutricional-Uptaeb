@@ -243,7 +243,7 @@ class tipoAlimentoTest extends TestCase {
     }
     
     public function test_modificarTipoAlimento_DatosListos(){
-        $id =21;
+        $id =15;
         $tipoA = 'Nuevo Tipo';
      
         $resultado = $this->objeto->modificarTipoAlimento($tipoA, $id);
@@ -277,7 +277,7 @@ class tipoAlimentoTest extends TestCase {
     }
 
     public function test_anularTipoAlimento_DatosNoExiste() {
-        $resultado = $this->objeto->anularTipoAlimento(19);
+        $resultado = $this->objeto->anularTipoAlimento(30);
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('ya no existe', $resultado['resultado']);
     }
@@ -290,7 +290,7 @@ class tipoAlimentoTest extends TestCase {
 
 
     public function test_anularTipoAlimento_DatosListos(){
-        $id = 22;
+        $id = 15;
         $resultado = $this->objeto->anularTipoAlimento($id);
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('anulado correctamente.', $resultado['resultado']);
