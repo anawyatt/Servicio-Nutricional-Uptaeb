@@ -98,14 +98,14 @@ public function test_infoAlimento_DatosErroneos() {
 
 // Prueba para un tipo de alimento que no existe
  public function test_infoAlimento_DatosNoExiste() {
-   $resultado = $this->objeto->infoAlimento('192', false);
+   $resultado = $this->objeto->infoAlimento('192');
    $this->assertIsArray($resultado);
    $this->assertCount(0, $resultado); 
 }
 
 // Prueba para un tipo de alimento existente
 public function test_infoAlimento_DatosExiste() {
-    $resultado = $this->objeto->infoAlimento('78', false); 
+    $resultado = $this->objeto->infoAlimento('78'); 
     $this->assertIsArray($resultado);
     $this->assertNotEmpty($resultado);
 }
@@ -128,7 +128,7 @@ public function test_infoAlimento_DatosExiste() {
 
  // Prueba para datos inexistentes en la base de datos
  public function test_verificarExistenciaTipoA_DatosNoExistenBD() {
-    $resultado = $this->objeto->verificarExistenciaTipoA(19);
+    $resultado = $this->objeto->verificarExistenciaTipoA(22);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('no esta', $resultado['resultado']);
 }
@@ -169,7 +169,7 @@ public function test_verificarExistenciaTipoA_DatosExistenBD() {
 
 // Prueba que permita anular o modificar el alimento
 public function test_verificarBoton_Sisepuede() {
-    $resultado = $this->objeto->verificarBoton(155);
+    $resultado = $this->objeto->verificarBoton(154);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('se puede', $resultado['resultado']);
 
@@ -243,13 +243,13 @@ public function test_modificarAlimentos_DatoDuplicadoBD() {
 
 
 public function test_modificarAlimentos_DatosListos(){
-    $id = 155;
+    $id = 154;
     $tipoA = '14';
     $alimento = 'Maizina';
     $marca = 'Americana';
     $unidad = '90 Gr';
  
-    $resultado = $this->objeto->modificarAlimentos($id, $tipoA, $alimento, $marca, $unidad, false);
+    $resultado = $this->objeto->modificarAlimentos($id, $tipoA, $alimento, $marca, $unidad);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('modificado', $resultado['resultado']);
 
@@ -388,7 +388,7 @@ public function test_anularAlimento_Nosepuede() {
 }
 
 public function test_anularAlimentoListo(){
-    $id = 155;
+    $id = 154;
  
     $resultado = $this->objeto->anularAlimento($id);
     $this->assertArrayHasKey('resultado', $resultado);

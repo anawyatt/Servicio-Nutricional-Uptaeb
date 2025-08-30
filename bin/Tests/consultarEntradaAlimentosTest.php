@@ -137,7 +137,7 @@ public function test_alimento_DatosNoExiste() {
  
 // Prueba si se obtiene los alimentos  del registro de una entrada de alimentos
  public function test_alimento_DatosExiste() {
-     $resultado = $this->objeto->alimento(1,152); 
+     $resultado = $this->objeto->alimento(8,150); 
      $this->assertIsArray($resultado);
      $this->assertNotEmpty($resultado);
  }
@@ -169,7 +169,7 @@ public function test_verificarAnulacion_DatosVacios() {
 
 // Prueba para datos que existen en la base de datos
 public function test_verificarAnulacion_DatosExistenBD() {
-    $resultado = $this->objeto->verificarAnulacion(36);
+    $resultado = $this->objeto->verificarAnulacion(38);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('se puede', $resultado['resultado']);
 

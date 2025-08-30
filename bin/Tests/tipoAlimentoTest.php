@@ -105,14 +105,14 @@ class tipoAlimentoTest extends TestCase {
 
     // Prueba para un tipo de  alimento que no existe
     public function test_mostrarTipoA_DatosNoExiste() {
-        $resultado = $this->objeto->mostrarTipoA('90');
+        $resultado = $this->objeto->mostrarTipoA(90);
         $this->assertIsArray($resultado);
         $this->assertCount(0, $resultado); 
     }
  
     // Prueba para un tipo de  alimento existente
     public function test_mostrarTipoA_DatosExiste() {
-       $resultado = $this->objeto->mostrarTipoA('2'); 
+       $resultado = $this->objeto->mostrarTipoA(2); 
        $this->assertIsArray($resultado);
        $this->assertNotEmpty($resultado);
     }
