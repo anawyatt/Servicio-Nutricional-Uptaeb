@@ -75,7 +75,7 @@
                                       
                                        
                                     <div class="buscar mt-3 ">
-                                      <div class="wave-group p-2 col-md-6 my-2 " id="sel3" style="margin-top: 1.7vw!important">
+                                      <div class="wave-group p-2 col-md-6 my-2 " id="sel" style="margin-top: 1.7vw!important">
 
                                         <select class="input tipoA2" id="tipoA2"> </select>
                                         <span class="bar bar2A"></span>

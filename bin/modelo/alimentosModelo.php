@@ -16,26 +16,28 @@ class alimentosModelo extends connectDB
     private $payload;
     private $usuario;
     private $codigo;
+    private $img;
 
 
-    public function __construct()
-    {
-        parent::__construct();
+
+     public function __construct()
+{
+    parent::__construct();
+   
         $token = $_COOKIE['jwt'];
         $this->payload = JwtHelpers::validarToken($token);
-    }
+}
+
     public function verificarExistenciaTipoA($tipoA)
     {
         if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
-            return ['resultado' => 'Seleccionar el tipo de alimento'];
+            return ['resultado' => 'Seleccionar el tipo de alimento correctamente'];
         } else {
             $this->tipoA = $tipoA;
             $resultado = $this->verificarETA();
             return $resultado === true ? ['resultado' => 'si esta'] : ['resultado' => 'no esta'];
         }
     }
-
-
 
     private function verificarETA()
     {
@@ -118,65 +120,76 @@ class alimentosModelo extends connectDB
     }
 
     public function registrarAlimento($imagen, $men, $tipoA, $alimento, $marca, $unidad)
-    {
-        $errores = [];
+{
+    $errores = [];
 
-        if (!in_array($men, ['SI', 'NO'])) {
-            $errores[] = 'Valor inválido para men';
+    // validaciones de texto
+    if (!in_array($men, ['SI', 'NO'])) {
+        $errores[] = 'Valor inválido para men';
+    }
+    if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
+        $errores[] = 'Ingresar un tipo alimento correctamente';
+    }
+    if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $alimento)) {
+        $errores[] = 'Ingresar un alimento correctamente';
+    }
+    if (!preg_match("/^(Sin Marca|[a-zA-ZÀ-ÿ\s]{3,})$/", $marca)) {
+        $errores[] = 'Ingresar una marca correctamente';
+    }
+    if (!preg_match("/^\d*\s*[a-zA-Z]+$/", $unidad)) {
+        $errores[] = 'Ingresar la unidad correctamente';
+    }
+
+    if (!empty($errores)) {
+        return ['resultado' => implode(", ", $errores)];
+    }
+    if ($this->verificarAlimento($alimento, $marca, $unidad)['resultado'] == 'existe') {
+        return ['resultado' => 'existe'];
+    }
+
+    $codigo = $this->generarCodigo($alimento, $marca);
+    $ruta   = "assets/images/alimentos/";
+    $this->codigo   = $codigo;
+    $this->tipoA    = $tipoA;
+    $this->alimento = $alimento;
+    $this->marca    = $marca;
+    $this->unidad   = $unidad;
+
+    if ($men === 'NO') {
+        $this->imagen = $ruta . 'alimentoPredeterminado.png';
+    } else if ($men === 'SI' && $imagen !== null) {
+        $validacion = $this->validarImagen($imagen);
+        if ($validacion !== true) {
+            return $validacion; 
         }
+        $mime = mime_content_type($imagen['tmp_name']);
+        $extension = match($mime) {
+            'image/jpeg', 'image/jpg' => 'jpg',
+            'image/png'  => 'png',
+            'image/gif'  => 'gif',
+            'image/webp' => 'webp',
+            default      => 'png'
+        };
 
-        if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
-            $errores[] = 'Ingresar un tipo alimento correctamente';
-        }
-        if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $alimento)) {
-            $errores[] = 'Ingresar un alimento correctamente';
-        }
+        $destino = $ruta . $codigo . "." . $extension;
+        $this->imagen = $destino;
 
-        if (!preg_match("/^(Sin Marca|[a-zA-ZÀ-ÿ\s]{3,})$/", $marca)) {
-            $errores[] = 'Ingresar una marca correctamente';
-        }
-        if (!preg_match("/^\d*\s*[a-zA-Z]+$/", $unidad)) {
-            $errores[] = 'Ingresar la unidad correctamente';
-      }
-
-        if (!empty($errores)) {
-            $mensaje = ['resultado' => implode(", ", $errores)];
-            return $mensaje;
-        } 
-        if ($this->verificarAlimento($alimento, $marca, $unidad)['resultado'] == 'existe') {
-            return ['resultado' => 'existe'];
-        }
-        
-        
-        else {
-            $this->img = $imagen;
-            $codigo = $this->generarCodigo($alimento, $marca);
-            $ruta = "assets/images/alimentos/";
-            $this->codigo = $codigo;
-            $this->tipoA = $tipoA;
-            $this->alimento = $alimento;
-            $this->marca = $marca;
-            $this->unidad = $unidad;
-
-            if ($men === 'NO') {
-                $imagen = $ruta . 'alimentoPredeterminado.png';
-                $this->imagen = $imagen;
-            } else if ($men === 'SI' && $imagen !== null) {
-                $imagen = $ruta . $codigo . '.png';
-                $this->imagen = $imagen;
-                move_uploaded_file($this->img, $this->imagen);
-            }
-
-            return $this->registrar();
+        if (!move_uploaded_file($imagen['tmp_name'], $destino)) {
+            return ['resultado' => 'Error al guardar la imagen en el servidor'];
         }
     }
+
+    return $this->registrar();
+}
+
 
     private function registrar()
     {
         try {
             $this->conectarDB();
             $this->conex->beginTransaction();
-            $registrar = $this->conex->prepare("INSERT INTO `alimento`(`idAlimento`, `codigo`, `imgAlimento`, `nombre`, `unidadMedida`, `marca`, `stock`, `reservado`, `idTipoA`, `status`) VALUES (DEFAULT, ?, ?, ?, ?, ?, 0, 0, ?, 1)");
+            $registrar = $this->conex->prepare("INSERT INTO `alimento`(`idAlimento`, `codigo`, `imgAlimento`, `nombre`, `unidadMedida`, `marca`, `stock`, `reservado`, `idTipoA`, `status`)
+             VALUES (DEFAULT, ?, ?, ?, ?, ?, 0, 0, ?, 1)");
             $registrar->bindValue(1, $this->codigo);
             $registrar->bindValue(2, $this->imagen);
             $registrar->bindValue(3, $this->alimento);
@@ -199,28 +212,7 @@ class alimentosModelo extends connectDB
         }
     }
 
-    function validarImagen($imagen)
-    {
-        if ($imagen['error'] !== UPLOAD_ERR_OK) {
-            return ['resultado' => 'Error al subir la imagen'];
-        }
-        $mime = mime_content_type($imagen['tmp_name']);
-        $formatosValidos = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
-
-        if (!in_array($mime, $formatosValidos)) {
-            return ['resultado' => 'El archivo no es una imagen válida (JPEG, PNG)!'];
-        }
-        if ($imagen['size'] > 2 * 1024 * 1024) {
-            return ['resultado' => 'La imagen no debe superar los 2MB!'];
-        }
-        $dimensiones = getimagesize($imagen['tmp_name']);
-        if ($dimensiones === false) {
-            return ['resultado' => 'La imagen está dañada o no se puede procesar!'];
-        }
-        return true;
-    }
-
-    private function quitarAcentos($cadena)
+       private function quitarAcentos($cadena)
     {
         $acentos = array(
             'á',
@@ -342,6 +334,28 @@ class alimentosModelo extends connectDB
         $codigo = $parte1 . $parte2 . $numerosAleatorios;
 
         return $codigo;
+    }
+
+    
+     function validarImagen($imagen)
+    {
+        if ($imagen['error'] !== UPLOAD_ERR_OK) {
+            return ['resultado' => 'Error al subir la imagen'];
+        }
+        $mime = mime_content_type($imagen['tmp_name']);
+        $formatosValidos = ['image/jpeg', 'image/png', 'image/jpg', 'image/gif', 'image/webp'];
+
+        if (!in_array($mime, $formatosValidos)) {
+            return ['resultado' => 'El archivo no es una imagen válida (JPEG, PNG, WEBP, JPG)!'];
+        }
+        if ($imagen['size'] > 2 * 1024 * 1024) {
+            return ['resultado' => 'La imagen no debe superar los 2MB!'];
+        }
+        $dimensiones = getimagesize($imagen['tmp_name']);
+        if ($dimensiones === false) {
+            return ['resultado' => 'La imagen está dañada o no se puede procesar!'];
+        }
+        return true;
     }
 
 

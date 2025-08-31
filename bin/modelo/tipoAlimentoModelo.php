@@ -12,11 +12,13 @@ class tipoAlimentoModelo extends connectDB
   private $payload;
 
   public function __construct()
-  {
+{
     parent::__construct();
-    $token = $_COOKIE['jwt'];
-    $this->payload = JwtHelpers::validarToken($token);
-  }
+        $token = $_COOKIE['jwt'];
+        $this->payload = JwtHelpers::validarToken($token);
+    
+}
+
 
   private function validarTipoA($tipoA)
   {
@@ -40,8 +42,6 @@ class tipoAlimentoModelo extends connectDB
       return $resultado === true ? ['resultado' => 'error tipo'] : ['resultado' => 'no esta duplicado'];
     }
   }
-
-
   private function verificarTA()
   {
     try {
@@ -59,7 +59,6 @@ class tipoAlimentoModelo extends connectDB
     }
 
   }
-
   public function registrarTipoAlimento($tipoA)
   {
     if (!$this->validarTipoA($tipoA)) {
@@ -74,7 +73,6 @@ class tipoAlimentoModelo extends connectDB
     }
 
   }
-
   private function registrar()
   {
     try {
@@ -214,8 +212,6 @@ class tipoAlimentoModelo extends connectDB
     }
 
   }
-
-
   private function verificar2()
   {
 
@@ -337,11 +333,11 @@ class tipoAlimentoModelo extends connectDB
 
         } else {
           $this->conex->rollBack();
-          return ['resultado' => 'No se encontró el tipo de Salida o no se pudo anular'];
+          return ['resultado' => 'No se encontró el tipo de alimento o no se pudo anular'];
         }
       } else {
         $this->conex->rollBack();
-        return ['resultado' => 'No se encontró el tipo de Salida'];
+        return ['resultado' => 'No se encontró el tipo de alimento'];
       }
     } catch (\PDOException $e) {
       $this->conex->rollBack();

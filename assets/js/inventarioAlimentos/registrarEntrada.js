@@ -19,6 +19,8 @@ $("#tipoA").on('change', function() {
     chequeo_tipoA()
      if ($(this).val() == 'Seleccionar') {
       $('#unidad').val('');
+      $('#alimento').val('Seleccionar').trigger('change.select2');
+      $('#cantidad').val('');
     }
  });
 
@@ -27,6 +29,7 @@ $("#alimento").on('change', function() {
 	chequeo_alimento()
    if ($(this).val() == 'Seleccionar') {
       $('#unidad').val('');
+      $('#cantidad').val('');
     }
 
 	mostrar($(this).val());

@@ -25,6 +25,7 @@
        $('#disponibilidad').hide();
       $('#unidad').val('');
       $('#cantidad').val('');
+      $('#alimento').val('Seleccionar').trigger('change.select2');
     }
 	    verificarTipoA()
       mostrarAlimento($(this).val());

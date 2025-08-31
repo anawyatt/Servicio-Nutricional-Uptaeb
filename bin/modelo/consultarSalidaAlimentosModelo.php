@@ -16,13 +16,17 @@ class consultarSalidaAlimentosModelo extends connectDB
   private $imagen;
   private $id;
   private $payload;
+  private $fechaInicio;
+  private $fechaFin;
 
-  public function __construct()
-  {
+
+
+ public function __construct()
+{
     parent::__construct();
-    $token = $_COOKIE['jwt'];
-    $this->payload = JwtHelpers::validarToken($token);
-  }
+        $token = $_COOKIE['jwt'];
+        $this->payload = JwtHelpers::validarToken($token);
+}
 
 
   public function mostrarSalidaAlimentos($fechaInicio, $fechaFin)
@@ -127,17 +131,17 @@ class consultarSalidaAlimentosModelo extends connectDB
     }
   }
 
-  public function tipoalimento($id, $returnJson = true)
+  public function tipoalimento($id): array
   {
     if (!preg_match("/^[0-9]{1,}$/", $id)) {
       return ['resultado' => 'Seleccionar los tipos de alimentos del registro'];
     } else {
       $this->id = $id;
-      return $this->tipoA($returnJson);
+      return $this->tipoA();
     }
   }
 
-  private function tipoA($returnJson)
+  private function tipoA()
   {
     try {
       $this->conectarDB();
@@ -221,10 +225,17 @@ class consultarSalidaAlimentosModelo extends connectDB
   {
     if (!preg_match("/^[0-9]{1,}$/", $id)) {
       return ['resultado' => 'Seleccionar el id del registro a anular'];
-    } else {
+    } 
+
+    if($this->verificarExistencia($id)['resultado'] === 'ya no existe'){
+      return ['resultado' => 'ya no existe'];
+    }
+    if($this->verificarAnulacion($id)['resultado'] === 'no se puede'){
+      return ['resultado' => 'no se puede'];
+    }
       $this->id = $id;
       return $this->anular();
-    }
+    
   }
 
   private function anular()

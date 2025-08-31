@@ -449,6 +449,8 @@ function abrirArchivo2(ruta){
     tablaEntradaAlimentos() ;
   })
 
+  
+
 
 let errorFI=false
 let errorFF=false

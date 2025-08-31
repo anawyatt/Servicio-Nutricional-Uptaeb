@@ -114,8 +114,6 @@ $('#tipoA2').on('change', function() {
     dropdownParent: $('#sel'),
     selectionCssClass: "input",
     width: '100%',
-    templateResult: formatState,
-    templateSelection: formatState
   });
 });
 

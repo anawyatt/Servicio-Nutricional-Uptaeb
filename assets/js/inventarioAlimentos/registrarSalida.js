@@ -28,6 +28,9 @@ $("#tipoA").on('change', function() {
        $('#disponibilidad').hide();
       $('#unidad').val('');
       $('#cantidad').val('');
+      $('#alimento').val('Seleccionar').trigger('change.select2');
+      
+      
     }
  });
 

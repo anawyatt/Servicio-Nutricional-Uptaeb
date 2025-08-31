@@ -65,9 +65,16 @@ $('#ani').hide(1000);
                     </td>
                 </tr>`;
             });
-            $('.tbody').html(tabla);
-             mostrar = $('.tabla2').DataTable();
 
+             if ($.fn.DataTable.isDataTable('.tabla2')) {
+                  $('.tabla2').DataTable().clear().destroy();
+             }
+
+            $('.tbody').html(tabla);
+             mostrar = $('.tabla2').DataTable({
+                destroy: true
+             });
+             
              mostrar.on('draw.dt', function () {
                     quitarBotones();
                    });

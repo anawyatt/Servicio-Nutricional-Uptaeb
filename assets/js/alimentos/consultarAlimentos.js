@@ -342,6 +342,7 @@ let timer;
 
 fileInput0.addEventListener('change', function() {
       chequeoImagen();
+      verificarIMG();
   });
 
  $("#tipoA").on('change', function() {
@@ -380,7 +381,8 @@ fileInput0.addEventListener('change', function() {
         
                  if (error_alimento ===false  && error_veriTA ===false && error_marca === false && error_cantidad === false ) {
                       let marcaAlimento=$('#marca').val();
-                      modificar(marcaAlimento);
+                      let cantidad = $('#cantidad').val();
+                      modificar(marcaAlimento, cantidad);
                   }
                   else{
                       Swal.fire({
@@ -398,9 +400,11 @@ fileInput0.addEventListener('change', function() {
                 }
                 else{
 
+
                   if ( error_alimento ===false   && error_veriTA ===false ) {
                      let marcaAlimento='Sin marca';
-                     modificar(marcaAlimento);
+                     let cantidad = '';
+                     modificar(marcaAlimento, cantidad);
                 }
                 else{
                       Swal.fire({
@@ -816,16 +820,16 @@ $(document).ready(function() {
                 
 // ---------------- MODIFICAR ------------------------
 
-function modificar(marcaA){
+function modificar(marcaA, cantidadA){
   let tipoA = cambiarFormato($("#tipoA").val());
   let alimento =cambiarFormato( $("#alimento").val());
   let marca = cambiarFormato(marcaA);
   let unidad;
 
-                    if($('#cantidad').val() === ''){
+                    if(cantidadA === ''){
                         unidad = $("#unidad").val();
                     } else {
-                        unidad = $('#cantidad').val() + ' ' + $("#unidad").val();
+                        unidad = cantidadA + ' ' + $("#unidad").val();
                     }
   let id= $('#idd').val();
   let token = $('[name="csrf_token"]').val();
@@ -890,6 +894,71 @@ function modificar(marcaA){
   }
 }
 
+function verificarIMG(){
+    let fileInput = $("#fileInput0")[0];
+    let imagen = fileInput.files.length ? fileInput.files[0] : null;
+
+    if (imagen) {
+        let formData = new FormData();
+        formData.append("imagen", imagen);
+        formData.append("validarIMG", true);
+
+        $.ajax({
+            type: "POST",
+            url: '', 
+            data: formData,
+            dataType: "json",
+            processData: false, 
+            contentType: false, 
+            success(data){
+                data = typeof data === 'string' ? JSON.parse(data) : data;
+                
+                if (
+                    data.resultado === 'Error al subir la imagen' ||
+                    data.resultado === 'El archivo no es una imagen válida (JPEG, PNG, JPG, WEBP)!' ||
+                    data.resultado === 'La imagen no debe superar los 2MB!' ||
+                    data.resultado === 'La imagen está dañada o no se puede procesar!'
+                ) {
+                  
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon:'error',
+                        title:data.resultado,
+                        showConfirmButton:false,
+                        timer:3000,
+                        timerProgressBar:3000,
+                    });
+                    	container0.innerHTML = ''; 
+              container0.appendChild(defaultImage); 
+              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> '+data.resultado+'');
+              $(".error1").show();
+              $('#fileInput0').addClass('errorBorder');
+              $('.bar1').removeClass('bar');
+              $('.ic1').addClass('l');
+              $('.ic1').removeClass('labelPri');
+              $('.letra').addClass('labelE');
+              $('.letra').removeClass('label-char');
+             fileInput0.classList.add('changed');
+             error_imagen = true;
+
+                    error_imagen = true;
+                } else {
+                    $(".error1").html("");
+                    $(".error1").hide();
+                    $('#fileInput0').removeClass('errorBorder');
+                    $('.bar1').addClass('bar');
+                    $('.ic1').removeClass('l');
+                    $('.ic1').addClass('labelPri');
+                    $('.letra').removeClass('labelE');
+                    $('.letra').addClass('label-char');
+                    error_imagen = false;
+                }
+            }
+        });
+    }
+}
+
 
                   
   
@@ -916,13 +985,12 @@ function modificarImagen() {
         contentType: false,
         success: function(data) {
           data = typeof data === 'string' ? JSON.parse(data) : data;
-			if (data.resultado == 'El archivo no es una imagen válida (JPEG, PNG)!' || 
-			    data.resultado == 'La imagen no debe superar los 2MB!' || 
-			    data.resultado == 'La imagen está dañada o no se puede procesar!') {
+
+			if (data.mensaje.resultado !== 'imagen modificado') {
 
 			      	container0.innerHTML = ''; 
               container0.appendChild(defaultImage); 
-              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> '+data.resultado+'');
+              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> '+data.mensaje.resultado+'');
               $(".error1").show();
               $('#fileInput0').addClass('errorBorder');
               $('.bar1').removeClass('bar');
@@ -937,7 +1005,7 @@ function modificarImagen() {
 					toast: true,
 					position: 'top-end',
 					icon: 'error',
-					title: data.resultado,
+					title:data.mensaje.resultado,
 					showConfirmButton: false,
 					timer: 2500,
 					timerProgressBar: true,
@@ -1009,7 +1077,7 @@ function valAnular(idd){
 
   $(document).on('click', '.borrar', function() {
     id = this.id;
-    valAnular(id);
+  
     $.ajax({
     url: "",
     dataType: 'json',
@@ -1017,6 +1085,7 @@ function valAnular(idd){
     data: {infoAlimento: 'anular', id},
     success(data){
        if (data.resultado === 'ya no existe') {
+      
         $('#cerrar3').click();
          delete mostrarA;
          tablaAlimentos();
@@ -1031,6 +1100,7 @@ function valAnular(idd){
             })
         }
         else{
+            valAnular(id);
            if (data[0].marca === 'Sin Marca') {
               $('.eliminarA').html( '¿Deseas anular el alimento <b class="text-primary">'+data[0].nombre+'</b> ?');
            }

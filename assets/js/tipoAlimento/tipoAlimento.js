@@ -38,7 +38,7 @@ function quitarBotones(){
   }
 }
 
-let tabla ;
+let tablaI ;
 mostrarTabla();
 $('#ani').hide(1000);
 
@@ -50,34 +50,41 @@ $('#ani').hide(1000);
       dataType: 'JSON',
       data: {muestra: 'mostrar', tabla: 'tabla'}, 
       success(response){
-        $('#ani').show(2000);
-        console.log(response);
+    $('#ani').show(2000);
 
-        let lista = '';
-        response.forEach(fila => {
-          lista += `
-      <tr>
-              <td class="text-left">${fila.tipo}</td>
-              <td class="text-center d-grid gap-2 d-flex justify-content-lg-center accion" >
-                  <a class="btn btn-sm btn-icon text-primary flex-end modificar" data-bs-toggle="tooltip" title="Modificar Tipo de Alimento" href="#" type="button" id="${fila.idTipoA}" >
+    let lista = '';
+    response.forEach(fila => {
+      lista += `
+        <tr>
+            <td class="text-left">${fila.tipo}</td>
+            <td class="text-center d-grid gap-2 d-flex justify-content-lg-center accion" >
+                <a class="btn btn-sm btn-icon text-primary flex-end modificar" data-bs-toggle="tooltip" title="Modificar Tipo de Alimento" href="#" type="button" id="${fila.idTipoA}">
                     <span class="btn-inner pi"><i class="bi bi-pencil icon-24 t" width="20"></i></span>
-                  </a>
-                  <a class="btn btn-sm btn-icon text-danger eliminar"  data-bs-toggle="tooltip" title="Anular Tipo de Alimento" href="#"  type="button" id="${fila.idTipoA}">
+                </a>
+                <a class="btn btn-sm btn-icon text-danger eliminar" data-bs-toggle="tooltip" title="Anular Tipo de Alimento" href="#" type="button" id="${fila.idTipoA}">
                     <i class="bi bi-trash icon-24 t" width="20"></i>
-                  </a>
-              </td>
-       </tr>
-          `
-        })
-      
-        $('#tbody').html(lista);
-        tabla = $('.tabla').DataTable();
-         tabla.on('draw.dt', function () {
-              quitarBotones();
-             });
+                </a>
+            </td>
+        </tr>`;
+    });
 
-            quitarBotones();
-      }
+    if ($.fn.DataTable.isDataTable('.tabla')) {
+        $('.tabla').DataTable().clear().destroy();
+    }
+
+    $('#tbody').html(lista);
+
+    tablaI = $('.tabla').DataTable({
+        destroy: true
+    });
+
+    tablaI.on('draw.dt', function () {
+        quitarBotones();
+    });
+
+    quitarBotones();
+}
+
     })
   }
 
@@ -228,7 +235,7 @@ function registrar(){
                         $('#cerrarR').click();
                         $('.formu').trigger('reset'); 
                        $('[name="csrf_token"]').val(data.newCsrfToken);
-                        delete tabla;
+                        delete tablaI;
                         mostrarTabla();
                         Swal.fire({
                            toast: true,
@@ -442,13 +449,13 @@ $(document).on('click', '.resetear', function() {
       success(data){
         if (data.resultado === 'ya no existe') {
         $('#cerrar2').click();
-         delete tabla;
+         delete tablaI;
          mostrarTabla();
          Swal.fire({
                 toast: true,
                 position: 'top-end',
                 icon:'error',
-                title:'El Tipo de alimento <b class="fw-bold text-rojo">'+tipoA+'</b> fue anulado recientemente!',
+                title:'El Tipo de alimento  fue anulado recientemente!',
                 showConfirmButton:false,
                 timer:3000,
                 timerProgressBar:3000,
@@ -472,7 +479,7 @@ $(document).on('click', '.resetear', function() {
             $('[name="csrf_token"]').val(data.newCsrfToken);
             console.log(data);
             $('#cerrar2').click();
-            delete tabla;
+            delete tablaI;
             mostrarTabla();
             Swal.fire({
                toast: true,
@@ -583,13 +590,13 @@ $(document).on('click', '.resetear', function() {
         console.log(data);
         if (data.resultado === 'ya no existe') {
         $('#cerrar3').click();
-         delete tabla;
+         delete tablaI;
          mostrarTabla();
          Swal.fire({
                 toast: true,
                 position: 'top-end',
                 icon:'error',
-                title:'<span class=" text-rojo">El antecedente fue anulado recientemente!</span>',
+                title:'<span class=" text-rojo">El tipo de alimento fue anulado recientemente!</span>',
                 showConfirmButton:false,
                 timer:3000,
                 timerProgressBar:3000,
@@ -598,7 +605,7 @@ $(document).on('click', '.resetear', function() {
          else if (data.mensaje.resultado === 'anulado correctamente.' && data.newCsrfToken) {
        $('[name="csrf_token"]').val(data.newCsrfToken);
         $('#cerrar3').click();
-        delete tabla;
+        delete tablaI;
         mostrarTabla();
           Swal.fire({
                toast: true,

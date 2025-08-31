@@ -77,24 +77,27 @@ if (  isset($_POST['alimento']) && isset($_POST['marca']) && isset($_POST['unida
   }
 }
 
-if (isset($_POST['men']) && isset($_POST['tipoA']) && isset($_POST['alimento']) && isset($_POST['marca']) && isset($_POST['unidad']) && isset($_POST['csrfToken'])) {
-  if ($_POST['men'] === 'SI') {
-        if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === 0) {
-            $resultado = $objeto->validarImagen($_FILES['imagen']);
-            if ($resultado !== true) {
-                echo json_encode($resultado);
-                die();
-            }
-        } else {
-            echo json_encode(['resultado' => 'No se recibió imagen']);
-            die();
-        }
-    }
+
+if (isset($_FILES['imagen']) && isset($_POST['validarIMG'])) {
+    $validarImagen = $objeto->validarImagen($_FILES['imagen']);
+    echo json_encode($validarImagen);
+    die();
+}
+
+
+if ( isset($_POST['men']) && isset($_POST['tipoA']) && isset($_POST['alimento']) && isset($_POST['marca']) &&isset($_POST['unidad']) && isset($_POST['csrfToken'])) {
+   
     PostRateMiddleware::verificar('registrar', (array)$payload);
     $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
-    $imagen = ($_POST['men'] === 'SI' && isset($_FILES['imagen']['tmp_name'])) ? $_FILES['imagen']['tmp_name'] : null;
-    $registrar = $objeto->registrarAlimento($imagen, $_POST['men'], $_POST['tipoA'], $_POST['alimento'], $_POST['marca'],$_POST['unidad']);
-    echo json_encode(['mensaje'=> $registrar, 'newCsrfToken' => $csrf['newToken']]);
+
+    $imagen = ($_POST['men'] === 'SI' && isset($_FILES['imagen'])) ? $_FILES['imagen'] : null;
+
+    $registrar = $objeto->registrarAlimento($imagen, $_POST['men'], $_POST['tipoA'],$_POST['alimento'],$_POST['marca'], $_POST['unidad']);
+
+    echo json_encode([
+        'mensaje'=> $registrar,
+        'newCsrfToken' => $csrf['newToken']
+    ]);
     die();
 }
 

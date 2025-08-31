@@ -19,13 +19,14 @@ class registrarEntradaAlimentosModelo extends connectDB
   private $cantidad;
   private $id;
 
-  public function __construct()
-  {
-    parent::__construct();
-    $token = $_COOKIE['jwt'];
-    $this->payload = JwtHelpers::validarToken($token);
-  }
 
+  public function __construct()
+{
+    parent::__construct();
+        $token = $_COOKIE['jwt'];
+        $this->payload = JwtHelpers::validarToken($token);
+    
+}
 
 
   public function mostrarTipoAlimento()
@@ -193,7 +194,8 @@ class registrarEntradaAlimentosModelo extends connectDB
       $this->notificaciones($this->fecha, $this->hora, $this->descripcion);
       $mensaje = ['respuesta' => 'registrado', 'id' => $this->id];
       $bitacora = new bitacoraModelo;
-      $bitacora->registrarBitacora('Inventario de Alimentos - Entrada', 'Registró una entrada de alimentos en la fecha y hora: ' . $this->fecha . ' - ' . $this->hora . ' la cual describe que es :  ' . $this->descripcion, $this->payload->cedula);
+      $bitacora->registrarBitacora('Inventario de Alimentos - Entrada', 'Registró una entrada de alimentos en la fecha y hora: ' 
+      . $this->fecha . ' - ' . $this->hora . ' la cual describe que es :  ' . $this->descripcion, $this->payload->cedula);
       $this->conex->commit();
 
       return $mensaje;

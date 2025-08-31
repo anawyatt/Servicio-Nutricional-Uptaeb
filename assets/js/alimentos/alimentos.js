@@ -19,6 +19,7 @@ let timer;
 
 fileInput0.addEventListener('change', function() {
      chequeoImagen();
+     verificarIMG();
   });
 
  $("#tipoA").on('change', function() {
@@ -517,6 +518,70 @@ $(document).ready(function() {
     });
 });
 
+function verificarIMG(){
+    let fileInput = $("#fileInput0")[0];
+    let imagen = fileInput.files.length ? fileInput.files[0] : null;
+
+    if (imagen) {
+        let formData = new FormData();
+        formData.append("imagen", imagen);
+        formData.append("validarIMG", true);
+
+        $.ajax({
+            type: "POST",
+            url: '', 
+            data: formData,
+            dataType: "json",
+            processData: false, 
+            contentType: false, 
+            success(data){
+                data = typeof data === 'string' ? JSON.parse(data) : data;
+                
+                if (
+                    data.resultado === 'Error al subir la imagen' ||
+                    data.resultado === 'El archivo no es una imagen válida (JPEG, PNG, WEBP, JPG)!' ||
+                    data.resultado === 'La imagen no debe superar los 2MB!' ||
+                    data.resultado === 'La imagen está dañada o no se puede procesar!'
+                ) {
+                    container0.innerHTML = ''; // Limpiar el contenedor
+                    container0.appendChild(defaultImage); 
+                    $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> ' + data.resultado + '!');
+                    $(".error1").show();
+                    $('#fileInput0').addClass('errorBorder');
+                    $('.bar1').removeClass('bar');
+                    $('.ic1').addClass('l');
+                    $('.ic1').removeClass('labelPri');
+                    $('.letra').addClass('labelE');
+                    $('.letra').removeClass('label-char');
+                    fileInput0.classList.add('changed');
+                
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon:'error',
+                        title:data.resultado,
+                        showConfirmButton:false,
+                        timer:3000,
+                        timerProgressBar:3000,
+                    });
+
+                    error_imagen = true;
+                } else {
+                    $(".error1").html("");
+                    $(".error1").hide();
+                    $('#fileInput0').removeClass('errorBorder');
+                    $('.bar1').addClass('bar');
+                    $('.ic1').removeClass('l');
+                    $('.ic1').addClass('labelPri');
+                    $('.letra').removeClass('labelE');
+                    $('.letra').addClass('label-char');
+                    error_imagen = false;
+                }
+            }
+        });
+    }
+}
+
 
 
             function verificarTipoA(){
@@ -643,13 +708,11 @@ function registrar(datos){
 			// Asegurarse de que 'data' sea un objeto
 			data = typeof data === 'string' ? JSON.parse(data) : data;
 
-			if (data.resultado == 'El archivo no es una imagen válida (JPEG, PNG)!' || 
-			    data.resultado == 'La imagen no debe superar los 2MB!' || 
-			    data.resultado == 'La imagen está dañada o no se puede procesar!') {
+			if (data.mensaje.resultado !=='registrado') {
 
 				container0.innerHTML = ''; 
 				container0.appendChild(defaultImage); 
-				$('.error1').html('<i class="bi bi-exclamation-triangle-fill"></i> ' + data.resultado + '!');
+				$('.error1').html('<i class="bi bi-exclamation-triangle-fill"></i> ' + data.mensaje.resultado + '!');
 				$(".error1").show();
 				$('#fileInput0').addClass('errorBorder');
 				$('.bar1').removeClass('bar');
@@ -663,7 +726,7 @@ function registrar(datos){
 					toast: true,
 					position: 'top-end',
 					icon: 'error',
-					title: data.resultado,
+					title: data.mensaje.resultado,
 					showConfirmButton: false,
 					timer: 2500,
 					timerProgressBar: true,

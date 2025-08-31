@@ -19,12 +19,14 @@ class consultarEntradaAlimentosModelo extends connectDB
   private $fechaFin;
   private $payload;
 
-  public function __construct()
-  {
+ public function __construct()
+{
     parent::__construct();
     $token = $_COOKIE['jwt'];
     $this->payload = JwtHelpers::validarToken($token);
-  }
+   
+}
+
 
   public function mostrarEntradaAlimentos($fechaInicio, $fechaFin)
   {
@@ -144,7 +146,8 @@ class consultarEntradaAlimentosModelo extends connectDB
 
     try {
       $this->conectarDB();
-      $query = $this->conex->prepare("SELECT DISTINCT ta.idTipoA, ta.tipo, a.marca FROM entradaalimento ea INNER JOIN detalleentradaa dea ON dea.idEntradaA = ea.idEntradaA INNER JOIN alimento a ON a.idAlimento = dea.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE ea.idEntradaA = ?");
+      $query = $this->conex->prepare("SELECT DISTINCT ta.idTipoA, ta.tipo, a.marca FROM entradaalimento ea INNER JOIN detalleentradaa dea ON dea.idEntradaA = ea.idEntradaA 
+      INNER JOIN alimento a ON a.idAlimento = dea.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE ea.idEntradaA = ?");
       $query->bindValue(1, $this->id);
       $query->execute();
       $tipoalimento = $query->fetchAll();
@@ -175,7 +178,6 @@ class consultarEntradaAlimentosModelo extends connectDB
       return $this->muestraA();
     }
   }
-
   private function muestraA()
   {
     try {
@@ -224,10 +226,15 @@ class consultarEntradaAlimentosModelo extends connectDB
   {
     if (!preg_match("/^[0-9]{1,}$/", $id)) {
       return ['resultado' => 'Seleccionar el id del registro a anular'];
-    } else {
+    } 
+    if($this->verificarExistencia($id)['resultado'] === 'no esta'){
+      return ['resultado' => 'no esta'];
+    }
+    if($this->verificarAnulacion($id)['resultado'] === 'no se puede'){
+      return ['resultado' => 'no se puede'];
+    }
       $this->id = $id;
       return $this->anular();
-    }
   }
 
   private function anular()

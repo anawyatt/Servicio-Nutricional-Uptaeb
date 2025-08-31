@@ -19,14 +19,15 @@ class salidaAlimentosModelo extends connectDB
   private $descripcion;
   private $cantidad;
   private $payload;
+  private $id;
 
-  public function __construct()
-  {
+
+   public function __construct()
+{
     parent::__construct();
-    $token = $_COOKIE['jwt'];
-    $this->payload = JwtHelpers::validarToken($token);
-  }
-
+        $token = $_COOKIE['jwt'];
+        $this->payload = JwtHelpers::validarToken($token);
+}
 
 
   public function mostrarTipoAlimento()
@@ -59,7 +60,8 @@ class salidaAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
-      $verificar = $this->conex->prepare("SELECT idTipoA FROM tipoalimento ta WHERE idTipoA=? AND EXISTS (SELECT 1 FROM alimento a WHERE ta.idTipoA = a.idTipoA AND status=1 AND stock > 0);");
+      $verificar = $this->conex->prepare("SELECT idTipoA FROM tipoalimento ta WHERE idTipoA=? AND EXISTS 
+      (SELECT 1 FROM alimento a WHERE ta.idTipoA = a.idTipoA AND status=1 AND stock > 0);");
       $verificar->bindValue(1, $this->tipoA);
       $verificar->execute();
       $data = $verificar->fetchAll();
@@ -85,7 +87,9 @@ class salidaAlimentosModelo extends connectDB
   {
     try {
       $this->conectarDB();
-      $mostrar = $this->conex->prepare("SELECT DISTINCT a.idAlimento, a.codigo, a.imgAlimento, a.nombre, a.unidadMedida, a.marca, a.stock FROM tipoalimento ta INNER JOIN alimento a ON ta.idTipoA = a.idTipoA WHERE a.idTipoA =? and a.stock > 0 and EXISTS (SELECT 1 FROM detalleentradaa daa WHERE a.idAlimento = daa.idAlimento AND status=1);");
+      $mostrar = $this->conex->prepare("SELECT DISTINCT a.idAlimento, a.codigo, a.imgAlimento, a.nombre, a.unidadMedida, a.marca, a.stock FROM 
+      tipoalimento ta INNER JOIN alimento a ON ta.idTipoA = a.idTipoA WHERE a.idTipoA =? and a.stock > 0 and EXISTS (SELECT 1 FROM detalleentradaa daa 
+      WHERE a.idAlimento = daa.idAlimento AND status=1);");
       $mostrar->bindValue(1, $this->tipoA);
       $mostrar->execute();
       $alimentos = $mostrar->fetchAll();
@@ -238,8 +242,8 @@ class salidaAlimentosModelo extends connectDB
       $mensaje = ['respuesta' => 'registrado', 'id' => $this->id];
       $bitacora = new bitacoraModelo;
       $bitacora->registrarBitacora('Inventario de Alimentos - Salida', 'Registró una salida de alimentos  en la fecha y hora: ' . $this->fecha . ' - ' . $this->fecha . ' la cual describe el motivo :  ' . $this->descripcion, $this->payload->cedula);
-      $this->notificaciones($this->fecha, $this->hora, $this->descripcion);
-      $this->notificaciones3($this->tipoS, $this->fecha, $this->hora);
+      $this->notificaciones();
+      $this->notificaciones3();
 
       $this->conex->commit();
 
@@ -288,7 +292,7 @@ class salidaAlimentosModelo extends connectDB
       $registrar->bindValue(3, $this->id);
       $registrar->execute();
       $this->actualizarStock($this->alimento, $this->cantidad);
-      $this->notificaciones2($this->alimento);
+      $this->notificaciones2();
       $this->conex->commit();
 
       return ['resultado' => 'exitoso'];
@@ -334,7 +338,7 @@ class salidaAlimentosModelo extends connectDB
     }
   }
 
-  private function notificaciones($fecha, $hora, $descripcion)
+  private function notificaciones()
   {
     try {
       $this->conectarDBSeguridad();
@@ -366,7 +370,7 @@ class salidaAlimentosModelo extends connectDB
     }
   }
 
-  private function notificaciones2($alimento)
+  private function notificaciones2()
   {
     try {
       $this->conectarDBSeguridad();
@@ -417,7 +421,7 @@ class salidaAlimentosModelo extends connectDB
     }
   }
 
-  private function notificaciones3($tipoS)
+  private function notificaciones3()
   {
     try {
       $this->conectarDBSeguridad();
