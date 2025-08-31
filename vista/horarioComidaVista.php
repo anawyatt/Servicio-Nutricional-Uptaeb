@@ -25,6 +25,7 @@
                         <option value="Merienda">Merienda</option>
                         <option value="Cena">Cena</option>
                     </select>
+                    
                     <span class="bar bar1"></span>
                     <label class="label labelPri ic1 mb-2">
                         <span class="label-char pl-2 letra1" style="--index: 0; margin-right: 3px!important;"> <i class=" ">

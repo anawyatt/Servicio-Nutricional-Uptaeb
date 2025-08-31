@@ -235,7 +235,7 @@ function alimentos() {
       if (response.length > 0) {
         response.forEach(fila => {
           if (fila.cantidad != 0) {
-            tipo.push(fila.tipo);
+            tipo.push(fila.horarioComida);
             cantidad.push(fila.cantidad);
           }
         });
@@ -266,7 +266,7 @@ function circulo(tipo, cantidad) {
           left: 'center'
         },
         series: [{
-          name: ' Tipos de alimentos disponibles',
+          name: ' Menus',
           type: 'pie',
           radius: ['40%', '70%'],
           avoidLabelOverlap: false,

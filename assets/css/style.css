@@ -657,6 +657,7 @@ body{
             border-color: #d11c1c!important;
         }
 
+
 /* Quitar el borde en estado de focus */
 .select2-container--bootstrap-5 .select2-selection--single {
     box-shadow: none !important;

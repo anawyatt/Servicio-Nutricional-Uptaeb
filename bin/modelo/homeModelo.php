@@ -182,14 +182,10 @@ class homeModelo extends connectDB {
         }
     }
 
-    public function alimentos() {
+    public function menusG() {
         try {
             $this->conectarDB();
-            $mostrar = $this->conex->prepare("SELECT ta.tipo, COUNT(a.idAlimento) AS cantidad 
-                                              FROM tipoalimento ta 
-                                              INNER JOIN alimento a ON ta.idTipoA = a.idTipoA 
-                                              WHERE a.stock > 0 
-                                              GROUP BY ta.tipo;");
+            $mostrar = $this->conex->prepare("SELECT m.horarioComida, COUNT(m.idMenu) AS cantidad FROM menu m LEFT JOIN evento e ON m.idMenu = e.idMenu WHERE m.status = 1 AND e.idMenu IS NULL GROUP BY m.horarioComida;");
             $mostrar->execute();
             $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
             $this->desconectarDB();

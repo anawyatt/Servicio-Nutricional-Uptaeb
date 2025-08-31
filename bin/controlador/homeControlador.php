@@ -67,7 +67,7 @@ if (isset($_POST['mostrar7'])) {
 }
 
 if (isset($_POST['mostrar8'])) {
-    $mostrar = $objModel->alimentos();
+    $mostrar = $objModel->menusG();
 }
 
 if (isset($_POST['mostrar9'])) {

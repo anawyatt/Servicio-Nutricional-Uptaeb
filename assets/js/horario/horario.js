@@ -70,3 +70,4 @@ $("#registrar").on('click', function() {
         });
     }
 });
+

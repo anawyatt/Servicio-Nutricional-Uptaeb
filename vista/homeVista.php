@@ -78,7 +78,7 @@
    <div class="container col-md-4 "  data-aos="fade-up" data-aos-delay="1500">
      <div class="card">
       <div class=" card-header">
-        <h4 class="azul5" align="center"> Tipos de Alimentos Disponibles</h4>
+        <h4 class="azul5" align="center"> Menús por horario </h4>
       </div>
       <div class="card-body pb-0">
               <div id="trafficChart" style="min-height: 360px;" class="echart"></div>

@@ -51,7 +51,7 @@ class horarioComidaModelo extends connectDB
         setcookie('jwt', $nuevoToken, time() + 3600*6, "/", "", false, true);  // Considera agregar "secure" si usas HTTPS
 
         $bitacora = new bitacoraModelo();
-        $bitacora->registrarBitacora('Login', 'El Usuario '. $payload->nombre.' '.$payload->apellido.': Inició al sistema en el horario de '.$payload->horario_comida,  $payload->cedula);
+        $bitacora->registrarBitacora('Login', 'El Usuario '. $payload->nombre.' '.$payload->apellido.': Inició al sistema en el horario de '.$this->horario,  $payload->cedula);
 
         // Enviar respuesta con URL para redirigir
         $url = urlencode($this->sistem->encryptURL('home'));  // Redirige al Home
