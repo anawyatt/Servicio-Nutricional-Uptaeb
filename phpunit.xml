@@ -9,39 +9,28 @@
         <testsuite name="integration-tipoAlimentos-Alimentos">
             <file>bin/Tests/tipoAlimentoTest.php</file>
             <file>bin/Tests/alimentosTest.php</file>
-        </testsuite>
-
-        <testsuite name="integration-Alimentos-EntradaAlimentos">
             <file>bin/Tests/consultarAlimentosTest.php</file>
-            <file>bin/Tests/consultarEntradaAlimentosTest.php</file>
         </testsuite>
 
-        <testsuite name="integration-tipoAlimentos-Alimentos-EntradaAlimentos">
-            <file>bin/Tests/tipoAlimentoTest.php</file>
+        <testsuite name="integration-Inventario-Alimentos">
+            <file>bin/Tests/registrarEntradaAlimentosTest.php</file>
+            <file>bin/Tests/consultarEntradaAlimentosTest.php</file>
+            <file>bin/Tests/stockAlimentosTest.php</file>
+            <file>bin/Tests/salidaAlimentosTest.php</file>
+            <file>bin/Tests/consultarSalidaAlimentosTest.php</file>
+
+        </testsuite>
+
+        <testsuite name="integration-Alimentos-InventarioAlimentos">
+            <file>bin/Tests/alimentosTest.php</file>
             <file>bin/Tests/consultarAlimentosTest.php</file>
             <file>bin/Tests/registrarEntradaAlimentosTest.php</file>
-        </testsuite>
-
-        <testsuite name="integration-salidaAlimentos-EntradaAlimentos">
-            <file>bin/Tests/consultarEntradaAlimentos.php</file>
+            <file>bin/Tests/consultarEntradaAlimentosTest.php</file>
+            <file>bin/Tests/stockAlimentosTest.php</file>
+            <file>bin/Tests/salidaAlimentosTest.php</file>
             <file>bin/Tests/consultarSalidaAlimentosTest.php</file>
         </testsuite>
 
-        <testsuite name="integration-salidaAlimentos-EntradaAlimentos-StockAlimentos">
-            <file>bin/Tests/consultarEntradaAlimentos.php</file>
-            <file>bin/Tests/stockAlimentosTest.php</file>
-            <file>bin/Tests/registrarSalidaAlimentosTest.php</file>
-        </testsuite>
-
-        <testsuite name="integration-salidaAlimentos-StockAlimentos">
-            <file>bin/Tests/consultarSalidaAlimentos.php</file>
-            <file>bin/Tests/stockAlimentosTest.php</file>
-        </testsuite>
-
-
-
-
-        
     </testsuites>
 
         <php>
