@@ -4,12 +4,13 @@ namespace middleware;
 
 use helpers\JwtHelpers;
 use helpers\BlacklistHelper;
-
+use helpers\encryption as encryption;
 class JwtMiddleware
 {
     public static function verificarToken()
     {
         $token = null;
+        $sistem = new encryption();
 
         // Intentar obtener el token desde la cabecera Authorization
         $headers = getallheaders();
@@ -27,7 +28,7 @@ class JwtMiddleware
         // Si aún no hay token, responder con error
         if (!$token) {
             http_response_code(401);
-            echo json_encode(['error' => 'Token no encontrado']);
+             header("Location: ?url=" . urlencode($sistem->encryptURL('login')));
             exit;
         }
 
@@ -36,14 +37,14 @@ class JwtMiddleware
 
         if (!$decoded) {
             http_response_code(401);
-            echo json_encode(['error' => 'Token inválido o expirado']);
+            header("Location: ?url=" . urlencode($sistem->encryptURL('login')));
             exit;
         }
 
         // Verificar si está en lista negra
         if (BlacklistHelper::isBlacklisted($decoded->jti)) {
             http_response_code(401);
-            echo json_encode(['error' => 'Token revocado']);
+            header("Location: ?url=" . urlencode($sistem->encryptURL('login')));
             exit;
         }
 
