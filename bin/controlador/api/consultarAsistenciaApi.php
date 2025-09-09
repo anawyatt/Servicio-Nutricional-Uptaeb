@@ -35,6 +35,11 @@ if (!isset($_POST['datos'])) {
 try {
     // Verificar el token JWT
     $decodedToken = JwtMiddleware::verificarToken();
+    if (!$decodedToken) {
+    http_response_code(401);
+    echo json_encode(['resultado' => 'error', 'mensaje' => 'Token no válido o expirado']);
+    exit;
+}
 
     // Descifrar los datos enviados
     $data = decryptionAsyncHelpers::decryptPayload(base64Payload: $_POST['datos']);

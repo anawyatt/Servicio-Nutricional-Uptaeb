@@ -35,7 +35,7 @@ class consultarMenuModelo extends connectDB {
 
     private $alimentos;
     private $horario;
-    private $payload;
+    public $payload;
 
     public function __construct(){
         parent ::__construct();

@@ -62,12 +62,11 @@ class homeModelo extends connectDB {
             $this->conectarDB();
             
             if ($this->horario) {
-                $mostrar = $this->conex->prepare("SELECT COUNT(idMenu) as cantidad 
-                                                  FROM menu WHERE status = 1 AND horarioComida = ?");
+                $mostrar = $this->conex->prepare("SELECT COUNT(m.idMenu) AS cantidad FROM menu m LEFT JOIN evento e ON m.idMenu = e.idMenu WHERE m.status = 1 AND m.horarioComida = ?AND  e.idMenu IS NULL");
                 $mostrar->bindValue(1, $this->horario);
                 $mostrar->execute();
             } else {
-                $mostrar = $this->conex->prepare("SELECT COUNT(idMenu) as cantidad FROM menu WHERE status = 1");
+                $mostrar = $this->conex->prepare("SELECT COUNT(m.idMenu) AS cantidad FROM menu m LEFT JOIN evento e ON m.idMenu = e.idMenu WHERE m.status = 1 AND e.idMenu IS NULL;");
                 $mostrar->execute();
             }
             $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
@@ -209,6 +208,21 @@ class homeModelo extends connectDB {
             return $e;
         }
     }
+
+    public function asistenciasPorPNF(){
+
+      try {
+       $this->conectarDB();
+       $grafico = $this->conex->prepare("SELECT e.carrera AS nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM asistencia WHERE status = 1)), 2) AS porcentaje FROM asistencia a INNER JOIN estudiante e ON a.cedEstudiante = e.cedEstudiante WHERE a.status = 1 GROUP BY e.carrera ORDER BY e.carrera DESC;");
+       $grafico->execute();
+       $data = $grafico->fetchAll(\PDO::FETCH_OBJ);
+       $this->desconectarDB();
+       return $data;
+   } catch (\PDOException $e) {
+       return $e;
+   }
+ }
+
 
     public function menus() {
         try {

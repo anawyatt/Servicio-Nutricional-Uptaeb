@@ -50,8 +50,8 @@ if (isset($_POST['datos'])) {
 if (isset($_POST['dataGraficoA'])) {
     $data = decryptionAsyncHelpers::decryptPayload($_POST['dataGraficoA']);
 
-    if (isset($data['graficoAlimentos'])) {
-        $resultado = $objeto->alimentos();
+    if (isset($data['graficoAsistencias'])) {
+        $resultado = $objeto->asistenciasPorPNF();
         echo json_encode($resultado);
         exit;
     } else {

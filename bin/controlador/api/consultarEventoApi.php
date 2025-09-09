@@ -22,6 +22,11 @@ use helpers\decryptionAsyncHelpers;
 
 
 $decodedToken = JwtMiddleware::verificarToken();
+if (!$decodedToken) {
+    http_response_code(401);
+    echo json_encode(['resultado' => 'error', 'mensaje' => 'Token no válido o expirado']);
+    exit;
+}
 $consultarEventosModelo = new consultarEventos();
 
 

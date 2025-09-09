@@ -36,7 +36,7 @@ class consultarEventosModelo extends connectDB {
     private $alimentos;
     private $nomEvent;
     private $descripEvent;
-    private $payload;
+    public $payload;
 
 
 

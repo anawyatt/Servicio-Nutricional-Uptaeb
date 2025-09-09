@@ -22,6 +22,11 @@ use helpers\decryptionAsyncHelpers;
 
 
 $decodedToken = JwtMiddleware::verificarToken();
+if (!$decodedToken) {
+    http_response_code(401);
+    echo json_encode(['resultado' => 'error', 'mensaje' => 'Token no válido o expirado']);
+    exit;
+}
 $consultarMenuModelo = new consultarMenu();
 
 
@@ -37,7 +42,7 @@ try {
             $horarioComida = $data['horarioComida'] ?? null;
 
             if ($horarioComida) {
-                $consultarMenuModelo->payload = (object)['horario_comida' => $horarioComida]; // 👈 importante, que coincida con el modelo
+                $consultarMenuModelo->payload = (object)['horario_comida' => $horarioComida]; // 👈 
             }
 
             $menus = $consultarMenuModelo->mostrarM($fechaInicio, $fechaFin);

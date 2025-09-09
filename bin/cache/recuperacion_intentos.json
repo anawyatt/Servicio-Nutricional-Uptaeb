@@ -1,0 +1,14 @@
+{
+    "f6cf8c8154a62e28c74d833d104133398752cf54c9f720b97cbd798f947108a6": {
+        "intentos": 2,
+        "primer_intento": 1756944125,
+        "bloqueado_hasta": 1756944433
+    },
+    "737a0865bc8f2fb7400601996824e174345e244ba6f1b55617ec112c0af9856d": {
+        "exitosos": {
+            "contador": 1,
+            "fecha": "2025-09-04",
+            "bloqueado_hasta": null
+        }
+    }
+}
