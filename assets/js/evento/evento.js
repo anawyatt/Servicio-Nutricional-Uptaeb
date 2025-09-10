@@ -1060,7 +1060,7 @@ let newAlimento = `
             success: function(data) {
                   if (data.resultado == 'exitoso' && data.eventId && data.menuId && data.salidaId && data.newCsrfToken) {
 
-                    registrarDetalle(data.eventId,  data.menuId, data.salidaId);
+                    registrarDetalle(data.menuId, data.salidaId);
 
                     $('[name="csrf_token"]').val(data.newCsrfToken);
 
