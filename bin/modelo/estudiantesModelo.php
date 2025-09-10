@@ -188,10 +188,7 @@ class estudiantesModelo extends connectDB
         }
     }
 
-
-
-
-    public function validarExcel($archivo)
+       public function validarExcel($archivo)
     {
         // Verificar si hay error en la subida
         if ($archivo['error'] !== UPLOAD_ERR_OK) {
@@ -376,6 +373,7 @@ class estudiantesModelo extends connectDB
 
     public function registrarEstudiante($cedula, $nombre, $segNombre, $apellido, $segApellido, $sexo, $telefono, $nucleo, $carrera, $secciones, $horarios)
     {
+        
         // Crear array de datos para normalizar
         $datosOriginales = [
             'Cedula' => $cedula,
@@ -458,7 +456,18 @@ class estudiantesModelo extends connectDB
 
     private function registrarNuevoEstudiante($cedula, $nombre, $segNombre, $apellido, $segApellido, $sexo, $telefono, $nucleo, $carrera)
     {
+        if (!preg_match('/^\d+$/', $cedula)) return 'Cédula inválida';
+    if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚüÜ\s]+$/u', $nombre) ||
+        (!empty($segNombre) && !preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚüÜ\s]+$/u', $segNombre)) ||
+        !preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚüÜ\s]+$/u', $apellido) ||
+        (!empty($segApellido) && !preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚüÜ\s]+$/u', $segApellido))) return 'Nombre o apellido inválido';
+    if (!preg_match('/^[MF]$/i', $sexo)) return 'Sexo inválido';
+    if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚüÜ\s]+$/u', $nucleo) ||
+        !preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚüÜ\s]+$/u', $carrera)) return 'Núcleo o carrera inválido';
+
         try {
+
+
             $query = $this->conex->prepare("INSERT INTO estudiante (cedEstudiante, nombre, segNombre, apellido, segApellido, sexo, telefono, nucleo, carrera, status) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, 1)");
             $query->bindValue(1, $cedula);
             $query->bindValue(2, $nombre);
@@ -531,4 +540,7 @@ class estudiantesModelo extends connectDB
             $this->desconectarDB();
         }
     }
+
+
+    
 }

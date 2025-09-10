@@ -174,7 +174,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 }
 
 // Tu código original de procesamiento
-if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+
+if ($_SERVER['REQUEST_METHOD'] === 'POST') { 
     $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
     if (isset($_POST['data'])) {
 
@@ -183,9 +184,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $totalProcessed = 0;
         $alreadyRegistered = [];
         $incompleteData = [];
-         $errors = [];
-
-       
+        $errors = []; // Array para errores de validación
 
         foreach ($data as $index => $row) {
             try {
@@ -216,10 +215,15 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         $datosNormalizados['horarios']
                     );
 
+                    // Verificar si es un mensaje de éxito o error
                     if (strpos($registrar, 'ya está actualizada') !== false) {
                         $alreadyRegistered[] = $datosNormalizados['cedula'];
-                    } else {
+                    } elseif (strpos($registrar, 'registrado con éxito') !== false) {
                         $totalProcessed++;
+                    } else {
+                        // Es un error de validación
+                        $errors[] = "Fila " . ($index + 1) . " (Cédula: {$datosNormalizados['cedula']}): " . $registrar;
+                        error_log("Error de validación en fila " . ($index + 1) . ": " . $registrar);
                     }
                 } else {
                     $incompleteData[] = $datosNormalizados['cedula'] ?: 'Sin cédula';
@@ -253,7 +257,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'status' => 'success',
             'totalProcessed' => $totalProcessed,
             'alreadyRegistered' => $alreadyRegistered,
-            'incompleteData' => $incompleteData
+            'incompleteData' => $incompleteData,
+            'errors' => $errors // Incluir errores en la respuesta
         ]);
         die();
     } else {
@@ -261,6 +266,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         die();
     }
 }
+
 
 
 
@@ -278,3 +284,4 @@ if (file_exists("vista/estudiantesVista.php")) {
 } else {
     die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
 }
+?>

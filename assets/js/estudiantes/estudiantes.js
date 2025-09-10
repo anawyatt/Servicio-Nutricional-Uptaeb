@@ -434,7 +434,7 @@ $(document).ready(function () {
   /**
    * Función para procesar el archivo Excel
    */
-  function procesarArchivo() {
+function procesarArchivo() {
     isUploading = true;
     $("#uploadButton").prop("disabled", true);
     $("#cancelButton").show();
@@ -520,13 +520,36 @@ $(document).ready(function () {
                 message +=
                   '<b style="color:red;">Cédulas con datos incompletos:</b><br>' +
                   response.incompleteData.join(", ") +
+                  "<br><br>";
+              }
+
+              // Mostrar errores de validación si existen
+              if (response.errors && response.errors.length > 0) {
+                message +=
+                  '<b style="color:red;">Errores de validación:</b><br>' +
+                  response.errors.map(error => `• ${error}`).join("<br>") +
                   "<br>";
               }
 
+              // Determinar el ícono basado en si hay errores
+              let icon = "success";
+              let title = "Proceso completado";
+              
+              if (response.errors && response.errors.length > 0) {
+                if (response.totalProcessed === 0) {
+                  icon = "error";
+                  title = "Proceso completado con errores";
+                } else {
+                  icon = "warning";
+                  title = "Proceso completado con advertencias";
+                }
+              }
+
               Swal.fire({
-                icon: "success",
-                title: "Proceso completado",
+                icon: icon,
+                title: title,
                 html: message,
+                width: '600px', // Hacer el modal más ancho para mostrar mejor los errores
               });
             } else if (response.status === "error") {
               Swal.fire({
@@ -580,7 +603,7 @@ $(document).ready(function () {
     };
 
     reader.readAsArrayBuffer(file);
-  }
+}
 
   $("#cancelButton").on("click", function () {
     Swal.fire({
