@@ -274,10 +274,10 @@ let error_tipoA2= false;
       });
 
        $("#editar").on("click", function(e){ 
-        error_rol2= false;
+        error_tipoA2= false;
         val_tipoA2();
 
-        if (error_rol2 == false) {
+        if (error_tipoA2 == false) {
            modificarTipoAlimento();
         }
         else{

@@ -41,6 +41,7 @@
 
                 tabla += `
                     <tr>
+                        <td>${row.tipo}</td>
                         <td class="text-center">${row.codigo}</td>
                         <td><img src="${row.imgAlimento}" width="70" height="70" alt="Profile" class="mb-2"></td>
                         <td>${row.nombre}</td>

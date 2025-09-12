@@ -122,7 +122,8 @@
                           <table class="table table-bordered table-hover tabla" >
                               <thead class="table-success">
                                   <tr>
-                                     <th class="blanco fw-bold ">Codigo</th>
+                                    <th class="blanco fw-bold ">Tipo</th>
+                                     <th class="blanco fw-bold ">Código</th>
                                     <th class="blanco fw-bold">Imagen</th>
                                     <th class="blanco fw-bold">Alimento</th>
                                     <th class="blanco fw-bold">Marca</th>

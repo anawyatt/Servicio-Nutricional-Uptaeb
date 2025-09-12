@@ -392,7 +392,6 @@
   <!-- Select Unidad (más grande) -->
   <div class="wave-group" style="flex:3;">
     <select class="input" id="unidad" required>
-      <option value="Seleccionar" >Seleccionar</option>
       <option  value="Kg">Kilogramo (Kg)</option>
       <option value="Gr">Gramo (Gr)</option>
       <option value="Lt">Litro (Lt)</option>
