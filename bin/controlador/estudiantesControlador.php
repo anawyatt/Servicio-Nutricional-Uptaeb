@@ -24,28 +24,35 @@ $objeto = new estudiantes;
 $sistem = new encryption();
 
 $normalizer = new EstudianteNormalizer();
+
 $NotificacionesServer = new NotificacionesServer();
 
-
-if (isset($_POST['notificaciones'])) {
-  $valor = $NotificacionesServer->consultarNotificaciones();
-}
-
-if (isset($_POST['notificacionId'])) {
-  $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-}
 
 $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Estudiantes', 'consultar');
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
-$tokenCsrf = csrfTokenHelper::generateCsrfToken($payload->cedula);
+$tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
 if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
-  $resultadoToken = csrfMiddleware::verificarYRenovar($_POST['csrfToken'], $payload->cedula);
-  echo json_encode(['message' => 'Token renovado', 'newCsrfToken' => $resultadoToken['newToken']]);
-  die();
+    $resultadoToken = csrfMiddleware::verificarYRenovar($_POST['csrfToken'], $payload->cedula);
+    echo json_encode(['message' => 'Token renovado','newCsrfToken' => $resultadoToken['newToken']]);
+    die();
 }
+
+    if (isset($payload->cedula)) {
+        $NotificacionesServer->setCedula($payload->cedula);
+    } else {
+        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+    }
+
+    if (isset($_POST['notificaciones'])) {
+        $valor = $NotificacionesServer->consultarNotificaciones();
+    }
+  
+    if (isset($_POST['notificacionId'])) {
+        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
+    }
 
 
 if (isset($_POST['verEstudiantes']) && isset($datosPermisos['permiso']['consultar'])) {
@@ -173,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
     exit;
 }
 
-// Tu código original de procesamiento
+// procesamiento
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') { 
     $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
@@ -258,7 +265,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'totalProcessed' => $totalProcessed,
             'alreadyRegistered' => $alreadyRegistered,
             'incompleteData' => $incompleteData,
-            'errors' => $errors // Incluir errores en la respuesta
+            'errors' => $errors 
         ]);
         die();
     } else {
