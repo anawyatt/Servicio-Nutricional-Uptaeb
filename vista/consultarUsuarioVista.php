@@ -251,7 +251,7 @@
 
                                           <div class="wave-group p-2 col-md-6 my-2" id="selectR">
              <select class="input rol" id="rol">
-                                         <option value="Seleccionar">Seleccionar</option>
+                                        
                                         </select>
                                       
                     <span class="bar bar8"></span>

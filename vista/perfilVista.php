@@ -129,7 +129,7 @@
                                 <div class="form-card text-start">
                               <div class="row">
             <div class="wave-group p-2 col-md-6 my-2">
-                <input required="" id="nombre" name="nombre" type="name" placeholder="Nombre"  class="input nombre">
+                <input required="" id="nombre" name="nombre" type="name"   class="input nombre">
                     <span class="bar bar1"></span>
                     <label class="label labelPri ic1">
                         <span class="label-char pl-2 letra1" style="--index: 0; margin-right: 3px!important;"> <i class=" " >
@@ -141,7 +141,7 @@
             </div>
 
              <div class="wave-group p-2 col-md-6 my-2">
-                <input required="" type="text" id="apellido" name="apellido" placeholder="Apellido"  class="input apellido">
+                <input required="" type="text" id="apellido" name="apellido"   class="input apellido">
                     <span class="bar bar2"></span>
                     <label class="label labelPri ic2">
                         <span class="label-char pl-2 letra2" style="--index: 0; margin-right: 3px!important;"> <i class=" " >
@@ -153,7 +153,7 @@
             </div>
 
             <div class="wave-group p-2 col-md-12 my-2">
-                <input required="" type="email" id="correo" name="correo" placeholder="Correo"  class="input correo">
+                <input required="" type="email" id="correo" name="correo"   class="input correo">
                     <span class="bar bar3"></span>
                     <label class="label labelPri ic3">
                         <span class="label-char pl-2 letra3" style="--index: 0; margin-right: 3px!important;"> <i class=" " >

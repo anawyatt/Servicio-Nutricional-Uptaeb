@@ -603,7 +603,7 @@ $("#editar").on("click", function(e){
      $('.letra7').removeClass('labelE');
      $('.letra7').addClass('label-char');
     } else {
-     $(".error7").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese el número de teléfono <b>(0400 0000000)</b"');
+     $(".error7").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese el número de teléfono <b>(04000000000)</b"');
      $(".error7").show();
      $('#telefono').addClass('errorBorder');
      $('.bar7').removeClass('bar');
