@@ -48,6 +48,10 @@ if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_P
 
 if (isset($_POST['tipoS'])) {
   $validar = $objeto->verificarTipoSalida($_POST['tipoS']);
+    if ($validar['resultado'] !== 'ok') {
+        echo json_encode($validar);
+        die();
+    }
 }
 
 if (isset($_POST['registrar']) && isset($_POST['tipoS']) && $datosPermisos['permiso']['registrar']) {
@@ -68,6 +72,8 @@ if (isset($_POST['muestra'], $_POST['tabla'])) {
 if (isset($_POST['modificar']) && isset($_POST['id'])) {
   
   $verificarModificacion = $objeto->verificarModificacion($_POST['id']);
+  echo json_encode($verificarModificacion);
+  die();
  
 }
 
@@ -76,20 +82,32 @@ if (isset($_POST['modificar']) && isset($_POST['id'])) {
 
 if (isset($_POST['mostrar']) && isset($_POST['id'])) {
   $mostrarInfo = $objeto->mostrarTipoS($_POST['id']);
+  echo json_encode($mostrarInfo);
+  die();
 }
 
 //-------- MODIFICAR -----------------------------------------
 
 if (isset($_POST['tipoS2']) && isset($_POST['id']) && $datosPermisos['permiso']['modificar']) {
-  PostRateMiddleware::verificar('modificar', (array)$payload);
-  $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
-  $verificarExistencia = $objeto->verificarExistencia($_POST['id']);
-  $verificarTipoAlimento = $objeto->verificarTipoS2($_POST['tipoS2'], $_POST['id']);
+    PostRateMiddleware::verificar('modificar', (array)$payload);
+    $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
+    $verificarExistencia = $objeto->verificarExistencia($_POST['id']);
+    $verficar = $objeto->verificarTipoS2($_POST['tipoS2'], $_POST['id']);
+        if ($verificarExistencia !== null) {
+        echo json_encode($verificarExistencia);
+        die();
+    }
 
-  $modificar = $objeto->modificarTipoSalida($_POST['tipoS2'], $_POST['id']);
-   echo json_encode($modificar);
-                die();
+    if ($verficar['resultado'] !== 'ok') {
+        echo json_encode($verficar);
+        die();
+    }
+
+    $modificar = $objeto->modificarTipoSalida($_POST['tipoS2'], $_POST['id']);
+    echo json_encode($modificar);
+    die();
 }
+
 
 //-------- ANULAR -----------------------------------------
 if (isset($_POST['id']) && isset($_POST['borrar'])  && $datosPermisos['permiso']['eliminar']) {
