@@ -1,4 +1,4 @@
-<?php /*
+<?php 
 use PHPUnit\Framework\TestCase;
 use modelo\tipoAlimentoModelo as tipoAlimento;
 
@@ -265,5 +265,5 @@ class tipoAlimentoTest extends TestCase {
     }
 
 
-}*/
+}
 ?>

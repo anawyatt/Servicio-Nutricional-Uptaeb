@@ -15,12 +15,10 @@
         private $iD;
         private $payload;
 
-
         public function __construct(){
               parent::__construct();
-              
               $this->encryption = new encryption();
-
+              
             if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
                 $token = $_COOKIE['jwt'];
                 $this->payload = JwtHelpers::validarToken($token);
@@ -230,7 +228,6 @@
             try {
                 $this->conectarDBSeguridad();
 
-                // Obtener ruta actual de imagen para borrar archivo si no es la imagen por defecto
                 $query = $this->conex2->prepare("SELECT img FROM usuario WHERE cedula = ? AND status = 1");
                 $query->bindValue(1, $this->cedula);
                 $query->execute();
@@ -270,15 +267,12 @@
             $rand = rand(1, 10000);
             $this->img = $img;
 
-            // Ruta absoluta donde se guardará la imagen
             $directorio = __DIR__ . '/../../assets/images/perfil/';
             $nombreArchivo = $this->cedula . $rand . '.png';
             $rutaCompleta = $directorio . $nombreArchivo;
 
-            // Ruta relativa que se guardará en la base de datos
             $this->imagen = 'assets/images/perfil/' . $nombreArchivo;
 
-            // Mover imagen al servidor
             if (!move_uploaded_file($this->img, $rutaCompleta)) {
                 return [
                     'resultado' => 'error',
