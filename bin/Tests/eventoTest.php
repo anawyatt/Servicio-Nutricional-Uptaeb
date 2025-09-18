@@ -1,12 +1,18 @@
-<?php /*
+<?php 
 use PHPUnit\Framework\TestCase;
 use modelo\eventoModelo as evento;
 
 class eventoTest extends TestCase {
 
     protected function setUp(): void {
+          if (!isset($_ENV['SECRET_KEY_JWT'])) {
+        $_ENV['SECRET_KEY_JWT'] = 'graciasDiosF4bK7P9X2Q7mJ8vZ3R6Y1nF4bK7P9X2SamuelEsElMejorQ7mJ8vZ3R6Y1nF4bK7P9X2Q7mJ8vZ3R6Y.';
+    }
+
         $this->object = new evento();
-        $_SESSION['cedula'] = '12345678';     
+        $_SESSION['cedula'] = '12345678';
+        $this->conex = new PDO('mysql:host=localhost;dbname=comerdorUptaeb', 'root', '');
+        $this->conex->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
     }
 
     protected function tearDown(): void {
@@ -14,160 +20,137 @@ class eventoTest extends TestCase {
     }
 
      //------------------- VERIFICAR EXISTENCIA TIPO ALIMENTO -  EVENTO ---------------
-       // Prueba para datos vacíos
-       public function test_verificarExistenciaTipoA_DatosVacios() {
-        $resultado = $this->object->verificarExistenciaTipoA('',false);
+      public function test_verificarExistenciaTipoA_DatosVacios() {
+        $resultado = $this->object->verificarExistenciaTipoA('');
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('Ingresar el Tipo de Alimento', $resultado['resultado']);
-        }
+      }
 
-          // Prueba para datos erróneos (no cumplen con las expresiones regulares)
-        public function test_verificarExistenciaTipoA_DatosErroneos() {
-        $resultado = $this->object->verificarExistenciaTipoA('Toma45',false);
+      public function test_verificarExistenciaTipoA_DatosErroneos() {
+        $resultado = $this->object->verificarExistenciaTipoA('Toma45');
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('Ingresar el Tipo de Alimento', $resultado['resultado']);
-        }
+      }
 
-          // Prueba para datos inexistentes en la base de datos
-        public function test_verificarExistenciaTipoA_DatosNoExistenBD() {
-        $resultado = $this->object->verificarExistenciaTipoA(60,false);
+      public function test_verificarExistenciaTipoA_DatosNoExistenBD() {
+        $resultado = $this->object->verificarExistenciaTipoA(600);
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('no esta', $resultado['resultado']);
-        }
+      }
 
-        // Prueba para datos que existen en la base de datos
-        public function test_verificarExistenciaTipoA_DatosExistenBD() {
-        $resultado = $this->object->verificarExistenciaTipoA(2,false);
+      public function test_verificarExistenciaTipoA_DatosExistenBD() {
+        $resultado = $this->object->verificarExistenciaTipoA(12);
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('si esta', $resultado['resultado']);
-        }
+      }
 
         //------------------ VERIFICAR EXISTENCIA ALIMENTO - EVENTO ---------------------
 
-                // Prueba para datos vacíos
-        public function test_verificarExistenciaAlimento_DatosVacios() {
-        $resultado = $this->object->verificarExistenciaAlimento('',false);
+      public function test_verificarExistenciaAlimento_DatosVacios() {
+        $resultado = $this->object->verificarExistenciaAlimento('');
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('Ingresar Alimento', $resultado['resultado']);
-        } 
+      } 
 
-              // Prueba para datos vacíos
-         // Prueba para datos erróneos (no cumplen con las expresiones regulares)
-        public function test_verificarExistenciaAlimento_DatosErroneos() {
-        $resultado = $this->object->verificarExistenciaAlimento('Rem9394ch',false);
+      public function test_verificarExistenciaAlimento_DatosErroneos() {
+        $resultado = $this->object->verificarExistenciaAlimento('Rem9394ch');
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('Ingresar Alimento', $resultado['resultado']);
-        }
+      }
         
-           // Prueba para datos inexistentes en la base de datos
-        public function test_verificarExistenciaAlimento_DatosNoExistenBD() {
-        $resultado = $this->object->verificarExistenciaAlimento(30,false);
+      public function test_verificarExistenciaAlimento_DatosNoExistenBD() {
+        $resultado = $this->object->verificarExistenciaAlimento(300);
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('no esta', $resultado['resultado']);
-        } 
+      } 
         
-           // Prueba para datos que existen en la base de datos
-        public function test_verificarExistenciaAlimento_DatosExistenBD() {
-        $resultado = $this->object->verificarExistenciaAlimento(5,false);
+      public function test_verificarExistenciaAlimento_DatosExistenBD() {
+        $resultado = $this->object->verificarExistenciaAlimento(15);
         $this->assertArrayHasKey('resultado', $resultado);
         $this->assertEquals('si esta', $resultado['resultado']);
-        } 
+      } 
 
           //------------------ MOSTRAR ALIMENTO - EVENTO ----------------------------------
 
-           // Prueba para datos vacíos
-          public function test_mostrarAlimento_DatosVacios() {
-          $resultado = $this->object->mostrarAlimento('',false);
+      public function test_mostrarAlimento_DatosVacios() {
+          $resultado = $this->object->mostrarAlimento('');
           $this->assertArrayHasKey('resultado', $resultado);
           $this->assertEquals('Ingresar Alimento', $resultado['resultado']); 
-          }
+      }
 
-            // Prueba para datos erróneos (no cumplen con las expresiones regulares)
-          public function test_mostrarAlimento_DatosErroneos() {
-          $resultado = $this->object->mostrarAlimento('Mo4a',false);
+      public function test_mostrarAlimento_DatosErroneos() {
+          $resultado = $this->object->mostrarAlimento('Mo4a');
           $this->assertArrayHasKey('resultado', $resultado);
           $this->assertEquals('Ingresar Alimento', $resultado['resultado']);
-          }
+      }
 
-            // Prueba para un  alimento que no existe
-          public function test_mostrarAlimento_DatosNoExiste() {
-          $resultado = $this->object->mostrarAlimento('52', false);
+      public function test_mostrarAlimento_DatosNoExiste() {
+          $resultado = $this->object->mostrarAlimento('52',);
           $this->assertIsArray($resultado);
           $this->assertCount(0, $resultado); 
-          }
+      }
 
-           // Prueba para un  alimento existente
-          public function test_mostrarAlimento_DatosExiste() {
-          $resultado = $this->object->mostrarAlimento('1', false); 
+      public function test_mostrarAlimento_DatosExiste() {
+          $resultado = $this->object->mostrarAlimento('1',); 
           $this->assertIsArray($resultado);
           $this->assertNotEmpty($resultado);
-          } 
+      } 
 
                //------------------- INFORMACION DEL ALIMENTO - EVENTO -------------------------
-                  // Prueba para datos vacíos
-          public function test_infoAlimento_DatosVacios() {
-          $resultado = $this->object->infoAlimento('',false);
+      public function test_infoAlimento_DatosVacios() {
+          $resultado = $this->object->infoAlimento('');
           $this->assertArrayHasKey('resultado', $resultado);
           $this->assertEquals('Selecionar Alimento para Obtener Informacion', $resultado['resultado']);
-          }
+      }
 
-            // Prueba para datos erróneos (no cumplen con las expesiones regulares)
-          public function test_infoAlimento_DatosErroneos() {
-          $resultado = $this->object->infoAlimento('07po0;',false);
+      public function test_infoAlimento_DatosErroneos() {
+          $resultado = $this->object->infoAlimento('07po0;');
           $this->assertArrayHasKey('resultado', $resultado);
           $this->assertEquals('Selecionar Alimento para Obtener Informacion', $resultado['resultado']);
-          }
+      }
 
-           // Prueba para un la informacion del alimento que no existe
-           public function test_infoAlimento_DatosNoExiste() {
-           $resultado = $this->object->infoAlimento('88', false);
+      public function test_infoAlimento_DatosNoExiste() {
+           $resultado = $this->object->infoAlimento('880',);
            $this->assertIsArray($resultado);
            $this->assertCount(0, $resultado); 
-          }
+      }
 
-           // Prueba para un  alimento existente
-          public function test_infoAlimento_DatosExiste() {
-          $resultado = $this->object->infoAlimento('1', false); 
+      public function test_infoAlimento_DatosExiste() {
+          $resultado = $this->object->infoAlimento('1',); 
           $this->assertIsArray($resultado);
           $this->assertNotEmpty($resultado);
-          }
+      }
 
            //------------------- VALIDAR FECHA Y HORARIO -  EVENTO ---------------
-            // Prueba para datos vacíos
-          public function test_validarFH_DatosVacios() {
-          $resultado = $this->object->validarFH('','', false);
+        public function test_validarFH_DatosVacios() {
+          $resultado = $this->object->validarFH('','');
           $this->assertArrayHasKey('resultado', $resultado);
           $this->assertEquals('Ingresar Fecha, Seleccionar Horario del Menú', $resultado['resultado']);
-          }
+        }
 
-            // Prueba para datos erróneos (no cumplen con las expresiones regulares)
-          public function test_validarFH_DatosErroneos() {
-          $resultado = $this->object->validarFH('20 de septiembre', 'Dejs74n', false);
+        public function test_validarFH_DatosErroneos() {
+          $resultado = $this->object->validarFH('20 de septiembre', 'Dejs74n',);
           $this->assertArrayHasKey('resultado', $resultado);
           $this->assertEquals('Ingresar Fecha, Seleccionar Horario del Menú', $resultado['resultado']);
-          }
+        }
 
-             // Prueba para datos inexistentes en la base de datos
-          public function test_validarFH_DatosNoExistenBD() {
-          $resultado = $this->object->validarFH('2024-12-12','Cena',false);
+        public function test_validarFH_DatosNoExistenBD() {
+          $resultado = $this->object->validarFH('2024-12-12','Cena');
           $this->assertArrayHasKey('resultado', $resultado);
           $this->assertEquals('No tiene un evento registrado para esa fecha y horario', $resultado['resultado']);
-          }
+        }
 
-            // Prueba para datos que existen en la base de datos
-           public function test_validarFH_DatosExistenBD() {
-            $resultado = $this->object->validarFH('2024-11-18', 'Merienda', false);
+        public function test_validarFH_DatosExistenBD() {
+            $resultado = $this->object->validarFH('2025-10-01', 'Cena');
             $this->assertArrayHasKey('resultado', $resultado);
             $this->assertEquals('error', $resultado['resultado']);    
             $this->assertArrayHasKey('mensaje', $resultado);
             $this->assertEquals('Ya tiene un evento registrado para esa fecha y horario', $resultado['mensaje']);
-            }
+        }
 
             //-------------------VERIFICAR DATOS PARA REGISTRA EVENTOS -----------------
-            // Prueba para datos vacíos
-            public function test_registrarEvento_DatosVacios() {
-            $resultado = $this->object->registrarEvento('', '', '',
-            '', '','',false);
+        public function test_registrarEvento_DatosVacios() {
+            $resultado = $this->object->registrarEvento('', '', '', '', '','');
       
             $this->assertArrayHasKey('resultado', $resultado);
           
@@ -177,13 +160,10 @@ class eventoTest extends TestCase {
             $this->assertStringContainsString('Ingresar Nombre del evento', $resultado['resultado']); 
             $this->assertStringContainsString('Ingresar Descripción del evento', $resultado['resultado']); 
             $this->assertStringContainsString('Ingresar Descripción del Menú', $resultado['resultado']);    
-            }
+        }
 
-            // Prueba para datos erróneos (no cumplen con las expresiones regulares)
-           public function test_registrarEvento_DatosErroneos() {
-            $resultado = $this->object->registrarEvento('25 de noviembre del 2025',
-             'De354yo','4u5','1a', '12','p1',
-            false);
+        public function test_registrarEvento_DatosErroneos() {
+            $resultado = $this->object->registrarEvento('25 de noviembre del 2025','De354yo','4u5','1a', '12','p1');
     
             $this->assertArrayHasKey('resultado', $resultado);
         
@@ -193,13 +173,11 @@ class eventoTest extends TestCase {
             $this->assertStringContainsString('Ingresar Nombre del evento', $resultado['resultado']); 
             $this->assertStringContainsString('Ingresar Descripción del evento', $resultado['resultado']); 
             $this->assertStringContainsString('Ingresar Descripción del Menú', $resultado['resultado']);    
-            }
+        }
 
               //-------------------VERIFICAR DATOS PARA REGISTRA DETALLE SALIDA EVENTO -----------------
-
-                // Prueba para datos vacíos
-            public function test_detalleSalidaM_DatosVacios() {
-            $resultado = $this->object->detalleSalidaM('', '', '', '', false);
+        public function test_detalleSalidaM_DatosVacios() {
+            $resultado = $this->object->detalleSalidaM('', '', '', '');
 
             $this->assertArrayHasKey('resultado', $resultado);
     
@@ -207,11 +185,10 @@ class eventoTest extends TestCase {
             $this->assertStringContainsString('Ingresar Cantidad de Alimentos', $resultado['resultado']);
             $this->assertStringContainsString('Obtener ID del Menú', $resultado['resultado']);
             $this->assertStringContainsString('Obtener ID de la Salida', $resultado['resultado']);
-            } 
+        } 
 
-            // Prueba para datos erróneos (no cumplen con las expresiones regulares)
-            public function test_detalleSalidaM_DatosErroneos() {
-            $resultado = $this->object->detalleSalidaM('YY76', 'PO9', '6D','0P9J', false);
+        public function test_detalleSalidaM_DatosErroneos() {
+            $resultado = $this->object->detalleSalidaM('YY76', 'PO9', '6D','0P9J');
 
             $this->assertArrayHasKey('resultado', $resultado);
     
@@ -219,13 +196,13 @@ class eventoTest extends TestCase {
             $this->assertStringContainsString('Ingresar Cantidad de Alimentos', $resultado['resultado']);
             $this->assertStringContainsString('Obtener ID del Menú', $resultado['resultado']);
             $this->assertStringContainsString('Obtener ID de la Salida', $resultado['resultado']);
-            }  
+        }  
 
 
    // --------------------- REGISTRO DE UN EVENTO-----------------------------
           public function test_registrarEventoYDetalleSalidaMenu_DatosListos() {
     
-          $feMenu = '2024-12-31';
+          $feMenu = '2025-12-31';
           $horarioComida = 'Cena';
           $cantPlatos = 60;
           $nomEvent = 'Año Nuevo';
@@ -233,7 +210,7 @@ class eventoTest extends TestCase {
           $descripcion = 'Cena ingredientes especiales';
 
           $resultado = $this->object->registrarEvento($feMenu, $horarioComida, $cantPlatos, $nomEvent, $descripEvent,
-          $descripcion, false);
+          $descripcion,);
 
           $this->assertArrayHasKey('resultado', $resultado);
           $this->assertEquals('registrado', $resultado['resultado']);
@@ -256,10 +233,10 @@ class eventoTest extends TestCase {
 
         foreach ($alimentos as $item) {
           $detalleResultado = $this->object->detalleSalidaM($item['alimento'], $item['cantidad'], 
-       $menuId, $salidaId, false);
+       $menuId, $salidaId,);
 
-      ||  $this->assertArrayHasKey('resultado', $detalleResultado);
-      ||  $this->assertEquals('exitoso', $detalleResultado['resultado']);
+      $this->assertArrayHasKey('resultado', $detalleResultado);
+      $this->assertEquals('exitoso', $detalleResultado['resultado']);
   }
 
 }
@@ -269,5 +246,5 @@ class eventoTest extends TestCase {
       
           
        
-}*/
+}
 ?>
