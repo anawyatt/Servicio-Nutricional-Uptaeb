@@ -74,6 +74,7 @@
                                     <th class="blanco fw-bold">Cédula</th>
                                     <th class="blanco fw-bold">Nombre</th>
                                     <th class="blanco fw-bold">Apellido</th>
+                                    <th class="blanco fw-bold">Cargo</th>
                                     <th class="blanco fw-bold">Estado</th>
                                     <th class="blanco fw-bold accion">Acciones</th>
                                   </tr>

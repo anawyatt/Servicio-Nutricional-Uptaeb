@@ -54,6 +54,7 @@ $(document).ready(function (){
                     <td class="">${row.cedula}</td>
                     <td class="">${row.nombre}</td>
                     <td class="">${row.apellido }</td>
+                    <td class="">${row.nombreRol}</td>
                      `+ resultado +`
                     <td class="text-center accion">
                     <a id="${row.cedula}" class="btn btn-sm btn-icon text-info flex-end text-center infoUsuario" data-bs-toggle="modal" data-bs-target="#infoUsuario"data-bs-toggle="tooltip" title="informacion Usuario" href="#" >
@@ -415,7 +416,6 @@ $("#editar").on("click", function(e){
                              else{
                               $('[name="csrf_token"]').val(data.newCsrfToken);
                               $('.cerrar2').click();
-                            delete mostrar;
                             rellenar();
                              Swal.fire({
                                   toast: true,

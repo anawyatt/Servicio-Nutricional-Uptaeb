@@ -33,7 +33,7 @@ class consultarUsuarioModelo extends connectDB{
         $this->cedula = $cedula;
         try {
             $this->conectarDBSeguridad();
-            $new = $this->conex2->prepare("SELECT cedula, img, nombre, apellido, status FROM vista_usuarios_info WHERE cedula != ?");
+            $new = $this->conex2->prepare("SELECT cedula, img, nombre, apellido, nombreRol, status FROM vista_usuarios_info WHERE cedula != ?");
             $new->bindValue(1, $this->cedula);
             $new->execute();
             $data = $new->fetchAll(\PDO::FETCH_OBJ);
