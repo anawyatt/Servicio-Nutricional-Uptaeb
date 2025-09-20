@@ -27,16 +27,15 @@ $(".borrar").remove()
  tablaEvento();
 
 let mostrarE = $('.tabla').DataTable({
- "columns": [
-     { "data": "feMenu", "render": function (data) {
-      let feMenu = new Date(data);
-      let dia = feMenu.getUTCDate().toString().padStart(2, '0'); // Usar getUTCDate()
-      let mes = (feMenu.getUTCMonth() + 1).toString().padStart(2, '0'); // Usar getUTCMonth()
-      let anio = feMenu.getUTCFullYear(); // Usar getUTCFullYear()
-
-      return `${dia}-${mes}-${anio}`;
-  },
-         "className": "text-center"
+ "ordering": false, // respeta el orden del SQL
+  "columns": [
+    { 
+      "data": "feMenu", 
+      "render": function (data) {
+        let [anio, mes, dia] = data.split("-");
+        return `${dia}-${mes}-${anio}`;
+      },
+      "className": "text-center"
      },
      { "data": "horarioComida", "className": "text-center" },
      { "data": "cantPlatos", "className": "text-center" },

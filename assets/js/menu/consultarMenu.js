@@ -27,46 +27,46 @@ $(".borrar").remove()
     tablaMenu();
 
 let mostrarM = $('.tabla').DataTable({
-    "columns": [
-        { "data": "feMenu", "render":function (data) {
-          let feMenu = new Date(data);
-          let dia = feMenu.getUTCDate().toString().padStart(2, '0'); // Usar getUTCDate()
-          let mes = (feMenu.getUTCMonth() + 1).toString().padStart(2, '0'); // Usar getUTCMonth()
-          let anio = feMenu.getUTCFullYear(); // Usar getUTCFullYear()
-  
-          return `${dia}-${mes}-${anio}`;
+  "ordering": false, // respeta el orden del SQL
+  "columns": [
+    { 
+      "data": "feMenu", 
+      "render": function (data) {
+        let [anio, mes, dia] = data.split("-");
+        return `${dia}-${mes}-${anio}`;
       },
-            "className": "text-center"
-        },
-        { "data": "horarioComida", "className": "text-center" },
-        { "data": "cantPlatos", "className": "text-center" },
-        {
-            "data": "idMenu",
-            "render": function (data, type, row) {
-                return `
-                    <td class="text-center accion">
-                        <a id="${data}" class="btn btn-sm btn-icon text-info flex-end text-center informacion" data-bs-toggle="modal" data-bs-target="#infoMenu" data-bs-toggle="tooltip" title="Información Menú" href="#" type="button">
-                            <span class="btn-inner pi">
-                                <i class="bi bi-eye icon-24 t" width="20"></i>
-                            </span>
-                        </a>
-                        <a id="${data}" class="btn btn-sm btn-icon text-primary flex-end text-center editar" data-bs-toggle="tooltip" title="Modificar Menú" href="#" type="button">
-                            <span class="btn-inner pi">
-                                <i class="bi bi-pencil icon-24 t" width="20"></i>
-                            </span>
-                        </a>
-                        <a id="${data}" class="btn btn-sm btn-icon text-danger text-center borrar" data-bs-toggle="tooltip" title="Eliminar Menú" href="#" type="button">
-                            <i class="bi bi-trash icon-24 t" width="20"></i>
-                        </a>
-                        <a id="${data}" class="btn btn-sm btn-icon text-primary text-center pdf" data-bs-toggle="modal" data-bs-target="#pdfMenu" data-bs-toggle="tooltip" title="Descargar Menú" href="#" type="button">
-                            <i class="ri-download-line icon-24 t" width="20"></i>
-                        </a>
-                    </td>`;
-            },
-            "className": "text-center"
-        }
-    ]
+      "className": "text-center"
+    },
+    { "data": "horarioComida", "className": "text-center" },
+    { "data": "cantPlatos", "className": "text-center" },
+    {
+      "data": "idMenu",
+      "render": function (data) {
+        return `
+          <td class="text-center accion">
+              <a id="${data}" class="btn btn-sm btn-icon text-info flex-end text-center informacion" data-bs-toggle="modal" data-bs-target="#infoMenu" data-bs-toggle="tooltip" title="Información Menú" href="#" type="button">
+                  <span class="btn-inner pi">
+                      <i class="bi bi-eye icon-24 t" width="20"></i>
+                  </span>
+              </a>
+              <a id="${data}" class="btn btn-sm btn-icon text-primary flex-end text-center editar" data-bs-toggle="tooltip" title="Modificar Menú" href="#" type="button">
+                  <span class="btn-inner pi">
+                      <i class="bi bi-pencil icon-24 t" width="20"></i>
+                  </span>
+              </a>
+              <a id="${data}" class="btn btn-sm btn-icon text-danger text-center borrar" data-bs-toggle="tooltip" title="Eliminar Menú" href="#" type="button">
+                  <i class="bi bi-trash icon-24 t" width="20"></i>
+              </a>
+              <a id="${data}" class="btn btn-sm btn-icon text-primary text-center pdf" data-bs-toggle="modal" data-bs-target="#pdfMenu" data-bs-toggle="tooltip" title="Descargar Menú" href="#" type="button">
+                  <i class="ri-download-line icon-24 t" width="20"></i>
+              </a>
+          </td>`;
+      },
+      "className": "text-center"
+    }
+  ]
 });
+
 
 // Función para rellenar la tabla
 function tablaMenu() {
@@ -1779,7 +1779,7 @@ let newAlimento = `
              success: function(data) {
               if (data.resultado === 'ya no existe') {
                 $('#cerrar3').click();
-                 delete mostrarM ;
+                 delete mostrarM;
                  tablaMenu();
                  Swal.fire({
                         toast: true,
