@@ -943,11 +943,12 @@ function modificar() {
       url: "",  
       dataType: "json",
       data: {
+          modificarInfo:true,
           feMenu,
           horarioComida,
           cantPlatos,
           descripcion,
-          id,
+          idMenu:id,
           idSalidaA,
           csrfToken: token
 
