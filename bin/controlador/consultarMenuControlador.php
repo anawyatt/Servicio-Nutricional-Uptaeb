@@ -127,16 +127,17 @@
           }
         }
         
-        
+        if(isset($datosPermisos['permiso']['modificar'])){
 
-        if (isset($datosPermisos['permiso']['modificar']) && isset($_POST['feMenu']) && isset($_POST['horarioComida']) && isset($_POST['cantPlatos']) && isset($_POST['descripcion'])
-         && isset($_POST['id']) && isset($_POST['idSalidaA'])&& isset($_POST['csrfToken'])) {
+           if ( isset($_POST['modificarInfo']) && isset($_POST['feMenu']) && isset($_POST['horarioComida']) && isset($_POST['cantPlatos']) && isset($_POST['descripcion'])
+         && isset($_POST['idMenu']) && isset($_POST['idSalidaA'])&& isset($_POST['csrfToken'])) {
             $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
 
            PostRateMiddleware::verificar('modificar', (array)$payload); 
 
           $modificarM = $object->modificarMenu($_POST['feMenu'], $_POST['horarioComida'], 
-          $_POST['cantPlatos'], $_POST['descripcion'], $_POST['id'], $_POST['idSalidaA']);
+          $_POST['cantPlatos'], $_POST['descripcion'], $_POST['idMenu'], $_POST['idSalidaA']);
+
             if (!isset($modificarM['resultado']) || $modificarM['resultado'] !== 'Menú Actualizado Exitosamente') {
 
               echo json_encode([
@@ -162,6 +163,10 @@
         echo json_encode($modificarDSM);
         die();
       }
+
+  }
+
+       
 
       if (isset($_POST['id']) && !isset($_POST['borrar'])) {
           $verificarAnulacion = $object->verificarAnulacion($_POST['id']);

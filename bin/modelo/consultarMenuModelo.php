@@ -438,7 +438,7 @@ class consultarMenuModelo extends connectDB {
               }
         }
 
-        public function modificarMenu($feMenu, $horarioComida, $cantPlatos, $descripcion, $id, $idSalidaA) {
+        public function modificarMenu($feMenu, $horarioComida, $cantPlatos, $descripcion, $idMenu, $idSalidaA) {
             if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
                 return ['Ingresar Fecha del Menú en formato YYYY-MM-DD'];
             }
@@ -455,7 +455,7 @@ class consultarMenuModelo extends connectDB {
                 return ['Ingresar Descripción del Menú'];
             }
 
-            if (!preg_match("/^[0-9]{1,}$/", $id)) {
+            if (!preg_match("/^[0-9]{1,}$/", $idMenu)) {
                 return ['Seleccionar Menú'];
             }
         
@@ -467,7 +467,7 @@ class consultarMenuModelo extends connectDB {
             $this->horarioComida = $horarioComida;
             $this->cantPlatos = $cantPlatos;
             $this->descripcion = $descripcion;
-            $this->id = $id;
+            $this->idMenu = $idMenu;
             $this->idSalidaA = $idSalidaA;
         
             return $this->modiMenu();
@@ -481,23 +481,23 @@ class consultarMenuModelo extends connectDB {
                 $bitacora = new bitacoraModelo();
 
                 $idTipoSalidas = $this->tipoSalidaMenu();
-                $updateM = $this->datosMenu($this->id);
+                $updateM = $this->datosMenu($this->idMenu);
                 $updateS = $this->salidaA($idTipoSalidas, $this->idSalidaA);
                 $borrar = $this->borrarAlimentoM($this->idSalidaA);
 
         
                 if ($updateM['feMenu'] !== $this->feMenu) {
-                    $this->actualizarFechaMenu($this->feMenu, $this->id);
+                    $this->actualizarFechaMenu($this->feMenu, $this->idMenu);
                     $bitacora->registrarBitacora('Modificar Menú', "feMenu de '{$updateM['feMenu']}' a '{$this->feMenu}'", $this->payload->cedula);
                 }
                 
                 if ($updateM['horarioComida'] !== $this->horarioComida) {
-                    $this->actualizarHorarioComida($this->horarioComida, $this->id);
+                    $this->actualizarHorarioComida($this->horarioComida, $this->idMenu);
                     $bitacora->registrarBitacora('Modificar Menú', "horarioComida de '{$updateM['horarioComida']}' a '{$this->horarioComida}'", $this->payload->cedula);
                 }
                 
                 if ($updateM['cantPlatos'] !== $this->cantPlatos) {
-                    $this->actualizarCantidadPlatos($this->cantPlatos, $this->id);
+                    $this->actualizarCantidadPlatos($this->cantPlatos, $this->idMenu);
                     $bitacora->registrarBitacora('Modificar Menú', "cantPlatos de '{$updateM['cantPlatos']}' a '{$this->cantPlatos}'", $this->payload->cedula);
                 }
                 
@@ -506,11 +506,10 @@ class consultarMenuModelo extends connectDB {
                     $bitacora->registrarBitacora('Modificar Menú', "descripcion de '{$updateS['descripcion']}' a '{$this->descripcion}'", $this->payload->cedula);
                 }
                 
-        
                 $this->conex->commit();
 
                 
-               return [ 'resultado' => 'Menú Actualizado Exitosamente','menuId' => $this->id,'salidaId' => $this->idSalidaA];
+               return [ 'resultado' => 'Menú Actualizado Exitosamente','menuId' => $this->idMenu,'salidaId' => $this->idSalidaA];
 
             } catch (Exception $error) {
                $this->conex->rollBack();
