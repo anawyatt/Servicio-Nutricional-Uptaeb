@@ -27,7 +27,7 @@ $(".borrar").remove()
     tablaMenu();
 
 let mostrarM = $('.tabla').DataTable({
-  "ordering": false, // respeta el orden del SQL
+  "ordering": false, 
   "columns": [
     { 
       "data": "feMenu", 
@@ -978,7 +978,7 @@ function modificar() {
               actualizarDetalle();  
                 $('[name="csrf_token"]').val(response.newCsrfToken);
               $('#cerrar2').click();
-              delete mostrarM ;
+              console.log('Menú Modificado');
               Swal.fire({
                   toast: true,
                   position: 'top-end',
@@ -1183,36 +1183,24 @@ function chequeo_cantidad() {
 }
 
 
+$(document).on('change', 'input[type=checkbox]', function () {
+  $('input[type=checkbox]').not(this).prop('checked', false);
+  validarCheck();
+});
+
 function validarCheck() {
-const checkboxes = $('input[type=checkbox]');
-const errorElement = $('.error5');
-let selected = false;
+  const checkboxes = $('input[type=checkbox]');
+  const errorElement = $('.error5');
 
-checkboxes.on('change', function() {
-  if ($(this).is(':checked')) {
-    checkboxes.not(this).prop('checked', false).removeClass('is-invalid');
-    selected = true;
-  } else {
-    selected = false;
-  }
-
-  if (selected) {
+  if (checkboxes.is(':checked')) {
     errorElement.html('');
     checkboxes.removeClass('is-invalid');
+    error_horarioC = false;
   } else {
     errorElement.html('<i class="bi bi-exclamation-triangle-fill"></i> ¡Seleccione un horario para el menú!');
     checkboxes.addClass('is-invalid');
+    error_horarioC = true;
   }
-});
-
-if ($('input[type=checkbox]:checked').length == 0) {
-  errorElement.html('<i class="bi bi-exclamation-triangle-fill"></i> ¡Seleccione un horario para el menú!');
-  checkboxes.addClass('is-invalid');
-  error_horarioC = true;
-} else {
-  errorElement.html('');
-  checkboxes.removeClass('is-invalid');
-}
 }
 
 function chequeo_fecha() {
@@ -1292,12 +1280,7 @@ if (chequeo.test(descripcion) && descripcion !== '') {
 }
 
 
-
-
-
-
       function verificarTipoA(){
-         
            let tipoA = $("#tipoA").val();
            if (tipoA != 'Seleccionar') {
              $.ajax({
@@ -1307,7 +1290,6 @@ if (chequeo.test(descripcion) && descripcion !== '') {
                     data:{ valida:'si', tipoA},
                     success(data){
                       if (data.resultado === 'no esta') {
-                         delete select;
                           mostrarTipoA();
                           Swal.fire({
                             toast: true,
@@ -1331,9 +1313,7 @@ if (chequeo.test(descripcion) && descripcion !== '') {
           }
 
 
-           function verificarAlimento(){
-
-         
+           function verificarAlimento(){ 
            let alimento = $("#alimento").val();
            if (alimento != 'Seleccionar') {
              $.ajax({
@@ -1343,7 +1323,6 @@ if (chequeo.test(descripcion) && descripcion !== '') {
                     data:{ valida2:'si', alimento},
                     success(data){
                       if (data.resultado === 'no esta') {
-                         delete select;
                           mostrarTipoA();
                           Swal.fire({
                             toast: true,
@@ -1780,7 +1759,6 @@ let newAlimento = `
              success: function(data) {
               if (data.resultado === 'ya no existe') {
                 $('#cerrar3').click();
-                 delete mostrarM;
                  tablaMenu();
                  Swal.fire({
                         toast: true,

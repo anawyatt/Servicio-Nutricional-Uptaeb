@@ -83,9 +83,9 @@ class consultarMenuModelo extends connectDB {
             try {
                 $this->conectarDB();
                 $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, MAX(sa.descripcion) AS descripcion
-                FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
+                FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu  LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
                 WHERE m.status = 1 AND m.feMenu BETWEEN ? AND ? AND m.horarioComida = ? AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu)
-                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos;");
+                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos ORDER BY m.feMenu ASC, m.horarioComida; ");
                 
                 $info->bindValue(1, $this->fechaInicio);
                 $info->bindValue(2, $this->fechaFin);
@@ -93,66 +93,72 @@ class consultarMenuModelo extends connectDB {
                 $info->execute();
                 $resultado = $info->fetchAll(\PDO::FETCH_OBJ) ?: []; 
                 $this->desconectarDB();
-    
+
                 return $resultado;
             } catch (\Exception $error) {
                 return ["Sistema", "¡Error Sistema!"];
             }
         }
-        
+
         private function mostrarMConHorarioSinFiltros() {
             try {
                 $this->conectarDB();
-                $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, sa.descripcion
+                $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, MAX(sa.descripcion) AS descripcion
                 FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
-                WHERE m.status = 1 AND m.feMenu >= CURDATE() AND m.horarioComida = ? AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu);");
+                WHERE m.status = 1 AND m.feMenu >= CURDATE() AND m.horarioComida = ? AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu)
+                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos ORDER BY m.feMenu ASC, m.horarioComida;");
                 
                 $info->bindValue(1, $this->horario);
                 $info->execute();
                 $resultado = $info->fetchAll(\PDO::FETCH_OBJ) ?: []; 
                 $this->desconectarDB();
-    
+
                 return $resultado;
             } catch (\Exception $error) {
                 return ["Sistema", "¡Error Sistema!"];
             }
         }
-        
+
         private function mostrarMConFiltros() {
             try {
                 $this->conectarDB();
-                $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, sa.descripcion
-                FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON 
-                ds.idSalidaA = sa.idSalidaA WHERE m.status = 1 AND m.feMenu BETWEEN ? AND ? AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu);");
+                $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, MAX(sa.descripcion) AS descripcion
+                FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
+                WHERE m.status = 1 AND m.feMenu BETWEEN ? AND ? AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu)
+                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos ORDER BY m.feMenu ASC, m.horarioComida;");
                 
                 $info->bindValue(1, $this->fechaInicio);
                 $info->bindValue(2, $this->fechaFin);
                 $info->execute();
                 $resultado = $info->fetchAll(\PDO::FETCH_OBJ) ?: []; 
                 $this->desconectarDB();
-        
+
                 return $resultado;
             } catch (\Exception $error) {
                 return ["Sistema", "¡Error Sistema!"];
             }
         }
+
+       private function mostrarMSinFiltros() {
+    try {
+        $this->conectarDB();
+        $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, MAX(sa.descripcion) AS descripcion
+        FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
+        WHERE m.status = 1 AND m.feMenu >= CURDATE() AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu)
+        GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos ORDER BY m.feMenu ASC, m.horarioComida; ");
         
-        private function mostrarMSinFiltros() {
-            try {
-                $this->conectarDB();
-                $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, MAX(sa.descripcion) AS descripcion
-                FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
-                WHERE m.status = 1 AND m.feMenu >= CURDATE() AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu)
-                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos;");
-                $info->execute();
-                $resultado = $info->fetchAll(\PDO::FETCH_OBJ) ?: [];
-                $this->desconectarDB();
-        
-                return $resultado;
-            } catch (\Exception $error) {
-                return ["Sistema", "¡Error Sistema!"];
-            }
-        }
+        $info->execute();
+        $resultado = $info->fetchAll(\PDO::FETCH_OBJ) ?: [];
+        $this->desconectarDB();
+
+        return $resultado;
+    } catch (\Exception $error) {
+        return ["Sistema", "¡Error Sistema!"];
+    }
+}
+
+
+
              
         public function verificarExistencia($id){
             if (!preg_match("/^[0-9]{1,}$/", $id)) {

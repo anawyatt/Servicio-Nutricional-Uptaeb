@@ -283,10 +283,11 @@ class eventoModelo extends connectDB {
 
       private function salidaAlimentos($idTipoSalidas) {
         $new = $this->conex->prepare("INSERT INTO `salidaalimentos`(`idSalidaA`, `fecha`, `hora`, `descripcion`, `idTipoSalidaA`, `status`)  
-        VALUES (DEFAULT, DEFAULT, DEFAULT, ?, ?, 1)");
+        VALUES (DEFAULT, ?, NOW(), ?, ?, 1)");
 
-        $new->bindValue(1, $this->descripcion);
-        $new->bindValue(2, $idTipoSalidas);
+        $new->bindValue(1, $this->feMenu); 
+        $new->bindValue(2, $this->descripcion);
+        $new->bindValue(3, $idTipoSalidas);
         $new->execute();
         return $this->conex->lastInsertId();
       }
