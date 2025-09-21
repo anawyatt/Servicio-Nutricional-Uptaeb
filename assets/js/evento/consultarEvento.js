@@ -871,16 +871,17 @@ function modiAli() {
       url: "", 
       dataType: "json",
       data: {
-          feMenu,
-          horarioComida,
-          cantPlatos,
-          idMenu,
-          nomEvent,
-          descripEvent,
-          id,
-          descripcion,
-          idSalidaA,
-          csrfToken: token
+                  modificarE:true,
+                  feMenu,
+                  cantPlatos,
+                  nomEvent,
+                  descripEvent,
+                  horarioComida,
+                  descripcion,
+                  idEvento: id,
+                  idSalidaA,
+                  idMenu,
+                  csrfToken: token   
       },
       success(response) {
           if (response.resultado === "error") {
@@ -927,15 +928,16 @@ function modificar() {
               url: "", 
               dataType: "json",
               data: {
-              feMenu,
-                  horarioComida,
+                  modificarE:true,
+                  feMenu,
                   cantPlatos,
-                  idMenu,
                   nomEvent,
                   descripEvent,
-                  id,
+                  horarioComida,
                   descripcion,
+                  idEvento: id,
                   idSalidaA,
+                  idMenu,
                   csrfToken: token            
                   },
             success(response) {

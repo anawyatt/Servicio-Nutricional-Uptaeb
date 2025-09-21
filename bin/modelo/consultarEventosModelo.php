@@ -37,6 +37,7 @@ class consultarEventosModelo extends connectDB {
     private $nomEvent;
     private $descripEvent;
     public $payload;
+    public $idEvento;
 
 
 
@@ -438,7 +439,7 @@ class consultarEventosModelo extends connectDB {
               }
         }
         
-        public function modificarEven($feMenu, $cantPlatos, $nomEvent, $descripEvent, $horarioComida, $descripcion, $id, $idSalidaA, $idMenu) {
+        public function modificarEven($feMenu, $cantPlatos, $nomEvent, $descripEvent, $horarioComida, $descripcion, $idEvento, $idSalidaA, $idMenu) {
         
             if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
                return ['Ingresar Fecha del Menú en formato YYYY-MM-DD'];
@@ -464,7 +465,7 @@ class consultarEventosModelo extends connectDB {
                return ['Ingresar descripción del Menú'];
             }
         
-            if (!preg_match("/^[0-9]{1,}$/", $id)) {
+            if (!preg_match("/^[0-9]{1,}$/", $idEvento)) {
                 return ['Seleccionar Evento'];
             }
         
@@ -482,7 +483,7 @@ class consultarEventosModelo extends connectDB {
             $this->descripEvent = $descripEvent;
             $this->horarioComida = $horarioComida;
             $this->descripcion = $descripcion;
-            $this->id = $id;
+            $this->idEvento = $idEvento;
             $this->idSalidaA = $idSalidaA;
             $this->idMenu = $idMenu;
         
@@ -500,7 +501,7 @@ class consultarEventosModelo extends connectDB {
         
                 $idTipoSalidas = $this->tipoSalidaMenu();
                 $updateM = $this->datosMenu($this->idMenu);
-                $updateE = $this->datosEvento($this->id);
+                $updateE = $this->datosEvento($this->idEvento);
                 $updateS = $this->salidaA($idTipoSalidas, $this->idSalidaA);
                 $borrar=$this->borrarAlimentoM($this->idSalidaA);
 
@@ -520,11 +521,11 @@ class consultarEventosModelo extends connectDB {
                 }
         
                 if ($updateE['nomEvent'] !== $this->nomEvent) {
-                    $this->actualizarNombreEvento($this->nomEvent, $this->id);
+                    $this->actualizarNombreEvento($this->nomEvent, $this->idEvento);
                     $bitacora->registrarBitacora('Modificar Evento', "nomEvent de '{$updateE['nomEvent']}' a '{$this->nomEvent}'",$this->payload->cedula);
                 }
                 if ($updateE['descripEvent'] !== $this->descripEvent) {
-                    $this->actualizarDescripcionEvento($this->descripEvent, $this->id);
+                    $this->actualizarDescripcionEvento($this->descripEvent, $this->idEvento);
                     $bitacora->registrarBitacora('Modificar Evento', "descripEvent de '{$updateE['descripEvent']}' a '{$this->descripEvent}'",$this->payload->cedula);
                 }
         
