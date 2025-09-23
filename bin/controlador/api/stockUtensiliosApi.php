@@ -36,6 +36,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (isset($_POST['datos'])) {
+
 try {
     $data = decryptionAsyncHelpers::decryptPayload($_POST['datos']);
 
@@ -54,25 +55,25 @@ try {
 }
 
 if (isset($_POST['consultarStockTotal'])) {
-   
-    try{
-
-    $data = decryptionAsyncHelpers::decryptPayload($_POST['consultarStockTotal']);
-
-    if (!isset($data['mostrarUtensiliosTotal']) ) {
-        http_response_code(400);
-        echo json_encode(['resultado' => 'error', 'mensaje' => 'Parámetros requeridos faltantes para el reporte']);
+    try {
+        $data = decryptionAsyncHelpers::decryptPayload($_POST['consultarStockTotal']);
+        
+        if (!isset($data['mostrarUtensiliosTotal'])) {
+            http_response_code(400);
+            echo json_encode(['resultado' => 'error', 'mensaje' => 'Parámetros requeridos faltantes para el reporte pdf']);
+            exit;
+        }
+        $resultado = $objeto->mostrarUtensilios();
+        
+        echo json_encode($resultado);
         exit;
-    }
-    $resultado = $objeto->mostrarUtensilios();
-    echo json_encode($resultado);
 
-
-    }catch(Exception $e) {
+    } catch (Exception $e) {
         http_response_code(400);
         echo json_encode(['resultado' => 'error', 'mensaje' => $e->getMessage()]);
+        exit;
     }
 }
-
 http_response_code(400);
 echo json_encode(['resultado' => 'error', 'mensaje' => 'Solicitud inválida']);
+
