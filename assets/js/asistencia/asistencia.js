@@ -496,7 +496,8 @@ function idMenu() {
                                                   Swal.fire({
                                                       title: "¡Éxito!",
                                                       text: "El Estudiante puede acceder al Comedor",
-                                                      icon: "success"
+                                                      icon: "success",
+                                                      scrollbarPadding: false,
                                                   });
                                                   $('.form-Study').trigger('reset');
                                                   $('#inputCedula').val('');
@@ -1501,6 +1502,7 @@ function registrarExcepcion2() {
                             showConfirmButton: false,
                             timer: 2500,
                             timerProgressBar: true,
+                            scrollbarPadding: false,
                         });
                         $('.formu').trigger('reset');
                         obtenerPlatosDisponibles();
