@@ -112,32 +112,59 @@ class stockAlimentosModelo extends connectDB
     }
   }
 
-  public function buscarAlimento($alimento)
-  {
-    if (empty($alimento)) {
-      return ['resultado' => 'Ingrese el nombre del alimento'];
-    } else {
-      $this->alimento = $alimento;
-      return $this->mostrarAlimentoBuscador();
-    }
+public function buscarAlimentoPaginado($alimento, $limit, $offset)
+{
+  $alimentoBuscado = '%' . $alimento . '%';
+  try {
+    $this->conectarDB();
+    $consultar = $this->conex->prepare("SELECT idAlimento, imgAlimento, nombre, marca, stock, reservado FROM alimento WHERE nombre LIKE ? AND (stock > 0 OR reservado > 0) ORDER BY nombre LIMIT ? OFFSET ?");
+    $consultar->bindValue(1, $alimentoBuscado);
+    $consultar->bindValue(2, (int) $limit, \PDO::PARAM_INT);
+    $consultar->bindValue(3, (int) $offset, \PDO::PARAM_INT);
+    $consultar->execute();
+    $data = $consultar->fetchAll(\PDO::FETCH_OBJ);
+    $this->desconectarDB();
+    return $data;
+  } catch (\Exception $e) {
+    throw new \RuntimeException('Error al buscar el alimento paginado: ' . $e->getMessage());
   }
-  private function mostrarAlimentoBuscador()
-  {
-    $alimentoBuscado='%'.$this->alimento.'%';
-    try {
-      $this->conectarDB();
-      $consultar = $this->conex->prepare("SELECT idAlimento, imgAlimento, nombre, marca, stock, reservado FROM alimento WHERE nombre LIKE ? AND (stock > 0 OR reservado > 0);");
-      $consultar->bindValue(1, $alimentoBuscado );
-      $consultar->execute();
-      $data = $consultar->fetchAll(\PDO::FETCH_OBJ);
-      $this->desconectarDB();
-      return $data;
+}
 
-    } catch (\Exception $e) {
-      throw new \RuntimeException('Error al mostrar el tipo de alimento: ' . $e->getMessage());
-    }
+public function alimentosPaginado($limit, $offset)
+{
+  try {
+    $this->conectarDB();
+    $consulta = $this->conex->prepare("
+      SELECT a.*, ta.*
+      FROM alimento a
+      INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA
+      WHERE a.status = 1 AND (a.stock > 0 OR a.reservado > 0)
+      ORDER BY a.nombre LIMIT ? OFFSET ?
+    ");
+    $consulta->bindValue(1, (int) $limit, \PDO::PARAM_INT);
+    $consulta->bindValue(2, (int) $offset, \PDO::PARAM_INT);
+    $consulta->execute();
+    $result = $consulta->fetchAll(\PDO::FETCH_ASSOC);
+    $this->desconectarDB();
+    return $result;
+  } catch (\Exception $e) {
+    throw new \RuntimeException('Error al obtener el stock paginado: ' . $e->getMessage());
   }
+}
 
+public function contarAlimentosTotales()
+{
+  try {
+    $this->conectarDB();
+    $consulta = $this->conex->prepare("SELECT COUNT(*) FROM alimento WHERE status = 1 AND (stock > 0 OR reservado > 0)");
+    $consulta->execute();
+    $count = $consulta->fetchColumn();
+    $this->desconectarDB();
+    return $count;
+  } catch (\Exception $e) {
+    throw new \RuntimeException('Error al contar los alimentos: ' . $e->getMessage());
+  }
+}
 
   /*-------LA FUNCION PARA El PDFD--------*/
   public function fpdf($tipoA)
@@ -145,7 +172,7 @@ class stockAlimentosModelo extends connectDB
 
     try {
 
-      $detalle = $this->mostrarAlimentos($tipoA, false);
+      $detalle = $this->mostrarAlimentos($tipoA);
       $data = [
         'detalle' => $detalle
       ];

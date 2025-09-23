@@ -45,7 +45,7 @@ try {
     http_response_code(401);
     echo json_encode(['resultado' => 'error', 'mensaje' => 'Token no válido o expirado']);
     exit;
-}
+   }
 
     // Desencriptar datos
     $data = decryptionAsyncHelpers::decryptPayload($_POST['datos']);

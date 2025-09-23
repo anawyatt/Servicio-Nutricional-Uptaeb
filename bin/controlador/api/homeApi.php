@@ -22,6 +22,11 @@ use helpers\decryptionAsyncHelpers;
  $objeto = new home();
 
 $decodedToken = JwtMiddleware::verificarToken();
+    if (!$decodedToken) {
+    http_response_code(401);
+    echo json_encode(['resultado' => 'error', 'mensaje' => 'Token no válido o expirado']);
+    exit;
+   }
 
 header('Content-Type: application/json');
 
@@ -34,6 +39,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $data = null;
 
 if (isset($_POST['datos'])) {
+
     $data = decryptionAsyncHelpers::decryptPayload($_POST['datos']);
 
     if (isset($data['mostrarInfo'])) {

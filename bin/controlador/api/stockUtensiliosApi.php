@@ -35,12 +35,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
     exit;
 }
 
-if (!isset($_POST['datos'])) {
-    http_response_code(400);
-    echo json_encode(['resultado' => 'error', 'mensaje' => 'Faltan datos cifrados']);
-    exit;
-}
-else{
+if (isset($_POST['datos'])) {
 try {
     $data = decryptionAsyncHelpers::decryptPayload($_POST['datos']);
 
@@ -57,3 +52,27 @@ try {
     echo json_encode(['resultado' => 'error', 'mensaje' => $e->getMessage()]);
 }
 }
+
+if (isset($_POST['consultarStockTotal'])) {
+   
+    try{
+
+    $data = decryptionAsyncHelpers::decryptPayload($_POST['consultarStockTotal']);
+
+    if (!isset($data['mostrarUtensiliosTotal']) ) {
+        http_response_code(400);
+        echo json_encode(['resultado' => 'error', 'mensaje' => 'Parámetros requeridos faltantes para el reporte']);
+        exit;
+    }
+    $resultado = $objeto->mostrarUtensilios();
+    echo json_encode($resultado);
+
+
+    }catch(Exception $e) {
+        http_response_code(400);
+        echo json_encode(['resultado' => 'error', 'mensaje' => $e->getMessage()]);
+    }
+}
+
+http_response_code(400);
+echo json_encode(['resultado' => 'error', 'mensaje' => 'Solicitud inválida']);
