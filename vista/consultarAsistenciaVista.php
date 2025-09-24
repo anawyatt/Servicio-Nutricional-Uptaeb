@@ -94,7 +94,7 @@
                                     <div class="form-group col-md-4 row ">
                                         <div class=" col-12">
                                             <input type="checkbox" class="form-check-input" id="ultimo_Registro">
-                                            <label class="form-check-label" for="">Última Registro</label>
+                                            <label class="form-check-label" for="">Último Registro</label>
                                         </div>
 
 
