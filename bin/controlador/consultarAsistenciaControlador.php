@@ -16,19 +16,24 @@ $objeto = new consultarAsistencia;
 $sistem = new encryption();
 $NotificacionesServer = new NotificacionesServer();
 
-if (isset($_POST['notificaciones'])) {
-  $valor = $NotificacionesServer->consultarNotificaciones();
-}
-
-if (isset($_POST['notificacionId'])) {
-  $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-}
 
 $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Asistencias', 'consultar');
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
+if (isset($payload->cedula)) {
+        $NotificacionesServer->setCedula($payload->cedula);
+    } else {
+        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+    }
 
+    if (isset($_POST['notificaciones'])) {
+        $valor = $NotificacionesServer->consultarNotificaciones();
+    }
+  
+    if (isset($_POST['notificacionId'])) {
+        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
+    }
 
 if (isset($_POST['select'])) {
   $mostrarFechas = $objeto->mostrarFechas();
@@ -49,7 +54,7 @@ if (isset($_POST['mostrar']) && isset($_POST['fecha']) && isset($_POST['horarioC
   die();
 }
 
-if (isset($_POST['mostrarUltimaVez']) && isset($permiso['consultar'])) {
+if (isset($_POST['mostrarUltimaVez'])) {
   $MostrarPorFiltro = $objeto->mostrarUltimaVez();
   echo json_encode($MostrarPorFiltro);
   die();

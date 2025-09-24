@@ -439,7 +439,7 @@ function procesarArchivo() {
     $("#uploadButton").prop("disabled", true);
     $("#cancelButton").show();
     $(".progress").show();
-    let token = $('[name="csrf_token"]').val();
+    
 
     var file = document.getElementById("file").files[0];
     var reader = new FileReader();
@@ -460,11 +460,11 @@ function procesarArchivo() {
       });
 
       var dataToSend = JSON.stringify(jsonData);
-      if(token) {
+    
       ajaxRequest = $.ajax({
         url: "", // URL del controlador
         method: "POST",
-        data: { data: dataToSend, csrfToken: token },
+        data: { data: dataToSend},
         xhr: function () {
           var xhr = new window.XMLHttpRequest();
 
@@ -496,7 +496,7 @@ function procesarArchivo() {
           return xhr;
         },
         success: function (responseText) {
-          $('[name="csrf_token"]').val(data.newCsrfToken);
+
           var finalResponses = responseText.split("\n");
           var finalResponse = finalResponses[finalResponses.length - 1].trim();
 
@@ -599,7 +599,7 @@ function procesarArchivo() {
           mostrarTabla();
         },
       });
-      }
+      
     };
 
     reader.readAsArrayBuffer(file);
@@ -636,24 +636,3 @@ function procesarArchivo() {
 });
 
 $("#estu1").addClass("active");
-
-setInterval(function () {
-  $.ajax({
-    url: "",
-    type: "POST",
-    dataType: "JSON",
-    data: { renovarToken: true, csrfToken: $('[name="csrf_token"]').val() },
-    success(data) {
-      if (data.newCsrfToken) {
-        $('[name="csrf_token"]').val(data.newCsrfToken);
-        console.log("Token CSRF renovado");
-      } else {
-        console.log("No se pudo renovar el token CSRF");
-      }
-    },
-    error: function (err) {
-      console.error("Error renovando token CSRF:", err);
-    },
-  });
-}, 240000);
-

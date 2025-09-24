@@ -13,10 +13,13 @@ use component\NotificacionesServer as NotificacionesServer;
 
 $objeto = new asistencia;
 $sistem = new encryption();
+$NotificacionesServer = new NotificacionesServer();
 
- $NotificacionesServer = new NotificacionesServer();
+$datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Asistencias', 'registrar');
+$permisos = $datosPermisos['permisos'];
+$payload = $datosPermisos['payload'];
 
-    if (isset($payload->cedula)) {
+if (isset($payload->cedula)) {
         $NotificacionesServer->setCedula($payload->cedula);
     } else {
         die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
@@ -30,9 +33,6 @@ $sistem = new encryption();
         $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
     }
 
-$datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Asistencias', 'registrar');
-$permisos = $datosPermisos['permisos'];
-$payload = $datosPermisos['payload'];
 
 if (isset($_POST['verEstudiantes']) && isset($datosPermisos['permiso']['consultar'])) {
   $id = $_POST['id'];

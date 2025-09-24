@@ -3,19 +3,34 @@ $('#as3').addClass('text-primary');
 $('.as3').addClass('active')
 
   // Cuando el checkbox de filtrar cambia
-  $('#cbx').change(function() {
-      if ($(this).is(':checked')) {
-          // Mostrar los switches
-          $('#mostrar').show();
-      } else {
-          // Ocultar los switches
+$('#cbx').change(function() {
+    if ($(this).is(':checked')) {
+        console.log('Activado');
+        // Mostrar los switches
+        $('#mostrar').show();
+    } else {
+        console.log('Desactivado');
+        // Ocultar los switches
         $('#mostrar').hide();
-         $('#selectFecha').val('Seleccionar').trigger('change.select2');
-         $('#selectHorario').val('Seleccionar').trigger('change.select2');
-         $('#muestraU').hide(1000);
-          rellenar();
-      }
-  });
+
+        // Resetear selects
+        $('#selectFecha').val('Seleccionar').trigger('change.select2');
+        $('#selectHorario').val('Seleccionar').trigger('change.select2');
+
+        // Ocultar sección de tabla filtrada
+        $('#muestraU').hide(1000);
+
+        // Limpiar tabla y recargar con los datos principales
+        if (typeof tabla !== "undefined") {
+            tabla.clear().draw();
+        }
+
+        // Llamar a la función principal
+        rellenar();
+    }
+});
+
+$('#mostrar').hide();
 
   $('#mostrar').hide();
 
@@ -61,36 +76,40 @@ $('.as3').addClass('active')
   }
 
   function buscarUltimafecha() {
-      $.ajax({
-          method: "post",
-          url: "", 
-          dataType: "json",
-          data: {mostrarUltimaVez: true},
-          success(data) {
-              $('#ani').show(2000);
-              let fecha = new Date(data[0].FechaAsistencia);
-              let dia = (fecha.getDate() + 1).toString().padStart(2, '0');
-              let mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
-              let anio = fecha.getFullYear();
-              let fechaFormateada = `${dia}-${mes}-${anio}`;
-              $('#ultima').val(fechaFormateada);
-              tabla.clear().rows.add(data).draw();
+    $.ajax({
+        method: "post",
+        url: "", // <-- agrega tu ruta aquí
+        dataType: "json",
+        data: { mostrarUltimaVez: true },
+        success(data) {
+            console.log('esta es data', data);
 
-               if (data.length > 0) {
-              tabla.clear().rows.add(data).draw();
-               $('#botonPDF').prop('disabled', false);
-  
+            if (data.length > 0) {
+                $('#ani').show(2000);
+                let fecha = new Date(data[0].FechaAsistencia);
+                let dia = fecha.getDate().toString().padStart(2, '0');
+                let mes = (fecha.getMonth() + 1).toString().padStart(2, '0');
+                let anio = fecha.getFullYear();
+                let fechaFormateada = `${dia}-${mes}-${anio}`;
+                $('#ultima').val(fechaFormateada);
+
+                tabla.clear().rows.add(data).draw();
+                $('#botonPDF').prop('disabled', false);
+            } else {
+                $('#botonPDF').prop('disabled', true);
             }
-            else if (data.length == 0) {
-               $('#botonPDF').prop('disabled', true);
-            }
-          }
-      });
-  }
+        },
+        error: function(xhr, status, error) {
+            console.error("Error AJAX:", status, error, xhr.responseText);
+        }
+    });
+}
+
 
   $('#muestraU').hide(0);
   $('#ultimo_Registro').change(function() {
       if ($(this).is(':checked')) {
+        console.log('entro');
           buscarUltimafecha();
           $('#muestraU').show(0);
           $('#porFecha').prop('checked', false);
