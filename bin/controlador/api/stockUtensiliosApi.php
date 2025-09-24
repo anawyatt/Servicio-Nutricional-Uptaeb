@@ -36,22 +36,30 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 }
 
 if (isset($_POST['datos'])) {
-
-try {
+  try {
     $data = decryptionAsyncHelpers::decryptPayload($_POST['datos']);
 
-    if (!isset($data['mostrarUtensilios']) || !isset($data['utensilio'])) {
-        http_response_code(400);
-        echo json_encode(['resultado' => 'error', 'mensaje' => 'Parámetros requeridos faltantes']);
-        exit;
+    if (!isset($data['mostrarUtensilios']) || !isset($data['utensilio']) || !isset($data['offset'])) {
+      http_response_code(400);
+      echo json_encode(['resultado' => 'error', 'mensaje' => 'Parámetros requeridos faltantes']);
+      exit;
     }
-    $resultado = $objeto->buscarUtensilio($data['utensilio']);
-
+    
+    $limit = 10; 
+    $offset = (int) $data['offset'];
+    
+    if (empty($data['utensilio'])) {
+      $resultado = $objeto->mostrarUtensiliosPaginado($limit, $offset);
+    } else {
+      $resultado = $objeto->buscarUtensilioPaginado($data['utensilio'], $limit, $offset);
+    }
+    
     echo json_encode($resultado);
-} catch (Exception $e) {
+  } catch (Exception $e) {
     http_response_code(400);
     echo json_encode(['resultado' => 'error', 'mensaje' => $e->getMessage()]);
-}
+  }
+  exit;
 }
 
 if (isset($_POST['consultarStockTotal'])) {

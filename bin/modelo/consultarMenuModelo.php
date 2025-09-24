@@ -919,6 +919,7 @@ class consultarMenuModelo extends connectDB {
             }
         }
         
+        
         private function obtenerCantidadReservadoSalida($idSalidaA) {
             $info = $this->conex->prepare("SELECT a.idAlimento, a.reservado, -SUM(dsm.cantidad) AS totalCantidad FROM salidaAlimentos sa 
             INNER JOIN detallesalidamenu dsm ON dsm.idSalidaA = sa.idSalidaA INNER JOIN alimento a ON a.idAlimento = dsm.idAlimento 
