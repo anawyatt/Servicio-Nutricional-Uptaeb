@@ -40,12 +40,14 @@ try {
             $fechaInicio = $data['fechaInicio'] ?? '';
             $fechaFin = $data['fechaFin'] ?? '';
             $horarioComida = $data['horarioComida'] ?? null;
+            $limit = $data['limit'] ?? 5;
+            $offset = $data['offset'] ?? 0;
 
             if ($horarioComida) {
-                $consultarEventosModelo->payload = (object)['horario_comida' => $horarioComida]; // 👈 importante, que coincida con el modelo
+                $consultarEventosModelo->payload = (object)['horario_comida' => $horarioComida];
             }
 
-            $eventos = $consultarEventosModelo->mostrarE($fechaInicio, $fechaFin);
+            $eventos = $consultarEventosModelo->mostrarE($fechaInicio, $fechaFin, $limit, $offset);
 
             if (is_array($eventos) && isset($eventos[0]) && is_string($eventos[0])) {
                 http_response_code(400);
