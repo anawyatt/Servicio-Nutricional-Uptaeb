@@ -27,16 +27,15 @@ $(".borrar").remove()
  tablaEvento();
 
 let mostrarE = $('.tabla').DataTable({
- "columns": [
-     { "data": "feMenu", "render": function (data) {
-      let feMenu = new Date(data);
-      let dia = feMenu.getUTCDate().toString().padStart(2, '0'); // Usar getUTCDate()
-      let mes = (feMenu.getUTCMonth() + 1).toString().padStart(2, '0'); // Usar getUTCMonth()
-      let anio = feMenu.getUTCFullYear(); // Usar getUTCFullYear()
-
-      return `${dia}-${mes}-${anio}`;
-  },
-         "className": "text-center"
+ "ordering": false, // respeta el orden del SQL
+  "columns": [
+    { 
+      "data": "feMenu", 
+      "render": function (data) {
+        let [anio, mes, dia] = data.split("-");
+        return `${dia}-${mes}-${anio}`;
+      },
+      "className": "text-center"
      },
      { "data": "horarioComida", "className": "text-center" },
      { "data": "cantPlatos", "className": "text-center" },
@@ -231,43 +230,56 @@ function validarFechaFin(){
 
 // MOSTRAR INFORMACIÓN ------------------------------------------
 
-$(document).on('click', '.informacion', function () {
-  let id = this.id;
-  $.ajax({
-      method: "post",
-      url: "", 
-      dataType: "json",
-      data: { infoEvento: true, id: id },
-      success(data) {
-        console.log(data);
-          let tipoA = '';
-          let lista = data;
+ $(document).on('click', '.informacion', function () {
+    let id = this.id;
+    $.ajax({
+        method: "post",
+        url: "", 
+        dataType: "json",
+        data: { infoEvento: true, id: id },
+        success(data) {
+           console.log(data);
 
-          lista.forEach(fila => { 
-              tipoA += `
-                  <table class="table table-hover table-bordered">
-                      <thead class="table-success">
-                          <tr>
-                              <th colspan="5" class='blanco fw-bold text-center'>${fila.tipo}</th>
-                          </tr>
-                          <tr>
-                              <th class="blanco">Imagen</th>
-                              <th class="blanco">Alimento</th>
-                              <th class="blanco">Marca</th>
-                              <th class="blanco">Cantidad</th>
-                          </tr>
-                      </thead>
-                      <tbody id="infoA_${fila.idTipoA}" class="infoA"></tbody>
-                  </table>
-              `;
+            let tipoA = '';
+            let grupos = {};
 
-            
-              mostrarAlimentos(fila.idTipoA, id);
-          });
+            data.forEach(fila => {
+                if (!grupos[fila.tipo]) {
+                    grupos[fila.tipo] = [];
+                }
+                grupos[fila.tipo].push(fila);
+            });
 
-          $('#tablas').html(tipoA);
-      }
-  });
+            Object.keys(grupos).forEach(tipo => {
+                let filas = grupos[tipo];
+
+                let mostrarContNeto = filas.some(f => f.marca && f.marca !== "Sin Marca");
+                let totalColumnas = 4 + (mostrarContNeto ? 1 : 0);
+
+                tipoA += `
+                    <table class="table table-hover table-bordered">
+                        <thead class="table-success">
+                            <tr>
+                                <th colspan="${totalColumnas}" class="blanco fw-bold text-center">${tipo}</th>
+                            </tr>
+                            <tr>
+                                <th class="blanco">Imagen</th>
+                                <th class="blanco">Alimento</th>
+                                <th class="blanco">Marca</th>
+                                ${mostrarContNeto ? `<th class="blanco">Cont. Neto</th>` : ""}
+                                <th class="blanco">Cantidad</th>
+                            </tr>
+                        </thead>
+                        <tbody id="infoA_${filas[0].idTipoA}" class="infoA"></tbody>
+                    </table>
+                `;
+
+                mostrarAlimentos(filas[0].idTipoA, id);
+            });
+
+            $('#tablas').html(tipoA);
+        }
+    });
 });
 
 function mostrarAlimentos(idTipoA, idEvento) {
@@ -312,35 +324,51 @@ function mostrarAlimentos(idTipoA, idEvento) {
          $('#tbody5').html(tablita2);
 
 
+ // ------------------ DETALLE ----------
+            let alimento = '';
+            let lista = data;
 
-      //--------------------- DETALLE
-          let alimento = '';
-          let lista = data;
+            // Detectar si este tipo de alimento usa columna Cont. Neto
+            let mostrarContNeto = lista.some(f => f.marca && f.marca !== "Sin Marca");
 
-          lista.forEach(fila => { 
+            lista.forEach(fila => { 
+                let unidadMedida;
 
-            let unidadMedida;
-            if (fila.unidadMedida === 'Unidad' && fila.cantidad > 1) {
-             unidadMedida = fila.unidadMedida + 'es';
-            }
-            else{
-              unidadMedida = fila.unidadMedida;
-            }
-            if (fila.unidadMedida !== 'Unidad' && fila.cantidad > 1) {
-               unidadMedida = fila.unidadMedida + 's';
-            }
-              alimento += `
-                  <tr>
-                      <td><img src="${fila.imgAlimento}" width="70" height="70" alt="Profile" class="mb-2"></td>
-                      <td>${fila.nombre}</td>
-                      <td>${fila.marca}</td>
-                      <td>${fila.cantidad} ${unidadMedida}</td>
-                  </tr>
-              `;
-          });
+                if (fila.marca === 'Sin Marca') {
+                    if (fila.unidadMedida === 'Unidad' && fila.cantidad > 1) {
+                        unidadMedida = fila.unidadMedida + 'es';
+                    } else {
+                        unidadMedida = fila.unidadMedida;
+                    }
+                    
+                } else {
+                    unidadMedida = 'Unidad';
+                    if (fila.cantidad > 1) {
+                        unidadMedida = 'Unidades';
+                    }
+                }
 
-          $(`#infoA_${idTipoA}`).html(alimento);
-      }
+                // Si la tabla requiere columna Cont. Neto, siempre insertamos <td>
+                let contNetoColumna = "";
+                if (mostrarContNeto) {
+                    contNetoColumna = (fila.marca !== "Sin Marca") 
+                        ? `<td>${fila.unidadMedida}</td>` 
+                        : `<td class="text-muted">N/A</td>`; // vacío o N/A
+                }
+
+                alimento += `
+                    <tr>
+                        <td><img src="${fila.imgAlimento}" width="70" height="70" alt="Profile" class="mb-2"></td>
+                        <td>${fila.nombre}</td>
+                        <td>${fila.marca}</td>
+                        ${contNetoColumna}
+                        <td>${fila.cantidad} ${unidadMedida}</td>
+                    </tr>
+                `;
+            });
+
+            $(`#infoA_${idTipoA}`).html(alimento);
+        }
   });
 }
 
@@ -469,6 +497,7 @@ $(document).on('click', '.resetear', function () {
       dataType: "json",
       data: { infoEvento: true, id: id },
       success: function(data) {
+
           let alimentos = '';
           let requests = [];
 
@@ -520,34 +549,47 @@ $(document).on('click', '.resetear', function () {
 });
 
 function procesarAlimento(data) {
-  let alimento1 = '';
-  data.forEach(fila => {
-      let unidadMedida = fila.unidadMedida;
+    let alimento1 = '';
+    let lista1 = data;
+    console.log(lista1);
 
-   
-      if (unidadMedida === 'Unidad' && fila.cantidad > 1) {
-          unidadMedida = 'Unidades';
-      } else if (unidadMedida !== 'Unidad' && fila.cantidad > 1) {
-          unidadMedida += 's';
-      }
+    lista1.forEach(fila => {
+        let unidadMedida;
+        let cont;
+        if (fila.marca === 'Sin Marca') {
+          cont='';
+        if (fila.unidadMedida === 'Unidad' && fila.cantidad > 1) {
+            unidadMedida = fila.unidadMedida + 'es';
+        } else {
+            unidadMedida = fila.unidadMedida;
+        }
+       
+        } else {
+        cont =  `- ${fila.unidadMedida}  `;
+        unidadMedida = 'Unidad';
+        if (fila.cantidad > 1) {
+            unidadMedida = 'Unidades';
+        }
+       }
+      
 
-      alimento1 += `
-          <tr class='${fila.idAlimento}'>
-              <td class='d-none'><input class='d-none idAlimento2' value='${fila.idAlimento}'></td>
-              <td><img src="${fila.imgAlimento}" width="50" height="50" alt="Profile" class="mb-2"></td>
-              <td>${fila.nombre}</td>
-              <td>${fila.marca}</td>
-              <td>${fila.cantidad} ${unidadMedida}<input class='d-none' id='cantidadA' value='${fila.cantidad}'></td>
-              <td>
-                  <a id='quitarFila' class="btn btn-sm btn-icon text-danger text-center" value='${fila.idAlimento}' data-bs-toggle="tooltip" title="Borrar Alimento" type="button">
-                      <i class="bi bi-trash icon-24 t" width="20"></i>
-                  </a>
-              </td>
-          </tr>
-      `;
-  });
+        alimento1 += `
+            <tr class='${fila.idAlimento}'>
+                <td class='d-none'><input class='d-none idAlimento2' value='${fila.idAlimento}'></td>
+                <td><img src="${fila.imgAlimento}" width="50" height="50" alt="Profile" class="mb-2"></td>
+                <td>${fila.nombre}  ${cont}</td>
+                <td>${fila.marca} </td>
+                <td>${fila.cantidad} ${unidadMedida}<input class='d-none' id='cantidadA' value='${fila.cantidad}'></td>
+                <td>
+                    <a id='quitarFila' class="btn btn-sm btn-icon text-danger text-center" value='${fila.idAlimento}' data-bs-toggle="tooltip" title="Borrar Alimento" type="button">
+                        <i class="bi bi-trash icon-24 t" width="20"></i>
+                    </a>
+                </td>
+            </tr>
+        `;
+    });
 
-  return alimento1;
+    return alimento1;
 }
 
 
@@ -556,12 +598,23 @@ function procesarAlimento(data) {
  $('#tablaD').hide();
  $('#ani').show();
  $("#tipoA").on('change', function() {
+  if ($(this).val() == 'Seleccionar') {
+       $('#disponibilidad').hide();
+      $('#unidad').val('');
+      $('#cantidad').val('');
+      $('#alimento').val('Seleccionar').trigger('change.select2');
+    }
    verificarTipoA()
    mostrarAlimento($(this).val());
    chequeo_tipoA()
  });
 
  $("#alimento").on('change', function() {
+  if ($(this).val() == 'Seleccionar') {
+       $('#disponibilidad').hide();
+      $('#unidad').val('');
+      $('#cantidad').val('');
+    }
    verificarAlimento()
    chequeo_alimento()
 
@@ -817,16 +870,17 @@ function modiAli() {
       url: "", 
       dataType: "json",
       data: {
-          feMenu,
-          horarioComida,
-          cantPlatos,
-          idMenu,
-          nomEvent,
-          descripEvent,
-          id,
-          descripcion,
-          idSalidaA,
-          csrfToken: token
+                  modificarE:true,
+                  feMenu,
+                  cantPlatos,
+                  nomEvent,
+                  descripEvent,
+                  horarioComida,
+                  descripcion,
+                  idEvento: id,
+                  idSalidaA,
+                  idMenu,
+                  csrfToken: token   
       },
       success(response) {
           if (response.resultado === "error") {
@@ -873,15 +927,16 @@ function modificar() {
               url: "", 
               dataType: "json",
               data: {
-              feMenu,
-                  horarioComida,
+                  modificarE:true,
+                  feMenu,
                   cantPlatos,
-                  idMenu,
                   nomEvent,
                   descripEvent,
-                  id,
+                  horarioComida,
                   descripcion,
+                  idEvento: id,
                   idSalidaA,
+                  idMenu,
                   csrfToken: token            
                   },
             success(response) {
@@ -908,9 +963,11 @@ function modificar() {
                     } 
                     else {
                     actualizarDetalle();  
-                    $('[name="csrf_token"]').val(response.newCsrfToken);
+                    $('[name="csrf_token"]').val(response.newCsrfToken); 
                     $('#cerrar2').click();
                     delete mostrarE;
+                    tablaEvento(); 
+                    vaciarTabla();
                     Swal.fire({
                       toast: true,
                       position: 'top-end',
@@ -919,10 +976,7 @@ function modificar() {
                       showConfirmButton:false,
                       timer:2500,
                       timerProgressBar:true,
-                    });
-
-                    tablaEvento(); 
-                    vaciarTabla();  
+                    });  
                 }
               
             },
@@ -1478,8 +1532,8 @@ function mostrarAlimento(a) {
        if (fila.marca === 'Sin Marca') {
          opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre}</option>`;
        } else {
-         opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre} - ${fila.marca}</option>`;
-       }
+            opE += `<option value="${fila.idAlimento}" data-img_src="${imgSrc}">${fila.nombre} - ${fila.marca} - ${fila.unidadMedida}</option>`;
+        }
      });
      $('#alimento').html(input2 + opE);
    }
@@ -1522,142 +1576,171 @@ function formatState(state) {
 });
       
 
-
-function newAlimento(idAlimento, imagen, alimento, marca, cantidad, unidad){
+function newAlimento(idAlimento,imagen, alimento, marca, cantidad, unidad, contNeto){
 let unidadMedida;
+let cont;
+
+if (marca === 'Sin Marca') {
+  cont = '';
 if (unidad === 'Unidad' && cantidad > 1) {
-unidadMedida = unidad + 'es';
+ unidadMedida = unidad + 'es';
 }
 else{
- unidadMedida = unidad;
+  unidadMedida = unidad;
 }
-if (unidad !== 'Unidad' && cantidad > 1) {
-  unidadMedida = unidad + 's';
-}
-let newAlimento = `
 
-   <tr class='${idAlimento}'>
-      <td class='d-none'><input class='d-none idAlimento2'  value='${idAlimento}'></td>
-      <td><img src="${imagen}" width="70" height="70"alt="Profile" class=" mb-2"></td>
-      <td>${alimento}</td>
-      <td>${marca}</td>
-      <td>${cantidad} ${unidadMedida}<input class='d-none' id='cantidadA' value='${cantidad}'></td>
-      <td>
-         <a id='quitarFila'  class="btn btn-sm btn-icon text-danger text-center " value='${idAlimento}'   data-bs-toggle="tooltip" title="Borrar Alimento"   type="button" >
-                <i class="bi bi-trash icon-24 t" width="20"></i>
-         </a>
-      </td>
-   
-   </tr>`;
-
-   console.log(newAlimento);
-   return newAlimento;
-
-   }
-
-function mostrarLoQueQueda(imagen, codigo, cantidad, restar, unidad){
- let unidadMedida;
-if (unidad === 'Unidad' && cantidad > 1) {
-unidadMedida = unidad + 'es';
 }
 else{
- unidadMedida = unidad;
+  unidadMedida = 'Unidad';
+  if (cantidad > 1) {
+   unidadMedida = 'Unidades';
+  }
+  cont = `- ${contNeto}`;
 }
-if (unidad !== 'Unidad' && cantidad > 1) {
-  unidadMedida = unidad + 's';
-}
+  let newAlimento = `
+  
+      <tr class='${idAlimento}'>
+         <td class='d-none'><input class='d-none idAlimento2'  value='${idAlimento}'></td>
+         <td><img src="${imagen}" width="70" height="70"alt="Profile" class=" mb-2"></td>
+         <td>${alimento} ${cont}</td>
+         <td>${marca} </td>
+         <td>${cantidad} ${unidadMedida}<input class='d-none' id='cantidadA' value='${cantidad}'></td>
+         <td>
+            <a id='quitarFila'  class="btn btn-sm btn-icon text-danger text-center " value='${idAlimento}'   data-bs-toggle="tooltip" title="Borrar Alimento"   type="button" >
+                   <i class="bi bi-trash icon-24 t" width="20"></i>
+            </a>
+         </td>
+      
+      </tr>`;
+  
+      console.log(newAlimento);
+      return newAlimento;
+  
+      }
+  
+function mostrarLoQueQueda(imagen, codigo, nombre, cantidad, restar, unidad, marca) {
+let unidadMedida;
 
+if (marca === 'Sin Marca') {
+if (unidad === 'Unidad' && cantidad > 1) {
+ unidadMedida = unidad + 'es';
+}
+else{
+  unidadMedida = unidad;
+}
+}
+else{
+  unidadMedida = 'Unidad';
+  if (cantidad > 1) {
+   unidadMedida = 'Unidades';
+  }
+}
 
 let total= cantidad - restar;
 
 let newAlimento = `
 
-   <tr class='${codigo}'>
-      <td><img src="${imagen}" width="70" height="70"alt="Profile" class=" mb-2"></td>
-      <td>${codigo}</td>
-      <td>${total} ${unidadMedida}<input class='d-none' id='cantidadA' value='${cantidad}'></td>
-   </tr>`;
-   return newAlimento;
-   }
+    <tr class='${codigo}'>
+       <td><img src="${imagen}" width="70" height="70"alt="Profile" class=" mb-2"></td>
+       <td>${nombre}</td>
+       <td>${total} ${unidadMedida}<input class='d-none' id='cantidadA' value='${cantidad}'></td>
+    </tr>`;
+    return newAlimento;
+}
 
-function mostrar2(alimento){
- let idAlimento = alimento;
-   $.ajax({
-     url: '',
-     type: 'POST',
-     dataType: 'JSON',
-     data: {muestra:true, idAlimento}, 
-     success(data){
-     if ($('#alimento').val() === 'Seleccionar') {
-        $('#unidad').val(' ');
-     }
-     else{
-       $('#unidad').val(data[0].unidadMedida);
-     }
-     
-     }
-   })
+  function mostrar2(alimento){
+    let idAlimento = alimento;
+      $.ajax({
+        url: '',
+        type: 'POST',
+        dataType: 'JSON',
+        data: {muestra:true, idAlimento}, 
+        success(data){
+           if ($('#alimento').val() === 'Seleccionar') {
+      	 $('#unidad').val(' ');
+      }
+      else{
+      	if(data[0].marca === 'Sin Marca'){
+             $('#unidad').val(data[0].unidadMedida)
+        }else{
+          $('#unidad').val('Unidades')
+        }
+      }
+        
+        }
+      })
+  
+      }
+  
+      function mostrarInfo(alimento, cantidad, unidad){
+        let idAlimento = alimento;
+          $.ajax({
+            url: '',
+            type: 'POST',
+            dataType: 'JSON',
+            data: {muestra:true, idAlimento}, 
+            success(data){
+            let newRow= newAlimento(data[0].idAlimento,data[0].imgAlimento, data[0].nombre, data[0].marca, cantidad, data[0].unidadMedida, data[0].unidadMedida);
+            let newRow2= mostrarLoQueQueda(data[0].imgAlimento, data[0].codigo, data[0].nombre, data[0].stock, cantidad,data[0].unidadMedida, data[0].marca);
+            $('#tablaD').show(1000);
+             $('#ani').show(1000);
+            $('#tabla3 tbody').append(newRow);
+            $('.tabla2 tbody').append(newRow2);
+            $('#cancelarInventario').click();
+            tableContainer.scrollTop = tableContainer.scrollHeight;
+            tableContainer2.scrollTop = tableContainer2.scrollHeight;
+      
+            }
+          })
+      
+      }
+  
+      function mostrarCantidadDisponible(alimento){
+	let idAlimento = alimento;
+    $.ajax({
+      url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {muestra:true, idAlimento}, 
+      success(data){
+        console.log('disponible', data);
+        let unidad;
 
-   }
+            if ($('#alimento').val() === 'Seleccionar') {
+      	  	      $('#dispo').val('');
+      	    }
+      	  	else{
+              
+              if (data[0].marca === 'Sin Marca') {
+              if (data[0].unidadMedida === 'Unidad' && data[0].stock > 1) {
+                unidad = data[0].unidadMedida + 'es';
+              }
+              if (data[0].unidadMedida !== 'Unidad') {
+                
+                 unidad = data[0].unidadMedida;
+                
+              }
+              
+            }
+            else {
+             unidad = 'Unidad';
+              if (data[0].stock > 1) {
+                unidad = 'Unidades';
+              }
+            }
+              $('#disponibilidad').show(100);
+      	  		$('#dispo').val(data[0].stock + ' '+unidad);
+      	  	}
 
-   function mostrarInfo(alimento, cantidad, unidad){
-     let idAlimento = alimento;
-       $.ajax({
-         url: '',
-         type: 'POST',
-         dataType: 'JSON',
-         data: {muestra:true, idAlimento}, 
-         success(data){
-         let newRow= newAlimento(data[0].idAlimento,data[0].imgAlimento, data[0].nombre, data[0].marca, cantidad, unidad);
-         let newRow2= mostrarLoQueQueda(data[0].imgAlimento, data[0].codigo,data[0].stock, cantidad,unidad)
-         $('#tablaD').show(1000);
-          $('#ani').show(1000);
-         $('#tabla3 tbody').append(newRow);
-         $('.tabla2 tbody').append(newRow2);
-         $('#cancelarInventario').click();
-         tableContainer.scrollTop = tableContainer.scrollHeight;
-         tableContainer2.scrollTop = tableContainer2.scrollHeight;
-   
-         }
-       })
-   
-   }
+      	  	let cantidad = data[0].stock;
 
-   function mostrarCantidadDisponible(alimento){
- let idAlimento = alimento;
-   $.ajax({
-     url: '',
-     type: 'POST',
-     dataType: 'JSON',
-     data: {muestra:true, idAlimento}, 
-     success(data){
-        if ($('#alimento').val() === 'Seleccionar') {
-           $('#dispo').val('');
-         }
-           else{
-             let unidadMedida;
-             if (data[0].unidadMedida === 'Unidad' && data[0].stock > 1) {
-                unidadMedida = data[0].unidadMedida + 'es';
-             }
-             if (data[0].unidadMedida !== 'Unidad' && data[0].stock > 1) {
-                  unidadMedida = data[0].unidadMedida + 's';
-             }
-              else{
-                  unidadMedida = data[0].unidadMedida;
-             }
-             $('#disponibilidad').show(100);
-             $('#dispo').val(data[0].stock + ' '+unidadMedida);
-           }
+      	  	 return cantidad
+      }
+    })
 
-           let cantidad = data[0].stock;
+  }
 
-            return cantidad
-     }
-   })
-
-   }
-
-
+  
  function disponible(alimento) {
  return new Promise((resolve, reject) => {
    let idAlimento = alimento;
