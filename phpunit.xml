@@ -6,6 +6,20 @@
          cacheDirectory=".phpunit.cache">
 
     <testsuites>
+
+        <testsuite name="integration-Usuario-Roles">
+            <file>bin/Tests/usuarioTest.php</file>
+            <file>bin/Tests/consultarUsuarioTest.php</file>
+            <file>bin/Tests/rolesTest.php</file>
+        </testsuite>
+
+        <testsuite name="integration-Roles-Modulos-Permiso">
+            <file>bin/Tests/rolesTest.php</file>
+            <file>bin/Tests/moduloTest.php</file>
+            <file>bin/Tests/permisoTest.php</file>
+        </testsuite>
+
+
         <testsuite name="integration-tipoAlimentos-Alimentos">
             <file>bin/Tests/tipoAlimentoTest.php</file>
             <file>bin/Tests/alimentosTest.php</file>
@@ -29,6 +43,32 @@
             <file>bin/Tests/stockAlimentosTest.php</file>
             <file>bin/Tests/salidaAlimentosTest.php</file>
             <file>bin/Tests/consultarSalidaAlimentosTest.php</file>
+        </testsuite>
+
+        <testsuite name="integration-Menu-Stock-Alimentos">
+            <file>bin/Tests/menuTest.php</file>
+            <file>bin/Tests/consultarMenuTest.php</file>
+            <file>bin/Tests/stockAlimentosTest.php</file>
+        </testsuite>
+
+        <testsuite name="integration-Eventos-Stock-Alimentos">
+            <file>bin/Tests/eventoTest.php</file>
+            <file>bin/Tests/consultarEventoTest.php</file>
+            <file>bin/Tests/stockAlimentosTest.php</file>
+        </testsuite>
+
+         <testsuite name="integration-Asistencias-Menu-TipoSalida">
+            <file>bin/Tests/asistenciaTests.php</file>
+            <file>bin/Tests/consultarAsistenciaTests.php</file>
+            <file>bin/Tests/menuTest.php</file>
+            <file>bin/Tests/consultarMenuTest.php</file>
+            <file>bin/Tests/tipoSalidaTests.php</file>
+        </testsuite>
+
+        <testsuite name="integration-SalidaAlimentos-TipoSalida">
+            <file>bin/Tests/salidaAlimentosTest.php</file>
+            <file>bin/Tests/consultarSalidaAlimentosTest.php</file>
+            <file>bin/Tests/tipoSalidaTests.php</file>
         </testsuite>
 
     </testsuites>

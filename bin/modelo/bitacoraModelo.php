@@ -24,32 +24,42 @@ class bitacoraModelo extends connectDB
             $token = $_COOKIE['jwt'];
             $this->payload = JwtHelpers::validarToken($token);
         } else {
+            
             $this->payload = null; // o un array vacío, según convenga
         }
 
         $this->encryption = new encryption();
     }
 
-    public function registrarBitacora($modulo, $acciones, $usuario)
-    {
-
-        $this->modulo = $modulo;
-        $this->acciones = $acciones;
-        $this->usuario = $usuario;
-        $this->conectarDBSeguridad();
-        try {
-            $registrar = $this->conex2->prepare("CALL sp_registrar_bitacora(?, ?, ?)");
-            $registrar->bindValue(1, $this->modulo);
-            $registrar->bindValue(2, $this->acciones);
-            $registrar->bindValue(3, $this->usuario);
-            $registrar->execute();
-        } catch (\Exception $error) {
-
-            return array("Sistema", "¡Error Sistema!");
-        } finally {
-            $this->desconectarDB();
-        }
+ public function registrarBitacora($modulo, $acciones, $usuario)
+{
+    // Validaciones con expresiones regulares
+    if (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/", $modulo) ||
+        !preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/", $acciones) ||
+        !preg_match("/^\d+$/", $usuario)
+    ) {
+        return ['resultado' => 'Datos inválidos'];
     }
+
+    $this->modulo = $modulo;
+    $this->acciones = $acciones;
+    $this->usuario = $usuario;
+
+    $this->conectarDBSeguridad();
+    try {
+        $registrar = $this->conex2->prepare("CALL sp_registrar_bitacora(?, ?, ?)");
+        $registrar->bindValue(1, $this->modulo);
+        $registrar->bindValue(2, $this->acciones);
+        $registrar->bindValue(3, $this->usuario);
+        $registrar->execute();
+    } catch (\Exception $error) {
+        return ["Sistema", "¡Error Sistema!"];
+    } finally {
+        $this->desconectarDB();
+    }
+}
+
+
 
     public function mostrarBitacora($fechaInicio, $fechaFin, $start = 0, $length = 10, $searchValue = '', $orderBy = 'fecha', $orderDir = 'desc')
     {

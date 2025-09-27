@@ -34,13 +34,10 @@ class loginModelo extends connectDB
         $this->clave = $clave;
         $this->sistem = new encryption();
 
-
-        // Validar inputs antes de llamar login privada
         if (empty($this->cedula) || empty($this->clave)) {
             return ['resultado' => 'error', 'mensaje' => 'Cédula y contraseña son obligatorios.'];
         }
 
-        // Solo verificar si está bloqueado, NO registrar intento aquí
         $verificacion = ConteoLoginHelpers::verificarBloqueo($this->cedula);
         if ($verificacion['bloqueado']) {
             return ['resultado' => 'error', 'mensaje' => $verificacion['mensaje']];
@@ -48,7 +45,6 @@ class loginModelo extends connectDB
 
         $resultado = $this->login();
 
-        // Si el login es exitoso, resetear intentos
         if ($resultado['resultado'] === 'success') {
             ConteoLoginHelpers::resetearIntentos($this->cedula);
             return $resultado;

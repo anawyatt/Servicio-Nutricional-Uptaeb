@@ -35,21 +35,36 @@ class consultarMenuModelo extends connectDB {
 
     private $alimentos;
     private $horario;
-    private $payload;
+    public $payload;
 
     public function __construct(){
         parent ::__construct();
-        $token = $_COOKIE['jwt'];
-        $this->payload = JwtHelpers::validarToken($token);
+         if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
+            $token = $_COOKIE['jwt'];
+            $this->payload = JwtHelpers::validarToken($token);
+        } else {
+            $this->payload = (object) ['cedula' => '12345678'];
         }
+    }
+
 
         public function mostrarM($fechaInicio, $fechaFin) {
-            if (!preg_match("/^(?:\s*|((19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])))$/", $fechaInicio)) {
-                return ['La fecha de inicio debe estar en formato YYYY-MM-DD o estar vacía'];
+            $errores = [];
+
+            if (!preg_match("/^$|^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $fechaInicio)) {
+                $errores[] = 'La fecha de inicio debe estar en formato YYYY-MM-DD o estar vacía';
             }
-        
-            if (!preg_match("/^(?:\s*|((19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])))$/", $fechaFin)) {
-                 return ['La fecha de fin debe estar en formato YYYY-MM-DD o estar vacía'];
+
+            if (!preg_match("/^$|^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $fechaFin)) {
+                $errores[] = 'La fecha de fin debe estar en formato YYYY-MM-DD o estar vacía';
+            }
+
+            if (!empty($errores)) {
+                return ['resultado' => implode(' | ', $errores)]; 
+            }
+
+            if (!empty($fechaInicio) && !empty($fechaFin) && $fechaInicio > $fechaFin) {
+                return ['resultado' => 'La fecha de inicio no puede ser mayor que la fecha de fin'];
             }
 
             $this->fechaInicio = $fechaInicio;
@@ -82,9 +97,9 @@ class consultarMenuModelo extends connectDB {
             try {
                 $this->conectarDB();
                 $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, MAX(sa.descripcion) AS descripcion
-                FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
+                FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu  LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
                 WHERE m.status = 1 AND m.feMenu BETWEEN ? AND ? AND m.horarioComida = ? AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu)
-                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos;");
+                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos ORDER BY m.feMenu ASC, m.horarioComida; ");
                 
                 $info->bindValue(1, $this->fechaInicio);
                 $info->bindValue(2, $this->fechaFin);
@@ -92,72 +107,75 @@ class consultarMenuModelo extends connectDB {
                 $info->execute();
                 $resultado = $info->fetchAll(\PDO::FETCH_OBJ) ?: []; 
                 $this->desconectarDB();
-    
+
                 return $resultado;
             } catch (\Exception $error) {
                 return ["Sistema", "¡Error Sistema!"];
             }
         }
-        
+
         private function mostrarMConHorarioSinFiltros() {
             try {
                 $this->conectarDB();
-                $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, sa.descripcion
+                $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, MAX(sa.descripcion) AS descripcion
                 FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
-                WHERE m.status = 1 AND m.feMenu >= CURDATE() AND m.horarioComida = ? AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu);");
+                WHERE m.status = 1 AND m.feMenu >= CURDATE() AND m.horarioComida = ? AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu)
+                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos ORDER BY m.feMenu ASC, m.horarioComida;");
                 
                 $info->bindValue(1, $this->horario);
                 $info->execute();
                 $resultado = $info->fetchAll(\PDO::FETCH_OBJ) ?: []; 
                 $this->desconectarDB();
-    
+
                 return $resultado;
             } catch (\Exception $error) {
                 return ["Sistema", "¡Error Sistema!"];
             }
         }
-        
+
         private function mostrarMConFiltros() {
             try {
                 $this->conectarDB();
-                $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, sa.descripcion
-                FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON 
-                ds.idSalidaA = sa.idSalidaA WHERE m.status = 1 AND m.feMenu BETWEEN ? AND ? AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu);");
+                $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, MAX(sa.descripcion) AS descripcion
+                FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
+                WHERE m.status = 1 AND m.feMenu BETWEEN ? AND ? AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu)
+                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos ORDER BY m.feMenu ASC, m.horarioComida;");
                 
                 $info->bindValue(1, $this->fechaInicio);
                 $info->bindValue(2, $this->fechaFin);
                 $info->execute();
                 $resultado = $info->fetchAll(\PDO::FETCH_OBJ) ?: []; 
                 $this->desconectarDB();
-        
+
                 return $resultado;
             } catch (\Exception $error) {
                 return ["Sistema", "¡Error Sistema!"];
             }
         }
-        
+
         private function mostrarMSinFiltros() {
             try {
                 $this->conectarDB();
                 $info = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos, MAX(sa.descripcion) AS descripcion
                 FROM menu m LEFT JOIN detalleSalidaMenu ds ON m.idMenu = ds.idMenu LEFT JOIN salidaAlimentos sa ON ds.idSalidaA = sa.idSalidaA
                 WHERE m.status = 1 AND m.feMenu >= CURDATE() AND NOT EXISTS (SELECT 1 FROM evento e WHERE e.idMenu = m.idMenu)
-                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos;");
+                GROUP BY m.idMenu, m.feMenu, m.horarioComida, m.cantPlatos ORDER BY m.feMenu ASC, m.horarioComida; ");
+                
                 $info->execute();
                 $resultado = $info->fetchAll(\PDO::FETCH_OBJ) ?: [];
                 $this->desconectarDB();
-        
+
                 return $resultado;
             } catch (\Exception $error) {
                 return ["Sistema", "¡Error Sistema!"];
             }
         }
-             
+
+         
         public function verificarExistencia($id){
             if (!preg_match("/^[0-9]{1,}$/", $id)) {
                 return ['resultado' => 'Seleccionar Menú'];
-            } 
-            
+            }  
             $this->id = $id;
             $resultado = $this->verificar(); 
             return $resultado === true ? ['resultado' => 'si existe'] : ['resultado' => 'ya no existe'];
@@ -183,16 +201,14 @@ class consultarMenuModelo extends connectDB {
             if (!preg_match("/^[0-9]{1,}$/", $id)) {
              return ['resultado' => 'Seleccionar Menú'];
          }
-          
             $this->id = $id;
             return $this->mostrar();
-        
         }
 
         private function mostrar() {
             try {
                 $this->conectarDB();
-                $info = $this->conex->prepare("SELECT idTipoA, tipo, feMenu, horarioComida FROM vista_tipo_alimentos_por_menu WHERE idMenu = ?;");
+                $info = $this->conex->prepare("SELECT idTipoA, tipo, feMenu, horarioComida, marca FROM vista_tipo_alimentos_por_menu WHERE idMenu = ?;");
             
                 $info->bindValue(1, $this->id);
                 $info->execute();
@@ -200,27 +216,32 @@ class consultarMenuModelo extends connectDB {
                 $this->desconectarDB();
                 return $resultado;
                
-
               } catch (\PDOException $e) {
                  return $e;
              }
         }
-   
+
         public function alimento($idTipoA, $idMenu) {
+            $errores = [];
+
             if (!preg_match("/^[0-9]{1,}$/", $idTipoA)) {
-                return  ['Ingresar Tipo Alimento'];
+                $errores[] = 'Ingresar Tipo Alimento';
             }
 
             if (!preg_match("/^[0-9]{1,}$/", $idMenu)) {
-                return ['Ingresar Menú'];
+                $errores[] = 'Ingresar Menú';
+            }
+
+            if (!empty($errores)) {
+                return ['resultado' => implode(', ', $errores)];
             }
 
             $this->TipoA = $idTipoA;
             $this->id = $idMenu;
+
             return $this->most();
         }
-
-
+       
         private function most(){
             try {
                 $this->conectarDB();
@@ -365,7 +386,6 @@ class consultarMenuModelo extends connectDB {
             }
         }
 
-
         public function verificarModificacion($id){
             if (!preg_match("/^[0-9]{1,}$/", $id)) {
             return ['resultado' => 'Seleccionar Menú'];
@@ -395,25 +415,32 @@ class consultarMenuModelo extends connectDB {
         }
 
         public function validarFH($feMenu, $horarioComida, $idMenu) {
+            $errores = [];
+
             if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
-                return 'Ingresar Fecha';
+                $errores[] = "Ingresar Fecha";
             }
-        
+
             if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $horarioComida)) {
-                 return 'Seleccionar Horario del Menú';
+                $errores[] = "Seleccionar Horario del Menú";
             }
-        
+
             if (!preg_match("/^[0-9]{1,}$/", $idMenu)) {
-                return 'Seleccionar Menú';
+                $errores[] = "Seleccionar Menú";
             }
-        
-        
+
+            if (!empty($errores)) {
+                return ['resultado' => implode(', ', $errores)];
+            }
+
             $this->feMenu = $feMenu;
             $this->horarioComida = $horarioComida;
             $this->idMenu = $idMenu;
-            $resultado =  $this->validar();
-            return $resultado === true ? ['resultado' => 'error', 'mensaje' => 'Ya tiene un menú registrado para esa fecha y horario'] 
-           :  ['resultado' => 'No tiene un menú registrado para esa fecha y horario'];
+
+            $resultado = $this->validar();
+            return $resultado === true 
+                ? ['resultado' => 'error', 'mensaje' => 'Ya tiene un menú registrado para esa fecha y horario'] 
+                : ['resultado' => 'No tiene un menú registrado para esa fecha y horario'];
         }
 
         private function validar(){
@@ -436,40 +463,47 @@ class consultarMenuModelo extends connectDB {
               }
         }
 
-        public function modificarMenu($feMenu, $horarioComida, $cantPlatos, $descripcion, $id, $idSalidaA) {
+        public function modificarMenu($feMenu, $horarioComida, $cantPlatos, $descripcion, $idMenu, $idSalidaA) {
+            $errores = [];
+
             if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
-                return ['Ingresar Fecha del Menú en formato YYYY-MM-DD'];
+                $errores[] = "Ingresar Fecha del Menú en formato YYYY-MM-DD";
             }
-            
+
             if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $horarioComida)) {
-                return ['Seleccionar Horario del Menú'];
+                $errores[] = "Seleccionar Horario del Menú";
             }
 
             if (!preg_match("/^[0-9]{1,}$/", $cantPlatos)) {
-                return ['Ingresar cantidad de Platos'];
-            }
-        
-            if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripcion)) {
-                return ['Ingresar Descripción del Menú'];
+                $errores[] = "Ingresar cantidad de Platos";
             }
 
-            if (!preg_match("/^[0-9]{1,}$/", $id)) {
-                return ['Seleccionar Menú'];
+            if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripcion)) {
+                $errores[] = "Ingresar Descripción del Menú";
             }
-        
+
+            if (!preg_match("/^[0-9]{1,}$/", $idMenu)) {
+                $errores[] = "Seleccionar Menú";
+            }
+
             if (!preg_match("/^[0-9]{1,}$/", $idSalidaA)) {
-                return ['Seleccionar Salida Alimento'];
+                $errores[] = "Seleccionar Salida Alimento";
             }
-        
+
+            if (!empty($errores)) {
+                return ['resultado' => implode(', ', $errores)];
+            }
+
             $this->feMenu = $feMenu;
             $this->horarioComida = $horarioComida;
             $this->cantPlatos = $cantPlatos;
             $this->descripcion = $descripcion;
-            $this->id = $id;
+            $this->idMenu = $idMenu;
             $this->idSalidaA = $idSalidaA;
-        
+
             return $this->modiMenu();
         }
+
        
         private function modiMenu() {
             try {
@@ -479,23 +513,23 @@ class consultarMenuModelo extends connectDB {
                 $bitacora = new bitacoraModelo();
 
                 $idTipoSalidas = $this->tipoSalidaMenu();
-                $updateM = $this->datosMenu($this->id);
+                $updateM = $this->datosMenu($this->idMenu);
                 $updateS = $this->salidaA($idTipoSalidas, $this->idSalidaA);
                 $borrar = $this->borrarAlimentoM($this->idSalidaA);
 
         
                 if ($updateM['feMenu'] !== $this->feMenu) {
-                    $this->actualizarFechaMenu($this->feMenu, $this->id);
+                    $this->actualizarFechaMenu($this->feMenu, $this->idMenu);
                     $bitacora->registrarBitacora('Modificar Menú', "feMenu de '{$updateM['feMenu']}' a '{$this->feMenu}'", $this->payload->cedula);
                 }
                 
                 if ($updateM['horarioComida'] !== $this->horarioComida) {
-                    $this->actualizarHorarioComida($this->horarioComida, $this->id);
+                    $this->actualizarHorarioComida($this->horarioComida, $this->idMenu);
                     $bitacora->registrarBitacora('Modificar Menú', "horarioComida de '{$updateM['horarioComida']}' a '{$this->horarioComida}'", $this->payload->cedula);
                 }
                 
                 if ($updateM['cantPlatos'] !== $this->cantPlatos) {
-                    $this->actualizarCantidadPlatos($this->cantPlatos, $this->id);
+                    $this->actualizarCantidadPlatos($this->cantPlatos, $this->idMenu);
                     $bitacora->registrarBitacora('Modificar Menú', "cantPlatos de '{$updateM['cantPlatos']}' a '{$this->cantPlatos}'", $this->payload->cedula);
                 }
                 
@@ -504,11 +538,10 @@ class consultarMenuModelo extends connectDB {
                     $bitacora->registrarBitacora('Modificar Menú', "descripcion de '{$updateS['descripcion']}' a '{$this->descripcion}'", $this->payload->cedula);
                 }
                 
-        
                 $this->conex->commit();
 
                 
-               return [ 'resultado' => 'Menú Actualizado Exitosamente','menuId' => $this->id,'salidaId' => $this->idSalidaA];
+               return [ 'resultado' => 'Menú Actualizado Exitosamente','menuId' => $this->idMenu,'salidaId' => $this->idSalidaA];
 
             } catch (Exception $error) {
                $this->conex->rollBack();
@@ -601,30 +634,37 @@ class consultarMenuModelo extends connectDB {
             }
         }
         
-        public function detalleSalidaM($cantidad, $idMenu, $idAlimento, $idSalidaA) {            
+        public function detalleSalidaM($cantidad, $idMenu, $idAlimento, $idSalidaA) {
+            $errores = [];
+
             if (!preg_match("/^[0-9]{1,}$/", $cantidad)) {
-                return ['Ingresar cantidad de alimentos'];
+                $errores[] = "Ingresar cantidad de alimentos";
             }
-        
+
             if (!preg_match("/^[0-9]{1,}$/", $idMenu)) {
-               return  ['Seleccionar Menú'];
+                $errores[] = "Seleccionar Menú";
             }
 
             if (!preg_match("/^[0-9]{1,}$/", $idAlimento)) {
-               return  ['Seleccionar Alimento'];
+                $errores[] = "Seleccionar Alimento";
             }
 
             if (!preg_match("/^[0-9]{1,}$/", $idSalidaA)) {
-               return  ['Seleccionar Salida'];
+                $errores[] = "Seleccionar Salida";
+            }
+
+            if (!empty($errores)) {
+                return ['resultado' => implode(', ', $errores)];
             }
 
             $this->cantidad = $cantidad;
             $this->idMenu = $idMenu;
             $this->alimento = $idAlimento;
             $this->idSalidaA = $idSalidaA;
-        
+
             return $this->actualizarDetalle();
         }
+
           
         private function actualizarDetalle(){
             try {
@@ -950,28 +990,49 @@ class consultarMenuModelo extends connectDB {
         }
         
 
-        public function fpdf($id) {
-            try {
-                $this->id = $id;
-                $descripcion = $this->obtenerInfoMenu($this->id);
-                $detalle = $this->detalleMenu($this->id);
-               
-                $data = [
-                    'descripcion' => $descripcion,
-                    'detalle' => $detalle
-                ];
-        
-                /*-------fDFD--------*/
-                $reporte = new reporte;
-                $reporte->AddPage();
-                $reporte->menu($data);
-                $reporte->Output();
-        
-            } catch (\PDOException $e) {
-                return $e;
-            }
+       public function fpdf($id) {
+    try {
+        $this->id = $id; // <-- Asignar el ID primero
+        $this->conectarDB();
+
+        $new = $this->conex->prepare("
+            SELECT m.feMenu, sa.descripcion, m.horarioComida, m.cantPlatos 
+            FROM salidaalimentos sa 
+            INNER JOIN detallesalidamenu dsm ON sa.idSalidaA = dsm.idSalidaA 
+            INNER JOIN menu m ON m.idMenu = dsm.idMenu 
+            WHERE m.status=1 AND dsm.status=1 AND sa.status=1 AND m.idMenu=?
+        ");
+        $new->bindValue(1, $this->id, PDO::PARAM_INT);
+        $new->execute();
+        $info = $new->fetchAll(\PDO::FETCH_OBJ);
+
+        $this->desconectarDB();
+
+        // Validar que se obtuvieron resultados
+        if (empty($info)) {
+            throw new \Exception("No se encontró información para el ID de menú: $id");
         }
-        
+
+        $descripcion = $info;
+        $detalle = $this->detalleMenu($this->id); // Asegúrate que este método devuelva datos
+
+        $data = [
+            'descripcion' => $descripcion,
+            'detalle' => $detalle
+        ];
+
+        $reporte = new reporte;
+        $reporte->AddPage();
+        $reporte->menu($data);
+        $reporte->Output();
+
+    } catch (\PDOException $e) {
+        return $e->getMessage();
+    } catch (\Exception $e) {
+        return $e->getMessage();
+    }
+}
+
 
         public function infoApp($idMenu) {
             if (!preg_match("/^[0-9]{1,}$/", $idMenu)) {

@@ -66,7 +66,7 @@ public function test_verificarExistencia_DatosVacios() {
 
  // Prueba para datos inexistentes en la base de datos
  public function test_verificarExistencia_DatosNoExistenBD() {
-    $resultado = $this->objeto->verificarExistencia(150);
+    $resultado = $this->objeto->verificarExistencia(500);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('ya no existe', $resultado['resultado']);
 }
@@ -98,7 +98,7 @@ public function test_tipoalimento_DatosVacios() {
 
 // Prueba de que no se obtenga los tipos de alimentos  del registro de una Salida de alimentos anulada
 public function test_tipoalimento_DatosNoExiste() {
-    $resultado = $this->objeto->tipoalimento(165);
+    $resultado = $this->objeto->tipoalimento(495);
     $this->assertIsArray($resultado);
     $this->assertCount(0, $resultado); 
  }
@@ -170,7 +170,7 @@ public function test_verificarAnulacion_DatosVacios() {
 
 // Prueba para datos que existen en la base de datos
 public function test_verificarAnulacion_DatosExistenBD() {
-    $resultado = $this->objeto->verificarAnulacion(4);
+    $resultado = $this->objeto->verificarAnulacion(466);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('se puede', $resultado['resultado']);
 
@@ -193,7 +193,7 @@ public function test_anularSalidaAlimento_DatosVacios() {
 }
 
  public function test_anularSalidaAlimento_DatosNoExistenBD() {
-    $resultado = $this->objeto->anularSalidaAlimento(150);
+    $resultado = $this->objeto->anularSalidaAlimento(506);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('ya no existe', $resultado['resultado']);
 }
@@ -204,14 +204,12 @@ public function test_anularSalidaAlimento_DatosVacios() {
 }
 
 public function test_anularSalidaAlimentoListo(){
-    $id = 4;
+    $id = 466;
  
     $resultado = $this->objeto->anularSalidaAlimento($id);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('eliminado', $resultado['resultado']);
 }
-
-
 
 
 }

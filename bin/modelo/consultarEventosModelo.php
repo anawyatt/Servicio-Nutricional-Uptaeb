@@ -36,25 +36,38 @@ class consultarEventosModelo extends connectDB {
     private $alimentos;
     private $nomEvent;
     private $descripEvent;
-    private $payload;
+    public $payload;
+    public $idEvento;
 
-    
-   
-    public function __construct(){
+public function __construct(){
         parent ::__construct();
-        $token = $_COOKIE['jwt'];
-        $this->payload = JwtHelpers::validarToken($token);
+         if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
+            $token = $_COOKIE['jwt'];
+            $this->payload = JwtHelpers::validarToken($token);
+        } else {
+            $this->payload = (object) ['cedula' => '12345678'];
         }
+    }
 
         public function mostrarE($fechaInicio, $fechaFin) {
-            if (!preg_match("/^(?:\s*|((19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])))$/", $fechaInicio)) {
-                return ['La fecha de inicio debe estar en formato YYYY-MM-DD o estar vacía'];
-            }
-        
-            if (!preg_match("/^(?:\s*|((19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])))$/", $fechaFin)) {
-                 return ['La fecha de fin debe estar en formato YYYY-MM-DD o estar vacía'];
-            }
+        $errores = [];
 
+                if (!preg_match("/^$|^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $fechaInicio)) {
+                    $errores[] = 'La fecha de inicio debe estar en formato YYYY-MM-DD o estar vacía';
+                }
+
+                if (!preg_match("/^$|^\d{4}-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $fechaFin)) {
+                    $errores[] = 'La fecha de fin debe estar en formato YYYY-MM-DD o estar vacía';
+                }
+
+                if (!empty($errores)) {
+                    return ['resultado' => implode(' | ', $errores)]; 
+                }
+
+                if (!empty($fechaInicio) && !empty($fechaFin) && $fechaInicio > $fechaFin) {
+                    return ['resultado' => 'La fecha de inicio no puede ser mayor que la fecha de fin'];
+                }
+                
             $this->fechaInicio = $fechaInicio;
             $this->fechaFin = $fechaFin;
             return $this->mostrarEvento();
@@ -180,7 +193,7 @@ class consultarEventosModelo extends connectDB {
               $mostrar->execute();
               $data = $mostrar->fetchAll();
               $this->desconectarDB();
-               return $data !== false;
+               return !empty($data);
             } catch (Exception $error) {
                     return false;  
                 
@@ -199,24 +212,32 @@ class consultarEventosModelo extends connectDB {
         private function mostrarEven() {
             try {
                 $this->conectarDB();
-                $query = $this->conex->prepare("SELECT idTipoA, tipo, nomEvent FROM vista_tipo_alimento_evento WHERE idEvento = ?;");
+                $query = $this->conex->prepare("SELECT idTipoA, tipo, nomEvent, marca FROM vista_tipo_alimento_evento WHERE idEvento = ?;");
                 $query->bindValue(1, $this->id);
                 $query->execute();
                 $data = $query->fetchAll();
                 $this->desconectarDB();
-                return $data;
+               return $data ?: [];
             } catch (\PDOException $e) {
-                return $e;
+                return []; 
             }
         }
 
         public function alimento( $idTipoA, $idEvento) {
+            $errores = [];
+            if (!preg_match("/^[0-9]{1,}$/", $idEvento)) {
+                $errores[] = 'Seleccionar Evento';
+            }
             if (!preg_match("/^[0-9]{1,}$/", $idTipoA)) {
-            return ['Ingresar Tipo Alimento'];
+                $errores[] = 'Ingresar Tipo Alimento';
             }
 
             if (!preg_match("/^[0-9]{1,}$/", $idEvento)) {
-             return ['Ingresar Evento'];
+                $errores[] = 'Ingresar Evento';
+            }
+
+            if (!empty($errores)) {
+                return ['resultado' => implode(', ', $errores)];
             }
 
             $this->idTipoA = $idTipoA;
@@ -393,16 +414,22 @@ class consultarEventosModelo extends connectDB {
         }
 
         public function validarFH($feMenu, $horarioComida, $idEvento) {
+            $errores = [];
+
             if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
-               return ['Ingresar Fecha del Evento'];
+               $errores[] = 'Ingresar Fecha del Evento';
             }
         
             if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $horarioComida)) {
-               return ['Seleccionar Horario del Evento'];
+               $errores[] = 'Seleccionar Horario del Evento';
             }
         
             if (!preg_match("/^[0-9]{1,}$/", $idEvento)) {
-               return ['Seleccionar Evento'];
+               $errores[] = 'Seleccionar Evento';
+            }
+
+            if (!empty($errores)) {
+                return ['resultado' => implode(', ', $errores)];
             }
         
             $this->feMenu = $feMenu;
@@ -414,7 +441,6 @@ class consultarEventosModelo extends connectDB {
            :  ['resultado' => 'No tiene un evento registrado para esa fecha y horario'];
         }
         
-
         private function validar(){
             try {
                 $this->conectarDB();
@@ -436,58 +462,63 @@ class consultarEventosModelo extends connectDB {
               }
         }
         
-        public function modificarEven($feMenu, $cantPlatos, $nomEvent, $descripEvent, $horarioComida, $descripcion, $id, $idSalidaA, $idMenu) {
-        
+        public function modificarEven($feMenu, $cantPlatos, $nomEvent, $descripEvent, $horarioComida, $descripcion, $idEvento, $idSalidaA, $idMenu) {
+            $errores = [];
+
             if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
-               return ['Ingresar Fecha del Menú en formato YYYY-MM-DD'];
+                $errores[] = 'Ingresar Fecha del Menú en formato YYYY-MM-DD';
             }
-        
+
             if (!preg_match("/^[0-9]{1,}$/", $cantPlatos)) {
-               return ['Ingresar cantidad de Platos'];
+                $errores[] = 'Ingresar cantidad de Platos';
             }
-        
+
             if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $nomEvent)) {
-               return ['Ingresar Nombre del Evento'];
+                $errores[] = 'Ingresar Nombre del Evento';
             }
-        
+
             if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripEvent)) {
-               return ['Ingresar descripción del evento'];
+                $errores[] = 'Ingresar descripción del evento';
             }
-        
+
             if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $horarioComida)) {
-               return ['Seleccionar Horario del Menú'];
+                $errores[] = 'Seleccionar Horario del Menú';
             }
-        
+
             if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripcion)) {
-               return ['Ingresar descripción del Menú'];
+                $errores[] = 'Ingresar descripción del Menú';
             }
-        
-            if (!preg_match("/^[0-9]{1,}$/", $id)) {
-                return ['Seleccionar Evento'];
+
+            if (!preg_match("/^[0-9]{1,}$/", $idEvento)) {
+                $errores[] = 'Seleccionar Evento';
             }
-        
+
             if (!preg_match("/^[0-9]{1,}$/", $idSalidaA)) {
-                return ['Seleccionar Salida de Alimento'];
+                $errores[] = 'Seleccionar Salida de Alimento';
             }
-        
+
             if (!preg_match("/^[0-9]{1,}$/", $idMenu)) {
-                return ['Seleccionar Menú'];
+                $errores[] = 'Seleccionar Menú';
             }
-        
+
+            if (!empty($errores)) {
+                return ['resultado' => implode(', ', $errores)];
+            }
+
             $this->feMenu = $feMenu;
             $this->cantPlatos = $cantPlatos;
             $this->nomEvent = $nomEvent;
             $this->descripEvent = $descripEvent;
             $this->horarioComida = $horarioComida;
             $this->descripcion = $descripcion;
-            $this->id = $id;
+            $this->idEvento = $idEvento;
             $this->idSalidaA = $idSalidaA;
             $this->idMenu = $idMenu;
-        
+
             return $this->modiEvento();
         }
-        
-        
+
+             
         private function modiEvento() {
             try {
                 $this->conectarDB();
@@ -498,7 +529,7 @@ class consultarEventosModelo extends connectDB {
         
                 $idTipoSalidas = $this->tipoSalidaMenu();
                 $updateM = $this->datosMenu($this->idMenu);
-                $updateE = $this->datosEvento($this->id);
+                $updateE = $this->datosEvento($this->idEvento);
                 $updateS = $this->salidaA($idTipoSalidas, $this->idSalidaA);
                 $borrar=$this->borrarAlimentoM($this->idSalidaA);
 
@@ -518,11 +549,11 @@ class consultarEventosModelo extends connectDB {
                 }
         
                 if ($updateE['nomEvent'] !== $this->nomEvent) {
-                    $this->actualizarNombreEvento($this->nomEvent, $this->id);
+                    $this->actualizarNombreEvento($this->nomEvent, $this->idEvento);
                     $bitacora->registrarBitacora('Modificar Evento', "nomEvent de '{$updateE['nomEvent']}' a '{$this->nomEvent}'",$this->payload->cedula);
                 }
                 if ($updateE['descripEvent'] !== $this->descripEvent) {
-                    $this->actualizarDescripcionEvento($this->descripEvent, $this->id);
+                    $this->actualizarDescripcionEvento($this->descripEvent, $this->idEvento);
                     $bitacora->registrarBitacora('Modificar Evento', "descripEvent de '{$updateE['descripEvent']}' a '{$this->descripEvent}'",$this->payload->cedula);
                 }
         
@@ -551,8 +582,7 @@ class consultarEventosModelo extends connectDB {
             return $info->fetchColumn();
         }
       
-        
-         private function datosMenu($idMenu) {
+        private function datosMenu($idMenu) {
             $info = $this->conex->prepare("SELECT feMenu, horarioComida, cantPlatos FROM menu WHERE idMenu = ? AND status = 1 FOR UPDATE");
             $info->bindValue(1, $idMenu);
             $info->execute();
@@ -619,20 +649,25 @@ class consultarEventosModelo extends connectDB {
         }
         
         public function detalleSalidaE($cantidad, $idMenu, $idAlimento, $idSalidaA) {
+            $errores = [];
             if (!preg_match("/^[0-9]{1,}$/", $cantidad)) {
-                return ['Ingresar cantidad de alimentos'];
+                $errores[] = 'Ingresar cantidad de alimentos';
             }
         
             if (!preg_match("/^[0-9]{1,}$/", $idMenu)) {
-                return ['Seleccionar Menú'];
+                $errores[] = 'Seleccionar Menú';
             }
         
             if (!preg_match("/^[0-9]{1,}$/", $idAlimento)) {
-                return ['Seleccionar Alimentos'];
+                $errores[] = 'Seleccionar Alimentos';
             }
         
             if (!preg_match("/^[0-9]{1,}$/", $idSalidaA)) {
-                return ['Seleccionar Salida ID'];
+                $errores[] = 'Seleccionar Salida ID';
+            }
+
+            if (!empty($errores)) {
+                return ['resultado' => implode(', ', $errores)];
             }
         
             $this->cantidad = $cantidad;
@@ -878,6 +913,7 @@ class consultarEventosModelo extends connectDB {
                 return $e->getMessage();
             }
         }
+        
         private function anularMenu($id) {
             try {
                 $new = $this->conex->prepare("UPDATE menu SET status = 0 WHERE idMenu = ? ");

@@ -283,7 +283,7 @@ public function test_usuariosRegistradosConRol_ListoAnular() {
     }
 
     public function test_eliminarRol_UsuarioAsociado() {
-        $resultado = $this->objeto->eliminarRol(3);
+        $resultado = $this->objeto->eliminarRol(2);
         $this->assertArrayHasKey('resultado', $resultado);
        $this->assertEquals('usuarios_asociados', $resultado['resultado']);
        

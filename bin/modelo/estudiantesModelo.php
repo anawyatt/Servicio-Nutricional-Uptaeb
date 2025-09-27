@@ -28,14 +28,21 @@ class estudiantesModelo extends connectDB
     private $carrera;
     private $encryption;
     private $normalizer;
+    protected $conex; 
 
 
-
-    public function __construct()
+    public function __construct($pdo = null)
     {
         parent::__construct();
         $this->encryption = new encryption();
         $this->normalizer = new EstudianteNormalizer();
+        if ($pdo) {
+            $this->conex = $pdo;
+        } else {
+            // Conexión por defecto si no se pasa PDO
+            $this->conex = new PDO('mysql:host=localhost;dbname=comerdorUptaeb', 'root', '');
+            $this->conex->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
+        }
     }
 
     public function mostrarEstudiantes($start = 0, $length = 10, $search = '', $orderBy = 'cedEstudiante', $orderDirection = 'ASC')
@@ -173,7 +180,7 @@ class estudiantesModelo extends connectDB
     }
 
 
-    private function obtenercodigo($cedula)
+    protected function obtenercodigo($cedula)
     {
         try {
             $this->conectarDBSeguridad();
@@ -376,6 +383,15 @@ class estudiantesModelo extends connectDB
 
     public function registrarEstudiante($cedula, $nombre, $segNombre, $apellido, $segApellido, $sexo, $telefono, $nucleo, $carrera, $secciones, $horarios)
     {
+            if (empty($cedula) || empty($nombre) || empty($apellido) || empty($carrera)) {
+                return "Faltan datos obligatorios.";
+            }
+
+            if (!ctype_digit($cedula)) {
+                return "Dato inválido: la cédula debe ser numérica.";
+            }
+
+
         // Crear array de datos para normalizar
         $datosOriginales = [
             'Cedula' => $cedula,
@@ -487,8 +503,6 @@ class estudiantesModelo extends connectDB
             return $e;
         }
     }
-
-
 
     private function registrar()
     {

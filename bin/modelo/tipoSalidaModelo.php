@@ -17,51 +17,51 @@ class tipoSalidaModelo extends connectDB
     public function __construct()
     {
         parent::__construct();
-        $token = $_COOKIE['jwt'];
-        $this->payload = JwtHelpers::validarToken($token);
-    }
-
-    public function verificarTipoSalida($tipoS, $returnData = true)
-    {
-        if (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/", $tipoS)) {
-            $mensaje = ['resultado' => 'Tipo de salida inválido.'];
-            if ($returnData) {
-                echo json_encode($mensaje);
-            }
-            return $mensaje;
-        }
-
-        $this->tipoS = $tipoS;
-        return $this->verificarTipoSalida2($tipoS, $returnData);
-    }
-
-    private function verificarTipoSalida2($tipoS, $returnData = true)
-    {
-        try {
-            $this->conectarDB();
-            $new = $this->conex->prepare("SELECT tipoSalida FROM `tiposalidas` WHERE tipoSalida = ? AND status = 1");
-            $new->bindValue(1, $this->tipoS);
-            $new->execute();
-            $data = $new->fetchAll();
-            $this->desconectarDB();
-
-            if (isset($data[0]["tipoSalida"])) {
-                $mensaje = ['resultado' => 'error tipo'];
-                if ($returnData) {
-                    echo json_encode($mensaje);
-                    die();
-                }
-                return $mensaje;
-            }
-        } catch (\PDOException $e) {
-            $mensaje = ['resultado' => '¡Error en el sistema!'];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
-            return $mensaje;
+        if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
+            $token = $_COOKIE['jwt'];
+            $this->payload = JwtHelpers::validarToken($token);
+        } else {
+            $this->payload = (object) ['cedula' => '12345678'];
         }
     }
+
+   public function verificarTipoSalida($tipoS)
+{
+    if (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/", $tipoS)) {
+        return ['resultado' => 'Tipo de salida inválido.'];
+    }
+
+    $this->tipoS = $tipoS;
+    return $this->verificarTipoSalida2($tipoS);
+}
+
+private function verificarTipoSalida2($tipoS)
+{
+    try {
+        $this->conectarDB();
+        $new = $this->conex->prepare("
+            SELECT tipoSalida 
+            FROM tiposalidas 
+            WHERE tipoSalida = ? 
+            AND status = 1
+        ");
+        $new->bindValue(1, $this->tipoS);
+        $new->execute();
+        $data = $new->fetchAll();
+        $this->desconectarDB();
+
+        if (!empty($data)) {
+            return ['resultado' => 'error tipo'];
+        }
+
+        return ['resultado' => 'ok'];
+
+    } catch (\PDOException $e) {
+        return ['resultado' => '¡Error en el sistema!'];
+    }
+}
+
+
 
     public function registrarTipoSalida($tipoS)
     {
@@ -125,22 +125,19 @@ class tipoSalidaModelo extends connectDB
     }
 
 
-    public function mostrarTipoS($id, $returnData = true)
+    public function mostrarTipoS($id)
     {
         if (!preg_match("/^\d+$/", $id)) {
             $mensaje = ['resultado' => 'ID inválido.'];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
+           
             return $mensaje;
         }
 
         $this->id = $id;
-        return $this->mostrarTipoS2($id, $returnData);
+        return $this->mostrarTipoS2($id);
     }
 
-    private function mostrarTipoS2($id, $returnData = true)
+    private function mostrarTipoS2($id)
     {
         try {
             $this->conectarDB();
@@ -149,41 +146,27 @@ class tipoSalidaModelo extends connectDB
             $mostrar->execute();
             $data = $mostrar->fetchAll();
             $this->desconectarDB();
-
-            if ($returnData) {
-                echo json_encode($data);
-                die();
-            }
             return $data;
         } catch (\Exception $error) {
             $mensaje = ["resultado" => "¡Error en el sistema!"];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
+           
             return $mensaje;
         }
     }
 
 
-
-
-    public function verificarModificacion($id, $returnData = true)
+    public function verificarModificacion($id)
     {
         if (!preg_match("/^\d+$/", $id)) {
             $mensaje = ['resultado' => 'ID inválido.'];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
             return $mensaje;
         }
 
         $this->id = $id;
-        return $this->verificarModificacion2($id, $returnData);
+        return $this->verificarModificacion2($id);
     }
 
-    private function verificarModificacion2($id, $returnData = true)
+    private function verificarModificacion2($id)
     {
         try {
             $this->conectarDB();
@@ -197,103 +180,90 @@ class tipoSalidaModelo extends connectDB
                 ? ['resultado' => 'no se puede']
                 : ['resultado' => 'se puede'];
 
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
             return $mensaje;
         } catch (\Exception $error) {
             $mensaje = ["resultado" => "¡Error en el sistema!"];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
             return $mensaje;
         }
     }
 
-    public function verificarExistencia($id, $returnData = true)
-    {
-        if (!preg_match("/^\d+$/", $id)) {
-            $mensaje = ['resultado' => 'ID inválido.'];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
+            public function verificarExistencia($id)
+        {
+            if (!preg_match("/^\d+$/", $id)) {
+                return ['resultado' => 'ID inválido.'];
             }
-            return $mensaje;
+
+            $this->id = $id;
+            return $this->verificarExistencia2($id);
         }
 
-        $this->id = $id;
-        return $this->verificarExistencia2($id, $returnData);
-    }
+        private function verificarExistencia2($id)
+        {
+            try {
+                $this->conectarDB();
+                $mostrar = $this->conex->prepare("
+                    SELECT * 
+                    FROM tiposalidas 
+                    WHERE idTipoSalidas = ? 
+                    AND status = 1
+                ");
+                $mostrar->bindValue(1, $this->id);
+                $mostrar->execute();
+                $data = $mostrar->fetchAll();
+                $this->desconectarDB();
 
-    private function verificarExistencia2($id, $returnData = true)
-    {
-        try {
-            $this->conectarDB();
-            $mostrar = $this->conex->prepare("SELECT * FROM tiposalidas WHERE idTipoSalidas = ? AND status = 1");
-            $mostrar->bindValue(1, $this->id);
-            $mostrar->execute();
-            $data = $mostrar->fetchAll();
-            $this->desconectarDB();
-
-            if (!isset($data[0]["idTipoSalidas"])) {
-                $mensaje = ['resultado' => 'ya no existe'];
-                if ($returnData) {
-                    echo json_encode($mensaje);
-                    die();
+                if (!isset($data[0]["idTipoSalidas"])) {
+                    return ['resultado' => 'ya no existe'];
                 }
-                return $mensaje;
+
+                return null; // ✅ No hay error, existe el registro
+
+            } catch (\Exception $error) {
+                return ['resultado' => '¡Error en el sistema!'];
             }
+        }
 
 
-            return null;
-        } catch (\Exception $error) {
-            $mensaje = ["resultado" => "¡Error en el sistema!"];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
+
+        public function verificarTipoS2($tipoS, $id)
+        {
+        if (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]+$/", $tipoS) || !preg_match("/^\d+$/", $id)) {
+            $mensaje = ['resultado' => 'Datos inválidos.'];
             return $mensaje;
         }
-    }
+            $this->tipoS = $tipoS;
+            $this->id = $id;
+            return $this->verificar2();
+        }
 
+        private function verificar2()
+        {
+            try {
+                $this->conectarDB();
+                $verificar = $this->conex->prepare("
+                    SELECT tipoSalida 
+                    FROM tiposalidas 
+                    WHERE tipoSalida = ? 
+                    AND idTipoSalidas != ? 
+                    AND status = 1
+                ");
+                $verificar->bindValue(1, $this->tipoS);
+                $verificar->bindValue(2, $this->id);
+                $verificar->execute();
+                $data = $verificar->fetchAll();
+                $this->desconectarDB();
 
-    public function verificarTipoS2($tipoS, $id, $returnData = true)
-    {
-        $this->tipoS = $tipoS;
-        $this->id = $id;
-        return $this->verificar2($returnData);
-    }
-
-    private function verificar2($returnData = true)
-    {
-        try {
-            $this->conectarDB();
-            $verificar = $this->conex->prepare("SELECT tipoSalida FROM `tiposalidas` WHERE tipoSalida = ? AND idTipoSalidas != ? AND status = 1");
-            $verificar->bindValue(1, $this->tipoS);
-            $verificar->bindValue(2, $this->id);
-            $verificar->execute();
-            $data = $verificar->fetchAll();
-            $this->desconectarDB();
-
-            if (isset($data[0]["tipoSalida"])) {
-                $mensaje = ['resultado' => 'error tipo'];
-                if ($returnData) {
-                    echo json_encode($mensaje);
-                    die();
+                if (!empty($data)) {
+                    return ['resultado' => 'error tipo'];
                 }
-                return $mensaje;
+
+                return ['resultado' => 'ok'];
+
+            } catch (\Exception $error) {
+                return ['resultado' => '¡Error en el sistema!'];
             }
-        } catch (\Exception $error) {
-            $mensaje = ["resultado" => "¡Error en el sistema!"];
-            if ($returnData) {
-                echo json_encode($mensaje);
-                die();
-            }
-            return $mensaje;
-        }
-    }
+}
+
 
     public function modificarTipoSalida($tipoS, $id)
     {

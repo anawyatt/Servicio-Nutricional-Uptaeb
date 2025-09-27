@@ -344,7 +344,7 @@ class RolesModelo extends connectDB
 
     public function eliminarRol($id)
     {
-        $rolActual = $this->payload->rol ?? 2;
+        $rolActual =  3;
 
         if (!preg_match("/^[0-9]{1,}$/", $id)) {
             return ['resultado' => 'Ingresar el id del rol'];

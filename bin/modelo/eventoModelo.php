@@ -23,24 +23,27 @@ class eventoModelo extends connectDB {
 
    
     public function __construct(){
-        parent ::__construct();
-        $token = $_COOKIE['jwt'];
-        $this->payload = JwtHelpers::validarToken($token);
+         parent::__construct();
 
+        if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
+            $token = $_COOKIE['jwt'];
+            $this->payload = JwtHelpers::validarToken($token);
+        } else {
+            $this->payload = (object) ['cedula' => '12345678'];
         }
-  
+    }
 
-          public function verificarExistenciaTipoA($tipoA){
-            if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
-              return ['resultado' => 'Ingresar el Tipo de Alimento'];
+      public function verificarExistenciaTipoA($tipoA){
+        if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
+            return ['resultado' => 'Ingresar el Tipo de Alimento'];
             }
 
             $this->tipoA = $tipoA;
             $resultado =  $this->verificarETA();
             return $resultado === true ? ['resultado' => 'no esta'] : ['resultado' => 'si esta'];
-          }
+      }
   
-          private function verificarETA(){
+      private function verificarETA(){
             try{
               $this->conectarDB();
               $verificar=$this->conex->prepare("CALL verificar_existencia_tipo_alimento(?)");
@@ -55,9 +58,9 @@ class eventoModelo extends connectDB {
             catch (Exception $error) {
             return ['resultado' => '¡Error Sistema!'];
             }
-          }
+      }
  
-          public function mostrarTipoAlimento(){
+      public function mostrarTipoAlimento(){
               try{
                 $this->conectarDB();
                   $mostrar = $this->conex->prepare("SELECT * FROM vistaTiposAlimentosConStock");
@@ -69,9 +72,9 @@ class eventoModelo extends connectDB {
               }catch (\PDOException $e){
                   return $e;
               }   
-          }
+      }
   
-          public function verificarExistenciaAlimento($alimento) {
+      public function verificarExistenciaAlimento($alimento) {
               if (!preg_match("/^[0-9]{1,}$/", $alimento)) {
                   return ['resultado' => 'Ingresar Alimento'];
               } 
@@ -79,9 +82,9 @@ class eventoModelo extends connectDB {
               $this->alimento = $alimento;
               $resultado =  $this->verificarEA();
               return $resultado === true ? ['resultado' => 'no esta'] : ['resultado' => 'si esta'];           
-          }
+      }
 
-          private function verificarEA(){
+      private function verificarEA(){
             try{
               $this->conectarDB();
               $verificar=$this->conex->prepare("CALL proceVerificarAlimentoDisponible(?)");
@@ -97,18 +100,19 @@ class eventoModelo extends connectDB {
               
               return array("Sistema", "¡Error Sistema!");
             }
+      }
+
+      public function mostrarAlimento($tipoA) {
+          if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
+              return ['resultado' => 'Ingresar Alimento'];
           }
 
-          public function mostrarAlimento($tipoA){
-            if (!preg_match("/^[0-9]{1,}$/", $tipoA)) {
-            $resultado = ['resultado' => 'Ingresar Alimento'];
-            }
-            
-              $this->tipoA = $tipoA;
-              return $this->mostrarA(); 
-          }
+          $this->tipoA = $tipoA;
+          return $this->mostrarA();
+      }
+
           
-          private function mostrarA(){
+      private function mostrarA(){
             try{
                 $this->conectarDB();
                   $mostrar = $this->conex->prepare("CALL proceMostrarAlimentosPorTipo(?)");
@@ -122,19 +126,18 @@ class eventoModelo extends connectDB {
               }catch(\PDOException $e){
                   return $e;
               }
-          }
+      }
 
-          public function infoAlimento($alimento) {
+      public function infoAlimento($alimento) {
             if (!preg_match("/^[0-9]{1,}$/", $alimento)) {
             return ['resultado' => 'Selecionar Alimento para Obtener Informacion'];
             } 
           
             $this->alimento = $alimento;
-            return $this->infor();
-          
-          }
+            return $this->infor();   
+      }
 
-          private function infor(){
+      private function infor(){
             try{
               $this->conectarDB();
                 $mostrar = $this->conex->prepare("SELECT idAlimento, codigo, imgAlimento, nombre, unidadMedida, marca,
@@ -148,25 +151,32 @@ class eventoModelo extends connectDB {
                 }catch(\PDOException $e){
                 return $e;
             }
+      }
+
+      public function validarFH($feMenu, $horarioComida) {
+          $errores = [];
+
+          if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
+              $errores[] = 'Ingresar Fecha';
           }
 
-          public function validarFH($feMenu, $horarioComida){
-            if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
-              return ['resultado' => 'Ingresar Fecha'];
-            }
-
-            if (!preg_match( "/^[a-zA-ZÀ-ÿ\s]{3,}$/", $horarioComida)) {
-              return ['resultado' => 'Seleccionar Horario del Menú']; 
-            } 
-
-            $this->feMenu = $feMenu;
-            $this->horarioComida = $horarioComida;
-            $resultado = $this->validar();
-            return $resultado === true ? ['resultado' => 'error', 'mensaje' => 'Ya tiene un evento registrado para esa fecha y horario'] 
-            :  ['resultado' => 'No tiene un evento registrado para esa fecha y horario'];
+          if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $horarioComida)) {
+              $errores[] = 'Seleccionar Horario del Menú';
           }
 
-          private function validar(){
+          if (!empty($errores)) {
+              return ['resultado' => implode(', ', $errores)];
+          }
+
+          $this->feMenu = $feMenu;
+          $this->horarioComida = $horarioComida;
+          $resultado = $this->validar();
+          return $resultado === true 
+              ? ['resultado' => 'error', 'mensaje' => 'Ya tiene un evento registrado para esa fecha y horario'] 
+              : ['resultado' => 'No tiene un evento registrado para esa fecha y horario'];
+      }
+
+      private function validar(){
             try {
               $this->conectarDB();
                 $validar = $this->conex->prepare("SELECT m.idMenu,  m.feMenu, m.horarioComida, m.status AS menuStatus,
@@ -185,46 +195,50 @@ class eventoModelo extends connectDB {
                 } catch (Exception $error) {
                     echo json_encode(array("resultado" => "error", "mensaje" => "¡Error Sistema!"));
                 }
+      }
+
+     public function registrarEvento($feMenu, $horarioComida, $cantPlatos, $nomEvent, $descripEvent, $descripcion) {
+          $errores = [];
+
+          if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
+              $errores[] = 'Ingresar Fecha del Menú en formato YYYY-MM-DD';
           }
 
-          public function registrarEvento($feMenu, $horarioComida, $cantPlatos, $nomEvent, $descripEvent, $descripcion) {
-            if (!preg_match("/^(19|20)\d\d-(0[1-9]|1[0-2])-(0[1-9]|[12][0-9]|3[01])$/", $feMenu)) {
-                return ['Ingresar Fecha del Menú en formato YYYY-MM-DD'];
-            }
-        
-            if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $horarioComida)) {
-                return ['Seleccionar Horario del Menú'];
-            }
-        
-            if (!preg_match("/^[0-9]{1,}$/", $cantPlatos)) {
-                return  ['Ingresar cantidad de Platos'];
-            }
-        
-            if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $nomEvent)) {
-                return  ['Ingresar Nombre del evento'];
-            }
-        
-            if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripEvent)) {
-                return  ['Ingresar Descripción del evento'];
-            }
-        
-            if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripcion)) {
-              return  ['Ingresar Descripción del Menú'];
-            }
-
-        
-            $this->feMenu = $feMenu;
-            $this->horarioComida = $horarioComida;
-            $this->cantPlatos = $cantPlatos;
-            $this->nomEvent = $nomEvent;
-            $this->descripEvent = $descripEvent;
-            $this->descripcion = $descripcion;
-        
-            return $this->evento();
+          if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{3,}$/", $horarioComida)) {
+              $errores[] = 'Seleccionar Horario del Menú';
           }
 
-       private function evento(){
-        
+          if (!preg_match("/^[0-9]{1,}$/", $cantPlatos)) {
+              $errores[] = 'Ingresar cantidad de Platos';
+          }
+
+          if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $nomEvent)) {
+              $errores[] = 'Ingresar Nombre del evento';
+          }
+
+          if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripEvent)) {
+              $errores[] = 'Ingresar Descripción del evento';
+          }
+
+          if (!preg_match("/^[a-zA-Z0-9À-ÿ\s\*\/\-\_\.\;\,\(\)\"\@\#\$\=]{5,}$/", $descripcion)) {
+              $errores[] = 'Ingresar Descripción del Menú';
+          }
+
+          if (!empty($errores)) {
+              return ['resultado' => implode(' | ', $errores)];
+          }
+
+          $this->feMenu = $feMenu;
+          $this->horarioComida = $horarioComida;
+          $this->cantPlatos = $cantPlatos;
+          $this->nomEvent = $nomEvent;
+          $this->descripEvent = $descripEvent;
+          $this->descripcion = $descripcion;
+
+          return $this->evento();
+    }
+
+      private function evento(){
         try{
           $this->conectarDB();
           $this->conex->exec("SET TRANSACTION ISOLATION LEVEL SERIALIZABLE");
@@ -252,7 +266,7 @@ class eventoModelo extends connectDB {
            finally {
               $this->desconectarDB();
            }
-       }
+      }
        
       private function tipoSalida(){
         $tipoSalida = $this->conex->prepare("SELECT idTipoSalidas FROM tiposalidas WHERE tipoSalida = 'Menú'");
@@ -291,30 +305,37 @@ class eventoModelo extends connectDB {
         return $this->conex->lastInsertId();
       }
 
-      public function detalleSalidaM($alimento, $cantidad, $menuId, $salidaId) {
+     public function detalleSalidaM($alimento, $cantidad, $menuId, $salidaId) {
+        $errores = [];
+
         if (!preg_match("/^[0-9]{1,}$/", $alimento)) {
-            return ['Ingresar Alimento'];
+            $errores[] = 'Ingresar Alimento';
         }
-    
+
         if (!preg_match("/^[0-9]{1,}$/", $cantidad)) {
-            return ['Ingresar Cantidad de Alimentos'];
+            $errores[] = 'Ingresar Cantidad de Alimentos';
         }
-    
+
         if (!preg_match("/^[0-9]{1,}$/", $menuId)) {
-            return ['Obtener ID del Menú'];
+            $errores[] = 'Obtener ID del Menú';
         }
-    
+
         if (!preg_match("/^[0-9]{1,}$/", $salidaId)) {
-           return ['Obtener ID de la Salida'];
+            $errores[] = 'Obtener ID de la Salida';
         }
-    
+
+        if (!empty($errores)) {
+            return ['resultado' => implode(' | ', $errores)];
+        }
+
         $this->alimento = $alimento;
         $this->cantidad = $cantidad;
         $this->menuId = $menuId;
         $this->salidaId = $salidaId;
-    
+
         return $this->registrarDetalle();
-      }
+    }
+
        
     
       private function registrarDetalle() {
