@@ -32,7 +32,7 @@ class stockAlimentosTest extends TestCase {
 
  // Prueba para datos inexistentes en la base de datos
  public function test_verificarExistenciaTipoA_DatosNoExistenBD() {
-    $resultado = $this->objeto->verificarExistenciaTipoA(19);
+    $resultado = $this->objeto->verificarExistenciaTipoA(30);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('no esta', $resultado['resultado']);
 }

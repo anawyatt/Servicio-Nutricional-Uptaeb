@@ -16,10 +16,8 @@ class estudiantesTests extends TestCase {
         $this->objeto = $this->getMockBuilder(estudiante::class)
             ->onlyMethods(['obtenercodigo'])
             ->getMock();
-
     }
-
- /* Pruebas para el método infoStudy con diferentes escenarios  
+ 
 // identificador encriptado de un estudiante existente
  public function testInfoStudy_DatosCorrectos()
     {
@@ -55,9 +53,7 @@ class estudiantesTests extends TestCase {
     $this->assertTrue($resultado === false || $resultado === [], "Si el ID no es válido debería devolver false o array vacío");
 }
 
-*/
 
-/*
 // Pruebas para el método verificarCodigo con diferentes escenarios CODIDO DE SEGURIDAD PARA REGISTRAR LA DATA
 public function testVerificarCodigo_DatosVacios()
 {
@@ -103,10 +99,7 @@ public function testVerificarCodigo_DatosIncorrectos_SoloCodigo()
     $resultado = $this->objeto->verificarCodigo("Uptaeb123*", "12345678");
     $this->assertTrue($resultado, "El código correcto debería validar en true");
 }
-*/
 
-
-/*
 // Pruebas para el método registrarEstudiante con diferentes escenarios
 
 public function testRegistrarEstudiante_DatosVacios()
@@ -220,10 +213,6 @@ public function testRegistrarEstudianteExistenteActualiza(): void
     $stmt->execute(['99999999']);
     $this->assertGreaterThan(0, (int)$stmt->fetchColumn());
 }
-*/
-
-
-
 
 
 }

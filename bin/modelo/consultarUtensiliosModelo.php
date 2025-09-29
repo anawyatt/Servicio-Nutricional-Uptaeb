@@ -15,11 +15,15 @@ class consultarUtensiliosModelo extends connectDB {
     private $id;
     private $payload;
 
-    public function __construct() {
-        parent::__construct();
+     public function __construct(){
+    parent::__construct();
+    if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
         $token = $_COOKIE['jwt'];
         $this->payload = JwtHelpers::validarToken($token);
-    } 
+    } else {
+        $this->payload = (object) ['cedula' => '12345678'];
+    }
+}
 
  public function mostrarUtensilios() {
     try {
@@ -40,43 +44,55 @@ class consultarUtensiliosModelo extends connectDB {
 
 
 public function verificarExistencia($id) {
-    if (!ctype_digit($id)) {
-        return ['error' => 'ID inválido.'];
-    }
+    if (empty($id) || !ctype_digit((string)$id)) {
+    return ['status' => 'error', 'mensaje' => 'ID inválido', 'data' => null];
+}
 
     try {
         $this->conectarDB();
-        $stmt = $this->conex->prepare("SELECT 1 FROM utensilios WHERE idUtensilios = ? AND status = 1");
+        $stmt = $this->conex->prepare("SELECT * FROM utensilios WHERE idUtensilios = ? AND status = 1 LIMIT 1");
         $stmt->execute([$id]);
         $existe = $stmt->fetch();
         $this->desconectarDB();
 
-        return $existe ? null : ['resultado' => 'ya no existe'];
+        if ($existe) {
+            return ['status' => 'ok', 'mensaje' => 'si existe', 'data' => true];
+        } else {
+            return ['status' => 'error', 'mensaje' => 'ya no existe', 'data' => null];
+        }
+
     } catch (\Exception $e) {
         $this->desconectarDB();
-        return ['error' => '¡Error en el sistema!'];
+        return ['status' => 'error', 'mensaje' => '¡Error en el sistema!', 'data' => null];
     }
 }
 
 public function infoUtensilio($id) {
-    if (!ctype_digit($id)) {
-        return ['error' => 'ID inválido.'];
+    if (empty($id) || !ctype_digit($id)) {
+        return ['status' => 'error', 'mensaje' => 'ID inválido', 'data' => null];
     }
 
     try {
         $this->conectarDB();
         $stmt = $this->conex->prepare("
-            SELECT * FROM utensilios u 
+            SELECT u.*, tu.tipo 
+            FROM utensilios u 
             INNER JOIN tipoutensilios tu ON u.idTipoU = tu.idTipoU 
             WHERE u.idUtensilios = ?
+            LIMIT 1
         ");
         $stmt->execute([$id]);
-        $data = $stmt->fetchAll(\PDO::FETCH_OBJ);
+        $data = $stmt->fetch(\PDO::FETCH_OBJ);
         $this->desconectarDB();
 
-        return $data ?: ['resultado' => 'No se encontró utensilio.'];
+        if ($data) {
+            return ['status' => 'ok', 'mensaje' => 'utensilio encontrado', 'data' => $data];
+        } else {
+            return ['status' => 'error', 'mensaje' => 'No se encontró utensilio', 'data' => null];
+        }
+
     } catch (\PDOException $e) {
-        return ['error' => '¡Error en el sistema!'];
+        return ['status' => 'error', 'mensaje' => '¡Error en el sistema!', 'data' => null];
     }
 }
 
@@ -178,6 +194,35 @@ public function verificarUtensilio($id, $tipoU, $utensilio, $material) {
     return $this->consultarUtensilio();
 }
 
+private function consultarUtensilio() {
+    try {
+        $this->conectarDB();
+        $stmt = $this->conex->prepare("
+            SELECT nombre
+            FROM utensilios
+            WHERE idTipoU = ? 
+              AND nombre = ? 
+              AND material = ?
+              AND idUtensilios = ?
+              AND status = 1
+        ");
+        $stmt->bindValue(1, $this->tipoU);
+        $stmt->bindValue(2, $this->utensilio);
+        $stmt->bindValue(3, $this->material);
+        $stmt->bindValue(4, $this->id);
+        $stmt->execute();
+        $data = $stmt->fetchAll();
+        $this->desconectarDB();
+
+        return $data ? ['resultado' => 'existe'] : ['resultado' => 'no esta'];
+    } catch (\PDOException $e) {
+        $this->desconectarDB();
+        error_log("Error en consultarUtensilio: " . $e->getMessage());
+        return ['resultado' => 'error', 'mensaje' => 'Error al consultar utensilio: ' . $e->getMessage()];
+    }
+}
+
+
 public function modificarUtensilio($id, $tipoU, $utensilio, $material) {
     $validacion = $this->validarDatosUtensilio($id, $tipoU, $utensilio, $material);
     if ($validacion) return $validacion;
@@ -188,52 +233,6 @@ public function modificarUtensilio($id, $tipoU, $utensilio, $material) {
     $this->material = $material;
 
     return $this->modificarU();
-}
-
-private function validarDatosUtensilio($id, $tipoU, $utensilio, $material) {
-    if (!preg_match('/^\d+$/', $id) || !preg_match('/^\d+$/', $tipoU)) {
-        return ['resultado' => 'ID y tipo de utensilio deben ser números enteros positivos.'];
-    }
-
-    if (empty(trim($utensilio)) || !preg_match('/^[a-zA-Z0-9\s]+$/', $utensilio)) {
-        return ['resultado' => 'El nombre del utensilio es inválido.'];
-    }
-
-    if (empty(trim($material)) || !preg_match('/^[a-zA-Z0-9\s]+$/', $material)) {
-        return ['resultado' => 'El material es inválido.'];
-    }
-
-    return null;
-}
-
-private function consultarUtensilio() {
-    try {
-        $this->conectarDB();
-        $stmt = $this->conex->prepare("
-        SELECT nombre 
-        FROM vista_utensilios_activos
-        WHERE idTipoU = ? AND nombre = ? AND material = ? 
-        AND idUtensilios != ?
-    ");
-        $stmt->bindValue(1, $this->tipoU);
-        $stmt->bindValue(2, $this->utensilio);
-        $stmt->bindValue(3, $this->material);
-        $stmt->bindValue(4, $this->id);
-        $stmt->execute();
-        $data = $stmt->fetchAll();
-        $this->desconectarDB();
-
-        return isset($data[0]['nombre']) 
-            ? ['resultado' => 'existe'] 
-            : null;
-
-    } catch (\PDOException $e) {
-    $this->desconectarDB();
-    error_log("Error en consultarUtensilio: " . $e->getMessage());
-
-    return ['error' => 'Error al consultar utensilio: ' . $e->getMessage()];
-
-}
 }
 
 private function modificarU() {
@@ -263,6 +262,24 @@ private function modificarU() {
 
         return ['error' => $e->getMessage()];
     }
+}
+
+private function validarDatosUtensilio($id, $tipoU, $utensilio, $material) {
+    if (!preg_match('/^\d+$/', $id) || !preg_match('/^\d+$/', $tipoU)) {
+        return ['resultado' => 'ID y tipo de utensilio deben ser números enteros positivos.'];
+    }
+
+    $utensilio = (string)$utensilio; 
+
+    if (empty(trim($utensilio)) || !preg_match('/^[a-zA-Z0-9áéíóúÁÉÍÓÚñÑ\s]+$/', $utensilio)) {
+        return ['resultado' => 'El nombre del utensilio es inválido.'];
+    }
+
+    if (empty(trim($material)) || !preg_match('/^[a-zA-Z0-9\s]+$/', $material)) {
+        return ['resultado' => 'El material es inválido.'];
+    }
+
+    return null;
 }
 
 

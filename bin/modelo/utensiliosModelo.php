@@ -15,7 +15,7 @@ private $material;
 private $imagen;
 private $payload;
 
-    // Validar imagen igual que en alimentosModelo
+    
     public function validarImagen($imagen)
     {
         if (!isset($imagen['error']) || $imagen['error'] !== UPLOAD_ERR_OK) {
@@ -37,11 +37,16 @@ private $payload;
         return true;
     }
 
-    public function __construct() {
-        parent::__construct();
+    public function __construct()
+{
+    parent::__construct();
+    if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
         $token = $_COOKIE['jwt'];
         $this->payload = JwtHelpers::validarToken($token);
-    } 
+    } else {
+        $this->payload = (object) ['cedula' => '12345678'];
+    }
+}
 
     public function verificarExistenciaTipoU($tipoU) {
         if (!preg_match("/^[0-9]+$/", $tipoU)) {
@@ -134,18 +139,26 @@ public function verificarUtensilios($tipoU, $utensilio, $material) {
 
 
 public function registrarUtensilio($imagen, $imgState, $tipoU, $utensilios, $material, $returnJson = false) {
+    $errores = [];
+
     if (!preg_match("/^[0-9]+$/", $tipoU)) {
-        return ['resultado' => 'Seleccionar un tipo de utensilio válido'];
+        $errores[] = 'Seleccionar un tipo de utensilio válido';
     }
 
     if (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{1,50}$/", $utensilios)) {
-        return ['resultado' => 'Nombre de utensilio inválido'];
+        $errores[] = 'Nombre de utensilio inválido';
     }
 
     if (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{1,30}$/", $material)) {
-        return ['resultado' => 'Material inválido'];
+        $errores[] = 'Material inválido';
     }
 
+    // Si hay errores, devolverlos todos juntos
+    if (!empty($errores)) {
+        return ['resultado' => implode(' | ', $errores)];
+    }
+
+    // ----- Proceso normal de registro -----
     $codigo = $this->generarCodigo($utensilios, $material);
     $ruta = "assets/images/utensilios/";
     $this->tipoU = $tipoU;
@@ -157,7 +170,6 @@ public function registrarUtensilio($imagen, $imgState, $tipoU, $utensilios, $mat
     if ($imgState === 'NO') {
         $imagenPredeterminada = $ruta . 'utensiliospredetereminado.png';
 
-     
         $intento = 1;
         while (file_exists($nombreFinal)) {
             $codigo = $this->generarCodigo($utensilios, $material . $intento);

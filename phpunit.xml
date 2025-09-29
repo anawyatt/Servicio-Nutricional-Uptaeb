@@ -15,7 +15,7 @@
 
         <testsuite name="integration-Roles-Modulos-Permiso">
             <file>bin/Tests/rolesTest.php</file>
-            <file>bin/Tests/moduloTest.php</file>
+            <file>bin/Tests/moduloTests.php</file>
             <file>bin/Tests/permisoTest.php</file>
         </testsuite>
 
@@ -57,8 +57,9 @@
             <file>bin/Tests/stockAlimentosTest.php</file>
         </testsuite>
 
-         <testsuite name="integration-Asistencias-Menu-TipoSalida">
+         <testsuite name="integration-Asistencias-Estudiantes-Menu-TipoSalida">
             <file>bin/Tests/asistenciaTests.php</file>
+            <file>bin/Tests/estudiantesTests.php</file>
             <file>bin/Tests/consultarAsistenciaTests.php</file>
             <file>bin/Tests/menuTest.php</file>
             <file>bin/Tests/consultarMenuTest.php</file>
@@ -69,6 +70,69 @@
             <file>bin/Tests/salidaAlimentosTest.php</file>
             <file>bin/Tests/consultarSalidaAlimentosTest.php</file>
             <file>bin/Tests/tipoSalidaTests.php</file>
+        </testsuite>
+
+        <testsuite name="integration-tipoUtensilios-Utensilios">
+            <file>bin/Tests/tipoUtensilioTest.php</file>
+            <file>bin/Tests/utensiliosTest.php</file>
+            <file>bin/Tests/consultarUtensiliosTest.php</file>
+        </testsuite>
+
+        
+        <testsuite name="integration-Inventario-Utensilios">
+            <file>bin/Tests/entradaUtensiliosTest.php</file>
+            <file>bin/Tests/consultarEntradaUtensiliosTest.php</file>
+            <file>bin/Tests/salidaUtensiliosTest.php</file>
+            <file>bin/Tests/consultarSalidaUtensiliosTest.php</file>
+        </testsuite>
+
+        <testsuite name="integration-Utensilios-InventarioUtensilios">
+            <file>bin/Tests/utensiliosTest.php</file>
+            <file>bin/Tests/consultarUtensiliosTest.php</file>
+            <file>bin/Tests/entradaUtensiliosTest.php</file>
+            <file>bin/Tests/consultarEntradaUtensiliosTest.php</file>
+            <file>bin/Tests/salidaUtensiliosTest.php</file>
+            <file>bin/Tests/consultarSalidaUtensiliosTest.php</file>
+        </testsuite>
+
+        <testsuite name="integration-SalidaUtensilios-TipoSalida">
+            <file>bin/Tests/salidaUtensiliosTest.php</file>
+            <file>bin/Tests/consultarSalidaUtensiliosTest.php</file>
+            <file>bin/Tests/tipoSalidaTests.php</file>
+        </testsuite>
+
+         <testsuite name="integration-Total">
+            <file>bin/Tests/loginTest.php</file>
+            <file>bin/Tests/cambiarClaveTest.php</file>
+            <file>bin/Tests/usuarioTest.php</file>
+            <file>bin/Tests/rolesTest.php</file>
+            <file>bin/Tests/moduloTests.php</file>
+            <file>bin/Tests/permisoTest.php</file>
+            <file>bin/Tests/bitacoraTests.php</file>
+            <file>bin/Tests/perfilTest.php</file>
+            <file>bin/Tests/tipoAlimentoTest.php</file>
+            <file>bin/Tests/tipoSalidaTests.php</file>
+            <file>bin/Tests/tipoUtensilioTest.php</file>
+            <file>bin/Tests/alimentosTest.php</file>
+            <file>bin/Tests/consultarAlimentosTest.php</file>
+            <file>bin/Tests/registrarEntradaAlimentosTest.php</file>
+            <file>bin/Tests/consultarEntradaAlimentosTest.php</file>
+            <file>bin/Tests/stockAlimentosTest.php</file>
+            <file>bin/Tests/salidaAlimentosTest.php</file>
+            <file>bin/Tests/consultarSalidaAlimentosTest.php</file>
+            <file>bin/Tests/menuTest.php</file>
+            <file>bin/Tests/consultarMenuTest.php</file>
+            <file>bin/Tests/eventoTest.php</file>
+            <file>bin/Tests/consultarEventoTest.php</file>
+            <file>bin/Tests/estudiantesTests.php</file>
+            <file>bin/Tests/asistenciaTests.php</file>
+            <file>bin/Tests/consultarAsistenciaTests.php</file>
+            <file>bin/Tests/utensiliosTest.php</file>
+            <file>bin/Tests/consultarUtensiliosTest.php</file>
+            <file>bin/Tests/entradaUtensiliosTest.php</file>
+            <file>bin/Tests/consultarEntradaUtensiliosTest.php</file>
+            <file>bin/Tests/salidaUtensiliosTest.php</file>
+            <file>bin/Tests/consultarSalidaUtensiliosTest.php</file>
         </testsuite>
 
     </testsuites>

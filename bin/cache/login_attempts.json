@@ -1,1 +1,14 @@
-[]
+{
+    "8a776258ab782f45eac3fd47a0d6fe2231af644c0752e0e514790cd78979b54c": {
+        "intentos": 3,
+        "bloqueado_hasta": null,
+        "primer_intento": 1759089301,
+        "hash_info": "8a776258"
+    },
+    "f705991d13e8432bff5da95e61345dc205618075edae8e4df35e481fa716b3bf": {
+        "intentos": 4,
+        "bloqueado_hasta": 1759089949,
+        "primer_intento": 1759089302,
+        "hash_info": "f705991d"
+    }
+}

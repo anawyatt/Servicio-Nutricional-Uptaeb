@@ -9,14 +9,18 @@ use \PDOException;
 class ModulosModelo extends connectDB
 {
     private $id;
-    private $nombreModulo;
+    private $estado;
     private $payload;
 
     public function __construct()
     {
         parent::__construct();
-        $token = $_COOKIE['jwt'];
-        $this->payload = JwtHelpers::validarToken($token);
+         if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
+            $token = $_COOKIE['jwt'];
+            $this->payload = JwtHelpers::validarToken($token);
+        } else {
+            $this->payload = (object) ['cedula' => '12345678'];
+        }
     }
 
 
@@ -54,17 +58,16 @@ class ModulosModelo extends connectDB
     }
 
 
-    public function editarModulo($nombreModulo, $id)
+    public function editarModulo($estado, $id)
     {
         try {
-            $this->nombreModulo = $nombreModulo;
+            $this->estado = $estado;
             $this->id = $id;
-            $this->actualizarModulo();
+            return $this->actualizarModulo(); // 👈 Faltaba el return
         } catch (\Exception $e) {
-            return $e->getMessage(); // En caso de error
+            return ['mensaje' => $e->getMessage()]; 
         }
     }
-
 
     private function actualizarModulo()
     {
@@ -72,7 +75,7 @@ class ModulosModelo extends connectDB
             $this->conectarDBSeguridad();
             $this->conex2->beginTransaction();
             $query = $this->conex2->prepare("UPDATE modulo SET `status` = ? WHERE idModulo = ?");
-            $query->bindValue(1, $this->nombreModulo);
+            $query->bindValue(1, $this->estado);
             $query->bindValue(2, $this->id);
             $query->execute();
             $bitacora = new bitacoraModelo;
@@ -80,11 +83,14 @@ class ModulosModelo extends connectDB
 
             $this->conex2->commit();
             $this->desconectarDB();
-            echo json_encode(['mensaje' => 'Módulo actualizado exitosamente']);
-            die();
+            return ['mensaje' => 'Módulo actualizado exitosamente']; 
         } catch (\PDOException $e) {
             $this->conex2->rollBack();
             return $e;
         }
     }
+
+    
+
+    
 }

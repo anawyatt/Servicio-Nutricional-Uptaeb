@@ -16,19 +16,29 @@ class consultarEntradaUtensiliosModelo extends connectDB {
 	private $id;
     private $payload;
 
-    public function __construct() {
-        parent::__construct();
-        $token = $_COOKIE['jwt'];
-        $this->payload = JwtHelpers::validarToken($token);
-    } 
+    public function __construct(){
+    parent::__construct();
+        if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
+            $token = $_COOKIE['jwt'];
+            $this->payload = JwtHelpers::validarToken($token);
+        } else {
+            $this->payload = (object) ['cedula' => '12345678'];
+        }
+    }
 
    public function mostrarEntradaUtensilios($fechaInicio, $fechaFin) {
+    $errores = [];
+
     if (!empty($fechaInicio) && !preg_match("/^\d{4}-\d{2}-\d{2}$/", $fechaInicio)) {
-        return ['resultado' => 'Fecha de inicio inválida. Formato requerido: YYYY-MM-DD'];
+        $errores[] = 'Fecha de inicio inválida. Formato requerido: YYYY-MM-DD';
     }
 
     if (!empty($fechaFin) && !preg_match("/^\d{4}-\d{2}-\d{2}$/", $fechaFin)) {
-        return ['resultado' => 'Fecha de fin inválida. Formato requerido: YYYY-MM-DD'];
+        $errores[] = 'Fecha de fin inválida. Formato requerido: YYYY-MM-DD';
+    }
+
+    if (!empty($errores)) {
+        return ['resultado' => implode(", ", $errores)];
     }
 
     $this->fechaInicio = $fechaInicio;

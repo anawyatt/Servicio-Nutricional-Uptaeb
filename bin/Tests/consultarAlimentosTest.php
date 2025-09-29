@@ -169,7 +169,7 @@ public function test_verificarExistenciaTipoA_DatosExistenBD() {
 
 // Prueba que permita anular o modificar el alimento
 public function test_verificarBoton_Sisepuede() {
-    $resultado = $this->objeto->verificarBoton(154);
+    $resultado = $this->objeto->verificarBoton(155);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('se puede', $resultado['resultado']);
 
@@ -243,7 +243,7 @@ public function test_modificarAlimentos_DatoDuplicadoBD() {
 
 
 public function test_modificarAlimentos_DatosListos(){
-    $id = 154;
+    $id = 155;
     $tipoA = '14';
     $alimento = 'Maizina';
     $marca = 'Americana';
@@ -376,7 +376,7 @@ public function test_modificarImagen_DatosListos() {
     $this->assertEquals('Seleccionar el  alimento a anular', $resultado['resultado']);
 }
  public function test_anularAlimento_DatosNoExistenBD() {
-    $resultado = $this->objeto->anularAlimento(156);
+    $resultado = $this->objeto->anularAlimento(158);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('el alimento ya no existe', $resultado['resultado']);
 }
@@ -388,7 +388,7 @@ public function test_anularAlimento_Nosepuede() {
 }
 
 public function test_anularAlimentoListo(){
-    $id = 154;
+    $id = 155;
  
     $resultado = $this->objeto->anularAlimento($id);
     $this->assertArrayHasKey('resultado', $resultado);

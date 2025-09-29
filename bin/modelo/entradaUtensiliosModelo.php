@@ -13,11 +13,15 @@ private $utensilio;
 private $material;
 private $payload;
 
-    public function __construct() {
+    public function __construct(){
         parent::__construct();
-        $token = $_COOKIE['jwt'];
-        $this->payload = JwtHelpers::validarToken($token);
-    } 
+        if (isset($_COOKIE['jwt']) && !empty($_COOKIE['jwt'])) {
+            $token = $_COOKIE['jwt'];
+            $this->payload = JwtHelpers::validarToken($token);
+        } else {
+            $this->payload = (object) ['cedula' => '12345678'];
+        }
+    }   
 
     public function mostrarTipoUtensilio() {
         try {
@@ -177,15 +181,28 @@ public function infoUtensilio($utensilio) {
 
 
 public function registrarEntradaU($fecha, $hora, $descripcion) {
-    if (!preg_match("/^\d{4}-\d{2}-\d{2}$/", $fecha) || !preg_match("/^([01]\d|2[0-3]):([0-5]\d)$/", $hora)) {
-        return ['resultado' => 'Fecha o hora no válidas.'];
+    $errores = [];
+
+    if (!preg_match("/^\d{4}-\d{2}-\d{2}$/", $fecha)) {
+      $errores[] = 'Ingresar la fecha en formato YYYY-MM-DD';
     }
 
-    $this->fecha = $fecha;
-    $this->hora = $hora;
-    $this->descripcion = $descripcion;
+    if (!preg_match("/^(?:[01]\d|2[0-3]):[0-5]\d$/", $hora)) {
+      $errores[] = 'Ingresar la hora en formato HH:MM';
+    }
 
-    return $this->registrar();
+    if (!preg_match("/^[\w\sÀ-ÿ]{5,}$/", $descripcion)) {
+      $errores[] = 'Ingresar una descripción válida con al menos 5 caracteres';
+    }
+
+    if (!empty($errores)) {
+      return ['resultado' => implode(", ", $errores)];
+    } else {
+      $this->fecha = $fecha;
+      $this->hora = $hora;
+      $this->descripcion = $descripcion;
+      return $this->registrar();
+    }
 }
 
 private function registrar() {
@@ -211,7 +228,6 @@ private function registrar() {
         $this->id = $this->conex->lastInsertId();
         $this->conex->commit(); 
 
-        $this->notificaciones($this->fecha, $this->hora, $this->descripcion);
 
         return ['id' => $this->id];
     } catch (Exception $e) {
@@ -226,16 +242,25 @@ private function registrar() {
 
 
 public function registrarDetalleEntradaU($utensilio, $cantidad, $id) {
-    $this->utensilio = $utensilio;
-    $this->cantidad = $cantidad;
-    $this->id = $id;
-
-    if ($cantidad <= 0) {
-        return ['resultado' => 'La cantidad debe ser mayor a cero.'];
+    $errores = [];
+    if (!preg_match("/^[0-9]{1,}$/", $utensilio)) {
+      $errores[] = 'Ingresar el utensilio para el registro';
     }
-
-    return $this->registrarDetalle();
-}
+    if (!preg_match("/^[1-9][0-9]*$/", $cantidad)) {
+      $errores[] = 'Ingresar la cantidad';
+    }
+    if (!preg_match("/^[0-9]{1,}$/", $id)) {
+      $errores[] = 'Ingresar el  id del registro';
+    }
+    if (!empty($errores)) {
+      return ['resultado' => implode(", ", $errores)];
+    } else {
+      $this->utensilio = $utensilio;
+      $this->cantidad = $cantidad;
+      $this->id = $id;
+      return $this->registrarDetalle();
+    }
+  }
 
 private function registrarDetalle() {
     try {

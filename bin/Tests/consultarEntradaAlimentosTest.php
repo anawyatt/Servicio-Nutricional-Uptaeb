@@ -169,7 +169,7 @@ public function test_verificarAnulacion_DatosVacios() {
 
 // Prueba para datos que existen en la base de datos
 public function test_verificarAnulacion_DatosExistenBD() {
-    $resultado = $this->objeto->verificarAnulacion(38);
+    $resultado = $this->objeto->verificarAnulacion(153);
     $this->assertArrayHasKey('resultado', $resultado);
     $this->assertEquals('se puede', $resultado['resultado']);
 
@@ -204,7 +204,7 @@ public function test_anularEntradaAlimento_DatosVacios() {
 }
 
 public function test_anularEntradaAlimentoListo(){
-    $id = 50;
+    $id = 153;
  
     $resultado = $this->objeto->anularEntradaAlimento($id);
     $this->assertArrayHasKey('resultado', $resultado);

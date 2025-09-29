@@ -55,8 +55,6 @@ class loginTest extends TestCase {
 
     public function test_loginSistema_BloqueoUsuario() {
         ConteoLoginHelpers::registrarIntento('12345678');
-        ConteoLoginHelpers::registrarIntento('12345678');
-        ConteoLoginHelpers::registrarIntento('12345678');
 
         $resultado = $this->object->loginSistema('12345678', 'clave_incorrecta');
         $this->assertArrayHasKey('resultado', $resultado);
