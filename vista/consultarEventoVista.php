@@ -663,7 +663,7 @@
                 <div class="modal-footer">
                     <div class="text-start">
                       <button type="button" class="btn btn-danger" aria-label="Close" data-bs-dismiss="modal" id="clos" >Cancelar</button>
-                       <button type="button"  class="btn btn-primary" id="reportebtn" >Decargar</button>
+                       <button type="button"  class="btn btn-primary" id="reportebtn" >Descargar</button>
                     </div>
                 </div>
                 </form>
