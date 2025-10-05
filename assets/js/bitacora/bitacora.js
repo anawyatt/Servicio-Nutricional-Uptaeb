@@ -124,84 +124,98 @@ $(document).ready(function () {
     tabla.ajax.reload();
     $("#ani").show(2000);
   }
+// === VALIDACIÓN FECHA INICIO ===
+function validarFechaInicio() {
+  const fechaInicio = new Date($fechaI.val());
+  const fechaActual = new Date();
 
-  // Función para validar la fecha de inicio
-  function validarFechaInicio() {
-    const fechaInicio = new Date($fechaI.val());
-    const fechaActual = new Date();
-
-    if (fechaInicio > fechaActual) {
-      mostrarError(
-        "Fecha Inicio inválida!",
-        "La fecha no debe ser mayor a la fecha actual!",
-        $fechaI,
-        $error1,
-        $basicAddon1
-      );
-      errorFI = true;
-    } else {
-      ocultarError($fechaI, $error1, $basicAddon1);
-      errorFI = false;
-    }
-
-    return !errorFI;
+  if (fechaInicio > fechaActual) {
+    mostrarError(
+      "Fecha Inicio inválida!",
+      "Ingrese la Fecha, No debe ser mayor a la fecha de hoy!",
+      $fechaI,
+      $error1,
+      ".bar1",
+      ".ic1",
+      ".letra1"
+    );
+    errorFI = true;
+  } else {
+    ocultarError($fechaI, $error1, ".bar1", ".ic1", ".letra1");
+    errorFI = false;
   }
 
-  // Función para validar la fecha fin
-  function validarFechaFin() {
-    const fechaInicio = new Date($fechaI.val());
-    const fechaFin = new Date($fechaF.val());
-    const fechaActual = new Date();
+  return !errorFI;
+}
 
-    if (fechaFin > fechaActual) {
-      mostrarError(
-        "Fecha Fin inválida!",
-        "La fecha no debe ser mayor a la fecha actual!",
-        $fechaF,
-        $error2,
-        $basicAddon2
-      );
-      errorFF = true;
-    } else if (fechaInicio > fechaFin) {
-      mostrarError(
-        "Fecha Fin inválida!",
-        "La fecha no debe ser menor a la fecha de inicio!",
-        $fechaF,
-        $error2,
-        $basicAddon2
-      );
-      errorFF = true;
-    } else {
-      ocultarError($fechaF, $error2, $basicAddon2);
-      errorFF = false;
-    }
+// === VALIDACIÓN FECHA FIN ===
+function validarFechaFin() {
+  const fechaInicio = new Date($fechaI.val());
+  const fechaFin = new Date($fechaF.val());
+  const fechaActual = new Date();
 
-    return !errorFF;
+  if (fechaFin > fechaActual) {
+    mostrarError(
+      "Fecha Fin inválida!",
+      "Ingrese la Fecha, No debe ser mayor a la fecha de hoy!",
+      $fechaF,
+      $error2,
+      ".bar2",
+      ".ic2",
+      ".letra2"
+    );
+    errorFF = true;
+  } else if (fechaInicio > fechaFin) {
+    mostrarError(
+      "Fecha Fin inválida!",
+      "La fecha no debe ser menor a la fecha de inicio!",
+      $fechaF,
+      $error2,
+      ".bar2",
+      ".ic2",
+      ".letra2"
+    );
+    errorFF = true;
+  } else {
+    ocultarError($fechaF, $error2, ".bar2", ".ic2", ".letra2");
+    errorFF = false;
   }
 
-  // Funciones de utilidad para mostrar/ocultar errores
-  function mostrarError(titulo, mensaje, $campo, $error, $addon) {
-    Swal.fire({
-      toast: true,
-      position: "top-end",
-      icon: "error",
-      title: `<b class="text-rojo">${titulo}</b>`,
-      showConfirmButton: false,
-      timer: 3000,
-      timerProgressBar: 3000,
-    });
+  return !errorFF;
+}
 
-    $error.html(`<i class="bi bi-exclamation-triangle-fill"></i> ${mensaje}`);
-    $error.show();
-    $campo.addClass("is-invalid").removeClass("is-valid");
-    $addon.addClass("danger").removeClass("pri");
-  }
+// === FUNCIONES DE UTILIDAD ===
+function mostrarError(titulo, mensaje, $campo, $error, barClass, icClass, letraClass) {
+  Swal.fire({
+    toast: true,
+    position: "top-end",
+    icon: "error",
+    title: `<b class="text-rojo">${titulo}</b>`,
+    showConfirmButton: false,
+    timer: 3000,
+    timerProgressBar: 3000,
+  });
 
-  function ocultarError($campo, $error, $addon) {
-    $error.html("").hide();
-    $campo.removeClass("is-invalid").addClass("is-valid");
-    $addon.removeClass("danger").addClass("pri");
-  }
+  // Mensaje de error
+  $error.html(`<i class="bi bi-exclamation-triangle-fill"></i> ${mensaje}`).show();
+
+  // Estilos visuales de error
+  $campo.addClass("errorBorder");
+  $(barClass).removeClass("bar");
+  $(icClass).addClass("l").removeClass("labelPri");
+  $(letraClass).addClass("labelE").removeClass("label-char");
+}
+
+function ocultarError($campo, $error, barClass, icClass, letraClass) {
+  // Oculta y limpia error
+  $error.html("").hide();
+
+  // Restaura estilos visuales
+  $campo.removeClass("errorBorder");
+  $(barClass).addClass("bar");
+  $(icClass).removeClass("l").addClass("labelPri");
+  $(letraClass).removeClass("labelE").addClass("label-char");
+}
 
   // Función para formatear fechas
   function formatearFecha(fechaStr) {
