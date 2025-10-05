@@ -128,49 +128,101 @@ $(document).ready(function() {
   }
 
   // Funciones de validación
-  function chequeoImagen() {
-      if (fileInput0.files.length === 0) {
-          resetearImagen();
-          mostrarErrorImagen('Ingrese una imagen (JPG, PNG)!');
-          error_imagen = true;
-      } else {
-          validarPesoImagen0(fileInput0);
-          const file = fileInput0.files[0];
-          const reader = new FileReader();
-          reader.onload = function(e) {
-              const image = document.createElement('img');
-              image.src = e.target.result;
-              container0.innerHTML = '';
-              container0.appendChild(image);
-          };
-          if (file.type.startsWith('image/')) {
-              reader.readAsDataURL(file);
-              limpiarErrorImagen();
-              error_imagen = false; // Reiniciar flag si es válida
-          } else {
-              resetearImagen();
-              mostrarErrorImagen('Ingrese la imagen con formato (JPG, PNG)!');
-              fileInput0.value = '';
-              error_imagen = true;
-          }
-      }
-  }
+  function chequeoImagen(onValidationComplete) {
+    if (fileInput0.files.length === 0) {
+
+        $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> Ingrese una imagen valida para modificar.');
+        $(".error1").show();
+        error_imagen = true;
+        if (onValidationComplete) onValidationComplete(false);
+        return;
+    }
+
+    const file = fileInput0.files[0];
+
+    // Llama a la función que valida el peso
+    if (validarPesoImagen0(fileInput0) === false) {
+        if (onValidationComplete) onValidationComplete(false); // Notifica que la validación falló
+        return;
+    }
+
+    // Valida el tipo de archivo
+    if (!file.type.startsWith('image/')) {
+        $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> El archivo debe tener formato de imagen (JPG, PNG)!');
+        $(".error1").show();
+        fileInput0.value = '';
+        error_imagen = true;
+        if (onValidationComplete) onValidationComplete(false); // Notifica que la validación falló
+        return;
+    }
+
+    const reader = new FileReader();
+    const image = new Image();
+
+    // Esto se ejecuta SI la imagen está dañada
+    // Si la imagen está dañada
+image.onerror = function() {
+    container0.innerHTML = '';
+    container0.appendChild(defaultImage);
+    $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> La imagen está dañada o tiene un formato no válido.');
+    $(".error1").show();
+    fileInput0.value = '';
+    error_imagen = true;
+
+    // --- INICIO: APLICAR ESTILOS DE ERROR ---
+    $('#btnSeleccionarArchivo').removeClass('btn-primary').addClass('btn-danger'); // Pone el botón visible en rojo
+    $('#fileInput0').addClass('errorBorder');
+    $('.bar1').removeClass('bar');
+    $('.ic1').addClass('l').removeClass('labelPri');
+    $('.letra').addClass('labelE').removeClass('label-char'); // Pone las letras del label en rojo
+    // --- FIN: APLICAR ESTILOS DE ERROR ---
+
+    if (onValidationComplete) onValidationComplete(false); // Notifica que la validación falló
+};
+
+// Si la imagen es VÁLIDA
+image.onload = function() {
+    container0.innerHTML = '';
+    container0.appendChild(image);
+    $(".error1").hide();
+    error_imagen = false;
+
+    // --- INICIO: RESTAURAR ESTILOS NORMALES ---
+    $('#btnSeleccionarArchivo').removeClass('btn-danger').addClass('btn-primary'); // Devuelve el botón a su color original
+    $('#fileInput0').removeClass('errorBorder'); 
+    $('.bar1').addClass('bar');
+    $('.ic1').removeClass('l').addClass('labelPri');
+    $('.letra').removeClass('labelE').addClass('label-char'); // Devuelve las letras a su color normal
+    // --- FIN: RESTAURAR ESTILOS NORMALES ---
+
+    if (onValidationComplete) onValidationComplete(true); // Notifica que la validación fue exitosa
+};
+
+    reader.onload = function(e) {
+        image.src = e.target.result;
+    };
+
+    reader.readAsDataURL(file);
+}
+
+
 
   function validarPesoImagen0(input) {
-      if (input.files && input.files[0]) {
-          const imagen = input.files[0];
-          const pesoMb = imagen.size / 1024 / 1024;
-          if (pesoMb > 2) {
-              resetearImagen();
-              mostrarErrorImagen('La imagen excede el peso máximo de 2MB!');
-              input.value = "";
-              error_imagen = true;
-          } else {
-              limpiarErrorImagen();
-              error_imagen = false; // Reiniciar flag si es válida
-          }
-      }
-  }
+    if (input.files && input.files[0]) {
+        const imagen = input.files[0];
+        const pesoMb = imagen.size / 1024 / 1024;
+
+        if (pesoMb > 2) {
+            $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> La imagen excede el peso máximo de 2MB!');
+            $(".error1").show();
+            input.value = "";
+            error_imagen = true;
+            return false; // Devuelve 'falso' porque hubo un error
+        }
+    }
+    return true; // Devuelve 'verdadero' porque el peso es correcto
+}
+
 
   function chequeo_utensilio() {
       const chequeo = /^[a-zA-ZáéíóúÁÉÍÓÚäëïöüÄËÏÖÜàèìòùÀÈÌÒÙñÑ\s]{3,}$/;
@@ -342,7 +394,7 @@ $(document).ready(function() {
                       timer: 2500,
                       timerProgressBar: true,
                   });
-                  delete mostrarU;
+                  mostrarU = null;
                   tablaUtensilios();
                   primary();
               }
@@ -490,8 +542,10 @@ $(document).ready(function() {
   }
 
   // Event Listeners
-  fileInput0.addEventListener('change', chequeoImagen);
-  
+  fileInput0.addEventListener('change', function() {
+    chequeoImagen(); 
+});
+
   $("#tipoU").on('change', verificarTipoU);
   $("#utensilio").focusout(chequeo_utensilio);
   $("#utensilio").on('keyup', chequeo_utensilio);
@@ -519,15 +573,30 @@ $(document).ready(function() {
   });
   
   $("#editarIMG").on("click", function(e) {
-      e.preventDefault();
-      chequeoImagen();
-      if (!error_imagen) {
-          modificarImagen();
-          
-      } else {
-          mostrarErrorDatos();
-      }
-  });
+    e.preventDefault();
+
+    // Volvemos a llamar a la validación para estar 100% seguros
+    // y le decimos qué hacer cuando termine.
+    chequeoImagen(function(esValida) {
+        
+        // Este código solo se ejecuta DESPUÉS de que la validación termina.
+        if (esValida) {
+            // Si la imagen es válida, llamamos a la función que la envía al servidor.
+            modificarImagen(); 
+        } else {
+            // Si la imagen no es válida, mostramos una alerta.
+             Swal.fire({
+                toast: true,
+                position: 'top-end',
+                icon: 'error',
+                title: 'Por favor, selecciona una imagen válida.',
+                showConfirmButton: false,
+                timer: 3000,
+                timerProgressBar: true,
+            });
+        }
+    });
+});
   
   $(".editarI").on("click", function() {
       $('.editarImagen').show(900);

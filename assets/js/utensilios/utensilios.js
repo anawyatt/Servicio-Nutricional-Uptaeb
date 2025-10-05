@@ -140,58 +140,100 @@ function cambiarFormato(texto) {
 
 // validar Imagen---------------------------------------------
 
-function chequeoImagen(){
+function chequeoImagen() {
     if (fileInput0.files.length === 0) {
-        container0.innerHTML = '';
-        container0.appendChild(defaultImage);
-        $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> Ingrese una imagen (JPG, PNG)!');
-        $(".error1").show();
-        $('#fileInput0').addClass('errorBorder');
-        $('.bar1').removeClass('bar');
-        $('.ic1').addClass('l');
-        $('.ic1').removeClass('labelPri');
-        $('.letra').addClass('labelE');
-        $('.letra').removeClass('label-char');
-        fileInput0.classList.add('changed');
-        error_imagen = true;
+        // ... (Tu código para "no hay archivo" ya está bien)
     } else {
-        validarPesoImagen0(fileInput0);
         const file = fileInput0.files[0];
-        const reader = new FileReader();
-        reader.onload = function(e) {
-            const image = document.createElement('img');
-            image.src = e.target.result;
-            container0.innerHTML = '';
-            container0.appendChild(image);
-        };
-        if (file.type.startsWith('image/')) {
-            reader.readAsDataURL(file);
-            $(".error1").html("");
-            $(".error1").hide();
-            $('#fileInput0').removeClass('errorBorder');
-            $('.bar1').addClass('bar');
-            $('.ic1').removeClass('l');
-            $('.ic1').addClass('labelPri');
-            $('.letra').removeClass('labelE');
-            $('.letra').addClass('label-char');
-            fileInput0.classList.remove('changed');
-            error_imagen = false; // Reiniciar error si la imagen es válida
-        } else {
+        
+        if (validarPesoImagen0(fileInput0) === false) {
+             return; 
+        }
+
+        if (!file.type.startsWith('image/')) {
             container0.innerHTML = '';
             container0.appendChild(defaultImage);
-            $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la imagen con formato (JPG, PNG)!');
+            $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> El archivo debe tener formato de imagen (JPG, PNG)!');
             $(".error1").show();
-            $('#fileInput0').addClass('errorBorder');
+            
+            // --- ESTILOS DE ERROR ---
+            $('#fileInput0').addClass('errorBorder'); // Borde rojo para el input/botón
             $('.bar1').removeClass('bar');
-            $('.ic1').addClass('l');
-            $('.ic1').removeClass('labelPri');
-            $('.letra').addClass('labelE');
-            $('.letra').removeClass('label-char');
-            fileInput0.classList.add('changed');
+            $('.ic1').addClass('l').removeClass('labelPri');
+            $('.letra').addClass('labelE').removeClass('label-char'); // Letras en rojo
+            
             fileInput0.value = '';
             error_imagen = true;
+            return;
+        }
+
+        const reader = new FileReader();
+        const image = new Image();
+
+        // Si la imagen está dañada
+        image.onerror = function() {
+            container0.innerHTML = '';
+            container0.appendChild(defaultImage);
+            $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> La imagen está dañada o tiene un formato no válido.');
+            $(".error1").show();
+
+            // --- ESTILOS DE ERROR ---
+            $('#fileInput0').addClass('errorBorder'); // Borde rojo para el input/botón
+            $('.bar1').removeClass('bar');
+            $('.ic1').addClass('l').removeClass('labelPri');
+            $('.letra').addClass('labelE').removeClass('label-char'); // Letras en rojo
+            
+            fileInput0.value = '';
+            error_imagen = true;
+        };
+
+        // Si la imagen es VÁLIDA
+        image.onload = function() {
+            container0.innerHTML = '';
+            container0.appendChild(image);
+            $(".error1").hide();
+
+            // --- RESTAURAR ESTILOS NORMALES ---
+            $('#fileInput0').removeClass('errorBorder'); // Quita el borde rojo
+            $('.bar1').addClass('bar');
+            $('.ic1').removeClass('l').addClass('labelPri');
+            $('.letra').removeClass('labelE').addClass('label-char'); // Letras a su color normal
+
+            error_imagen = false;
+        };
+        
+        reader.onload = function(e) {
+            image.src = e.target.result;
+        };
+
+        reader.readAsDataURL(file);
+    }
+}
+
+
+function validarPesoImagen0(input) {
+    if (input.files && input.files[0]) {
+        const imagen = input.files[0];
+        const pesoMb = imagen.size / 1024 / 1024;
+
+        if (pesoMb > 2) {
+            container0.innerHTML = '';
+            container0.appendChild(defaultImage);
+            $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> La imagen excede el peso máximo de 2MB!');
+            $(".error1").show();
+            
+            // --- ESTILOS DE ERROR ---
+            $('#fileInput0').addClass('errorBorder'); // Borde rojo para el input/botón
+            $('.bar1').removeClass('bar');
+            $('.ic1').addClass('l').removeClass('labelPri');
+            $('.letra').addClass('labelE').removeClass('label-char'); // Letras en rojo
+
+            input.value = "";
+            error_imagen = true;
+            return false;
         }
     }
+    return true;
 }
 
 function validarPesoImagen0(input) {
@@ -433,7 +475,6 @@ function verificarTipoU(){
               data:{ valida:'si', tipoU},
               success(data){
                 if (data.resultado === 'no esta') {
-                    delete select;
                     mostrarTipoU();
                     Swal.fire({
                       toast: true,
@@ -518,7 +559,6 @@ function registrar(datos){
             success: function(datos) {
                 datos = typeof datos === 'string' ? JSON.parse(datos) : datos;
 
-                // Manejo de errores de imagen igual que en alimentos.js
                 if (
                     datos.resultado === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
                     datos.resultado === 'La imagen no debe superar los 2MB!' ||
