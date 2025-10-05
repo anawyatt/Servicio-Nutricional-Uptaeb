@@ -868,24 +868,23 @@ die();
 
 function menu($data){
     ob_end_clean(); // Limpiar el búfer de salida
-     $descripcion = $data['descripcion'];
+    $descripcion = $data['descripcion'];
 
     $this->SetTextColor(9,85,160);
     $this->SetFont('Helvetica', 'B', 20);
     // Título
-    $this->SetX(0); // Establecer posición X en 0
+    $this->SetX(0);
     $this->Cell(210, 10, utf8_decode('Menú - '.$descripcion[0]->horarioComida), 0, 0, 'C');
     $this->Ln(25);
 
-     // Datos de la descripcion
+    // Datos de la descripción
     $dateTime = new \DateTime($descripcion[0]->feMenu);
     $fechaFormateada = $dateTime->format('d-m-y');
 
-    // Datos de la descripción general en formato de párrafo
     $this->SetFont('Arial', 'B', 13);
     $this->SetTextColor(30,163,223);
     $this->Cell(17, 7, utf8_decode('Fecha: '), 0, 0, 'L');
-    
+
     $this->SetFont('Arial', '', 12);
     $this->SetTextColor(0);
     $this->Cell(50, 7, utf8_decode($fechaFormateada), 0, 1, 'L');
@@ -898,7 +897,7 @@ function menu($data){
     $this->SetTextColor(0);
     $this->Cell(55, 7, utf8_decode($descripcion[0]->horarioComida), 0, 1, 'L');
 
-     $this->SetFont('Arial', 'B', 13);
+    $this->SetFont('Arial', 'B', 13);
     $this->SetTextColor(30,163,223);
     $this->Cell(58, 7, utf8_decode('Cantidad de Comensales: '), 0, 0, 'L');
 
@@ -915,8 +914,6 @@ function menu($data){
     $this->Cell(0, 8, utf8_decode($descripcion[0]->descripcion), 0, 1, 'L'); 
 
     $this->Ln(5);
-    
-    
 
     $alimento = $data['detalle'];
     $alimentoI = '';
@@ -937,36 +934,62 @@ function menu($data){
             $this->SetLineWidth(.2);
             $this->SetFont('', 'B', 12);
 
-            $this->Cell(40, 6, utf8_decode('Código'), 1, 0, 'L', true);
-            $this->Cell(55, 6, 'Alimento', 1, 0, 'L', true);
-            $this->Cell(55, 6, 'Marca', 1, 0, 'L', true);
-            $this->Cell(40, 6, 'Cantidad', 1, 1, 'L', true);
+            // Encabezado de tabla
+            $this->Cell(30, 6, utf8_decode('Código'), 1, 0, 'L', true);
+            $this->Cell(90, 6, 'Alimento', 1, 0, 'L', true);
+            $this->Cell(40, 6, 'Marca', 1, 0, 'L', true);
+            $this->Cell(30, 6, 'Cantidad', 1, 1, 'L', true);
 
             $this->SetFillColor(255, 255, 255);
             $this->SetDrawColor(30,163,223);
             $this->SetTextColor(0);
             $this->SetFont('');
 
+            // Filas con MultiCell para Alimento
             foreach ($alimento as $detalle) {
-    if ($alimentoI == $detalle->tipo) {
-        $this->Cell(40, 8, utf8_decode($detalle->codigo), 1, 0, 'L');
+                if ($alimentoI == $detalle->tipo) {
 
-        // Concatenar nombre y unidad solo si no es "Sin Marca"
-        $nombreAlimento = ($detalle->marca != 'Sin Marca') 
-            ? $detalle->nombre . ' - ' . $detalle->unidadMedida 
-            : $detalle->nombre;
-        $this->Cell(55, 8, utf8_decode($nombreAlimento), 1, 0, 'L');
+                    $nombreAlimento = ($detalle->marca != 'Sin Marca') 
+                        ? $detalle->nombre . ' - ' . $detalle->unidadMedida 
+                        : $detalle->nombre;
 
-        $this->Cell(55, 8, utf8_decode($detalle->marca), 1, 0, 'L');
+                    $cantidad = ($detalle->marca != 'Sin Marca') 
+                        ? $detalle->cantidad . ' U.' 
+                        : $detalle->cantidad . ' ' . $detalle->unidadMedida;
 
-        // Concatenar cantidad con "Unidad" solo si no es "Sin Marca"
-        $cantidad = ($detalle->marca != 'Sin Marca') 
-            ? $detalle->cantidad . ' U.' 
-            : $detalle->cantidad . ' ' . $detalle->unidadMedida;
-        $this->Cell(40, 8, utf8_decode($cantidad), 1, 1, 'L');
-    }
-}
+                    // Anchos iguales a los encabezados
+                    $wCodigo   = 30;
+                    $wAlimento = 90;
+                    $wMarca    = 40;
+                    $wCantidad = 30;
 
+                    $x = $this->GetX();
+                    $y = $this->GetY();
+
+                    // Código
+                    $this->MultiCell($wCodigo, 8, utf8_decode($detalle->codigo), 1, 'L');
+                    $hCodigo = $this->GetY() - $y;
+
+                    // Alimento
+                    $this->SetXY($x + $wCodigo, $y);
+                    $this->MultiCell($wAlimento, 8, utf8_decode($nombreAlimento), 1, 'L');
+                    $hAlimento = $this->GetY() - $y;
+
+                    // Marca
+                    $this->SetXY($x + $wCodigo + $wAlimento, $y);
+                    $this->MultiCell($wMarca, 8, utf8_decode($detalle->marca), 1, 'L');
+                    $hMarca = $this->GetY() - $y;
+
+                    // Cantidad
+                    $this->SetXY($x + $wCodigo + $wAlimento + $wMarca, $y);
+                    $this->MultiCell($wCantidad, 8, utf8_decode($cantidad), 1, 'L');
+                    $hCantidad = $this->GetY() - $y;
+
+                    // Saltar a la siguiente fila
+                    $maxAltura = max($hCodigo, $hAlimento, $hMarca, $hCantidad);
+                    $this->SetXY($x, $y + $maxAltura);
+                }
+            }
         }
         $this->Ln(6);
     }
@@ -978,6 +1001,8 @@ function menu($data){
     echo json_encode($respuesta);
     die();
 }
+
+
 
 //----------------- EVENTO ------------------------
 
