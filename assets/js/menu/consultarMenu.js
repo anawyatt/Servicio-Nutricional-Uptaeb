@@ -1204,30 +1204,35 @@ function validarCheck() {
 }
 
 function chequeo_fecha() {
-const fecha = Date.parse($("#feMenu").val());
-  Date.parse($("#feMenu").val());
-  const hoy = Date.now();
-      if (fecha !== '' &&  fecha >= hoy){
-          $(".error6").html("");
-          $(".error6").hide();
-          $('#feMenu').removeClass('errorBorder');
-          $('.bar6').addClass('bar');
-          $('.ic6').removeClass('l');
-          $('.ic6').addClass('labelPri');
-          $('.letra6').removeClass('labelE');
-          $('.letra6').addClass('label-char');
-      } else {
-         $(".error6").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la Fecha, No debe ser menor a la fecha de hoy!');
-         $(".error6").show();
-         $('#feMenu').addClass('errorBorder');
-         $('.bar6').removeClass('bar');
-         $('.ic6').addClass('l');
-         $('.ic6').removeClass('labelPri');
-         $('.letra6').addClass('labelE');
-         $('.letra6').removeClass('label-char');
-         error_fecha = true;
-      }
+    const fecha = Date.parse($("#feMenu").val());
+    const hoy = new Date();
+    hoy.setHours(0,0,0,0); // ignorar horas
+
+    if (!isNaN(fecha) && fecha >= hoy) {
+        $(".error6").html("");
+        $(".error6").hide();
+        $('#feMenu').removeClass('errorBorder');
+        $('.bar6').addClass('bar');
+        $('.ic6').removeClass('l');
+        $('.ic6').addClass('labelPri');
+        $('.letra6').removeClass('labelE');
+        $('.letra6').addClass('label-char');
+        error_fecha = false;
+    } else {
+        $(".error6").html('<i class="bi bi-exclamation-triangle-fill"></i> Ingrese la Fecha, No debe ser menor a la fecha de hoy!');
+        $(".error6").show();
+        $('#feMenu').addClass('errorBorder');
+        $('.bar6').removeClass('bar');
+        $('.ic6').addClass('l');
+        $('.ic6').removeClass('labelPri');
+        $('.letra6').addClass('labelE');
+        $('.letra6').removeClass('label-char');
+        error_fecha = true;
+    }
 }
+
+$("#feMenu").on("change", chequeo_fecha);
+
 
 function chequeo_cantidadE() {
 const chequeo = /^[1-9]\d*$/;

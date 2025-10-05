@@ -965,7 +965,6 @@ function modificar() {
                     actualizarDetalle();  
                     $('[name="csrf_token"]').val(response.newCsrfToken); 
                     $('#cerrar2').click();
-                    delete mostrarE;
                     tablaEvento(); 
                     vaciarTabla();
                     Swal.fire({
@@ -1194,20 +1193,22 @@ console.error('Error al obtener la cantidad disponible:', error);
 }
 
 function chequeo_fecha() {
-  const fecha = Date.parse($("#feMenu").val());
-  Date.parse($("#feMenu").val());
-  const hoy = Date.now();
-     if (fecha !== '' &&  fecha >= hoy){
-         $(".error5").html("");
-         $(".error5").hide();
-         $('#feMenu').removeClass('errorBorder');
-         $('.bar5').addClass('bar');
-         $('.ic5').removeClass('l');
-         $('.ic5').addClass('labelPri');
-         $('.letra5').removeClass('labelE');
-         $('.letra5').addClass('label-char');
-     } else {
-        $(".error5").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la Fecha, No debe ser menor a la fecha de hoy!');
+    const fecha = Date.parse($("#feMenu").val());
+    const hoy = new Date();
+    hoy.setHours(0,0,0,0); 
+
+    if (!isNaN(fecha) && fecha >= hoy) {
+        $(".error5").html("");
+        $(".error5").hide();
+        $('#feMenu').removeClass('errorBorder');
+        $('.bar5').addClass('bar');
+        $('.ic5').removeClass('l');
+        $('.ic5').addClass('labelPri');
+        $('.letra5').removeClass('labelE');
+        $('.letra5').addClass('label-char');
+        error_fecha = false;
+    } else {
+        $(".error5").html('<i class="bi bi-exclamation-triangle-fill"></i> Ingrese la Fecha, No debe ser menor a la fecha de hoy!');
         $(".error5").show();
         $('#feMenu').addClass('errorBorder');
         $('.bar5').removeClass('bar');
@@ -1216,8 +1217,10 @@ function chequeo_fecha() {
         $('.letra5').addClass('labelE');
         $('.letra5').removeClass('label-char');
         error_fecha = true;
-     }
+    }
 }
+
+$("#feMenu").on("change", chequeo_fecha);
 
 function chequeo_cantidadE() {
     const chequeo = /^[1-9]\d*$/;
@@ -1366,7 +1369,6 @@ error_descripcion = true;
                  data:{ valida:'si', tipoA},
                  success(data){
                    if (data.resultado === 'no esta') {
-                      delete select;
                        mostrarTipoA();
                        Swal.fire({
                          toast: true,
@@ -1402,7 +1404,6 @@ error_descripcion = true;
                  data:{ valida2:'si', alimento},
                  success(data){
                    if (data.resultado === 'no esta') {
-                      delete select;
                        mostrarTipoA();
                        Swal.fire({
                          toast: true,
@@ -1838,7 +1839,6 @@ function valAnulacion(idd){
      success: function(data) {
       if (data.resultado === 'ya no existe') {
         $('#cerrar3').click();
-         delete mostrarE;
          tablaEvento();
          Swal.fire({
                 toast: true,
