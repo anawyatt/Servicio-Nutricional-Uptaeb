@@ -48,11 +48,12 @@ if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_P
 
 if (isset($_POST['tipoS'])) {
   $validar = $objeto->verificarTipoSalida($_POST['tipoS']);
-    if ($validar['resultado'] !== 'ok') {
+    if ($validar['resultado'] === 'error tipo') {
         echo json_encode($validar);
         die();
     }
 }
+
 
 if (isset($_POST['registrar']) && isset($_POST['tipoS']) && $datosPermisos['permiso']['registrar']) {
   PostRateMiddleware::verificar('registrar', (array)$payload);
