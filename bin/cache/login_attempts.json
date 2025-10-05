@@ -1,1 +1,8 @@
-[]
+{
+    "b66c2e252fcda801bdfb92977446cf5a2b9c517d4bc503ff49c8209ba8c0f047": {
+        "intentos": 1,
+        "bloqueado_hasta": null,
+        "primer_intento": 1759676756,
+        "hash_info": "b66c2e25"
+    }
+}
