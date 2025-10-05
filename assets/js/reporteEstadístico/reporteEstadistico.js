@@ -50,6 +50,7 @@ function verificarEA(){
         $('.graf, .MEcard, .Acard, .Ucard, #sel0, #graf1, #graf2, #graf3, #graf4, #graf5, #graf6, #botonB').hide(1000)
         $('.cardi, .AEcard, .grafis').show(1200);
         $('#fil').addClass('d-none');
+        $('#cbx').prop('checked', false);
         $('#asisEstu, #selectFecha').val('Seleccionar').trigger('change.select2');
       }
       }
@@ -63,7 +64,7 @@ function verificarME(){
     dataType: "json",
     data:{ verificarME:true},
     success(data){
-      if (data.resultado === 'no existe menu' && data.resultado === 'no existe evento') {
+      if (data.respuesta.resultado === 'no existe menu' && data.respuesta2.resultado === 'no existe evento') {
         $('.cardi, .grafis, .AEcard,.MEcard, .Acard, .Ucard, .graf').hide(1000)
           Swal.fire({
             toast: true,
@@ -75,16 +76,15 @@ function verificarME(){
             timerProgressBar:3000,
           })
       }
-      else if (data.resultado === 'existe menu' || data.resultado === 'existe evento'){
+      else if (data.respuesta.resultado === 'existe menu' || data.respuesta2.resultado === 'existe evento'){
         $('.graf, .AEcard, .Acard, .Ucard, #sel0, #graf1, #graf2, #graf3, #graf4, #graf5, #graf6, #botonB').hide(1000);
         $('.cardi, .MEcard,.grafis').show(1200);
         $('#fil').addClass('d-none');
+        $('#cbx').prop('checked', false);
         $('#menuEvent, #selectFecha').val('Seleccionar').trigger('change.select2');
         
         }
       }
-      
-      
     })
 }
 
@@ -95,7 +95,7 @@ function verificarIA(){
     dataType: "json",
     data:{ verificarIA:true},
     success(data){
-      if (data.resultado === 'no existe entrada') {
+      if (data.respuesta.resultado === 'no existe entrada') {
         $('.cardi, .grafis, .AEcard,.MEcard, .Acard, .Ucard, .graf').hide(1000);
           Swal.fire({
             toast: true,
@@ -107,10 +107,11 @@ function verificarIA(){
             timerProgressBar:3000,
           })
       }
-      else if (data.resultado === 'existe entrada' || data.resultado === 'existe salida' ){
+      else if (data.respuesta.resultado === 'existe entrada' || data.respuesta2.resultado === 'existe salida' ){
         $('.graf, .MEcard, .AEcard, .Ucard, #sel0, #graf1, #graf2, #graf3, #graf4, #graf5, #graf6, #botonB').hide(1000)
         $('.cardi, .Acard, .grafis').show(1200)
         $('#fil').addClass('d-none');
+        $('#cbx').prop('checked', false);
         $('#alimento, #selectFecha').val('Seleccionar').trigger('change.select2');
       }
       }
@@ -124,7 +125,7 @@ function verificarIU(){
     dataType: "json",
     data:{ verificarIU:true},
     success(data){
-      if (data.resultado === 'no existe entrada') {
+      if (data.respuesta.resultado === 'no existe entrada') {
         $('.cardi, .grafis, .AEcard,.MEcard, .Acard, .Ucard, .graf').hide(1000);
           Swal.fire({
             toast: true,
@@ -136,15 +137,33 @@ function verificarIU(){
             timerProgressBar:3000,
           })
       }
-      else if (data.resultado === 'existe entrada' || data.resultado === 'existe salida' ){
+      else if (data.respuesta.resultado === 'existe entrada' || data.respuesta2.resultado === 'existe salida' ){
         $('.graf, .MEcard, .Acard, .AEcard, #sel0, #graf1, #graf2, #graf3, #graf4, #graf5, #graf6, #botonB').hide(1000)
         $('.cardi, .Ucard, .grafis').show(1200)
         $('#fil').addClass('d-none');
+        $('#cbx').prop('checked', false);
         $('#utensilio, #selectFecha').val('Seleccionar').trigger('change.select2');
       }
       }
     })
 }
+
+// Validar grafos
+
+if ($('#grafos').hasClass('grafis')) {
+  $('#grafico1, #grafico2, #grafico3, #grafico4, #grafico5, #grafico6').on('click', function() {
+    Swal.fire({
+      toast: true,
+      position: 'top-end',
+      icon: 'error',
+      title: '¡Selecciona el tipo de reporte!',
+      showConfirmButton: false,
+      timer: 2500,
+      timerProgressBar: true,
+    });
+  });
+}
+
 
 //--------------------- Agregar el select 2 -----------------------------------------
 
@@ -229,6 +248,9 @@ $('#asisEstu').on('change', function() {
     $('#fil').addClass('d-none');
     $('#grafos').removeClass('grafos');
     $('#grafos').addClass('grafis');
+    $('#sel0, #botonB').hide(0);
+    $('#selectFecha').val('Seleccionar').trigger('change.select2');
+    
   }
 
 })
@@ -261,6 +283,8 @@ $('#menuEvent').on('change', function() {
     $('#grafos').addClass('grafis');
    $('.graf').hide(1000)
     $('#fil').addClass('d-none');
+    $('#cbx').prop('checked', false);
+    $('#sel0, #botonB').hide(0);
    }
 })
 
@@ -290,6 +314,8 @@ $('#alimento').on('change', function() {
     $('#fil').addClass('d-none');
     $('#grafos').removeClass('grafos');
     $('#grafos').addClass('grafis');
+    $('#sel0, #botonB').hide(0);
+    $('#cbx').prop('checked', false);
     
   }
 
@@ -315,6 +341,8 @@ $('#utensilio').on('change', function() {
     $('#fil').addClass('d-none');
     $('#grafos').removeClass('grafos');
     $('#grafos').addClass('grafis');
+    $('#sel0, #botonB').hide(0);
+    $('#cbx').prop('checked', false);
   }
 
 });
@@ -680,6 +708,7 @@ function mostrarFechasAsistencias(){
                  $('#grafos').removeClass('grafos');
                  $('#grafos').addClass('grafis');
                  $('#fil').addClass('d-none');
+                 $('#cbx').prop('checked', false);
                  $('#sel0, #botonB').hide(0);
                  Swal.fire({
                    toast: true,
@@ -772,6 +801,7 @@ function mostrarFechasAsistencias(){
                 $('#grafos').addClass('grafis');
                 $('#fil').addClass('d-none');
                 $('#sel0, #botonB').hide(0);
+                $('#cbx').prop('checked', false);
               Swal.fire({
                toast: true,
                position: 'top-end',
@@ -862,6 +892,7 @@ function mostrarFechasAsistencias(){
                    $('#grafos').addClass('grafis');
                    $('#fil').addClass('d-none');
                    $('#sel0, #botonB').hide(0);
+                   $('#cbx').prop('checked', false);
                     Swal.fire({
                toast: true,
                position: 'top-end',
@@ -952,6 +983,7 @@ function mostrarFechasAsistencias(){
                    $('#grafos').addClass('grafis');
                    $('#fil').addClass('d-none');
                    $('#sel0, #botonB').hide(0);
+                   $('#cbx').prop('checked', false);
                     Swal.fire({
                toast: true,
                position: 'top-end',
@@ -997,7 +1029,7 @@ function mostrarFechasAsistencias(){
                     if ($('#grafos').hasClass('grafos')) {
                     $('.graf, #graf1').show(1500)
                     $('#graf2, #graf3, #graf4, #graf5, #graf6').hide(1000)
-                    graficoBarra(' ','N° de Asistencias', cantidad, '','#graf1')
+                    graficoBarra('Asistencias ','N° de Asistencias', cantidad, '','#graf1')
                     }
                   })
                   $('#grafico2').on('click', function() { 
@@ -1041,6 +1073,7 @@ function mostrarFechasAsistencias(){
                    $('#grafos').addClass('grafis');
                    $('#fil').addClass('d-none');
                    $('#sel0, #botonB').hide(0);
+                   $('#cbx').prop('checked', false);
                     Swal.fire({
                toast: true,
                position: 'top-end',
@@ -1134,6 +1167,8 @@ function menus(){
                    $('#grafos').addClass('grafis');
                    $('#fil').addClass('d-none');
                    $('#sel0, #botonB').hide(0);
+                   $('#cbx').prop('checked', false);
+
                   Swal.fire({
              toast: true,
              position: 'top-end',
@@ -1224,6 +1259,7 @@ function eventos(){
                    $('#grafos').addClass('grafis');
                    $('#fil').addClass('d-none');
                    $('#sel0, #botonB').hide(0);
+                   $('#cbx').prop('checked', false);
                   Swal.fire({
              toast: true,
              position: 'top-end',
@@ -1314,6 +1350,7 @@ function cantidadMenuActivos(){
                  $('#grafos').addClass('grafis');
                  $('#fil').addClass('d-none');
                  $('#sel0, #botonB').hide(0);
+                 $('#cbx').prop('checked', false);
             Swal.fire({
              toast: true,
              position: 'top-end',
@@ -1404,6 +1441,7 @@ function alimentosMasUtilizados(){
                  $('#grafos').addClass('grafis');
                  $('#fil').addClass('d-none');
                  $('#sel0, #botonB').hide(0);
+                 $('#cbx').prop('checked', false);
                   Swal.fire({
              toast: true,
              position: 'top-end',
@@ -1494,6 +1532,8 @@ function eventosConMayorAlimentos(){
                    $('#grafos').addClass('grafis');
                    $('#fil').addClass('d-none');
                    $('#sel0, #botonB').hide(0);
+                   $('#cbx').prop('checked', false);
+
           Swal.fire({
              toast: true,
              position: 'top-end',
@@ -1588,6 +1628,8 @@ function entradaAlimentos(){
                  $('#grafos').removeClass('grafos');
                    $('#grafos').addClass('grafis');
                 $('#fil').addClass('d-none');
+                $('#cbx').prop('checked', false);
+                  $('#sel0, #botonB').hide(0);
                   Swal.fire({
              toast: true,
              position: 'top-end',
@@ -1678,6 +1720,8 @@ function alimentosMasIngresados(){
                  $('#grafos').removeClass('grafos');
                    $('#grafos').addClass('grafis');
                 $('#fil').addClass('d-none');
+                $('#cbx').prop('checked', false);
+
             Swal.fire({
              toast: true,
              position: 'top-end',
@@ -1767,11 +1811,13 @@ function salidaAlimentosMenu(){
                  $('#grafos').removeClass('grafos');
                    $('#grafos').addClass('grafis');
                 $('#fil').addClass('d-none');
+                $('#cbx').prop('checked', false);
+
                  Swal.fire({
              toast: true,
              position: 'top-end',
              icon:'error',
-             title:'No hay <b class="text-rojo fw-bold"> Alimentos</b> registrados!',
+             title:'No hay <b class="text-rojo fw-bold"> Alimentos</b> por menú registrados!',
              showConfirmButton:false,
              timer:2500,
              timerProgressBar:true,
@@ -1856,11 +1902,13 @@ function salidaAlimentosMerma(){
                  $('#grafos').removeClass('grafos');
                    $('#grafos').addClass('grafis');
                 $('#fil').addClass('d-none');
+                $('#cbx').prop('checked', false);
+
             Swal.fire({
              toast: true,
              position: 'top-end',
              icon:'error',
-             title:'No hay <b class="text-rojo fw-bold"> Alimentos</b> registrados!',
+             title:'No hay <b class="text-rojo fw-bold"> Alimentos</b> registrados por esa categoría!',
              showConfirmButton:false,
              timer:2500,
              timerProgressBar:true,
@@ -1947,6 +1995,7 @@ function entradaUtensilios(){
                  $('#grafos').removeClass('grafos');
                    $('#grafos').addClass('grafis');
                 $('#fil').addClass('d-none');
+                $('#cbx').prop('checked', false);
                  Swal.fire({
              toast: true,
              position: 'top-end',
@@ -2036,6 +2085,7 @@ function utensiliosMasIngresados(){
                  $('#grafos').removeClass('grafos');
                    $('#grafos').addClass('grafis');
                 $('#fil').addClass('d-none');
+                $('#cbx').prop('checked', false);
                  Swal.fire({
              toast: true,
              position: 'top-end',
@@ -2125,6 +2175,7 @@ function salidaUtensilios(){
                  $('#grafos').removeClass('grafos');
                    $('#grafos').addClass('grafis');
                 $('#fil').addClass('d-none');
+                $('#cbx').prop('checked', false);
                  Swal.fire({
              toast: true,
              position: 'top-end',

@@ -27,13 +27,11 @@ class reporteEstadisticoModelo extends connectDB{
         $this->desconectarDB();
        
        if (isset( $data[0]["idAsistencia"])) {
-          $mensaje = ['resultado' => 'existe'];
+          return ['resultado' => 'existe'];
         }
         else{
-          $mensaje = ['resultado' => 'no existe'];
+          return ['resultado' => 'no existe'];
         }
-        echo json_encode($mensaje);
-          die();
 
     }catch(\PDOException $e){
         return $e;
@@ -50,13 +48,11 @@ class reporteEstadisticoModelo extends connectDB{
         $this->desconectarDB();
        
        if (isset( $data[0]["idMenu"])) {
-          $mensaje = ['resultado' => 'existe menu'];
+        return ['resultado' => 'existe menu'];
         }
         else{
-          $mensaje = ['resultado' => 'no existe menu'];
+        return ['resultado' => 'no existe menu'];
         }
-        echo json_encode($mensaje);
-          die();
     }catch(\PDOException $e){
         return $e;
      }
@@ -72,13 +68,12 @@ class reporteEstadisticoModelo extends connectDB{
         $this->desconectarDB();
        
        if (isset( $data[0]["idEvento"])) {
-          $mensaje = ['resultado' => 'existe evento'];
+         return ['resultado' => 'existe evento'];
         }
         else{
-          $mensaje = ['resultado' => 'no existe evento'];
+         return ['resultado' => 'no existe evento'];
         }
-        echo json_encode($mensaje);
-          die();
+        
     }catch(\PDOException $e){
         return $e;
      }
@@ -95,13 +90,12 @@ class reporteEstadisticoModelo extends connectDB{
         $this->desconectarDB();
        
        if (isset( $data[0]["idEntradaA"])) {
-          $mensaje = ['resultado' => 'existe entrada'];
+          return ['resultado' => 'existe entrada'];
         }
         else{
-          $mensaje = ['resultado' => 'no existe entrada'];
+          return ['resultado' => 'no existe entrada'];
         }
-        echo json_encode($mensaje);
-          die();
+       
     }catch(\PDOException $e){
         return $e;
      }
@@ -117,13 +111,11 @@ class reporteEstadisticoModelo extends connectDB{
         $this->desconectarDB();
        
         if (isset( $data[0]["idSalidaA"])) {
-          $mensaje = ['resultado' => 'existe salida'];
+        return ['resultado' => 'existe salida'];
         }
         else{
-          $mensaje = ['resultado' => 'no existe salida'];
+          return ['resultado' => 'no existe salida'];
         }
-        echo json_encode($mensaje);
-          die();
     }catch(\PDOException $e){
         return $e;
      }
@@ -139,13 +131,12 @@ class reporteEstadisticoModelo extends connectDB{
         $this->desconectarDB();
        
        if (isset( $data[0]["idEntradaU"])) {
-          $mensaje = ['resultado' => 'existe entrada'];
+        return ['resultado' => 'existe entrada'];
         }
         else{
-          $mensaje = ['resultado' => 'no existe entrada'];
+        return ['resultado' => 'no existe entrada'];
         }
-        echo json_encode($mensaje);
-          die();
+       
     }catch(\PDOException $e){
         return $e;
      }
@@ -161,13 +152,11 @@ class reporteEstadisticoModelo extends connectDB{
         $this->desconectarDB();
        
         if (isset( $data[0]["idSalidaU"])) {
-          $mensaje = ['resultado' => 'existe salida'];
+          return ['resultado' => 'existe salida'];
         }
         else{
-          $mensaje = ['resultado' => 'no existe salida'];
+          return ['resultado' => 'no existe salida'];
         }
-        echo json_encode($mensaje);
-          die();
     }catch(\PDOException $e){
         return $e;
      }
@@ -183,9 +172,8 @@ class reporteEstadisticoModelo extends connectDB{
             $mostrar = $this->conex->prepare("SELECT DISTINCT fecha FROM asistencia  WHERE status = 1 ORDER BY fecha DESC ");
             $mostrar->execute();
             $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
-            echo json_encode($data);
             $this->desconectarDB();
-            die();
+            return $data;
 
         }catch(\PDOException $e){
             return $e;
@@ -198,10 +186,9 @@ class reporteEstadisticoModelo extends connectDB{
           $mostrar = $this->conex->prepare("SELECT DISTINCT a.fecha FROM asistencia a INNER JOIN estudiante e ON a.cedEstudiante= e.cedEstudiante INNER JOIN excepcion ex ON e.cedEstudiante ex.cedEstudiante WHERE a.status=1 and ex.status=1 and a.fecha = ex.fecha ORDER BY a.fecha DESC");
           $mostrar->execute();
           $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
-          echo json_encode($data);
           $this->desconectarDB();
-          die();
-
+          return $data;
+          
       }catch(\PDOException $e){
           return $e;
        }
@@ -213,9 +200,8 @@ class reporteEstadisticoModelo extends connectDB{
             $mostrar = $this->conex->prepare("SELECT DISTINCT feMenu FROM menu  WHERE status = 1 ORDER BY feMenu DESC ");
             $mostrar->execute();
             $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
-            echo json_encode($data);
             $this->desconectarDB();
-            die();
+            return $data;
 
         }catch(\PDOException $e){
             return $e;
@@ -228,9 +214,8 @@ class reporteEstadisticoModelo extends connectDB{
           $mostrar = $this->conex->prepare("SELECT DISTINCT m.feMenu FROM menu m INNER JOIN evento e on m.idMenu = e.idMenu WHERE e.status = 1 ORDER BY feMenu DESC; ");
           $mostrar->execute();
           $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
-          echo json_encode($data);
           $this->desconectarDB();
-          die();
+          return $data;
 
       }catch(\PDOException $e){
           return $e;
@@ -244,8 +229,8 @@ class reporteEstadisticoModelo extends connectDB{
             $mostrar = $this->conex->prepare("SELECT DISTINCT fecha FROM entradaalimento WHERE status = 1 and fecha != '0000-00-00' ORDER BY fecha DESC; ");
             $mostrar->execute();
             $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
-            echo json_encode($data);
-            die();
+            $this->desconectarDB();
+            return $data;
 
         }catch(\PDOException $e){
             return $e;
@@ -259,8 +244,8 @@ class reporteEstadisticoModelo extends connectDB{
           $mostrar = $this->conex->prepare("SELECT DISTINCT fecha FROM salidaalimentos WHERE status = 1 and fecha != '0000-00-00' ORDER BY fecha DESC; ");
           $mostrar->execute();
           $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
-          echo json_encode($data);
-          die();
+          $this->desconectarDB();
+          return $data;
 
       }catch(\PDOException $e){
           return $e;
@@ -274,9 +259,8 @@ class reporteEstadisticoModelo extends connectDB{
             $mostrar = $this->conex->prepare("SELECT DISTINCT fecha FROM entradau WHERE status = 1 and fecha != '0000-00-00'  ORDER BY fecha DESC; ");
             $mostrar->execute();
             $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
-            echo json_encode($data);
             $this->desconectarDB();
-            die();
+            return $data;
 
         }catch(\PDOException $e){
             return $e;
@@ -289,9 +273,8 @@ class reporteEstadisticoModelo extends connectDB{
           $mostrar = $this->conex->prepare("SELECT DISTINCT fecha FROM salidautensilios WHERE status = 1 and fecha != '0000-00-00' ORDER BY fecha DESC; ");
           $mostrar->execute();
           $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
-          echo json_encode($data);
           $this->desconectarDB();
-          die();
+          return $data;
 
       }catch(\PDOException $e){
           return $e;
@@ -305,7 +288,7 @@ class reporteEstadisticoModelo extends connectDB{
   
   //------------- ASISTENCIAS Y ESTUDIANTES -------------------
 
-public function asistenciasEstudiantes( $fecha, $returnData = false){
+public function asistenciasEstudiantes( $fecha){
   $this->fecha=$fecha;
 
   try {
@@ -325,19 +308,15 @@ public function asistenciasEstudiantes( $fecha, $returnData = false){
        $bitacora = new bitacoraModelo;
        $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total de asistencias por horario de Menu', $this->payload->cedula);
        $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            }
+           
+       return $data;
+          
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function asistenciasPorSexo( $fecha, $returnData = false){
+public function asistenciasPorSexo( $fecha){
   $this->fecha=$fecha;
 
   try {
@@ -358,19 +337,14 @@ public function asistenciasPorSexo( $fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total de asistencias por Sexo', $this->payload->cedula);
      
        $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
+  
               return $data;
-            } 
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function asistenciasPorNucleo( $fecha, $returnData = false){
+public function asistenciasPorNucleo( $fecha){
   $this->fecha=$fecha;
 
   try {
@@ -391,19 +365,14 @@ public function asistenciasPorNucleo( $fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total de asistencias por Núcleo', $this->payload->cedula);
     
        $this->desconectarDB();
-       if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
               return $data;
-            }; 
+            
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function asistenciasPorPNF( $fecha, $returnData = false){
+public function asistenciasPorPNF( $fecha){
   $this->fecha=$fecha;
 
   try {
@@ -425,19 +394,15 @@ public function asistenciasPorPNF( $fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total de asistencias por PNF', $this->payload->cedula);
          
           $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
+           
               return $data;
-            }
+            
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function asistenciasPorJustificativo($fecha, $returnData = false){
+public function asistenciasPorJustificativo($fecha){
 
     $this->fecha=$fecha;
 
@@ -455,13 +420,9 @@ public function asistenciasPorJustificativo($fecha, $returnData = false){
        $bitacora = new bitacoraModelo;
        $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total de asistencias por Justificativo', $this->payload->cedula);
        $this->desconectarDB();
-      if ($returnData === false) {
-              echo json_encode($data);
-              die();
-      }
-     else{
-      return $data;
-      }
+            
+                return $data;
+
    } catch (\PDOException $e) {
        return $e;
    }
@@ -469,7 +430,7 @@ public function asistenciasPorJustificativo($fecha, $returnData = false){
 
   //------------------- MENUS Y EVENTOS -------------------
 
-public function menus($fecha, $returnData = false){
+public function menus($fecha){
   $this->fecha=$fecha;
 
   try {
@@ -492,19 +453,13 @@ public function menus($fecha, $returnData = false){
 
        
        $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            } 
+            return $data;
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function eventos($fecha, $returnData = false){
+public function eventos($fecha){
   $this->fecha=$fecha;
 
   try {
@@ -525,19 +480,13 @@ public function eventos($fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total de eventos por horario de Menu', $this->payload->cedula);
       
        $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            }
+            return $data;
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function cantidadMenuActivos($fecha, $returnData = false){
+public function cantidadMenuActivos($fecha){
   $this->fecha=$fecha;
 
   try {
@@ -557,31 +506,25 @@ public function cantidadMenuActivos($fecha, $returnData = false){
        $bitacora = new bitacoraModelo;
        $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total de Menus Activos', $this->payload->cedula);
        $this->desconectarDB();
-             if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            } 
+             return $data;
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function alimentosMasUtilizados($fecha, $returnData = false){
+public function alimentosMasUtilizados($fecha){
   $this->fecha=$fecha;
 
   try {
     $this->conectarDB();
     if ($this->fecha !='Seleccionar') {
-       $grafico = $this->conex->prepare("SELECT a.nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / total.total_count), 2) AS porcentaje FROM alimento a JOIN detalleSalidaMenu dsm ON a.idAlimento = dsm.idAlimento INNER JOIN salidaAlimentos sa ON dsm.idSalidaA = sa.idSalidaA INNER JOIN ( SELECT COUNT(*) AS total_count FROM detalleSalidaMenu dsm INNER JOIN salidaAlimentos sa ON dsm.idSalidaA = sa.idSalidaA WHERE sa.fecha = ? ) AS total ON 1=1 WHERE sa.fecha = ? GROUP BY a.nombre ORDER BY cantidad DESC LIMIT 5;");
+       $grafico = $this->conex->prepare("SELECT a.nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / total.total_count), 2) AS porcentaje FROM alimento a JOIN detalleSalidaMenu dsm ON a.idAlimento = dsm.idAlimento INNER JOIN salidaAlimentos sa ON dsm.idSalidaA = sa.idSalidaA INNER JOIN ( SELECT COUNT(*) AS total_count FROM detalleSalidaMenu dsm INNER JOIN salidaAlimentos sa ON dsm.idSalidaA = sa.idSalidaA WHERE sa.fecha = ? ) AS total ON 1=1 WHERE sa.fecha = ? GROUP BY a.nombre ORDER BY cantidad DESC LIMIT 10;");
        $grafico->bindValue(1, $this->fecha);
        $grafico->bindValue(2, $this->fecha);
        $grafico->execute();
     }
     else{
-       $grafico = $this->conex->prepare("SELECT a.nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM detalleSalidaMenu)), 2) AS porcentaje FROM alimento a JOIN detalleSalidaMenu dsm ON a.idAlimento = dsm.idAlimento GROUP BY a.nombre HAVING COUNT(*) > 0;");
+       $grafico = $this->conex->prepare("SELECT a.nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM detalleSalidaMenu)), 2) AS porcentaje FROM alimento a JOIN detalleSalidaMenu dsm ON a.idAlimento = dsm.idAlimento GROUP BY a.nombre ORDER BY cantidad DESC LIMIT 10;");
        $grafico->execute();
      }    
 
@@ -590,19 +533,13 @@ public function alimentosMasUtilizados($fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó los alimentos mas utilizados en los menus', $this->payload->cedula);
       
        $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            }
+            return $data;
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function eventosConMayorAlimentos($fecha, $returnData = false){
+public function eventosConMayorAlimentos($fecha){
   $this->fecha=$fecha;
 
   try {
@@ -623,13 +560,7 @@ public function eventosConMayorAlimentos($fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total de eventos que han sacado grandes cantidades de alimentos', $this->payload->cedula);
          
           $this->desconectarDB();
-           if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            }
+           return $data;
    } catch (\PDOException $e) {
        return $e;
    }
@@ -638,7 +569,7 @@ public function eventosConMayorAlimentos($fecha, $returnData = false){
 
   // ------------------ ALIMENTOS ------------------------
 
-public function entradaAlimentos($fecha, $returnData = false){
+public function entradaAlimentos($fecha){
   $this->fecha=$fecha;
 
   try {
@@ -658,19 +589,13 @@ public function entradaAlimentos($fecha, $returnData = false){
         $bitacora = new bitacoraModelo;
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total de entradas de alimentos', $this->payload->cedula);
        $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            }
+          return $data;
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function alimentosMasIngresados($fecha, $returnData = false){
+public function alimentosMasIngresados($fecha){
   $this->fecha=$fecha;
 
   try {
@@ -692,31 +617,25 @@ public function alimentosMasIngresados($fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó los alimentos mas ingresados al inventario', $this->payload->cedula);
        
        $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            }
+            return $data;
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function salidaAlimentosMenu($fecha, $returnData = false){
+public function salidaAlimentosMenu($fecha){
   $this->fecha=$fecha;
 
   try {
     $this->conectarDB();
       if ($this->fecha !='Seleccionar') {
-      $grafico = $this->conex->prepare("SELECT ta.tipo AS nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / total.total_count), 2) AS porcentaje FROM salidaalimentos sa INNER JOIN detallesalidamenu dsm ON sa.idSalidaA = dsm.idSalidaA INNER JOIN alimento a ON dsm.idAlimento = a.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA INNER JOIN ( SELECT COUNT(*) AS total_count FROM detallesalidamenu dsm INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA WHERE sa.status = 1 AND dsm.status = 1 AND sa.fecha = ? ) AS total ON 1=1 WHERE sa.status = 1 AND dsm.status = 1 AND sa.fecha = ? GROUP BY ta.tipo ORDER BY cantidad DESC;");
+      $grafico = $this->conex->prepare("SELECT a.nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / total.total_count), 2) AS porcentaje FROM menu m INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN alimento a ON a.idAlimento = dsm.idAlimento INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA INNER JOIN ( SELECT COUNT(*) AS total_count FROM menu m INNER JOIN  detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA WHERE sa.status = 1 AND dsm.status = 1 AND m.feMenu = ? ) AS total ON 1=1 WHERE sa.status = 1 AND dsm.status = 1 AND m.feMenu = ? AND sa.idTipoSalidaA=1 GROUP BY a.idAlimento, a.nombre ORDER BY cantidad DESC LIMIT 10;");
        $grafico->bindValue(1, $this->fecha);
        $grafico->bindValue(2, $this->fecha);
        $grafico->execute();
     }
     else{
-       $grafico = $this->conex->prepare("SELECT ta.tipo AS nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM detallesalidamenu dsm INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA WHERE sa.status = 1 AND dsm.status = 1)), 2) AS porcentaje FROM salidaalimentos sa INNER JOIN detallesalidamenu dsm ON sa.idSalidaA = dsm.idSalidaA INNER JOIN alimento a ON dsm.idAlimento = a.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE sa.status = 1 AND dsm.status = 1 GROUP BY ta.tipo ORDER BY cantidad DESC;");
+       $grafico = $this->conex->prepare("SELECT a.nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / total.total_count), 2) AS porcentaje FROM menu m INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN alimento a ON a.idAlimento = dsm.idAlimento INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA INNER JOIN ( SELECT COUNT(*) AS total_count FROM menu m INNER JOIN  detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA WHERE sa.status = 1 AND dsm.status = 1 AND m.feMenu = ? ) AS total ON 1=1 WHERE sa.status = 1 AND dsm.status = 1 AND sa.idTipoSalidaA=1 GROUP BY a.idAlimento, a.nombre ORDER BY cantidad DESC LIMIT 10");
 
        $grafico->execute();
      }   
@@ -725,31 +644,25 @@ public function salidaAlimentosMenu($fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total el tipo de alimentos mas sacados por menus', $this->payload->cedula);
       
        $this->desconectarDB();
-           if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            }
+           return $data;
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function salidaAlimentosMerma($fecha, $returnData = false){
+public function salidaAlimentosMerma($fecha){
   $this->fecha=$fecha;
 
   try {
     $this->conectarDB();
 
     if ($this->fecha !='Seleccionar') {
-      $grafico = $this->conex->prepare("SELECT ta.tipo AS nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / total.total_count), 2) AS porcentaje FROM salidaalimentos sa INNER JOIN detallesalidaa dsa ON sa.idSalidaA = dsa.idSalidaA INNER JOIN alimento a ON dsa.idAlimento = a.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA INNER JOIN ( SELECT COUNT(*) AS total_count FROM detallesalidaa dsa INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsa.idSalidaA WHERE sa.status = 1 AND dsa.status = 1 AND sa.fecha = ? ) AS total ON 1=1 WHERE sa.status = 1 AND dsa.status = 1 AND sa.fecha = ? GROUP BY ta.tipo ORDER BY cantidad DESC;");
+      $grafico = $this->conex->prepare("SELECT a.nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / total.total_count), 2) AS porcentaje FROM alimento a INNER JOIN detallesalidaa dsa ON a.idAlimento = dsa.idAlimento INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsa.idSalidaA INNER JOIN ( SELECT COUNT(*) AS total_count FROM detallesalidaa dsa INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsa.idSalidaA WHERE sa.status = 1 AND dsa.status = 1 AND sa.idTipoSalidaA != 1 AND sa.fecha = ? ) AS total ON 1=1 WHERE sa.status = 1 AND dsa.status = 1 AND sa.idTipoSalidaA != 1 AND sa.fecha = ? GROUP BY a.idAlimento, a.nombre ORDER BY cantidad DESC LIMIT 10;");
        $grafico->bindValue(1, $this->fecha);
        $grafico->execute();
     }
     else{
-       $grafico = $this->conex->prepare("SELECT ta.tipo AS nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM detallesalidaa dsa INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsa.idSalidaA WHERE sa.status = 1 AND dsa.status = 1)), 2) AS porcentaje FROM salidaalimentos sa INNER JOIN detallesalidaa dsa ON sa.idSalidaA = dsa.idSalidaA INNER JOIN alimento a ON dsa.idAlimento = a.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE sa.status = 1 AND dsa.status = 1 GROUP BY ta.tipo ORDER BY cantidad DESC;");
+       $grafico = $this->conex->prepare("SELECT ta.tipo AS nombre, COUNT(*) AS cantidad, ROUND((COUNT(*) * 100.0 / (SELECT COUNT(*) FROM detallesalidaa dsa INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsa.idSalidaA WHERE sa.status = 1 AND dsa.status = 1)), 2) AS porcentaje FROM salidaalimentos sa INNER JOIN detallesalidaa dsa ON sa.idSalidaA = dsa.idSalidaA INNER JOIN alimento a ON dsa.idAlimento = a.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE sa.status = 1 AND dsa.status = 1 AND sa.idTipoSalidaA !=1 GROUP BY ta.tipo ORDER BY cantidad DESC;");
 
        $grafico->execute();
 
@@ -759,13 +672,7 @@ public function salidaAlimentosMerma($fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó los tipos de alimentos mas sacados por Donación o Merma', $this->payload->cedula);
        
        $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            }
+            return $data;
    } catch (\PDOException $e) {
        return $e;
    }
@@ -775,7 +682,7 @@ public function salidaAlimentosMerma($fecha, $returnData = false){
 
   // ------------------ UTENSILIOS -----------------------
 
-public function entradaUtensilios($fecha, $returnData = false){
+public function entradaUtensilios($fecha){
   $this->fecha=$fecha;
 
   try {
@@ -797,19 +704,13 @@ public function entradaUtensilios($fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó el total de entradas de utensilios', $this->payload->cedula);
       
           $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            } 
+           return $data;
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function utensiliosMasIngresados($fecha, $returnData = false){
+public function utensiliosMasIngresados($fecha){
   $this->fecha=$fecha;
 
   try {
@@ -832,19 +733,13 @@ public function utensiliosMasIngresados($fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó los utensilios mas ingresados al inventario', $this->payload->cedula);
       
        $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            }
+           return $data;
    } catch (\PDOException $e) {
        return $e;
    }
  }
 
-public function salidaUtensilios($fecha, $returnData = false){
+public function salidaUtensilios($fecha){
   $this->fecha=$fecha;
 
   try {
@@ -867,13 +762,7 @@ public function salidaUtensilios($fecha, $returnData = false){
           $bitacora->registrarBitacora('Reportes Estadísticos', 'Consultó los tipos de utensilios mas sacados en el inventario', $this->payload->cedula);
        
        $this->desconectarDB();
-            if ($returnData === false) {
-              echo json_encode($data);
-              die();
-            }
-            else{
-              return $data;
-            }
+            return $data;
    } catch (\PDOException $e) {
        return $e;
    }
@@ -891,87 +780,87 @@ public function fpdf($grafica, $tipo, $fecha){
       if($tipo === 'AE1'){
          $cabecera='Asistencias de Estudiantes';
          $titulos=['cam1'=>'Horario de Comida', 'cam2'=>'Cant. de Estudiantes', 'cam3'=> 'Porcentaje'];
-         $datos=$this->asistenciasEstudiantes($this->fecha, true);
+         $datos=$this->asistenciasEstudiantes($this->fecha);
       }
       if($tipo === 'AE2'){
          $cabecera='Asistencias de Estudiantes por Sexo';
          $titulos=['cam1'=>'Sexo', 'cam2'=>'Cant. de Estudiantes', 'cam3'=> 'Porcentaje'];
-         $datos=$this->asistenciasPorSexo($this->fecha, true);
+         $datos=$this->asistenciasPorSexo($this->fecha);
       }
       if($tipo === 'AE3'){
          $cabecera='Asistencias de Estudiantes por Núcleo';
          $titulos=['cam1'=>'Núcleo', 'cam2'=>'Cant. de Estudiantes', 'cam3'=> 'Porcentaje'];
-         $datos=$this->asistenciasPorNucleo($this->fecha, true);
+         $datos=$this->asistenciasPorNucleo($this->fecha);
       }
       if($tipo === 'AE4'){
          $cabecera='Asistencias de Estudiantes por PNF';
          $titulos=['cam1'=>'Programa Nacional de Formación', 'cam2'=>'Cant. de Estudiantes', 'cam3'=> 'Porcentaje'];
-         $datos=$this->asistenciasPorPNF($this->fecha, true);
+         $datos=$this->asistenciasPorPNF($this->fecha);
       }
       if($tipo === 'AE5'){
          $cabecera='Asistencias de Estudiantes por Justificativo';
          $titulos=['cam1'=>'Horario de Comida', 'cam2'=>'Cant. de Estudiantes', 'cam3'=> 'Porcentaje'];
-         $datos=$this->asistenciasPorJustificativo($this->fecha, true);
+         $datos=$this->asistenciasPorJustificativo($this->fecha);
       }
       if($tipo === 'ME1'){
          $cabecera='Total de Menus';
          $titulos=['cam1'=>'Horario de Comida', 'cam2'=>'Cant. de Menus', 'cam3'=> 'Porcentaje'];
-         $datos=$this->menus($this->fecha, true);
+         $datos=$this->menus($this->fecha);
       }
       if($tipo === 'ME2'){
          $cabecera='Total de Eventos';
          $titulos=['cam1'=>'Horario de Comida', 'cam2'=>'Cant. de Eventos', 'cam3'=> 'Porcentaje'];
-         $datos=$this->eventos($this->fecha, true);
+         $datos=$this->eventos($this->fecha);
       }
       if($tipo === 'ME3'){
          $cabecera='Horarios de comida con mayor número de menús activos';
          $titulos=['cam1'=>'Horario de Comida', 'cam2'=>'Cant. de Menus', 'cam3'=> 'Porcentaje'];
-         $datos=$this->cantidadMenuActivos($this->fecha, true);
+         $datos=$this->cantidadMenuActivos($this->fecha);
       }
       if($tipo === 'ME4'){
          $cabecera='Alimentos más frecuentemente utilizados en los menús';
          $titulos=['cam1'=>'Alimentos', 'cam2'=>'Cant. de Uso', 'cam3'=> 'Porcentaje'];
-         $datos=$this->alimentosMasUtilizados($this->fecha, true);
+         $datos=$this->alimentosMasUtilizados($this->fecha);
       }
        if($tipo === 'ME5'){
          $cabecera='Eventos con la mayor cantidad de salidas de alimentos';
          $titulos=['cam1'=>'Evento', 'cam2'=>'Cant. de Salidas', 'cam3'=> 'Porcentaje'];
-         $datos=$this->eventosConMayorAlimentos($this->fecha, true);
+         $datos=$this->eventosConMayorAlimentos($this->fecha);
       }
       if($tipo === 'A1'){
          $cabecera='Entrada de Alimentos';
          $titulos=['cam1'=>'Tipo de Alimento', 'cam2'=>'Cant. de Entradas', 'cam3'=> 'Porcentaje'];
-         $datos=$this->entradaAlimentos($this->fecha, true);
+         $datos=$this->entradaAlimentos($this->fecha);
       }
       if($tipo === 'A2'){
          $cabecera='Alimentos mas ingresados';
          $titulos=['cam1'=>'Alimento', 'cam2'=>'Cant. de Ingreso', 'cam3'=> 'Porcentaje'];
-         $datos=$this->alimentosMasIngresados($this->fecha, true);
+         $datos=$this->alimentosMasIngresados($this->fecha);
       }
       if($tipo === 'A3'){
          $cabecera='Salida de alimentos mas frecuentes por Menú';
          $titulos=['cam1'=>'Tipo de Alimento', 'cam2'=>'Cant. de Salidas', 'cam3'=> 'Porcentaje'];
-         $datos=$this->salidaAlimentosMenu($this->fecha, true);
+         $datos=$this->salidaAlimentosMenu($this->fecha);
       }
       if($tipo === 'A4'){
          $cabecera='Salida de alimentos mas frecuentes por Merma o Donación';
          $titulos=['cam1'=>'Tipo de Alimento', 'cam2'=>'Cant. de Salidas', 'cam3'=> 'Porcentaje'];
-         $datos=$this->salidaAlimentosMerma($this->fecha, true);
+         $datos=$this->salidaAlimentosMerma($this->fecha);
       }
       if($tipo === 'U1'){
          $cabecera='Entrada de Utensilios';
          $titulos=['cam1'=>'Tipo de Utensilio', 'cam2'=>'Cant. de Entradas', 'cam3'=> 'Porcentaje'];
-         $datos=$this->entradaUtensilios($this->fecha, true);
+         $datos=$this->entradaUtensilios($this->fecha);
       }
       if($tipo === 'U2'){
          $cabecera='Utensilios mas Ingresados';
          $titulos=['cam1'=>'Utensilio', 'cam2'=>'Cant. de Ingreso', 'cam3'=> 'Porcentaje'];
-         $datos=$this->utensiliosMasIngresados($this->fecha, true);
+         $datos=$this->utensiliosMasIngresados($this->fecha);
       }
       if($tipo === 'U3'){
          $cabecera='Salida de Utensilios';
          $titulos=['cam1'=>'Tipo de Utensilio', 'cam2'=>'Cant. de Salidas', 'cam3'=> 'Porcentaje'];
-         $datos=$this->salidaUtensilios($this->fecha, true);
+         $datos=$this->salidaUtensilios($this->fecha);
       }
 
       

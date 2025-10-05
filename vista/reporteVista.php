@@ -173,7 +173,7 @@
    <div class="wave-group p-2  my-2" id="sel3">
                 <select class="input alimento " id="alimento">
                   <option value='Seleccionar'>Seleccionar</option>
-                  <option value=1>Entrada de Alimentos</option>
+                  <option value=1>Entrada de Alimentos (Por tipos)</option>
                    <option value=2>Alimentos mas ingresados </option>
                    <option value=3>Salida de alimentos mas frecuentes por menu</option>
                    <option value=4>Salida de alimentos mas frecuentes por Merma o donación</option>

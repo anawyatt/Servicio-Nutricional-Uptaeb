@@ -32,20 +32,37 @@ if (isset($_POST['notificacionId'])) {
 // ------------------------------ VERIFICAR CARDS DE LOS REPORTES -----------------
 
 if (isset($_POST['verificarEA'])) {
-  $objeto->verificarAsistenciasEstudiantes();
+  $respuesta = $objeto->verificarAsistenciasEstudiantes();
+  echo json_encode($respuesta);
+  die();
 }
 
 if (isset($_POST['verificarME'])) {
-  $objeto->verificarMenus();
-  $objeto->verificarEventos();
+  $respuesta =  $objeto->verificarMenus();
+  $respuesta2 = $objeto->verificarEventos();
+  echo json_encode([
+    'respuesta' => $respuesta,
+    'respuesta2' => $respuesta2
+   ]);
+   die();
 }
 if (isset($_POST['verificarIA'])) {
-  $objeto->verificarEntradaAlimentos();
-  $objeto->verificarSalidaAlimentos();
+  $respuesta = $objeto->verificarEntradaAlimentos();
+  $respuesta2 = $objeto->verificarSalidaAlimentos();
+  echo json_encode([
+    'respuesta' => $respuesta,
+    'respuesta2' => $respuesta2
+   ]);
+   die();
 }
 if (isset($_POST['verificarIU'])) {
-  $objeto->verificarEntradaUtensilios();
-  $objeto->verificarSalidaUtensilios();
+ $respuesta =  $objeto->verificarEntradaUtensilios();
+  $respuesta2 = $objeto->verificarSalidaUtensilios();
+  echo json_encode([
+    'respuesta' => $respuesta,
+    'respuesta2' => $respuesta2
+   ]);
+   die();
 }
 
 
@@ -53,35 +70,51 @@ if (isset($_POST['verificarIU'])) {
 //------------ SELECTS ----------------------------
 
 if (isset($_POST['select1A'])) {
-  $objeto->mostrarFechasAsistencia();
+ $respuesta =  $objeto->mostrarFechasAsistencia();
+ echo json_encode($respuesta);
+ die();
 }
 
 if (isset($_POST['select1AJ'])) {
-  $objeto->mostrarFechasAsistenciaJustificativo();
+  $respuesta = $objeto->mostrarFechasAsistenciaJustificativo();
+  echo json_encode($respuesta);
+  die();
 }
 
 if (isset($_POST['select2M'])) {
-  $objeto->mostrarFechasMenus();
+ $respuesta = $objeto->mostrarFechasMenus();
+ echo json_encode($respuesta);
+  die();
 }
 
 if (isset($_POST['select2E'])) {
-  $objeto->mostrarFechasEventos();
+  $respuesta = $objeto->mostrarFechasEventos();
+  echo json_encode($respuesta);
+  die();
 }
 
 if (isset($_POST['select3EA'])) {
-  $objeto->mostrarFechasEntradaAlimentos();
+  $respuesta = $objeto->mostrarFechasEntradaAlimentos();
+  echo json_encode($respuesta);
+  die();
 }
 
 if (isset($_POST['select3SA'])) {
-  $objeto->mostrarFechasSalidaAlimentos();
+  $respuesta = $objeto->mostrarFechasSalidaAlimentos();
+  echo json_encode($respuesta);
+  die();
 }
 
 if (isset($_POST['select4EU'])) {
-  $objeto->mostrarFechasEntradaUtensilios();
+ $respuesta =  $objeto->mostrarFechasEntradaUtensilios();
+ echo json_encode($respuesta);
+    die();
 }
 
 if (isset($_POST['select4SU'])) {
-  $objeto->mostrarFechasSalidaUtensilios();
+ $respuesta =  $objeto->mostrarFechasSalidaUtensilios();
+ echo json_encode($respuesta);
+    die();
 }
 
 // -------------- ASISTENCIAS --------------------
@@ -89,22 +122,32 @@ if (isset($_POST['select4SU'])) {
 
 if (isset($_POST['reporteAsistenciasEstudiantes']) && isset($_POST['fecha'])) {
   $reporte = $objeto->asistenciasEstudiantes($_POST['fecha']);
+  echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteAsistenciasPorSexo']) && isset($_POST['fecha'])) {
   $reporte = $objeto->asistenciasPorSexo($_POST['fecha']);
+  echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteAsistenciasPorNucleo']) && isset($_POST['fecha'])) {
   $reporte = $objeto->asistenciasPorNucleo($_POST['fecha']);
+  echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteAsistenciasPorPNF']) && isset($_POST['fecha'])) {
   $reporte = $objeto->asistenciasPorPNF($_POST['fecha']);
+  echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteAsistenciasPorJustificativo']) && isset($_POST['fecha'])) {
   $reporte = $objeto->asistenciasPorJustificativo($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 
@@ -113,55 +156,79 @@ if (isset($_POST['reporteAsistenciasPorJustificativo']) && isset($_POST['fecha']
 
 if (isset($_POST['reporteMenus']) && isset($_POST['fecha'])) {
   $reporte = $objeto->menus($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteEventos']) && isset($_POST['fecha'])) {
   $reporte = $objeto->eventos($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteCantidadMenuActivos']) && isset($_POST['fecha'])) {
   $reporte = $objeto->cantidadMenuActivos($_POST['fecha']);
+  echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteAlimentosMasUtilizados']) && isset($_POST['fecha'])) {
   $reporte = $objeto->alimentosMasUtilizados($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteEventosConMayorAlimentos']) && isset($_POST['fecha'])) {
   $reporte = $objeto->eventosConMayorAlimentos($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 // ----------------- ALIMENTOS ------------------
 
 if (isset($_POST['reporteEntradaAlimentos']) && isset($_POST['fecha'])) {
   $reporte = $objeto->entradaAlimentos($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteAlimentosMasIngresados']) && isset($_POST['fecha'])) {
   $reporte = $objeto->alimentosMasIngresados($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteSalidaAlimentosMenu']) && isset($_POST['fecha'])) {
   $reporte = $objeto->salidaAlimentosMenu($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 
 if (isset($_POST['reporteSalidaAlimentosMerma']) && isset($_POST['fecha'])) {
   $reporte = $objeto->salidaAlimentosMerma($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 //-------------- UTENSILIOS ----------------------
 
 if (isset($_POST['reporteEntradaUtensilios']) && isset($_POST['fecha'])) {
   $reporte = $objeto->entradaUtensilios($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteUtensiliosMasIngresados']) && isset($_POST['fecha'])) {
   $reporte = $objeto->utensiliosMasIngresados($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 if (isset($_POST['reporteSalidaUtensilios']) && isset($_POST['fecha'])) {
   $reporte = $objeto->salidaUtensilios($_POST['fecha']);
+ echo json_encode($reporte);
+  die();
 }
 
 // ----------------- PDF ---------------------
@@ -169,6 +236,8 @@ if (isset($_POST['reporteSalidaUtensilios']) && isset($_POST['fecha'])) {
 
 if (isset($_POST['reporte']) && isset($_POST['grafica']) && isset($_POST['tipo']) && isset($_POST['fecha'])) {
   $reporte = $objeto->fpdf($_POST['grafica'], $_POST['tipo'], $_POST['fecha']);
+echo  json_encode($reporte);
+  die();
 }
 
 

@@ -284,7 +284,7 @@
 
                                 <div class='row'>
                                 <div class="wave-group p-2  my-2 col-md-6">
-                <input required="" type="date" class="input fecha mt-2" id="fecha">
+                <input required="" type="date" class="input fecha mt-3" id="fecha" disabled>
                     <span class="bar bar5"></span>
                     <label class="label labelPri ic5 ">
                         <span class="label-char pl-2 letra5" style="--index: 0; margin-right: 3px!important;"> <i class=" " >
@@ -304,7 +304,7 @@
             </div>
 
             <div class="wave-group p-2  my-2 col-md-6">
-                <input required="" type="time" class="input hora mt-2" id="hora">
+                <input required="" type="time" class="input hora mt-3" id="hora" disabled>
                     <span class="bar bar8"></span>
                     <label class="label labelPri ic8 ">
                         <span class="label-char pl-2 letra8" style="--index: 0; margin-right: 3px!important;"> <i class="bi bi-clock-fill "></i>                                                        
