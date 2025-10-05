@@ -7,28 +7,39 @@ $('#cbx').change(function() {
     if ($(this).is(':checked')) {
         console.log('Activado');
         // Mostrar los switches
-        $('#mostrar').show();
+        $('#mostrar').show(500);
     } else {
         console.log('Desactivado');
-        // Ocultar los switches
-        $('#mostrar').hide();
 
-        // Resetear selects
+        // Ocultar los switches
+        $('#mostrar').hide(500);
+
+        // 🔹 Desmarcar todos los checkboxes relacionados
+        $('#porFecha, #porHorario, #ultimo_Registro').prop('checked', false);
+
+        // 🔹 Deshabilitar porHorario (como en tu lógica anterior)
+        $('#porHorario').prop('disabled', true);
+
+        // 🔹 Ocultar los selects dependientes
+        $('#sel2, #sel3').hide(500);
+
+        // 🔹 Resetear selects
         $('#selectFecha').val('Seleccionar').trigger('change.select2');
         $('#selectHorario').val('Seleccionar').trigger('change.select2');
 
-        // Ocultar sección de tabla filtrada
+        // 🔹 Ocultar la tabla filtrada
         $('#muestraU').hide(1000);
 
-        // Limpiar tabla y recargar con los datos principales
+        // 🔹 Limpiar tabla si existe
         if (typeof tabla !== "undefined") {
             tabla.clear().draw();
         }
 
-        // Llamar a la función principal
+        // 🔹 Llamar a la función principal
         rellenar();
     }
 });
+
 
 $('#mostrar').hide();
 
@@ -122,38 +133,65 @@ $('#mostrar').hide();
       }
   });
 
-  $('#sel2').hide(0);
-  $('#porFecha').change(function() {
-      if ($(this).is(':checked')) {
-          $('#sel2').show(1000);
-          $('#muestraU').hide(1000);
-          $('#ultimo_Registro').prop('checked', false);
-          $("#selectFecha").on('change', function() {
-              mostrarHorarios($(this).val());
-              rellenar();
-          });
-      } else {
-          $('#selectFecha').val('Seleccionar').trigger('change.select2');
-          rellenar();
-          $('#sel2').hide(1000);
-      }
-  });
+// Ocultar los selects al inicio
+$('#sel2').hide(0);
+$('#sel3').hide(0);
 
-  $('#sel3').hide(0);
-  $('#porHorario').change(function() {
-      if ($(this).is(':checked')) {
-          $('#sel3').show(1000);
-          $('#muestraU').hide(1000);
-          $('#ultimo_Registro').prop('checked', false);
-          $("#selectHorario").on('change', function() {
-              rellenar();
-          });
-      } else {
-          $('#sel3').hide(1000);
-          $('#selectHorario').val('Seleccionar').trigger('change.select2');
-          rellenar();
-      }
-  });
+// Deshabilitar el checkbox de horario al inicio
+$('#porHorario').prop('disabled', true);
+
+// Evento para cuando se selecciona el modo por fecha
+$('#porFecha').change(function () {
+    if ($(this).is(':checked')) {
+        $('#sel2').show(1000);
+        $('#muestraU').hide(1000);
+        $('#ultimo_Registro').prop('checked', false);
+
+        // Escuchar cambio en la fecha
+        $("#selectFecha").on('change', function () {
+            let fecha = $(this).val();
+
+            if (fecha && fecha !== 'Seleccionar') {
+                mostrarHorarios(fecha);
+                rellenar();
+
+                // ✅ Habilitar el checkbox de horario cuando hay fecha válida
+                $('#porHorario').prop('disabled', false);
+            } else {
+                // 🚫 Deshabilitar nuevamente si no hay fecha seleccionada
+                $('#porHorario').prop('disabled', true);
+            }
+        });
+
+    } else {
+        // Si se desmarca "por fecha"
+        $('#selectFecha').val('Seleccionar').trigger('change.select2');
+        rellenar();
+        $('#sel2').hide(1000);
+
+        // 🚫 También deshabilitamos el checkbox de horario
+        $('#porHorario').prop('disabled', true).prop('checked', false);
+        $('#sel3').hide(1000);
+    }
+});
+
+// Evento para cuando se selecciona el modo por horario
+$('#porHorario').change(function () {
+    if ($(this).is(':checked')) {
+        $('#sel3').show(1000);
+        $('#muestraU').hide(1000);
+        $('#ultimo_Registro').prop('checked', false);
+
+        $("#selectHorario").on('change', function () {
+            rellenar();
+        });
+
+    } else {
+        $('#sel3').hide(1000);
+        $('#selectHorario').val('Seleccionar').trigger('change.select2');
+        rellenar();
+    }
+});
 
   $("#selectFecha").select2({
       theme: 'bootstrap-5',
