@@ -8,12 +8,12 @@ use \PDO;
 
 class consultarUtensiliosModelo extends connectDB {
 
-    private $tipoA;
-    private $alimento;
+    private $tipoU;
     private $material;
     private $imagen;
     private $id;
     private $payload;
+    private $utensilio;
 
     public function __construct() {
         parent::__construct();
@@ -166,12 +166,11 @@ private function consultarModificacion() {
     }
 }
 
-public function verificarUtensilio($id, $tipoU, $utensilio, $material) {
-    $validacion = $this->validarDatosUtensilio($id, $tipoU, $utensilio, $material);
+public function verificarUtensilio($id, $utensilio, $material) {
+    $validacion = $this->validarDatosUtensilio($id,  $utensilio, $material);
     if ($validacion) return $validacion;
 
     $this->id = $id;
-    $this->tipoU = $tipoU;
     $this->utensilio = $utensilio;
     $this->material = $material;
 
@@ -179,19 +178,23 @@ public function verificarUtensilio($id, $tipoU, $utensilio, $material) {
 }
 
 public function modificarUtensilio($id, $tipoU, $utensilio, $material) {
-    $validacion = $this->validarDatosUtensilio($id, $tipoU, $utensilio, $material);
+    $validacion = $this->validarDatosUtensilio($id,$utensilio, $material);
     if ($validacion) return $validacion;
 
+   if($this->verificarUtensilio($id,$utensilio,$material)['resultado'] == 'existe'){
+      return ['resultado' => 'existe'];
+   }
+
     $this->id = $id;
-    $this->tipoU = $tipoU;
     $this->utensilio = $utensilio;
     $this->material = $material;
+    $this->tipoU = $tipoU;
 
     return $this->modificarU();
 }
 
-private function validarDatosUtensilio($id, $tipoU, $utensilio, $material) {
-    if (!preg_match('/^\d+$/', $id) || !preg_match('/^\d+$/', $tipoU)) {
+private function validarDatosUtensilio($id, $utensilio, $material) {
+    if (!preg_match('/^\d+$/', $id)) {
         return ['resultado' => 'ID y tipo de utensilio deben ser números enteros positivos.'];
     }
 
@@ -209,23 +212,17 @@ private function validarDatosUtensilio($id, $tipoU, $utensilio, $material) {
 private function consultarUtensilio() {
     try {
         $this->conectarDB();
-        $stmt = $this->conex->prepare("
-        SELECT nombre 
-        FROM vista_utensilios_activos
-        WHERE idTipoU = ? AND nombre = ? AND material = ? 
-        AND idUtensilios != ?
-    ");
-        $stmt->bindValue(1, $this->tipoU);
-        $stmt->bindValue(2, $this->utensilio);
-        $stmt->bindValue(3, $this->material);
-        $stmt->bindValue(4, $this->id);
+        $stmt = $this->conex->prepare("SELECT nombre FROM utensilios WHERE status=1 AND nombre = ? AND material = ? AND idUtensilios != ?;");
+        $stmt->bindValue(1, $this->utensilio);
+        $stmt->bindValue(2, $this->material);
+        $stmt->bindValue(3, $this->id);
         $stmt->execute();
         $data = $stmt->fetchAll();
         $this->desconectarDB();
 
         return isset($data[0]['nombre']) 
             ? ['resultado' => 'existe'] 
-            : null;
+            : ['resultado' => 'no existe'];
 
     } catch (\PDOException $e) {
     $this->desconectarDB();
@@ -269,39 +266,39 @@ private function modificarU() {
 
 
 public function modificarImagen($imagen, $id) {
-    $info = $this->infoUtensilio($id, true);
+    $info = $this->infoUtensilio($id);
 
     if (empty($info)) {
         return ['error' => 'Utensilio no encontrado'];
     }
 
-    // Validación robusta de imagen dañada, tipo y tamaño (igual que en registro)
-    if (!isset($imagen['tmp_name']) || !file_exists($imagen['tmp_name'])) {
-        return ['resultado' => 'No se recibió imagen'];
-    }
-    $mime = mime_content_type($imagen['tmp_name']);
-    $formatosValidos = ['image/jpeg', 'image/png'];
-    if (!in_array($mime, $formatosValidos)) {
-        return ['resultado' => 'El archivo no es una imagen válida (JPEG, PNG)!'];
-    }
-    if ($imagen['size'] > 2 * 1024 * 1024) {
-        return ['resultado' => 'La imagen no debe superar los 2MB!'];
-    }
-    $dimensiones = getimagesize($imagen['tmp_name']);
-    if ($dimensiones === false) {
-        return ['resultado' => 'La imagen está dañada o no se puede procesar!'];
+  $errores = [];
+
+    if (!preg_match("/^[0-9]+$/", $id)) {
+        $errores[] = 'Ingresar el id del alimento correctamente';
     }
 
+    $validacion = $this->validarImagen($imagen);
+    if ($validacion !== true) {
+        $errores[] = $validacion['resultado'];
+    }
+
+    if (!empty($errores)) {
+        return ['resultado' => implode(", ", $errores)];
+    }
     $rand = $this->generarCodigo($info[0]->nombre, $info[0]->material);
     $ruta = "assets/images/utensilios/";
-    $nombreArchivo = $ruta . $rand . '.png';
 
-    if (!move_uploaded_file($imagen['tmp_name'], $nombreArchivo)) {
-        return ['error' => 'Error al mover la imagen subida'];
+    $ext = pathinfo($imagen['name'], PATHINFO_EXTENSION);
+    $imagenDestino = $ruta . $rand . '.' . $ext;
+
+    if (!move_uploaded_file($imagen['tmp_name'], $imagenDestino)) {
+        return ['resultado' => 'Error al mover la imagen al directorio de destino'];
     }
 
-    $this->imagen = $nombreArchivo;
+    $this->imagen = $imagenDestino;
     $this->id = $id;
+
 
     return $this->actualizarImagenDB();
 }
@@ -434,6 +431,26 @@ private function delete($rutaImagen) {
     }
 }
 
+public function validarImagen($imagen)
+    {
+        if (!isset($imagen['error']) || $imagen['error'] !== UPLOAD_ERR_OK) {
+            return ['resultado' => 'Error al subir la imagen'];
+        }
+        $mime = mime_content_type($imagen['tmp_name']);
+        $formatosValidos = ['image/jpeg', 'image/png'];
+
+        if (!in_array($mime, $formatosValidos)) {
+            return ['resultado' => 'El archivo no es una imagen válida (JPEG, PNG)!'];
+        }
+        if ($imagen['size'] > 2 * 1024 * 1024) {
+            return ['resultado' => 'La imagen no debe superar los 2MB!'];
+        }
+        $dimensiones = getimagesize($imagen['tmp_name']);
+        if ($dimensiones === false) {
+            return ['resultado' => 'La imagen está dañada o no se puede procesar!'];
+        }
+        return true;
+    }
 
 
 

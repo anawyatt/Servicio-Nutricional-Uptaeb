@@ -369,7 +369,7 @@ $("#editar").on("click", function(e){
                         },
                         success(data){
                           console.log(data);
-                              if (data.resultado === "error correo" && data.newCsrfToken){
+                              if (data.resultado === "error correo" ){
                                 Swal.fire({
                                   toast: true,
                                   position: 'top-end',

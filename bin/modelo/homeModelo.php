@@ -10,7 +10,6 @@ class homeModelo extends connectDB {
         parent::__construct();
     }
 
-    // Método para recibir el horario desde el controlador y hacer la consulta
     public function setHorario($horario) {
         $this->horario = $horario;
     }
@@ -229,21 +228,11 @@ class homeModelo extends connectDB {
             $this->conectarDB();
 
             if ($this->horario) {
-                $mostrar = $this->conex->prepare("SELECT m.feMenu, m.cantPlatos, sa.descripcion, m.horarioComida 
-                                                  FROM menu m 
-                                                  INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu 
-                                                  INNER JOIN salidaalimentos sa ON dsm.idSalidaA = sa.idSalidaA 
-                                                  WHERE m.status = 1 AND sa.status = 1 AND m.horarioComida = ? 
-                                                  GROUP BY m.idMenu;");
+                $mostrar = $this->conex->prepare("SELECT m.feMenu, m.cantPlatos, sa.descripcion, m.horarioComida, e.nomEvent, e.descripEvent FROM menu m LEFT JOIN evento e ON e.idMenu = m.idMenu INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON dsm.idSalidaA = sa.idSalidaA WHERE m.status = 1 AND sa.status = 1 AND m.horarioComida =? GROUP BY m.idMenu;");
                 $mostrar->bindValue(1, $this->horario);
                 $mostrar->execute();
             } else {
-                $mostrar = $this->conex->prepare("SELECT m.feMenu, m.cantPlatos, sa.descripcion, m.horarioComida 
-                                                  FROM menu m 
-                                                  INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu 
-                                                  INNER JOIN salidaalimentos sa ON dsm.idSalidaA = sa.idSalidaA 
-                                                  WHERE m.status = 1 AND sa.status = 1 
-                                                  GROUP BY m.idMenu;");
+                $mostrar = $this->conex->prepare("SELECT m.feMenu, m.cantPlatos, sa.descripcion, m.horarioComida, e.nomEvent, e.descripEvent FROM menu m LEFT JOIN evento e ON e.idMenu = m.idMenu INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON dsm.idSalidaA = sa.idSalidaA WHERE m.status = 1 AND sa.status = 1 GROUP BY m.idMenu");
                 $mostrar->execute();
             }
             $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);

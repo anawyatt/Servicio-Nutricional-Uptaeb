@@ -590,7 +590,10 @@ function colocarHoraActualEnCampo(hor) {
          $('.ic2, .ic3, .ic4, .ic5, .ic6, .ic7, .ic8').addClass('labelPri');
          $('.letra2, .letra3, .letra4, .letra5, .letra6, .letra7, .letra8').removeClass('labelE');
          $('.letra2, .letra3, .letra4, .letra5, .letra6, .letra7, .letra8').addClass('label-char');
-         $('#tipoA, #alimento').val('Seleccionar').trigger('change.select2');
+         $('#tipoA, #alimento').val('Seleccionar').trigger('change.select2')
+         $('#cantidad, #descripcion').val('');
+        
+        
      }
 
      function primary2 (){
@@ -701,10 +704,10 @@ function mostrarInfo(alimento, cantidad, unidad){
 
             function vaciarTabla() {
             const tabla = document.getElementById('tabla').getElementsByTagName('tbody')[0];
-            while (tabla.firstChild) {
+             while (tabla.firstChild) {
                 tabla.removeChild(tabla.firstChild);
+              }
             }
-        }
 
 
 /// -------------------- REGISTRAR ENTRADA DE ALIMENTOS -----------------------

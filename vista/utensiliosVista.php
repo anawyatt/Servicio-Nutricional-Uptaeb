@@ -67,7 +67,7 @@
                             <div class="row container">
                                 <div id="container0" class="contai"></div>
                                 <div class="wave-group p-2 my-2 mb-2">
-                                    <input type="file" class="input imagen" id="fileInput0">
+                                    <input type="file" class="input imagen" id="fileInput0" accept="image/*">
                                     <span class="bar bar1"></span>
                                     <label class="label labelPri ic1">
                                         <span class="label-char pl-2 letra" style="--index: 0; margin-right: 3px!important; font-size: 18px!important">
@@ -189,7 +189,7 @@
                                     <option value='Acero Carbono'>Acero Carbono</option>
                                     <option value='Otros'>Otros...</option>
                                     </select>
-                                    <span class="bar bar3"></span>
+                                    <span class="bar bar5" id="bar5"></span>
                                     <label class="label labelPri ic4">
                                         <span class="label-char pl-2 letra4" style="--index: 0; margin-right: 3px!important;">
                                         <i class="icon">

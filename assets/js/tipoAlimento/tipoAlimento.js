@@ -420,6 +420,7 @@ $(document).on('click', '.resetear', function() {
                 timer:3000,
                 timerProgressBar:3000,
             })
+            
               $('#error2').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El tipo de alimento ya existe!');
              danger1()
            } 

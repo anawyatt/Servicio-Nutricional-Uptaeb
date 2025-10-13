@@ -247,7 +247,7 @@
                                 <span class="label-char letra2" style="--index: 7">o</span>
 
                             </label>
-                            <p class=" text-center l er error2"></p>
+                            <p class=" text-center l er error2" id="error2"></p>
 
                         </div>
 

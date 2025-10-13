@@ -15,64 +15,93 @@ $(".borrar").remove()
 }
 }
 
-    tablaSalidaUtensilios();
-    let mostrarSU;
-    $('#ani').hide(1000);
+  let mostrarSU; 
 
-    function tablaSalidaUtensilios() {
-       var fechaInicio= $('#fecha').val();
-      var fechaFin= $('#fecha2').val();
-        $.ajax({
-            method: "post",
-            url: "", 
-            dataType: "json",
-            data: { mostrarSU: true, fechaInicio, fechaFin },
-            success(data) {
-                 $('#ani').show(2000);
-                let lista = data;
-                let tabla = "";
-                lista.forEach(row => {
-                 let fecha = new Date(row.fecha);
-                 let dia = fecha.getUTCDate().toString().padStart(2, '0'); // Usar getUTCDate()
-                 let mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0'); // Usar getUTCMonth()
-                 let anio = fecha.getUTCFullYear(); // Usar getUTCFullYear()
+$('#ani').hide(1000);
 
-                 let fechaFormateada = `${dia}-${mes}-${anio}`;
-                  let hora = new Date(`01/01/2000 ${row.hora}`);
-                  let horaFormateada = hora.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
-
-                    tabla += `
-                    <tr>
-                    <td class="text-center">${fechaFormateada}</td>
-                    <td class="text-center">${horaFormateada}</td>
-                    <td class="">${row.tipoSalida}</td>
-                    <td class="">${row.descripcion}</td>
-                    <td class="text-center ">
-                    <a id="${row.idSalidaU}" class="btn btn-sm btn-icon text-info flex-end text-center informacion" data-bs-toggle="modal" data-bs-target="#infoSUtensilios"data-bs-toggle="tooltip" title="informacion Utensilios" href="#" >
-                                <span class="btn-inner pi">
-                               <i class="bi bi-eye icon-24 t" width="20"></i>
-                                </span>
-                            </a>
-                    <a id="${row.idSalidaU}" class="btn btn-sm btn-icon text-danger text-center borrar"   data-bs-toggle="tooltip" title="Anular Utensilios" href="#"  type="button">
-                            <i class="bi bi-trash icon-24 t" width="20"></i>
-                            </a>
-
-                    <a id="${row.idSalidaU}" class="btn btn-sm btn-icon text-primary text-center pdf" data-bs-toggle="modal" data-bs-target="#pdfSUtensilios"   data-bs-toggle="tooltip" title="Descargar Salida de Utensilios" href="#"  type="button">
-                            <i class="ri-download-line icon-24 t" width="20"></i>
-                            </a>
-                    </td>
-                </tr>
-                    `;
-                });
-                $('#tbody').html(tabla);
-                mostrarSU = $('.tabla').DataTable();
-                mostrarSU.on('draw.dt', function () {
-                    quitarBotones();
-                   });
+mostrarSU = $('.tabla').DataTable({
+    "columns": [
       
-                  quitarBotones();
+        { 
+            "data": "fecha", 
+            "className": "text-center",
+            "render": function (data) {
+                
+                let fecha = new Date(data);
+                let dia = fecha.getUTCDate().toString().padStart(2, '0');
+                let mes = (fecha.getUTCMonth() + 1).toString().padStart(2, '0');
+                let anio = fecha.getUTCFullYear();
+                return `${dia}-${mes}-${anio}`;
             }
-        });
+        },
+    
+        {
+            "data": "hora", 
+            "className": "text-center",
+            "render": function (data) {
+                let hora = new Date(`01/01/2000 ${data}`);
+                return hora.toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true });
+            }
+        },
+      
+        { 
+            "data": "tipoSalida",
+            "className": "" 
+        },
+       
+        { 
+            "data": "descripcion",
+            "className": ""
+        },
+        {
+            "data": "idSalidaU",
+            "className": "text-center accion",
+            "render": function (data) {
+                return `
+                <a id="${data}" class="btn btn-sm btn-icon text-info flex-end text-center informacion" data-bs-toggle="modal" data-bs-target="#infoSUtensilios" data-bs-toggle="tooltip" title="informacion Utensilios" href="#" >
+                    <span class="btn-inner pi">
+                        <i class="bi bi-eye icon-24 t" width="20"></i>
+                    </span>
+                </a>
+                <a id="${data}" class="btn btn-sm btn-icon text-danger text-center borrar" data-bs-toggle="tooltip" title="Anular Utensilios" href="#" type="button">
+                    <i class="bi bi-trash icon-24 t" width="20"></i>
+                </a>
+                <a id="${data}" class="btn btn-sm btn-icon text-primary text-center pdf" data-bs-toggle="modal" data-bs-target="#pdfSUtensilios" data-bs-toggle="tooltip" title="Descargar Salida de Utensilios" href="#" type="button">
+                    <i class="ri-download-line icon-24 t" width="20"></i>
+                </a>`;
+            },
+            "orderable": false 
+        }
+    ],
+    "order": [[0, "desc"]] 
+});
+
+function tablaSalidaUtensilios() {
+    var fechaInicio = $('#fecha').val();
+    var fechaFin = $('#fecha2').val();
+
+    $.ajax({
+        method: "post",
+        url: "",
+        dataType: "json",
+        data: { mostrarSU: true, fechaInicio, fechaFin },
+        success(data) {
+    
+            $('#ani').show(2000); 
+            mostrarSU.clear().rows.add(data).draw();
+
+            mostrarSU.off('draw.dt').on('draw.dt', function () {
+                quitarBotones();
+            });
+
+
+            quitarBotones();
+        },
+        error(xhr, status, error) {
+      
+            console.error("Error al cargar la tabla de salida de utensilios:", status, error);
+        }
+    });
 }
 
 // MOSTRAR INFORMACIÓN ------------------------------------------

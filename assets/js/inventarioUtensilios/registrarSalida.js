@@ -99,13 +99,12 @@ $("#descripcion").focusout(function(){
     chequeo_descripcion();
  });
 
-  $("#cancelar").on('click', function() {
-  	 primary();
-  	setTodayDate();
-    vaciarTabla()
+  $(".cancelar").on('click', function() {
+    primary();
     $('#tablaD').hide();
     $('#ani').hide();
     $('#descripcion').val('');
+    vaciarTabla()
  });
 
    $("#cancelarInventario").on('click', function() {
@@ -721,6 +720,7 @@ $(document).ready(function() {
          $('.letra2, .letra3, .letra4, .letra5, .letra6, .letra7, .letra8').addClass('label-char');
          $('#tipoU, #utensilio, #tipoS').val('Seleccionar').trigger('change.select2');
          $('#disponibilidad').hide();
+         $('#cantidad, #descripcion').val('');
          $('#agregarInventario').prop('disabled', false);
      }
 

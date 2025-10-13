@@ -350,8 +350,8 @@ let error_clave3 = false;
          $(".error4").hide();
          $('#clave1').removeClass('errorBorder');
          $('.bar4').addClass('bar');
-         $('.ic4').removeClass('l');
-         $('.ic4').addClass('labelPri');
+         $('.ic4, .ey1').removeClass('l');
+         $('.ic4, .ey1').addClass('labelPri');
          $('.letra4').removeClass('labelE');
          $('.letra4').addClass('label-char');
         } else {
@@ -359,8 +359,8 @@ let error_clave3 = false;
          $(".error4").show();
          $('#clave1').addClass('errorBorder');
          $('.bar4').removeClass('bar');
-         $('.ic4').addClass('l');
-         $('.ic4').removeClass('labelPri');
+         $('.ic4, .ey1').addClass('l');
+         $('.ic4, .ey1').removeClass('labelPri');
          $('.letra4').addClass('labelE');
          $('.letra4').removeClass('label-char');
          error_clave = true;
@@ -375,8 +375,8 @@ let error_clave3 = false;
          $(".error5").hide();
          $('#clave2').removeClass('errorBorder');
          $('.bar5').addClass('bar');
-         $('.ic5').removeClass('l');
-         $('.ic5').addClass('labelPri');
+         $('.ic5, .ey2').removeClass('l');
+         $('.ic5, .ey2').addClass('labelPri');
          $('.letra5').removeClass('labelE');
          $('.letra5').addClass('label-char');
         } else {
@@ -384,8 +384,8 @@ let error_clave3 = false;
          $(".error5").show();
          $('#clave2').addClass('errorBorder');
          $('.bar5').removeClass('bar');
-         $('.ic5').addClass('l');
-         $('.ic5').removeClass('labelPri');
+         $('.ic5, .ey2').addClass('l');
+         $('.ic5, .ey2').removeClass('labelPri');
          $('.letra5').addClass('labelE');
          $('.letra5').removeClass('label-char');
          error_clave2 = true;
@@ -405,8 +405,8 @@ let error_clave3 = false;
         $(".error6").hide();
         $('#clave3').removeClass('errorBorder');
         $('.bar6').addClass('bar');
-        $('.ic6').removeClass('l');
-        $('.ic6').addClass('labelPri');
+        $('.ic6, .ey3').removeClass('l');
+        $('.ic6, .ey3').addClass('labelPri');
         $('.letra6').removeClass('labelE');
         $('.letra6').addClass('label-char');
         error_clave3 = false;
@@ -422,8 +422,8 @@ let error_clave3 = false;
         $(".error6").show();
         $('#clave3').addClass('errorBorder');
         $('.bar6').removeClass('bar');
-        $('.ic6').addClass('l');
-        $('.ic6').removeClass('labelPri');
+        $('.ic6,.ey3').addClass('l');
+        $('.ic6, .ey3').removeClass('labelPri');
         $('.letra6').addClass('labelE');
         $('.letra6').removeClass('label-char');
         error_clave3 = true;
@@ -436,8 +436,8 @@ let error_clave3 = false;
          $(".error4, .error5, .error6 ").hide();
          $('#clave1, #clave2, #clave3').removeClass('errorBorder');
          $('.bar4, .bar5, .bar6').addClass('bar');
-         $('.ic4, .ic5, .ic6').removeClass('l');
-         $('.ic4, .ic5, .ic6').addClass('labelPri');
+         $('.ic4, .ic5, .ic6, .ojo').removeClass('l');
+         $('.ic4, .ic5, .ic6, .ojo').addClass('labelPri');
          $('.letra4, .letra5, .letra6').removeClass('labelE');
          $('.letra4, .letra5, .letra6').addClass('label-char');
 
@@ -507,10 +507,24 @@ let error_clave3 = false;
                         }, 2000);
                     } else {
                         Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: data.respuesta.mensaje || 'Ocurrió un error inesperado',
-                        });
+                              toast: true,
+                              position: 'top-end',
+                              icon: 'error',
+                              title: data.respuesta.mensaje || 'Ocurrió un error inesperado',
+                              showConfirmButton: false,
+                              timer: 3000,
+                              timerProgressBar: 3000,
+                              width: '38%',
+                          });
+                        $(".error3").html(`<i  class='bi bi-exclamation-triangle-fill'></i> ${data.respuesta.mensaje}</b> !`);
+                        $(".error3").show();
+                        $('#correo').addClass('errorBorder');
+                        $('.bar3').removeClass('bar');
+                        $('.ic3').addClass('l');
+                        $('.ic3').removeClass('labelPri');
+                        $('.letra3').addClass('labelE');
+                        $('.letra3').removeClass('label-char');
+                        error_correo = true;
                     }
                 },
                 error(xhr, status, error) {

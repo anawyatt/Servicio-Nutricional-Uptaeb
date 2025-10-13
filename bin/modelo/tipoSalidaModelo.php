@@ -50,7 +50,7 @@ private function verificarTipoSalida2($tipoS)
             return ['resultado' => 'error tipo'];
         }
 
-        return ['resultado' => 'ok']; // ✅ importante
+        return ['resultado' => 'ok'];
 
     } catch (\PDOException $e) {
         return ['resultado' => '¡Error en el sistema!'];

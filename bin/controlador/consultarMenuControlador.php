@@ -118,6 +118,7 @@
           }
         }
         
+        
         if (isset($_POST['validar']) && isset($_POST['feMenu']) && isset($_POST['horarioComida'])
          && isset($_POST['id'])) {
           $validarFH= $object->validarFH( $_POST['feMenu'], $_POST['horarioComida'], $_POST['id']);

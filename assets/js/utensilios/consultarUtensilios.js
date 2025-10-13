@@ -1,7 +1,6 @@
 $(document).ready(function() {
   // Variables globales
   let permisos, modificarPermiso, eliminarPermiso, registrarPermiso;
-  let mostrarU;
   let id = '';
   const fileInput0 = document.getElementById('fileInput0');
   const container0 = document.getElementById('container0');
@@ -38,52 +37,74 @@ $(document).ready(function() {
       $('#enviar').attr(registrarPermiso, '');
   });
 
-  // Funciones principales
-  function tablaUtensilios() {
-      $.ajax({
-          method: "post",
-          url: "",
-          dataType: "json",
-          data: { mostrarU: true },
-          success(data) {
-              $('#ani').show(2000);
-              let tabla = "";
-              
-              data.forEach(row => {
-                  tabla += `
-                  <tr>
-                      <td class=""><img src="${row.imgUtensilios}" width="70" height="70" alt="Profile" class="mb-2"></td>
-                      <td class="">${row.nombre}</td>
-                      <td class="">${row.material}</td>
-                      <td class="text-center accion">
-                          <a id="${row.idUtensilios}" class="btn btn-sm btn-icon text-info flex-end text-center informacion" 
-                             data-bs-toggle="modal" data-bs-target="#infoUtensilio" data-bs-toggle="tooltip" 
-                             title="Información Utensilio" href="#">
-                              <span class="btn-inner pi">
-                                  <i class="bi bi-eye icon-24 t" width="20"></i>
-                              </span>
-                          </a>
-                          <a id="${row.idUtensilios}" class="btn btn-sm btn-icon text-primary flex-end text-center editar"  
-                             data-bs-toggle="tooltip" title="Modificar Utensilio" href="#">
-                              <span class="btn-inner pi">
-                                  <i class="bi bi-pencil icon-24 t" width="20"></i>
-                              </span>
-                          </a>
-                          <a id="${row.idUtensilios}" class="btn btn-sm btn-icon text-danger text-center borrar" 
-                             data-bs-toggle="modal" data-bs-toggle="tooltip" title="Anular Utensilio" href="#" type="button">
-                              <i class="bi bi-trash icon-24 t" width="20"></i>
-                          </a>
-                      </td>
-                  </tr>`;
-              });
-              
-              $('#tbody').html(tabla);
-              mostrarU = $('.tabla').DataTable();
-              mostrarU.on('draw.dt', quitarBotones);
-              quitarBotones();
-          }
-      });
-  }
+let mostrarU = $('.tabla').DataTable({
+    // Definición de las columnas para Utensilios
+    "columns": [
+        {
+            // Columna 1: Imagen del Utensilio (imgUtensilios)
+            "data": "imgUtensilios",
+            "render": function (data) {
+                return `<img src="${data}" width="70" height="70" alt="Profile" class="mb-2">`;
+            },
+            "orderable": false,
+            "className": ""
+        },
+        // Columna 2: Nombre (nombre)
+        { "data": "nombre", "className": "" },
+        // Columna 3: Material (material)
+        { "data": "material", "className": "" },
+        {
+            // Columna 4: Acciones (idUtensilios)
+            "data": "idUtensilios",
+            "className": "text-center accion",
+            "render": function (data) {
+                // 'data' es el idUtensilios en este caso
+                return `
+                <a id="${data}" class="btn btn-sm btn-icon text-info flex-end text-center informacion" 
+                    data-bs-toggle="modal" data-bs-target="#infoUtensilio" data-bs-toggle="tooltip" 
+                    title="Información Utensilio" href="#">
+                    <span class="btn-inner pi">
+                        <i class="bi bi-eye icon-24 t" width="20"></i>
+                    </span>
+                </a>
+                <a id="${data}" class="btn btn-sm btn-icon text-primary flex-end text-center editar"  
+                    data-bs-toggle="tooltip" title="Modificar Utensilio" href="#">
+                    <span class="btn-inner pi">
+                        <i class="bi bi-pencil icon-24 t" width="20"></i>
+                    </span>
+                </a>
+                <a id="${data}" class="btn btn-sm btn-icon text-danger text-center borrar" 
+                    data-bs-toggle="modal" data-bs-toggle="tooltip" title="Anular Utensilio" href="#" type="button">
+                    <i class="bi bi-trash icon-24 t" width="20"></i>
+                </a>`;
+            },
+            "orderable": false
+        }
+    ],
+    "order": [[1, "asc"]]
+});
+
+function tablaUtensilios() {
+    $.ajax({
+        method: "post",
+        url: "",
+        dataType: "json",
+        data: { mostrarU: true },
+        success(data) {
+            $('#ani').show(2000);
+            
+            mostrarU.clear().rows.add(data).draw();
+            mostrarU.on('draw.dt', function () {
+                quitarBotones();
+            });
+            quitarBotones();
+
+        },
+        error: function(jqXHR, textStatus, errorThrown) {
+            console.error("Error al cargar utensilios: ", textStatus, errorThrown);
+        }
+    });
+}
 
   function quitarBotones() {
       if (typeof permisos.modificar == 'undefined') {
@@ -128,100 +149,103 @@ $(document).ready(function() {
   }
 
   // Funciones de validación
-  function chequeoImagen(onValidationComplete) {
-    if (fileInput0.files.length === 0) {
 
-        $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> Ingrese una imagen valida para modificar.');
-        $(".error1").show();
-        error_imagen = true;
-        if (onValidationComplete) onValidationComplete(false);
-        return;
-    }
+  // validar Imagen---------------------------------------------
 
+ function chequeoImagen(){
+  if (fileInput0.files.length === 0) {
+              container0.innerHTML = ''; // Limpiar el contenedor
+              container0.appendChild(defaultImage); 
+              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> Ingrese una imagen (JPG, PNG)!');
+              $(".error1").show();
+              $('#fileInput0').addClass('errorBorder');
+              $('.bar1').removeClass('bar');
+              $('.ic1').addClass('l');
+              $('.ic1').removeClass('labelPri');
+              $('.letra').addClass('labelE');
+              $('.letra').removeClass('label-char');
+             fileInput0.classList.add('changed');
+             error_imagen = true;
+ 
+  } 
+  else{
+    validarPesoImagen0(fileInput0);
+ 
     const file = fileInput0.files[0];
-
-    // Llama a la función que valida el peso
-    if (validarPesoImagen0(fileInput0) === false) {
-        if (onValidationComplete) onValidationComplete(false); // Notifica que la validación falló
-        return;
-    }
-
-    // Valida el tipo de archivo
-    if (!file.type.startsWith('image/')) {
-        $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> El archivo debe tener formato de imagen (JPG, PNG)!');
-        $(".error1").show();
-        fileInput0.value = '';
-        error_imagen = true;
-        if (onValidationComplete) onValidationComplete(false); // Notifica que la validación falló
-        return;
-    }
-
     const reader = new FileReader();
-    const image = new Image();
-
-    // Esto se ejecuta SI la imagen está dañada
-    // Si la imagen está dañada
-image.onerror = function() {
-    container0.innerHTML = '';
-    container0.appendChild(defaultImage);
-    $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> La imagen está dañada o tiene un formato no válido.');
-    $(".error1").show();
-    fileInput0.value = '';
-    error_imagen = true;
-
-    // --- INICIO: APLICAR ESTILOS DE ERROR ---
-    $('#btnSeleccionarArchivo').removeClass('btn-primary').addClass('btn-danger'); // Pone el botón visible en rojo
-    $('#fileInput0').addClass('errorBorder');
-    $('.bar1').removeClass('bar');
-    $('.ic1').addClass('l').removeClass('labelPri');
-    $('.letra').addClass('labelE').removeClass('label-char'); // Pone las letras del label en rojo
-    // --- FIN: APLICAR ESTILOS DE ERROR ---
-
-    if (onValidationComplete) onValidationComplete(false); // Notifica que la validación falló
-};
-
-// Si la imagen es VÁLIDA
-image.onload = function() {
-    container0.innerHTML = '';
-    container0.appendChild(image);
-    $(".error1").hide();
-    error_imagen = false;
-
-    // --- INICIO: RESTAURAR ESTILOS NORMALES ---
-    $('#btnSeleccionarArchivo').removeClass('btn-danger').addClass('btn-primary'); // Devuelve el botón a su color original
-    $('#fileInput0').removeClass('errorBorder'); 
-    $('.bar1').addClass('bar');
-    $('.ic1').removeClass('l').addClass('labelPri');
-    $('.letra').removeClass('labelE').addClass('label-char'); // Devuelve las letras a su color normal
-    // --- FIN: RESTAURAR ESTILOS NORMALES ---
-
-    if (onValidationComplete) onValidationComplete(true); // Notifica que la validación fue exitosa
-};
 
     reader.onload = function(e) {
+        const image = document.createElement('img');
         image.src = e.target.result;
+        container0.innerHTML = '';
+        container0.appendChild(image);
     };
 
-    reader.readAsDataURL(file);
-}
-
-
-
-  function validarPesoImagen0(input) {
-    if (input.files && input.files[0]) {
-        const imagen = input.files[0];
-        const pesoMb = imagen.size / 1024 / 1024;
-
-        if (pesoMb > 2) {
-            $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> La imagen excede el peso máximo de 2MB!');
-            $(".error1").show();
-            input.value = "";
-            error_imagen = true;
-            return false; // Devuelve 'falso' porque hubo un error
-        }
+    if (file.type.startsWith('image/')) {
+        reader.readAsDataURL(file);
+             $(".error1").html("");
+             $(".error1").hide();
+             $('#fileInput0').removeClass('errorBorder');
+             $('.bar1').addClass('bar');
+             $('.ic1').removeClass('l');
+             $('.ic1').addClass('labelPri');
+             $('.letra').removeClass('labelE');
+             $('.letra').addClass('label-char');
+              fileInput0.classList.remove('changed');
+    } else {
+              container0.innerHTML = ''; // Limpiar el contenedor
+              container0.appendChild(defaultImage); 
+              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la imagen con formato (JPG, PNG)!');
+              $(".error1").show();
+              $('#fileInput0').addClass('errorBorder');
+              $('.bar1').removeClass('bar');
+              $('.ic1').addClass('l');
+              $('.ic1').removeClass('labelPri');
+              $('.letra').addClass('labelE');
+              $('.letra').removeClass('label-char');
+              fileInput0.classList.add('changed');
+            
+        fileInput0.value = '';
+        error_imagen = true;
     }
-    return true; // Devuelve 'verdadero' porque el peso es correcto
+  }
+    
 }
+
+function validarPesoImagen0(input) {
+    if (input.files && input.files[0]) {
+    const imagen = input.files[0];
+    const pesoMb = imagen.size / 1024 / 1024; // Convertir el tamaño a MB
+
+    if (pesoMb > 2) {
+              container0.innerHTML = ''; // Limpiar el contenedor
+              container0.appendChild(defaultImage); 
+              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> La imagen excede el peso máximo de 2MB!');
+              $(".error1").show();
+              $('#fileInput0').addClass('errorBorder');
+              $('.bar1').removeClass('bar');
+              $('.ic1').addClass('l');
+              $('.ic1').removeClass('labelPri');
+              $('.letra').addClass('labelE');
+              $('.letra').removeClass('label-char');
+              input.classList.add('changed');
+             input.value = "";
+             error_imagen = true;
+    
+               
+    } else {
+             $(".error1").html("");
+             $(".error1").hide();
+             $('#fileInput0').removeClass('errorBorder');
+             $('.bar1').addClass('bar');
+             $('.ic1').removeClass('l');
+             $('.ic1').addClass('labelPri');
+             $('.letra').removeClass('labelE');
+             $('.letra').addClass('label-char');
+              fileInput0.classList.remove('changed');
+     }
+   }
+  }
 
 
   function chequeo_utensilio() {
@@ -298,18 +322,6 @@ image.onload = function() {
       container0.appendChild(defaultImage);
   }
 
-  function mostrarErrorImagen(mensaje) {
-      $('.error1').html(`<i class="bi bi-exclamation-triangle-fill"></i> ${mensaje}`);
-      $(".error1").show();
-      $('#fileInput0').addClass('errorBorder');
-      $('.bar1').removeClass('bar');
-      $('.ic1').addClass('l');
-      $('.ic1').removeClass('labelPri');
-      $('.letra').addClass('labelE');
-      $('.letra').removeClass('label-char');
-      fileInput0.classList.add('changed');
-  }
-
   function limpiarErrorImagen() {
       $(".error1").html("").hide();
       $('#fileInput0').removeClass('errorBorder');
@@ -339,9 +351,10 @@ image.onload = function() {
 
   function primary() {
       resetearImagen();
+      limpiarErrorImagen();
       $(".error1, .error2, .error3, .error4, .error5").html("").hide();
-      $('#fileInput0, #utensilio, #material').removeClass('errorBorder');
-      $('#tipoU').removeClass('is-invalid');
+      $('#fileInput0, #utensilio').removeClass('errorBorder');
+      $('#tipoU,#material').removeClass('is-invalid');
       $('.bar1, .bar2, .bar3, .bar4, .bar5').addClass('bar');
       $('.ic1, .ic2, .ic3, .ic4, .ic5').removeClass('l').addClass('labelPri');
       $('.letra, .letra2, .letra3, .letra4, .letra5').removeClass('labelE').addClass('label-char');
@@ -365,8 +378,7 @@ image.onload = function() {
           data: { modificarINFO: 'SI', id, tipoU, utensilio, material, csrfToken: token },
           success(dato) {
             
-              if (dato.resultado === 'existe') {
-                  $('.cerrar2').click();
+              if (dato.mensaje.resultado === 'existe') {
                   Swal.fire({
                       toast: true,
                       position: 'top-end',
@@ -376,11 +388,13 @@ image.onload = function() {
                       timer: 3000,
                       timerProgressBar: 3000,
                   });
-                  $('#tipoU').addClass('is-invalid');
-                  $('#utensilio, #material').addClass('errorBorder');
-                  $('.bar2, .bar3, .bar4').removeClass('bar');
-                  $('.ic2, .ic3, .ic4').addClass('l').removeClass('labelPri');
-                  $('.letra2, .letra3, .letra4').addClass('labelE').removeClass('label-char');
+                  $('.error3').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El utensilio ya está registrado!').show();
+                  $('.error4').html(' <i  class="bi bi-exclamation-triangle-fill"></i> El material ya está registrado!').show();
+                  $('#material').addClass('is-invalid');
+                  $('#utensilio').addClass('errorBorder');
+                  $('.bar3, .bar4').removeClass('bar');
+                  $('.ic3, .ic4').addClass('l').removeClass('labelPri');
+                  $('.letra3, .letra4').addClass('labelE').removeClass('label-char');
               } else if (dato.mensaje.resultado === 'modificado' && dato.newCsrfToken) {
                 $('[name="csrf_token"]').val(dato.newCsrfToken);
                   $('.cerrar2').click();
@@ -394,7 +408,7 @@ image.onload = function() {
                       timer: 2500,
                       timerProgressBar: true,
                   });
-                  mostrarU = null;
+                  delete mostrarU;
                   tablaUtensilios();
                   primary();
               }
@@ -402,6 +416,108 @@ image.onload = function() {
       });
     }
   }
+
+  function verificarUtensilio() {
+      const utensilio = cambiarFormato($("#utensilio").val());
+      const material = cambiarFormato($("#material").val());
+      const id = $('#idd').val();
+
+      $.ajax({
+          type: "POST",
+          url: '',
+          dataType: "json",
+          data: { verificarUtensilios:true, id, utensilio, material},
+          success(dato) {
+            
+              if (dato.resultado === 'existe') {
+                  mostrarError('error3', 'utensilio', 'errorBorder', 3, 'El utensilio ya está registrado!');
+                  mostrarError('error4', 'material', 'is-invalid', 4, 'El material ya está registrado!');
+                    
+                  Swal.fire({
+                      toast: true,
+                      position: 'top-end',
+                      icon: 'error',
+                      title: `El utensilio <b class="fw-bold text-rojo">${utensilio}</b> con el material <b class="fw-bold text-rojo">${material}</b> ya está registrado!`,
+                      showConfirmButton: false,
+                      timer: 3000,
+                      timerProgressBar: 3000,
+                  });
+                 error_utensilio = true;
+
+              } 
+              else if (dato.resultado === 'no existe') {
+                 limpiarError('error4', 'material', 'is-invalid', 4);
+                 limpiarError('error3', 'utensilio', 'errorBorder', 3);
+                    error_utensilio = false;
+              }
+          }
+      });
+  }
+
+  function verificarIMG(){
+    let fileInput = $("#fileInput0")[0];
+    let imagen = fileInput.files.length ? fileInput.files[0] : null;
+
+    if (imagen) {
+        let formData = new FormData();
+        formData.append("imagen", imagen);
+        formData.append("validarIMG", true);
+
+        $.ajax({
+            type: "POST",
+            url: '', 
+            data: formData,
+            dataType: "json",
+            processData: false, 
+            contentType: false, 
+            success(data){
+                data = typeof data === 'string' ? JSON.parse(data) : data;
+                
+                if (
+                    data.resultado === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
+                    data.resultado === 'La imagen no debe superar los 2MB!' ||
+                    data.resultado === 'La imagen está dañada o no se puede procesar!' ||
+                    data.resultado === 'No se recibió imagen'
+                ) {
+                    container0.innerHTML = ''; // Limpiar el contenedor
+                    container0.appendChild(defaultImage); 
+                    $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> ' + data.resultado + '!');
+                    $(".error1").show();
+                    $('#fileInput0').addClass('errorBorder');
+                    $('.bar1').removeClass('bar');
+                    $('.ic1').addClass('l');
+                    $('.ic1').removeClass('labelPri');
+                    $('.letra').addClass('labelE');
+                    $('.letra').removeClass('label-char');
+                    fileInput0.classList.add('changed');
+                
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon:'error',
+                        title:data.resultado,
+                        showConfirmButton:false,
+                        timer:3000,
+                        timerProgressBar:3000,
+                    });
+
+                    error_imagen = true;
+                } else {
+                    $(".error1").html("");
+                    $(".error1").hide();
+                    $('#fileInput0').removeClass('errorBorder');
+                    $('.bar1').addClass('bar');
+                    $('.ic1').removeClass('l');
+                    $('.ic1').addClass('labelPri');
+                    $('.letra').removeClass('labelE');
+                    $('.letra').addClass('label-char');
+                    error_imagen = false;
+                }
+            }
+        });
+    }
+}
+
 
   function modificarImagen() {
       const datos = new FormData();
@@ -443,28 +559,35 @@ image.onload = function() {
               }
               // Manejo de errores de imagen dañada, tipo o tamaño
               if (
-                data.resultado === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
-                data.resultado === 'La imagen no debe superar los 2MB!' ||
-                data.resultado === 'La imagen está dañada o no se puede procesar!' ||
-                data.resultado === 'No se recibió imagen'
+                data.mensaje.resultado === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
+                data.mensaje.resultado === 'La imagen no debe superar los 2MB!' ||
+                data.mensaje.resultado === 'La imagen está dañada o no se puede procesar!' ||
+                data.mensaje.resultado === 'No se recibió imagen'
               ) {
-                $('.cerrar2').click();
-                resetearImagen();
-                mostrarErrorImagen(data.resultado);
+               container0.innerHTML = ''; 
+              container0.appendChild(defaultImage); 
+              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> '+data.mensaje.resultado+'');
+              $(".error1").show();
+              $('#fileInput0').addClass('errorBorder');
+              $('.bar1').removeClass('bar');
+              $('.ic1').addClass('l');
+              $('.ic1').removeClass('labelPri');
+              $('.letra').addClass('labelE');
+              $('.letra').removeClass('label-char');
+             fileInput0.classList.add('changed');
                 Swal.fire({
                   toast: true,
                   position: 'top-end',
                   icon: 'error',
-                  title: data.resultado,
+                  title: data.mensaje.resultado,
                   showConfirmButton: false,
                   timer: 2500,
                   timerProgressBar: true,
                 });
-                error_imagen = true;
-                return;
               }
-              if (data.resultado === 'imagen modificada') {
-                error_imagen = false; // Reiniciar flag si fue exitosa
+              if (data.mensaje.resultado === 'imagen modificada' && data.newCsrfToken) {
+                $('[name="csrf_token"]').val(data.newCsrfToken);
+                error_imagen = false;
                 $('.cerrar2').click();
                 Swal.fire({
                     toast: true,
@@ -544,13 +667,24 @@ image.onload = function() {
   // Event Listeners
   fileInput0.addEventListener('change', function() {
     chequeoImagen(); 
-});
+    verificarIMG();
+  });
+    let timer;
 
   $("#tipoU").on('change', verificarTipoU);
-  $("#utensilio").focusout(chequeo_utensilio);
-  $("#utensilio").on('keyup', chequeo_utensilio);
-  $("#material").focusout(chequeo_material);
-  $("#material").on('keyup', chequeo_material);
+
+
+  $("#material").on('change', function(){
+     chequeo_material()
+     verificarUtensilio()
+ });
+   $("#utensilio").on('keyup', function(){
+    chequeo_utensilio();
+        clearTimeout(timer); 
+         timer = setTimeout(function () {
+           verificarUtensilio()
+         }, 500);
+ });
   
   $("#edita").on("click", function(e) {
       e.preventDefault();
@@ -575,27 +709,24 @@ image.onload = function() {
   $("#editarIMG").on("click", function(e) {
     e.preventDefault();
 
-    // Volvemos a llamar a la validación para estar 100% seguros
-    // y le decimos qué hacer cuando termine.
-    chequeoImagen(function(esValida) {
-        
-        // Este código solo se ejecuta DESPUÉS de que la validación termina.
-        if (esValida) {
-            // Si la imagen es válida, llamamos a la función que la envía al servidor.
-            modificarImagen(); 
-        } else {
-            // Si la imagen no es válida, mostramos una alerta.
-             Swal.fire({
-                toast: true,
-                position: 'top-end',
-                icon: 'error',
-                title: 'Por favor, selecciona una imagen válida.',
-                showConfirmButton: false,
-                timer: 3000,
-                timerProgressBar: true,
-            });
-        }
-    });
+     e.preventDefault();
+      chequeoImagen();
+      error_imagen=false;
+      if (error_imagen === false) {
+        modificarImagen();
+      }
+      else{
+                      Swal.fire({
+                          toast: true,
+                          position: 'top-end',
+                          icon:'error',
+                          title:'<span class=" text-rojo">Ingrese la imagen Correctamente!</span>',
+                          showConfirmButton:false,
+                          timer:3000,
+                          timerProgressBar:3000,
+                          width:'38%',
+                      })
+                 }
 });
   
   $(".editarI").on("click", function() {
@@ -603,7 +734,7 @@ image.onload = function() {
       $('.editarInfo').hide(900);
   });
   
-  $(".cance").on("click", function() {
+  $(".cance, .limpiar").on("click", function() {
       primary();
       $('.formIMG').trigger('reset');
       $('.editarInfo').show(900);
@@ -659,12 +790,14 @@ image.onload = function() {
               const tabli1 = `
                   <tr>
                       <td class="">${data[0].tipo}</td>
-                      <td class="">${data[0].nombre}</td>
+                      
                   </tr>`;
               
               const tabli2 = `
                   <tr>
+                      <td class="">${data[0].nombre}</td>
                       <td class="">${data[0].material}</td>
+                      
                   </tr>`;
               
               const imag = `<img src="${data[0].imgUtensilios}" width="250" height="250" alt="Profile" class="mb-2">`;

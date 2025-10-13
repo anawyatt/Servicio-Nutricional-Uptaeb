@@ -56,12 +56,17 @@
         <div class="col-sm-12">
           <div class="card container shadow" data-aos="fade-up" data-aos-delay="700">
             <div class="card-body row ">
+              <div class=" d-flex">
 
-              <div class="form-group col-md-12">
+                                    <div class="checkbox p-1">
+                                        <input id="cbx" type="checkbox" class="activarFiltro" />
+                                        <label class="toggle" for="cbx"><span></span></label>
+                                    </div>
+                                    <div class="p-1">
+                                        <span>Filtrar Por Fechas</span>
+                                    </div>
 
-                <input type="checkbox" class="form-check-input" id="activar_filtro">
-                <label class="form-check-label" for="">Buscar Por Fechas</label>
-              </div>
+                                </div>
 
               <div class="buscar mt-2 row justify-content-center">
                 <div class="wave-group p-3 col-md-5">

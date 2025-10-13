@@ -16,7 +16,7 @@ $(document).ready(function () {
 
   // Manejo de filtros
   function setupFilters() {
-    const $activarFiltro = $("#activar_filtro");
+    const $activarFiltro = $("#cbx");
     const $buscar = $(".buscar");
 
     // Estado inicial
@@ -24,7 +24,7 @@ $(document).ready(function () {
       $buscar.hide();
     }
 
-    if (!$("#activar_filtro2").is(":checked")) {
+    if (!$("#cbx").is(":checked")) {
       $(".buscar2").hide();
     }
 
@@ -37,6 +37,8 @@ $(document).ready(function () {
         $fechaI.val("");
         $fechaF.val("");
         mostrarTabla();
+         ocultarError($fechaF, $error2, ".bar2", ".ic2", ".letra2");
+         ocultarError($fechaI, $error1, ".bar1", ".ic1", ".letra1");
       }
     });
   }
@@ -267,7 +269,7 @@ function ocultarError($campo, $error, barClass, icClass, letraClass) {
             // Construir tablas
             tabli1 += `
                 <tr>
-                  <td style="font-weight: bold;">${fila.acciones}</td>
+                  <td>${fila.acciones}</td>
                 </tr>`;
 
             tabli2 += `

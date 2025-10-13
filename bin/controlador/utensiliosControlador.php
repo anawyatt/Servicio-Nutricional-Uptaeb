@@ -11,10 +11,11 @@
  use helpers\csrfTokenHelper;
  use middleware\csrfMiddleware;
  use modelo\utensiliosModelo as utensilios;
+ use middleware\PostRateMiddleware as PostRateMiddleware;
 
   $objeto = new utensilios;
   $sistem = new encryption();
-  $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Utensilios', 'consultar');
+  $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Utensilios', 'registrar');
   $permisos = $datosPermisos['permisos'];
   $payload = $datosPermisos['payload'];
   $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
@@ -55,44 +56,32 @@ if (isset($datosPermisos['permiso']['consultar'])) {
   }
 }
 
+if (isset($_FILES['imagen']) && isset($_POST['validarIMG'])) {
+    $validarImagen = $objeto->validarImagen($_FILES['imagen']);
+    echo json_encode($validarImagen);
+    die();
+}
 
-if (isset($datosPermisos['permiso']['registrar'])) {
-  if (isset($_POST['tipoU']) && isset($_POST['utensilio']) && isset($_POST['material'])) {
 
-      $tipoU = $_POST['tipoU'];
+  if (isset($_POST['validarU']) && isset($_POST['utensilio']) && isset($_POST['material'])) {
+
       $utensilio = $_POST['utensilio'];
       $material = $_POST['material'];
 
-      $verificar = $objeto->verificarUtensilios($tipoU, $utensilio, $material);
-
+      $verificar = $objeto->verificarUtensilios( $utensilio, $material);
       echo json_encode($verificar);
       exit;
   }
 
   if (isset($_POST['imgState']) && isset($_POST['tipoUr']) && isset($_POST['utensilior']) && isset($_POST['materialr']) && isset($_POST['csrfToken'])) {
+    PostRateMiddleware::verificar('registrar', (array)$payload);
     $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
-    $imagen = (isset($_FILES['imagen']) && isset($_FILES['imagen']['tmp_name'])) ? $_FILES['imagen']['tmp_name'] : null;
-
-
-    // Validación de imagen usando el modelo (igual que alimentos)
-    if ($_POST['imgState'] === 'SI') {
-      if (isset($_FILES['imagen']) && $_FILES['imagen']['error'] === 0) {
-        $resultado = $objeto->validarImagen($_FILES['imagen']);
-        if ($resultado !== true) {
-          echo json_encode($resultado + ['newCsrfToken' => $csrf['newToken']]);
-          exit;
-        }
-      } else {
-        echo json_encode(['resultado' => 'No se recibió imagen', 'newCsrfToken' => $csrf['newToken']]);
-        exit;
-      }
-    }
+    $imagen = ($_POST['imgState'] === 'SI' && isset($_FILES['imagen'])) ? $_FILES['imagen'] : null;
 
     $respuesta = $objeto->registrarUtensilio($imagen, $_POST['imgState'], $_POST['tipoUr'], $_POST['utensilior'], $_POST['materialr'], false);
     echo json_encode(['mensaje'=> $respuesta, 'newCsrfToken' => $csrf['newToken']]);
     exit;
   }
-}
 
  $components = new initComponents();
  $navegador = new navegador($payload);

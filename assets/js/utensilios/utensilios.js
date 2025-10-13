@@ -6,6 +6,8 @@ let error_utensilio=false;
 let error_material=false;
 let error_veriTU = false;
 let error_veriU = false;
+let imgState = 'NO';
+
 let dupli_utensilio = false;
 
         const defaultImage = new Image();
@@ -14,12 +16,12 @@ let dupli_utensilio = false;
 
 fileInput0.addEventListener('change', function() {
       chequeoImagen();
+      verificarIMG()
   });
 
  $("#tipoU").on('change', function() {
     chequeo_tipoU();
     verificarTipoU();
-    verificarUtensilio()
  });
 
  $("#utensilio").focusout(function(){
@@ -50,12 +52,17 @@ fileInput0.addEventListener('change', function() {
     error_material = false;
     error_veriTU = false;
     error_veriU = false;
+    error_imagen=false;
     // NO reiniciar error_imagen aquí, debe persistir si hubo error previo
 
     chequeo_tipoU();
     chequeo_utensilio();
     verificarTipoU();
     chequeo_material();
+    chequeoImagen();
+    verificarUtensilio();
+    verificarIMG();
+
 
     let imagen = $("#fileInput0")[0].files.length ? $("#fileInput0")[0].files[0] : null;
     if (!imagen) {
@@ -64,7 +71,6 @@ fileInput0.addEventListener('change', function() {
         imgState = 'SI';
     }
 
-    // Si hay error de imagen, bloquear registro
     if (error_imagen === true) {
         Swal.fire({
             toast: true,
@@ -94,7 +100,7 @@ fileInput0.addEventListener('change', function() {
             datos.append("tipoUr", tipoUr);
             datos.append("utensilior", utensilior);
             datos.append("materialr", materialr);
-            console.log("datos");
+            console.log(...datos);
             registrar(datos);
         }
     } else {
@@ -140,101 +146,53 @@ function cambiarFormato(texto) {
 
 // validar Imagen---------------------------------------------
 
-function chequeoImagen() {
-    if (fileInput0.files.length === 0) {
-        // ... (Tu código para "no hay archivo" ya está bien)
-    } else {
-        const file = fileInput0.files[0];
-        
-        if (validarPesoImagen0(fileInput0) === false) {
-             return; 
-        }
+// validar Imagen---------------------------------------------
 
-        if (!file.type.startsWith('image/')) {
-            container0.innerHTML = '';
-            container0.appendChild(defaultImage);
-            $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> El archivo debe tener formato de imagen (JPG, PNG)!');
-            $(".error1").show();
-            
-            // --- ESTILOS DE ERROR ---
-            $('#fileInput0').addClass('errorBorder'); // Borde rojo para el input/botón
-            $('.bar1').removeClass('bar');
-            $('.ic1').addClass('l').removeClass('labelPri');
-            $('.letra').addClass('labelE').removeClass('label-char'); // Letras en rojo
-            
-            fileInput0.value = '';
-            error_imagen = true;
-            return;
-        }
+ function chequeoImagen(){
+ if (fileInput0.files.length > 0) {
+    validarPesoImagen0(fileInput0);
+ 
+    const file = fileInput0.files[0];
+    const reader = new FileReader();
 
-        const reader = new FileReader();
-        const image = new Image();
+    reader.onload = function(e) {
+        const image = document.createElement('img');
+        image.src = e.target.result;
+        container0.innerHTML = '';
+        container0.appendChild(image);
+    };
 
-        // Si la imagen está dañada
-        image.onerror = function() {
-            container0.innerHTML = '';
-            container0.appendChild(defaultImage);
-            $('.error1').html(' <i class="bi bi-exclamation-triangle-fill"></i> La imagen está dañada o tiene un formato no válido.');
-            $(".error1").show();
-
-            // --- ESTILOS DE ERROR ---
-            $('#fileInput0').addClass('errorBorder'); // Borde rojo para el input/botón
-            $('.bar1').removeClass('bar');
-            $('.ic1').addClass('l').removeClass('labelPri');
-            $('.letra').addClass('labelE').removeClass('label-char'); // Letras en rojo
-            
-            fileInput0.value = '';
-            error_imagen = true;
-        };
-
-        // Si la imagen es VÁLIDA
-        image.onload = function() {
-            container0.innerHTML = '';
-            container0.appendChild(image);
-            $(".error1").hide();
-
-            // --- RESTAURAR ESTILOS NORMALES ---
-            $('#fileInput0').removeClass('errorBorder'); // Quita el borde rojo
-            $('.bar1').addClass('bar');
-            $('.ic1').removeClass('l').addClass('labelPri');
-            $('.letra').removeClass('labelE').addClass('label-char'); // Letras a su color normal
-
-            error_imagen = false;
-        };
-        
-        reader.onload = function(e) {
-            image.src = e.target.result;
-        };
-
+    if (file.type.startsWith('image/')) {
         reader.readAsDataURL(file);
-    }
-}
-
-
-function validarPesoImagen0(input) {
-    if (input.files && input.files[0]) {
-        const imagen = input.files[0];
-        const pesoMb = imagen.size / 1024 / 1024;
-
-        if (pesoMb > 2) {
-            container0.innerHTML = '';
-            container0.appendChild(defaultImage);
-            $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> La imagen excede el peso máximo de 2MB!');
-            $(".error1").show();
+             $(".error1").html("");
+             $(".error1").hide();
+             $('#fileInput0').removeClass('errorBorder');
+             $('.bar1').addClass('bar');
+             $('.ic1').removeClass('l');
+             $('.ic1').addClass('labelPri');
+             $('.letra').removeClass('labelE');
+             $('.letra').addClass('label-char');
+              fileInput0.classList.remove('changed');
+    } else {
+              container0.innerHTML = ''; // Limpiar el contenedor
+              container0.appendChild(defaultImage); 
+              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la imagen con formato (JPG, PNG)!');
+              $(".error1").show();
+              $('#fileInput0').addClass('errorBorder');
+              $('.bar1').removeClass('bar');
+              $('.ic1').addClass('l');
+              $('.ic1').removeClass('labelPri');
+              $('.letra').addClass('labelE');
+              $('.letra').removeClass('label-char');
+              fileInput0.classList.add('changed');
             
-            // --- ESTILOS DE ERROR ---
-            $('#fileInput0').addClass('errorBorder'); // Borde rojo para el input/botón
-            $('.bar1').removeClass('bar');
-            $('.ic1').addClass('l').removeClass('labelPri');
-            $('.letra').addClass('labelE').removeClass('label-char'); // Letras en rojo
-
-            input.value = "";
-            error_imagen = true;
-            return false;
-        }
+        fileInput0.value = '';
+        error_imagen = true;
     }
-    return true;
-}
+  }
+    
+    }
+
 
 function validarPesoImagen0(input) {
     if (input.files && input.files[0]) {
@@ -242,34 +200,34 @@ function validarPesoImagen0(input) {
     const pesoMb = imagen.size / 1024 / 1024; // Convertir el tamaño a MB
 
     if (pesoMb > 2) {
-        container0.innerHTML = '';
-        container0.appendChild(defaultImage);
-        $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> La imagen excede el peso máximo de 2MB!');
-        $(".error1").show();
-        $('#fileInput0').addClass('errorBorder');
-        $('.bar1').removeClass('bar');
-        $('.ic1').addClass('l');
-        $('.ic1').removeClass('labelPri');
-        $('.letra').addClass('labelE');
-        $('.letra').removeClass('label-char');
-        input.classList.add('changed');
-        input.value = "";
-        error_imagen = true;
+              container0.innerHTML = ''; // Limpiar el contenedor
+              container0.appendChild(defaultImage); 
+              $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> La imagen excede el peso máximo de 2MB!');
+              $(".error1").show();
+              $('#fileInput0').addClass('errorBorder');
+              $('.bar1').removeClass('bar');
+              $('.ic1').addClass('l');
+              $('.ic1').removeClass('labelPri');
+              $('.letra').addClass('labelE');
+              $('.letra').removeClass('label-char');
+              input.classList.add('changed');
+             input.value = "";
+             error_imagen = true;
+    
+               
     } else {
-        $(".error1").html("");
-        $(".error1").hide();
-        $('#fileInput0').removeClass('errorBorder');
-        $('.bar1').addClass('bar');
-        $('.ic1').removeClass('l');
-        $('.ic1').addClass('labelPri');
-        $('.letra').removeClass('labelE');
-        $('.letra').addClass('label-char');
-        fileInput0.classList.remove('changed');
-        error_imagen = false; // Reiniciar error si el peso es válido
-    }
+             $(".error1").html("");
+             $(".error1").hide();
+             $('#fileInput0').removeClass('errorBorder');
+             $('.bar1').addClass('bar');
+             $('.ic1').removeClass('l');
+             $('.ic1').addClass('labelPri');
+             $('.letra').removeClass('labelE');
+             $('.letra').addClass('label-char');
+              fileInput0.classList.remove('changed');
+     }
    }
   }
-
 // validar Tipo de utensilio
 
  function chequeo_tipoU() { 
@@ -334,8 +292,8 @@ function validarPesoImagen0(input) {
         if (material != 'Seleccionar') {
          $(".error4").html("");
          $(".error4").hide();
-         $('#material').removeClass('errorBorder');
-         $('.bar4').addClass('bar');
+         $('#material').removeClass('is-invalid');
+         $('.bar5').addClass('bar');
          $('.ic4').removeClass('l');
          $('.ic4').addClass('labelPri');
          $('.letra4').removeClass('labelE');
@@ -343,26 +301,18 @@ function validarPesoImagen0(input) {
         } else {
          $(".error4").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese el material!');
          $(".error4").show();
-         $('#material').addClass('errorBorder');
-         $('.bar4').removeClass('bar');
+         $('#material').addClass('is-invalid');
+         $('.bar5').removeClass('bar');
          $('.ic4').addClass('l');
          $('.ic4').removeClass('labelPri');
          $('.letra4').addClass('labelE');
          $('.letra4').removeClass('label-char');
-        
          error_material = true;
         }
     }
 
-
- // Otros..............
-
-// Variable global para almacenar los datos originales del utensilio en edición
-
-// Variable global para almacenar los datos originales del utensilio en edición
 let datosOriginalesUtensilio = null;
 
-// Función para cargar los datos originales antes de editar
 function cargarDatosOriginalesUtensilio(tipoU, utensilio, material, imagenUrl) {
     datosOriginalesUtensilio = {
         tipoU: tipoU,
@@ -372,43 +322,14 @@ function cargarDatosOriginalesUtensilio(tipoU, utensilio, material, imagenUrl) {
     };
 }
 
-// Ejemplo de uso: cuando el usuario hace clic en "modificar" de un utensilio
-// cargarDatosOriginalesUtensilio('Cuchara', 'Cuchara Grande', 'Acero', 'assets/images/cuchara.png');
 
 function primary(){
-    if (datosOriginalesUtensilio) {
-        // Restaurar los datos originales si se está editando
-        $("#tipoU").val(datosOriginalesUtensilio.tipoU).trigger('change.select2');
-        $("#utensilio").val(datosOriginalesUtensilio.utensilio);
-        $("#material").val(datosOriginalesUtensilio.material).trigger('change.select2');
-        // Restaurar imagen original si existe
-        container0.innerHTML = '';
-        if (datosOriginalesUtensilio.imagenUrl) {
-            const img = new Image();
-            img.src = datosOriginalesUtensilio.imagenUrl;
-            container0.appendChild(img);
-        } else {
-            container0.appendChild(defaultImage);
-        }
-        // Limpiar errores y estilos
-        $(".error1, .error2, .error3, .error4, .error5").html("");
-        $(".error1, .error2, .error3, .error4, .error5").hide();
-        $('#fileInput0, #utensilio, #material').removeClass('errorBorder');
-        $('#tipoU').removeClass('is-invalid');
-        $('.bar1, .bar2, .bar3, .bar4, .bar5').addClass('bar');
-        $('.ic1, .ic2, .ic3, .ic4, .ic5').removeClass('l');
-        $('.ic1, .ic2, .ic3, .ic4, .ic5').addClass('labelPri');
-        $('.letra, .letra2, .letra3, .letra4, .letra5').removeClass('labelE');
-        $('.letra, .letra2, .letra3, .letra4, .letra5').addClass('label-char');
-        fileInput0.classList.remove('changed');
-    } else {
-        // Si no hay edición, limpiar todo como antes
         container0.innerHTML = '';
         container0.appendChild(defaultImage);
         $(".error1, .error2, .error3, .error4, .error5").html("");
         $(".error1, .error2, .error3, .error4, .error5").hide();
         $('#fileInput0, #utensilio, #material').removeClass('errorBorder');
-        $('#tipoU').removeClass('is-invalid');
+        $('#tipoU, #material').removeClass('is-invalid');
         $('.bar1, .bar2, .bar3, .bar4, .bar5').addClass('bar');
         $('.ic1, .ic2, .ic3, .ic4, .ic5').removeClass('l');
         $('.ic1, .ic2, .ic3, .ic4, .ic5').addClass('labelPri');
@@ -416,7 +337,6 @@ function primary(){
         $('.letra, .letra2, .letra3, .letra4, .letra5').addClass('label-char');
         $('#tipoU, #material').val('Seleccionar').trigger('change.select2');
         fileInput0.classList.remove('changed');
-    }
 }
 
  ////---------------------------MOSTRAR SELECT TIPO DE UTENSILIOS -------------------------------
@@ -498,7 +418,6 @@ function verificarTipoU(){
 }
 
   function verificarUtensilio() {
-    let tipoU = cambiarFormato($("#tipoU").val());
     let utensilio = cambiarFormato($("#utensilio").val());
     let material = cambiarFormato($("#material").val());
 
@@ -507,7 +426,7 @@ function verificarTipoU(){
             type: "POST",
             url: '', 
             dataType: "json",
-            data: { tipoU, utensilio, material },
+            data: { validarU:true, utensilio, material },
             success: function(data) {
               if (data.resultado === 'existe') {
                 Swal.fire({
@@ -519,28 +438,99 @@ function verificarTipoU(){
                     timer: 3000,
                     timerProgressBar: true, 
                 });
-            
-                $('#tipoU').addClass('is-invalid');
-                $('#utensilio, #material').addClass('errorBorder');
-                $('.bar2, .bar3, .bar4').removeClass('bar');
-                $('.ic2, .ic3, .ic4').addClass('l').removeClass('labelPri');
-                $('.letra2, .letra3, .letra4').addClass('labelE').removeClass('label-char');
+                
+                $(".error3").html(` <i  class="bi bi-exclamation-triangle-fill"></i> El utensilio <b class="fw-bold text-rojo">${utensilio}</b>  ya está registrado!`);
+                $(".error3").show();
+                $(".error4").html(` <i  class="bi bi-exclamation-triangle-fill"></i> El  material <b class="fw-bold text-rojo">${material}</b> ya está registrado!`);
+                $(".error4").show();
+                $('#material').addClass('is-invalid');
+                $('#utensilio').addClass('errorBorder');
+                $('.bar3, .bar4').removeClass('bar');
+                $(' .ic3, .ic4').addClass('l').removeClass('labelPri');
+                $(' .letra3, .letra4').addClass('labelE').removeClass('label-char');
                 $("#registrar").prop("disabled", true);
                 dupli_utensilio = true;
             } else if (data.resultado === 'no existe') {
-                
-                $('#tipoU').removeClass('is-invalid');
-                $('#utensilio, #material').removeClass('errorBorder');
-                $('.bar2, .bar3, .bar4').addClass('bar');
-                $('.ic2, .ic3, .ic4').removeClass('l').addClass('labelPri');
-                $('.letra2, .letra3, .letra4').removeClass('labelE').addClass('label-char');
+                $(".error3").html("");
+                $(".error3").hide();
+                $(".error4").html("");
+                $(".error4").hide();
+                $('#material').removeClass('is-invalid');
+                $('#utensilio').removeClass('errorBorder');
+                $('.bar3, .bar4').addClass('bar');
+                $(' .ic3, .ic4').removeClass('l').addClass('labelPri');
+                $(' .letra3, .letra4').removeClass('labelE').addClass('label-char');
                 $("#registrar").prop("disabled", false);
             }
             }
         });
     }
 }
-              
+        
+
+function verificarIMG(){
+    let fileInput = $("#fileInput0")[0];
+    let imagen = fileInput.files.length ? fileInput.files[0] : null;
+
+    if (imagen) {
+        let formData = new FormData();
+        formData.append("imagen", imagen);
+        formData.append("validarIMG", true);
+
+        $.ajax({
+            type: "POST",
+            url: '', 
+            data: formData,
+            dataType: "json",
+            processData: false, 
+            contentType: false, 
+            success(data){
+                data = typeof data === 'string' ? JSON.parse(data) : data;
+                
+                if (
+                     data.resultado === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
+                    data.resultado === 'La imagen no debe superar los 2MB!' ||
+                    data.resultado === 'La imagen está dañada o no se puede procesar!' ||
+                    data.resultado === 'No se recibió imagen'
+                ) {
+                    container0.innerHTML = ''; // Limpiar el contenedor
+                    container0.appendChild(defaultImage); 
+                    $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> ' + data.resultado + '!');
+                    $(".error1").show();
+                    $('#fileInput0').addClass('errorBorder');
+                    $('.bar1').removeClass('bar');
+                    $('.ic1').addClass('l');
+                    $('.ic1').removeClass('labelPri');
+                    $('.letra').addClass('labelE');
+                    $('.letra').removeClass('label-char');
+                    fileInput0.classList.add('changed');
+                
+                    Swal.fire({
+                        toast: true,
+                        position: 'top-end',
+                        icon:'error',
+                        title:data.resultado,
+                        showConfirmButton:false,
+                        timer:3000,
+                        timerProgressBar:3000,
+                    });
+
+                    error_imagen = true;
+                } else {
+                    $(".error1").html("");
+                    $(".error1").hide();
+                    $('#fileInput0').removeClass('errorBorder');
+                    $('.bar1').addClass('bar');
+                    $('.ic1').removeClass('l');
+                    $('.ic1').addClass('labelPri');
+                    $('.letra').removeClass('labelE');
+                    $('.letra').addClass('label-char');
+                    error_imagen = false;
+                }
+            }
+        });
+    }
+}
 
 
    // REGISTRAR ----------------------------------------------------
@@ -560,14 +550,14 @@ function registrar(datos){
                 datos = typeof datos === 'string' ? JSON.parse(datos) : datos;
 
                 if (
-                    datos.resultado === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
-                    datos.resultado === 'La imagen no debe superar los 2MB!' ||
-                    datos.resultado === 'La imagen está dañada o no se puede procesar!' ||
-                    datos.resultado === 'No se recibió imagen'
+                    datos.mensaje.resultado === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
+                    datos.mensaje.resultado === 'La imagen no debe superar los 2MB!' ||
+                    datos.mensaje.resultado === 'La imagen está dañada o no se puede procesar!' ||
+                    datos.mensaje.resultado === 'No se recibió imagen'
                 ) {
                     container0.innerHTML = '';
                     container0.appendChild(defaultImage);
-                    $('.error1').html('<i class="bi bi-exclamation-triangle-fill"></i> ' + datos.resultado);
+                    $('.error1').html(' <i  class="bi bi-exclamation-triangle-fill"></i> ' + data.resultado + '!');
                     $(".error1").show();
                     $('#fileInput0').addClass('errorBorder');
                     $('.bar1').removeClass('bar');
@@ -576,7 +566,6 @@ function registrar(datos){
                     $('.letra').addClass('labelE');
                     $('.letra').removeClass('label-char');
                     fileInput0.classList.add('changed');
-                    error_imagen = true;
 
                     Swal.fire({
                         toast: true,
@@ -587,6 +576,7 @@ function registrar(datos){
                         timer: 2500,
                         timerProgressBar: true,
                     });
+                    error_imagen = true;
                 } else if (datos.mensaje && datos.mensaje.resultado === 'registrado' && datos.newCsrfToken) {
                     Swal.fire({
                         toast: true,

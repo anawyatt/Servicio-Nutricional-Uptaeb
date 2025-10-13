@@ -11,6 +11,7 @@ class utensiliosModelo extends connectDB {
 
 private $tipoU;
 private $utensilio;
+
 private $material;
 private $imagen;
 private $payload;
@@ -87,12 +88,8 @@ public function mostrarTipoUtensilios() {
 }
 
 
-public function verificarUtensilios($tipoU, $utensilio, $material) {
+public function verificarUtensilios($utensilio, $material) {
     
-    if (!preg_match("/^[0-9]+$/", $tipoU)) {
-        return ['resultado' => 'Seleccionar un tipo de utensilio válido'];
-    }
-
     if (!preg_match("/^[a-zA-ZáéíóúÁÉÍÓÚñÑ\s]{1,50}$/", $utensilio)) {
         return ['resultado' => 'Nombre de utensilio inválido'];
     }
@@ -101,9 +98,14 @@ public function verificarUtensilios($tipoU, $utensilio, $material) {
         return ['resultado' => 'Material inválido'];
     }
 
-    $this->tipoU = $tipoU;
     $this->utensilio = $utensilio;
     $this->material = $material;
+
+    return $this->verificarU();
+
+}
+
+private function verificarU() {
 
     try {
         $this->conectarDB();
@@ -111,13 +113,11 @@ public function verificarUtensilios($tipoU, $utensilio, $material) {
             SELECT nombre 
             FROM utensilios 
             WHERE status = 1 
-              AND idTipoU = ? 
               AND nombre = ? 
               AND material = ?
         ");
-        $verificar->bindValue(1, $this->tipoU);
-        $verificar->bindValue(2, $this->utensilio);
-        $verificar->bindValue(3, $this->material);
+        $verificar->bindValue(1, $this->utensilio);
+        $verificar->bindValue(2, $this->material);
         $verificar->execute();
         $data = $verificar->fetchAll();
         $this->desconectarDB();
@@ -134,6 +134,10 @@ public function verificarUtensilios($tipoU, $utensilio, $material) {
 
 
 public function registrarUtensilio($imagen, $imgState, $tipoU, $utensilios, $material, $returnJson = false) {
+     if (!in_array($imgState, ['SI', 'NO'])) {
+        return ['resultado'=> 'Valor inválido para men' ];
+    }
+   
     if (!preg_match("/^[0-9]+$/", $tipoU)) {
         return ['resultado' => 'Seleccionar un tipo de utensilio válido'];
     }
@@ -146,44 +150,38 @@ public function registrarUtensilio($imagen, $imgState, $tipoU, $utensilios, $mat
         return ['resultado' => 'Material inválido'];
     }
 
+    if($this->verificarUtensilios($utensilios, $material)['resultado'] === 'existe') {
+        return ['resultado' => 'existe'];
+    }
+
     $codigo = $this->generarCodigo($utensilios, $material);
     $ruta = "assets/images/utensilios/";
     $this->tipoU = $tipoU;
-    $this->utensilios = $utensilios;
+    $this->utensilio = $utensilios;
     $this->material = $material;
 
-    $nombreFinal = $ruta . $codigo . '.png';
-
-    if ($imgState === 'NO') {
-        $imagenPredeterminada = $ruta . 'utensiliospredetereminado.png';
-
-     
-        $intento = 1;
-        while (file_exists($nombreFinal)) {
-            $codigo = $this->generarCodigo($utensilios, $material . $intento);
-            $nombreFinal = $ruta . $codigo . '.png';
-            $intento++;
-        }
-
-        if (!copy($imagenPredeterminada, $nombreFinal)) {
-            return ['resultado' => 'Error al copiar la imagen predeterminada'];
-        }
-
-        $this->imagen = $nombreFinal;
-
+    if ($imgState=== 'NO') {
+        $this->imagen = $ruta . 'utensilioPredeterminado.png';
     } else if ($imgState === 'SI' && $imagen !== null) {
-        $intento = 1;
-        while (file_exists($nombreFinal)) {
-            $codigo = $this->generarCodigo($utensilios, $material . $intento);
-            $nombreFinal = $ruta . $codigo . '.png';
-            $intento++;
+        $validacion = $this->validarImagen($imagen);
+        if ($validacion !== true) {
+            return $validacion; 
         }
+        $mime = mime_content_type($imagen['tmp_name']);
+        $extension = match($mime) {
+            'image/jpeg', 'image/jpg' => 'jpg',
+            'image/png'  => 'png',
+            'image/gif'  => 'gif',
+            'image/webp' => 'webp',
+            default      => 'png'
+        };
 
-        if (!move_uploaded_file($imagen, $nombreFinal)) {
-            return ['resultado' => 'Error al guardar la imagen subida'];
+        $destino = $ruta . $codigo . "." . $extension;
+        $this->imagen = $destino;
+
+        if (!move_uploaded_file($imagen['tmp_name'], $destino)) {
+            return ['resultado' => 'Error al guardar la imagen en el servidor'];
         }
-
-        $this->imagen = $nombreFinal;
     }
 
     return $this->registrar();
@@ -196,14 +194,14 @@ private function registrar() {
 
         $stmt = $this->conex->prepare("CALL sp_registrar_utensilio(?, ?, ?, ?)");
         $stmt->bindValue(1, $this->imagen);
-        $stmt->bindValue(2, $this->utensilios);
+        $stmt->bindValue(2, $this->utensilio);
         $stmt->bindValue(3, $this->material);
         $stmt->bindValue(4, $this->tipoU);
         $stmt->execute();
 
         $this->conex->commit();
         $bitacora = new bitacoraModelo;
-        $bitacora->registrarBitacora('Utensilio', 'Registró un Utensilio llamado: ' . $this->utensilios, $this->payload->cedula); 
+        $bitacora->registrarBitacora('Utensilio', 'Registró un Utensilio llamado: ' . $this->utensilio, $this->payload->cedula); 
         $this->desconectarDB();
 
         return ['resultado' => 'registrado'];

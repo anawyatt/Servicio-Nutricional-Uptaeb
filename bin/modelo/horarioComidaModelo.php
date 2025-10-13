@@ -14,14 +14,16 @@ class horarioComidaModelo extends connectDB
     private $idMenu;
     private $alimento;
     private $cantidad;
+    private $payload;
     public function __construct()
     {
         parent::__construct();
         $this->sistem = new encryption();
+        $token = $_COOKIE['jwt'];
+        $this->payload = JwtHelpers::validarToken($token);
     }
 
     
-
     public function ingresar($horario)
     {
         $this->horario = $horario;
@@ -34,7 +36,6 @@ class horarioComidaModelo extends connectDB
 
         $token = $_COOKIE['jwt'];
 
-        // Decodificar token para obtener payload actual
         $payload = JwtHelpers::validarToken($token);
 
         if (!$payload) {
@@ -56,12 +57,10 @@ class horarioComidaModelo extends connectDB
         // Enviar respuesta con URL para redirigir
         $url = urlencode($this->sistem->encryptURL('home'));  // Redirige al Home
 
-        echo json_encode([
+       return[
             'resultado' => 'success',
             'url' => '?url=' . $url
-        ]);
-
-        exit;
+        ];
     }
 
 
@@ -150,7 +149,7 @@ class horarioComidaModelo extends connectDB
             }
 
             $bitacora = new bitacoraModelo();
-            $bitacora->registrarBitacora('Menú', 'Se descontaron los alimentos del Menú ' . $this->idMenu, $_SESSION['cedula']);
+            $bitacora->registrarBitacora('Menú', 'Se descontaron los alimentos del Menú ' . $this->idMenu, $this->payload->cedula);
         } catch (\PDOException $e) {
             // Rollback manejado en la función principal
             throw $e;

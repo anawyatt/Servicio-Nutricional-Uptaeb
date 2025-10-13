@@ -18,18 +18,23 @@ $sistem = new encryption();
 
 $NotificacionesServer = new NotificacionesServer();
 
-if (isset($_POST['notificaciones'])) {
-  $valor = $NotificacionesServer->consultarNotificaciones();
-}
-
-if (isset($_POST['notificacionId'])) {
-  $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-}
-
 $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Bitacora', 'consultar');
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
+if (isset($payload->cedula)) {
+        $NotificacionesServer->setCedula($payload->cedula);
+    } else {
+        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+    }
+
+    if (isset($_POST['notificaciones'])) {
+        $valor = $NotificacionesServer->consultarNotificaciones();
+    }
+  
+    if (isset($_POST['notificacionId'])) {
+        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
+    }
 
 
 

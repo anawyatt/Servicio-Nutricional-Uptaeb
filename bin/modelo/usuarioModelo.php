@@ -95,6 +95,7 @@
             return $resultado === true ? ['resultado' => 'error telefono'] :['resultado' => 'No Existe'];
         }
 
+        
         private function validarT() {
             try {
                 $this->conectarDBSeguridad();

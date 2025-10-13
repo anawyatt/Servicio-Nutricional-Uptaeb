@@ -8,6 +8,8 @@ let error_veriTU = false;
 let error_veriU = false;
 let error_tabla=false;
 let error_hora=false;
+let hoy = new Date();
+let horaA = new Date();
 
 $('#ani').hide(0);
 $("#tipoU").on('change', function() {
@@ -85,9 +87,10 @@ $("#descripcion").focusout(function(){
     chequeo_descripcion();
  });
 
-  $("#cancelar").on('click', function() {
-  	 primary();
-  	setTodayDate();
+  $(".cancelarI").on('click', function() {
+  	  primary(); 
+        $('#ani').hide();
+        vaciarTabla();
  });
 
    $("#cancelarInventario").on('click', function() {
@@ -567,6 +570,7 @@ $(document).ready(function() {
      	 $(".error2, .error3, .error4, .error5, .error6, .error8").html("");
          $(".error2, .error3, .error4, .error5, .error6, .error8").hide();
          $('#tipoU, #utensilio, #cantidad, #fecha, #descripcion, #hora').removeClass('is-invalid');
+         $('#cantidad, #descripcion').val('');
           $('#cantidad, #fecha, #descripcion, #hora').removeClass('errorBorder');
          $('.bar2, .bar3, .bar4, .bar5, .bar6, .bar7,.bar8').addClass('bar');
          $('.ic2, .ic3, .ic4, .ic5, .ic6, .ic7, .ic8').removeClass('l');
@@ -634,6 +638,14 @@ function mostrarInfo(utensilio, cantidad){
                    error_tabla=true;
                 } 
             }
+
+            function vaciarTabla() {
+            const tabla = document.getElementById('tabla').getElementsByTagName('tbody')[0];
+             while (tabla.firstChild) {
+                tabla.removeChild(tabla.firstChild);
+              }
+            }
+
         
             validarTabla();
 

@@ -237,7 +237,7 @@
                               <form class="formu form1 ">
                                 <div class='row'>
                                 <div class="wave-group p-2  my-2 col-md-6">
-                <input required="" type="date" class="input fecha mt-2" id="fecha">
+                <input required="" type="date" class="input fecha mt-3" id="fecha" disabled>
                     <span class="bar bar5"></span>
                     <label class="label labelPri ic5 ">
                         <span class="label-char pl-2 letra5" style="--index: 0; margin-right: 3px!important;"> <i class=" " >
@@ -257,7 +257,7 @@
             </div>
 
             <div class="wave-group p-2  my-2 col-md-6">
-                <input required="" type="time" class="input hora mt-2" id="hora">
+                <input required="" type="time" class="input hora mt-3" id="hora" disabled>
                     <span class="bar bar8"></span>
                     <label class="label labelPri ic8 ">
                         <span class="label-char pl-2 letra8" style="--index: 0; margin-right: 3px!important;"> <i class="bi bi-clock-fill "></i>                                                        
@@ -309,7 +309,7 @@
 
 
     <div class="wave-group p-2  my-2">
-               <textarea class="input Textarea" id="descripcion"></textarea>
+               <textarea class="input Textarea descripcion" id="descripcion"></textarea>
                     <span class="bar bar6"></span>
                     <label class="label labelPri ic6 ">
                         <span class="label-char pl-2 letra6" style="--index: 0; margin-right: 3px!important;"> <i class="icon">
@@ -366,7 +366,7 @@
                              
                           
                                 <button type="button" name="next" class="btn btn-primary next action-button float-end" id="registrar"  value="Next"  >Registrar</button>
-                                 <button type="reset" class="btn btn-danger float-end me-1" id="cancelar">Cancelar</button>
+                                 <button type="button" class="btn btn-danger float-end me-1 cancelar" id="cancelar">Cancelar</button>
                               </form>
                          
                       

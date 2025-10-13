@@ -86,7 +86,7 @@ class ConteoLoginHelpers
         }
 
         self::guardarArchivo($data);
-        return ['bloqueado' => false, 'mensaje' => "Intento registrado. Le quedan " . (4 - $data[$cedulaHash]['intentos']) . " intentos."];
+        return ['bloqueado' => false, 'mensaje' => "Intento registrado. Le quedan " . (3 - $data[$cedulaHash]['intentos']) . " intentos."];
     }
 
     public static function resetearIntentos($cedula)
@@ -133,20 +133,19 @@ class ConteoLoginHelpers
             }
         }
 
-        // Solo guardar si hubo cambios
         if ($cambiosRealizados) {
             self::guardarArchivo($data);
         }
     }
 
-    // Método manual para forzar limpieza (opcional, para uso administrativo)
+  
     public static function limpiezaManual()
     {
         self::limpiezaAutomatica();
         return "Limpieza manual ejecutada correctamente.";
     }
 
-    // Método para obtener estadísticas (opcional, para debugging)
+
     public static function obtenerEstadisticas()
     {
         $data = self::leerArchivo();
@@ -161,13 +160,13 @@ class ConteoLoginHelpers
         $unDiaEnSegundos = 24 * 60 * 60;
 
         foreach ($data as $cedulaHash => $info) {
-            // Contar bloqueados
+            
             if ($info['bloqueado_hasta'] && $tiempoActual < $info['bloqueado_hasta']) {
                 $estadisticas['usuarios_bloqueados']++;
             } else {
                 $estadisticas['usuarios_con_intentos']++;
 
-                // Contar intentos antiguos (más de 24 horas)
+              
                 if (isset($info['primer_intento'])) {
                     $tiempoTranscurrido = $tiempoActual - $info['primer_intento'];
                     if ($tiempoTranscurrido > $unDiaEnSegundos) {

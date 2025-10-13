@@ -6,9 +6,7 @@ class BlacklistHelper
     private static $file = __DIR__ . '/../cache/blacklist.json';
     private static $cacheDir = __DIR__ . '/../cache';
     
-    /**
-     * Inicializar el directorio y archivo cache
-     */
+   
     private static function initializeCache(): bool
     {
         // Crear directorio cache si no existe
@@ -27,10 +25,7 @@ class BlacklistHelper
         
         return true;
     }
-    
-    /**
-     * Leer el contenido de blacklist y limpiar expirados
-     */
+   
     private static function readBlacklist(): array
     {
         // Inicializar cache
@@ -44,13 +39,13 @@ class BlacklistHelper
                 error_log("No se pudo crear el archivo blacklist.json. Verifica los permisos del directorio: " . self::$cacheDir);
                 return [];
             }
-            chmod(self::$file, 0644); // Cambiar a 0644 para mejor compatibilidad
+            chmod(self::$file, 0644); 
         }
 
         // Verificar permisos de escritura
         if (!is_writable(self::$file)) {
             error_log("El archivo blacklist.json no tiene permisos de escritura: " . self::$file);
-            // Intentar corregir permisos
+        
             if (!chmod(self::$file, 0644)) {
                 error_log("No se pudieron corregir los permisos del archivo blacklist.json");
                 return [];
@@ -92,9 +87,6 @@ class BlacklistHelper
         return $list;
     }
     
-    /**
-     * Agregar jti a blacklist con expiración
-     */
     public static function addToBlacklist(string $jti, int $exp): bool
     {
         try {

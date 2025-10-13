@@ -82,6 +82,12 @@
         <div class="container my-4 ">
             <div class="row g-3">
                 <div class="container mt-2">
+                     <div id="no-results-message" class="d-flex flex-column justify-content-center align-items-center d-none" >
+                         <i class="bi bi-search azul5" style="font-size: 100px;"></i>
+                         <h4 class="azul4">No se encontraron resultados para tu búsqueda.</h4>
+                           <p class="suggestion">Intenta con términos diferentes o más generales.</p>
+                     </div>
+                      
                     <div class="row cards">
 
                                 <div class="col-md-4 mb-4">

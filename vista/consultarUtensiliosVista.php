@@ -112,7 +112,6 @@
                                                <thead class="table-success">
                                                   <tr>
                                                    <th class="blanco">Tipo de Utensilio</th>
-                                                   <th class=" blanco">Utensilio</th>
                                                    </tr>
                                                </thead>
                                                <tbody id="info1"></tbody>
@@ -121,6 +120,7 @@
                                                 <table class="table table-hover table-bordered" >
                                                <thead class="table-success">
                                                   <tr>
+                                                  <th class=" blanco">Utensilio</th>
                                                 <th class="blanco">Material</th>
                                                   </tr>
                                                  </thead>
@@ -251,7 +251,6 @@
 
             <div class="wave-group p-2 col-md-6 my-2" id="sel34">
             <select class="input material" id="material">
-                                    <option value='Seleccionar'> Seleccionar</option>
                                     <option value='No Definido'> No Definido</option>
                                     <option value='Acero Inoxidable'> Acero Inoxidable</option>
                                     <option value='Aluminio'> Aluminio</option>

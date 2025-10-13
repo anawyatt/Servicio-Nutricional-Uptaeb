@@ -11,6 +11,7 @@
  use helpers\csrfTokenHelper;
  use middleware\csrfMiddleware;
  use modelo\consultarUtensiliosModelo as consultarUtensilios;
+  use middleware\PostRateMiddleware as PostRateMiddleware;
 
 
  $objeto = new consultarUtensilios;
@@ -74,6 +75,19 @@ if (isset($datosPermisos['permiso']['consultar'])) {
   }
 }
 
+if(isset($_POST['verificarUtensilios']) && isset($_POST['id']) && isset($_POST['utensilio']) && isset($_POST['material']) ) {
+   try {
+
+   $verificarUtensilio=  $objeto->verificarUtensilio($_POST['id'],  $_POST['utensilio'], $_POST['material']);
+      echo json_encode($verificarUtensilio);
+      die();
+    
+  } catch (\RuntimeException $e) {  
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
+ }
+
 if (isset($datosPermisos['permiso']['modificar'])) {
   if (isset($_POST['modificar'], $_POST['id'])) {
     $respuesta = $objeto->verificarModificacion($_POST['id']);
@@ -81,36 +95,44 @@ if (isset($datosPermisos['permiso']['modificar'])) {
     exit;
   }
 
+
   if (
     isset($_POST['modificarINFO'], $_POST['id'], $_POST['tipoU'], $_POST['utensilio'], $_POST['material'], $_POST['csrfToken'])
   ) {
-
+    PostRateMiddleware::verificar('modificar', (array)$payload);
     $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
-    $verificarUtensilio = $objeto->verificarUtensilio($_POST['id'], $_POST['tipoU'], $_POST['utensilio'], $_POST['material']);
     $modificar = $objeto->modificarUtensilio($_POST['id'], $_POST['tipoU'], $_POST['utensilio'], $_POST['material']);
     echo json_encode(['mensaje'=>$modificar, 'newCsrfToken' => $csrf['newToken']]);
     exit;
   }
 
+  if (isset($_FILES['imagen']) && isset($_POST['validarIMG'])) {
+    $validarImagen = $objeto->validarImagen($_FILES['imagen']);
+    echo json_encode($validarImagen);
+    die();
+}
+
+
   if (isset($_FILES['imagen'], $_POST['id'])) {
-    $modificar = $objeto->modificarImagen($_FILES['imagen'], $_POST['id']);
-    // Si la respuesta es un error de validación de imagen, devolverlo como resultado
-    if (isset($modificar['resultado']) && (
-      $modificar['resultado'] === 'El archivo no es una imagen válida (JPEG, PNG)!' ||
-      $modificar['resultado'] === 'La imagen no debe superar los 2MB!' ||
-      $modificar['resultado'] === 'La imagen está dañada o no se puede procesar!' ||
-      $modificar['resultado'] === 'No se recibió imagen'
-    )) {
-      echo json_encode($modificar);
-      exit;
-    }
-    echo json_encode($modificar);
-    exit;
+    try {
+     $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
+     
+     PostRateMiddleware::verificar('modificar', (array)$payload);
+
+     $modificar= $objeto->modificarImagen($_FILES['imagen'], $_POST['id']);
+
+           echo json_encode(['mensaje'=>$modificar, 'newCsrfToken' => $csrf['newToken']]);
+           die();
+  } catch (\RuntimeException $e) {
+    echo json_encode(['message' => $e->getMessage()]);
+    die();
+  }
   }
 }
 
 if (isset($datosPermisos['permiso']['eliminar'])) {
   if (isset($_POST['id'], $_POST['borrar'], $_POST['csrfToken'])) {
+    PostRateMiddleware::verificar('eliminar', (array)$payload);
     $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
     $eliminar = $objeto->anularUtensilio($_POST['id']);
     echo json_encode(['mensaje'=>$eliminar, 'newCsrfToken' => $csrf['newToken']]);

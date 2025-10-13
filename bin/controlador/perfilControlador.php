@@ -33,8 +33,14 @@ if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_P
 
     $permisos = $objet->getPermisosRol($payload->rol);
 
+    if (isset($payload->cedula)) {
+        $NotificacionesServer->setCedula($payload->cedula);
+    } else {
+        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+    }
+
     if (isset($_POST['notificaciones'])) {
-          $valor = $NotificacionesServer->consultarNotificaciones();
+        $valor = $NotificacionesServer->consultarNotificaciones();
     }
   
     if (isset($_POST['notificacionId'])) {

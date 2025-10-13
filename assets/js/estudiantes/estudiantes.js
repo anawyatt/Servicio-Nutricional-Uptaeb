@@ -142,6 +142,14 @@ $(document).on("click", ".ver", function () {
     dataType: "json",
     data: { verEstudiantes_informacion: true, id: id },
     success(data) {
+      let genero = "";
+      
+      if(data[0].sexo === "M"){
+        genero = "Masculino";
+      } else if(data[0].sexo === "F"){
+        genero = "Femenino";
+      }
+
       let tabli1 = " ",
         tabli2 = " ",
         tabli3 = " ";
@@ -162,7 +170,7 @@ $(document).on("click", ".ver", function () {
 
       tabli2 = `
                         <tr>
-                        <td class="">${data[0].sexo}</td>
+                        <td class="">${genero}</td>
                         <td class="">${data[0].telefono}</td>
                         <td class="">${data[0].nucleo}</td>
                         <td class="">${data[0].carrera}</td>

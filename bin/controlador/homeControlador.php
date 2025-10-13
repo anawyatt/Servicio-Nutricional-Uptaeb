@@ -36,7 +36,9 @@ $payload = $datosPermisos['payload'];
         if (isset($_POST['notificacionId'])) {
             $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
         }
-
+if(isset($payload->horario_comida)){
+$objModel->setHorario($payload->horario_comida);
+}
 
 if (isset($_POST['mostrar1'])) {
     $mostrar = $objModel->cantEstudiantes();

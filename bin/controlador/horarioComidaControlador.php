@@ -10,6 +10,8 @@
 
    if(isset($_POST['ingresar']) && isset($_POST['horario'])){
     $ingresar= $objeto->ingresar($_POST['horario']);
+    echo json_encode($ingresar);
+    die();
     }
 
   $components = new initComponents();

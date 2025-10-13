@@ -7,7 +7,6 @@ use component\sidebar as sidebar;
 use component\configuracion as configuracion;
 use modelo\AyudaModelo as Ayuda;
 use component\NotificacionesServer as NotificacionesServer;
-use config\componentes\configSistema as configSistema;
 use helpers\encryption as encryption;
 use helpers\permisosHelper as permisosHelper;
 
@@ -19,6 +18,12 @@ $permisosHelper = new permisosHelper();
 $datosPermisos = $permisosHelper->verificarPermisos($sistem, $objeto, 'Home', 'consultar');
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
+
+   if (isset($payload->cedula)) {
+        $NotificacionesServer->setCedula($payload->cedula);
+    } else {
+        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+    }
 
     if (isset($_POST['notificaciones'])) {
         $valor = $NotificacionesServer->consultarNotificaciones();

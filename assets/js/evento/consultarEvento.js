@@ -95,15 +95,11 @@ function tablaEvento() {
 
  //------------------------- FILTRO DE BUSQUEDA -----------------
  $('#fecha, #fecha2').on('change', function() { 
-    errorFI=false
     errorFF=false
-    validarFechaIncio();
-    validarFechaFin();
-    tablaEvento();
+    validarFechaFiltros();
+    tablaEvento() ;
   })
 
-
-let errorFI=false
 let errorFF=false
 
 
@@ -122,111 +118,55 @@ let errorFF=false
            $('#fecha').val("");
            $('#fecha2').val("");
            tablaEvento() ;
+           priFi()
        }
    });
 
 });
 
-
-function validarFechaIncio(){
-  var fechaInicio =new Date($('#fecha').val());
-  var fechaActual = new Date();
-
-            
-                if (fechaInicio > fechaActual) {
-                   Swal.fire({
-                         toast: true,
-                         position: 'top-end',
-                         icon:'error',
-                         title:'<b class="text-rojo">Fecha Inicio inválida!</b>',
-                         showConfirmButton:false,
-                         timer:3000,
-                         timerProgressBar:3000,
-                   })
-               $(".error1").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la Fecha, No debe ser mayor a la fecha de hoy!');
-               $(".error1").show();
-               $('#fecha').addClass('errorBorder');
-               $('.bar1').removeClass('bar');
-               $('.ic1').addClass('l');
-               $('.ic1').removeClass('labelPri');
-               $('.letra1').addClass('labelE');
-               $('.letra1').removeClass('label-char');
-               errorFI=true
-                }
-                else{
-                $(".error1").html("");
-                $(".error1").hide();
-                $('#fecha').removeClass('errorBorder');
-                $('.bar1').addClass('bar');
-                $('.ic1').removeClass('l');
-                $('.ic1').addClass('labelPri');
-                $('.letra1').removeClass('labelE');
-                $('.letra1').addClass('label-char');
-
-                }
-}
+            function priFi(){
+                $(".error1,.error2").html("");
+                $(".error1,.error2").hide();
+                $('#fecha,#fecha2').removeClass('errorBorder');
+                $('.bar1,.bar2').addClass('bar');
+                $('.ic1,.ic2').removeClass('l');
+                $('.ic1,.ic2').addClass('labelPri');
+                $('.letra1,.letra2').removeClass('labelE');
+                $('.letra1,.letra2').addClass('label-char');
+            }
 
 
-function validarFechaFin(){
+function validarFechaFiltros(){
   var fechaInicio =new Date($('#fecha').val());
   var fechaFin=new Date($('#fecha2').val());
-  var fechaActual = new Date();
 
-               if (fechaFin > fechaActual) {
+
+               if (fechaInicio > fechaFin) {
                    Swal.fire({
                          toast: true,
                          position: 'top-end',
                          icon:'error',
-                         title:'<b class="text-rojo">Fecha Fin inválida!</b>',
+                         title:'<b class="text-rojo">Fechas inválidas!</b>',
                          showConfirmButton:false,
                          timer:3000,
                          timerProgressBar:3000,
                    })
-               $(".error2").html('<i  class="bi bi-exclamation-triangle-fill"></i> Ingrese la Fecha, No debe ser mayor a la fecha de hoy!');
-               $(".error2").show();
-               $('#fecha2').addClass('errorBorder');
-               $('.bar2').removeClass('bar');
-               $('.ic2').addClass('l');
-               $('.ic2').removeClass('labelPri');
-               $('.letra2').addClass('labelE');
-               $('.letra2').removeClass('label-char');
-                    errorFF=true
-                }
-                 else if (fechaInicio > fechaFin) {
-                   Swal.fire({
-                         toast: true,
-                         position: 'top-end',
-                         icon:'error',
-                         title:'<b class="text-rojo">Fecha Fin inválida!</b>',
-                         showConfirmButton:false,
-                         timer:3000,
-                         timerProgressBar:3000,
-                   })
-                        $(".error2").html('<i  class="bi bi-exclamation-triangle-fill"></i> La fecha no debe ser menor a la fecha de inicio!');
-                        $(".error2").show();
-                        $('#fecha2').addClass('errorBorder');
-                        $('.bar2').removeClass('bar');
-                        $('.ic2').addClass('l');
-                        $('.ic2').removeClass('labelPri');
-                        $('.letra2').addClass('labelE');
-                        $('.letra2').removeClass('label-char');
+                        $(".error1,.error2").html('<i  class="bi bi-exclamation-triangle-fill"></i> La fecha fin no debe ser menor a la fecha de inicio!');
+                        $(".error1,.error2").show();
+                        $('#fecha, #fecha2').addClass('errorBorder');
+                        $('.bar1,.bar2').removeClass('bar');
+                        $('.ic1,.ic2').addClass('l');
+                        $('.ic1,.ic2').removeClass('labelPri');
+                        $('.letra1,.letra2').addClass('labelE');
+                        $('.letra1,.letra2').removeClass('label-char');
                     errorFF=true
                 }
                 else{
-                $(".error2").html("");
-                $(".error2").hide();
-                $('#fecha2').removeClass('errorBorder');
-                $('.bar2').addClass('bar');
-                $('.ic2').removeClass('l');
-                $('.ic2').addClass('labelPri');
-                $('.letra2').removeClass('labelE');
-                $('.letra2').addClass('label-char');
-
+                errorFF=false
+                priFi()
                 }
                 
 }
-
-
 
 // MOSTRAR INFORMACIÓN ------------------------------------------
 
@@ -694,11 +634,11 @@ $('input[type="checkbox"]').on('change', function(e) {
  $("#cantPlatos").on('keyup', function(){
    chequeo_cantidadE();
  });
- $("#nombre").focusout(function(){
+ 
+ $("#nomEvent").focusout(function(){
   chequeo_nombreE();
 });
-
-$("#nombre").on('keyup', function(){
+$("#nomEvent").on('keyup', function(){
   chequeo_nombreE();
 });
 
@@ -717,7 +657,7 @@ $("#descripEvent").on('keyup', function(){
  });
 
 
- $("#cancelar").on('click', function() {
+ $("#cancelar, .limpiar").on('click', function() {
   primary();
  setTodayDate(hoyA);
  vaciarTabla()
@@ -1038,6 +978,7 @@ function modificar() {
        $('input[type=checkbox]').prop('checked', false);
        $('#disponibilidad').hide();
        $('#agregarInventario').prop('disabled', false);
+        $('input[type=checkbox]').removeClass('is-invalid')
 
    }
 
@@ -1055,6 +996,7 @@ $('.letra2, .letra3, .letra4').addClass('label-char');
 $('#tipoA, #alimento').val('Seleccionar').trigger('change.select2');
 $('#disponibilidad').hide();
 $('#agregarInventario').prop('disabled', false);
+ $('input[type=checkbox]').removeClass('is-invalid')
 }
 
 function primary3(){
@@ -1428,8 +1370,10 @@ error_descripcion = true;
          let feMenu = $("#feMenu").val();
          let horarioComida = $("input[name='opcion']:checked").val();
          let id = $('#idd').val();
+         const fecha = Date.parse($("#feMenu").val());
+         const hoy = new Date();
 
-         if (feMenu != '' && horarioComida != '' ) {
+          if ( !isNaN(fecha) && fecha >= hoy && horarioComida != '' ) {
            $.ajax({
                   type: "POST",
                   url: '',

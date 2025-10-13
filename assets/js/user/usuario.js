@@ -643,14 +643,14 @@ $(document).ready(function () {
 
               function verificarTelefono(){
                
-                 let telefono = $("#telefono").val();
-                 if (telefono.length > 11) {
+                 let cel = $("#telefono").val();
+                 if (cel.length > 9) {
                    $.ajax({
                           type: "POST",
                           url: '',
                           dataType: "json",
-                          data:{ muestra3:'si', 
-                           telefono
+                          data:{ muestra3:true, 
+                           telefono:cel
                          },
                           success(date){
           
@@ -659,7 +659,7 @@ $(document).ready(function () {
                                   toast: true,
                                   position: 'top-end',
                                   icon:'error',
-                                  title:'El Nº de Teléfono  <b class="fw-bold text-rojo">'+telefono+'</b> ya existe, ingrese otro Nº de teléfono!',
+                                  title:'El Nº de Teléfono  <b class="fw-bold text-rojo">'+cel+'</b> ya existe, ingrese otro Nº de teléfono!',
                                   showConfirmButton:false,
                                   timer:3000,
                                   timerProgressBar:3000,

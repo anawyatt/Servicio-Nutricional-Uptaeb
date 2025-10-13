@@ -29,17 +29,28 @@ function calen(menus) {
       }
       var inicioEvento = data.feMenu + 'T' + hora;
       var horaFormateada = formatearHora(hora);
-    eventos.push({
-      title: '<strong class ="azul5 text-center" >Menu - '+ data.horarioComida + '</strong>' ,
-      start: inicioEvento,
-      extendedProps: {
-        fecha: fechaFormateadaM,
-        hora: horaFormateada,
-        cantEstudiantes: data.cantPlatos,
-        menu: data.descripcion,
+      let titulo;
+
+      if(data.nomEvent==null && data.descripEvent==null){
+        titulo='<strong class ="azul5 text-center" >Menú - '+ data.horarioComida + '</strong>'
       }
-    });
-  });
+      else{
+        titulo='<strong class ="azul5 text-center" >Evento - '+ data.horarioComida + '</strong>'
+      }
+     
+        eventos.push({
+          title: titulo ,
+          start: inicioEvento,
+          extendedProps: {
+            fecha: fechaFormateadaM,
+            hora: horaFormateada,
+            evento: data.nomEvent,
+            descripcionEvento: data.descripEvent,
+            cantEstudiantes: data.cantPlatos,
+            menu: data.descripcion,
+          }
+       });
+        });
 
     // Función para formatear la hora que se muestra en el pulsor de 24 horas a 12 horas
     function formatearHora(hora) {
@@ -87,11 +98,19 @@ function calen(menus) {
       },
 
       eventMouseEnter: function (info) {
-        var popoverContent = '<strong class ="azul5">' + 'Menu: '+ '</strong>'  + info.event.extendedProps.menu + '<br>';
-        popoverContent += '<strong class ="azul5">' + 'Fecha: ' + '</strong>' + info.event.extendedProps.fecha + '<br>';
+        var popoverContent = '';
+         popoverContent += '<strong class ="azul5">' + 'Fecha: ' + '</strong>' + info.event.extendedProps.fecha + '<br>';
          popoverContent += '<strong class ="azul5">' + 'Hora: ' + '</strong>' + info.event.extendedProps.hora + '<br>';
-        popoverContent += '<strong class ="azul5">' + 'Cantidad de Platos: ' + '</strong>' + info.event.extendedProps.cantEstudiantes + '<br>';
+         popoverContent += '<hr>';
+        if(info.event.extendedProps.evento != null && info.event.extendedProps.descripcionEvento != null){
+        popoverContent += '<strong class ="azul5">' + 'Evento: ' + '</strong>' + info.event.extendedProps.evento + '<br>';
+        popoverContent += '<strong class ="azul5">' + 'Descripción: ' + '</strong>' + info.event.extendedProps.descripcionEvento + '<br>';
+        popoverContent += '<hr>';
+        }
 
+        popoverContent += '<strong class ="azul5">' + 'Menu: '+ '</strong>'  + info.event.extendedProps.menu + '<br>';
+        popoverContent += '<strong class ="azul5">' + 'Cantidad de Platos: ' + '</strong>' + info.event.extendedProps.cantEstudiantes + '<br>';
+        
         $(info.el).popover({
           title: info.event.title,
           content: popoverContent,
