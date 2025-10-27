@@ -10,6 +10,7 @@ use helpers\encryption as encryption;
 use helpers\permisosHelper as permisosHelper;
 use modelo\EstudianteNormalizer as EstudianteNormalizer;
 use middleware\csrfMiddleware;
+use helpers\csrfTokenHelper;
 
 set_time_limit(3600);
 
@@ -44,6 +45,8 @@ $payload = $datosPermisos['payload'];
     if (isset($_POST['notificacionId'])) {
         $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
     }
+
+    $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
 
 if (isset($_POST['verEstudiantes']) && isset($datosPermisos['permiso']['consultar'])) {
@@ -174,7 +177,9 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // procesamiento
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') { 
-    if (isset($_POST['data'])) {
+    if (isset($_POST['data']) && isset($_POST['csrf_token'])) {
+        
+        $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrf_token']);
 
         $data = json_decode($_POST['data'], true);
         $totalRecords = count($data);
@@ -255,7 +260,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'totalProcessed' => $totalProcessed,
             'alreadyRegistered' => $alreadyRegistered,
             'incompleteData' => $incompleteData,
-            'errors' => $errors 
+            'errors' => $errors,
+            'newCsrfToken' => $csrf['newToken']
         ]);
         die();
     } else {

@@ -154,33 +154,33 @@ $(document).on("click", ".ver", function () {
         tabli2 = " ",
         tabli3 = " ";
 
+      const segNombre = data[0].segNombre ? ` ${data[0].segNombre}` : '';
+      const segApellido = data[0].segApellido ? ` ${data[0].segApellido}` : '';
+
       tabli1 = `
-                        <tr>
-                        <td class="">${formatearCedula(
-                          data[0].cedEstudiante
-                        )}</td>
-                        <td class="">${data[0].nombre} ${
-        data[0].segNombre
-      } </td>
-                        <td class="">${data[0].apellido} ${
-        data[0].segApellido
-      }</td>
-                        
-                    </tr>`;
+        <tr>
+          <td class="">${formatearCedula(
+            data[0].cedEstudiante
+          )}</td>
+          <td class="">${data[0].nombre}${segNombre}</td>
+          <td class="">${data[0].apellido}${segApellido}</td>
+        </tr>`;
+
+      const telefonoMostrado = data[0].telefono ? data[0].telefono : 'No registrado'; 
 
       tabli2 = `
-                        <tr>
-                        <td class="">${genero}</td>
-                        <td class="">${data[0].telefono}</td>
-                        <td class="">${data[0].nucleo}</td>
-                        <td class="">${data[0].carrera}</td>
-                        </tr>`;
+        <tr>
+          <td class="">${genero}</td>
+          <td class="">${telefonoMostrado}</td>
+          <td class="">${data[0].nucleo}</td>
+          <td class="">${data[0].carrera}</td>
+        </tr>`;
 
       tabli3 = `
-                    <tr>
-                    <td class="">${data[0].seccion}</td>
-                    <td class="">${data[0].horario}</td>
-                    </tr>`;
+        <tr>
+          <td class="">${data[0].seccion}</td>
+          <td class="">${data[0].horario}</td>
+        </tr>`;
 
       $("#info1").html(tabli1);
       $("#info2").html(tabli2);
@@ -467,12 +467,13 @@ function procesarArchivo() {
         return obj;
       });
 
+      let token = $('[name="csrf_token"]').val();
       var dataToSend = JSON.stringify(jsonData);
     
       ajaxRequest = $.ajax({
         url: "", // URL del controlador
         method: "POST",
-        data: { data: dataToSend},
+        data: { data: dataToSend, csrf_token: token },
         xhr: function () {
           var xhr = new window.XMLHttpRequest();
 
@@ -511,7 +512,9 @@ function procesarArchivo() {
           try {
             var response = JSON.parse(finalResponse);
 
-            if (response.status === "success") {
+            if (response.status === "success" && response.newCsrfToken) {
+              $('[name="csrf_token"]').val(response.newCsrfToken);
+
               let message =
                 "<b>Estudiantes registrados exitosamente:</b><br>" +
                 response.totalProcessed +
@@ -644,3 +647,23 @@ function procesarArchivo() {
 });
 
 $("#estu1").addClass("active");
+
+setInterval(function() {
+  $.ajax({
+     url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+      success(data){
+      if (data.newCsrfToken) {
+      $('[name="csrf_token"]').val(data.newCsrfToken);
+        console.log('Token CSRF renovado');
+      } else {
+        console.log('No se pudo renovar el token CSRF');
+      }
+    },
+    error: function(err) {
+      console.error('Error renovando token CSRF:', err);
+    }
+  });
+}, 240000);

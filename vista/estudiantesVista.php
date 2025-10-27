@@ -210,9 +210,9 @@
                     <button type="button" class="btn-close btn-primary" data-bs-dismiss="alert" aria-label="Close"></button>
                   </div>
                 </div>
-
+                   <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                 <form id="uploadForm" enctype="multipart/form-data" class="vaciar">
-                  <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($tokenCsrf); ?>">
+                  
                   <div class="form-group">
                     <label for="file" class="label labelPri ic1"><span class="label-char letra" style="--index: 0">Selecciona un archivo Excel:</span></label>
                     <input type="file" id="file" name="file" class="form-control input imagen" accept=".xlsx, .xls">

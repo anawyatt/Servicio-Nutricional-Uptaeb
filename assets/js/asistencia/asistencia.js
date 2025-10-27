@@ -458,6 +458,7 @@ function idMenu() {
       $(document).on('click', '.confirmar', function () {
         var id = $('#inputCedula').val(); 
         var horario = $('input[name="opcion"]:checked').val();
+        let token= $('input[name="csrf_token"]').val();
         if (!id || !horario) {
             Swal.fire({
                 title: "Datos incompletos",
@@ -466,6 +467,7 @@ function idMenu() {
             });
             return; 
         }
+        console.log('token csrf:', token);
           validarQueNoSeRepita(function (validar1) {
               if (validar1) {
                   validarPorhorario(function (validar2) {
@@ -489,10 +491,11 @@ function idMenu() {
                                           data: {
                                               registrar: true,
                                               id: estudianteId,
-                                              idmenu: menuId
+                                              idmenu: menuId,
+                                              csrfToken: token
                                           },
                                           success: function(data) {
-                                              if (data.resultado === 'registro exitoso') {
+                                              if (data.mensaje.resultado === 'registro exitoso' && data.newCsrfToken) {
                                                   Swal.fire({
                                                       title: "¡Éxito!",
                                                       text: "El Estudiante puede acceder al Comedor",
@@ -501,6 +504,7 @@ function idMenu() {
                                                   });
                                                   $('.form-Study').trigger('reset');
                                                   $('#inputCedula').val('');
+                                                  $('[name="csrf_token"]').val(data.newCsrfToken);
                                                   obtenerPlatosDisponibles();
                                               } else {
                                                   Swal.fire({
@@ -1223,6 +1227,7 @@ function registrarExcepcion1() {
     let seccion = $('#seccionStudy').val();
     let seccion2 = $('#seccionStudy2').val();
     let justificativo = $('#justificativo2').val();
+    let token= $('input[name="csrf_token"]').val();
 
     $.ajax({
         type: "POST",
@@ -1237,13 +1242,16 @@ function registrarExcepcion1() {
             carrera, 
             seccion, 
             seccion2, 
-            justificativo
+            justificativo,
+            csrfToken: token,
+            excepcion1: true
         },
         beforeSend: function() {
             
             $("#registrarE1").prop("disabled", true);
         },
         success: function(data) {
+            if(data.mensaje.resultado == 'registro del Estudiante' && data.newCsrfToken) {
             Swal.fire({
                 toast: true,
                 position: 'top-end',
@@ -1259,7 +1267,10 @@ function registrarExcepcion1() {
             $('#seccionStudy').val('Seleccionar').trigger('change.select2');
             $('#seccionStudy2').val('Seleccionar').trigger('change.select2');
             $('#horariosContainer').empty();
+            $('input[name="csrf_token"]').val(data.newCsrfToken);
             $('#cerrar').click();
+        }
+            
         },
         complete: function() {
             $("#registrarE1").prop("disabled", false);
@@ -1399,18 +1410,8 @@ $(".borrarE2").on('click', function(){
             dataType: "json",
             data: { mostrarCed: 'si', cedula: cedula },
             success: function(data) {
-                if (data.resultado !== "error Cedula") {
-                    // No error, cédula exists
-                    $(".error9e").hide();
-                    $('#cedula2').removeClass('errorBorder');
-                    $('.bar9e').addClass('bar');
-                    $('.ic9e').removeClass('l');
-                    $('.ic9e').addClass('labelPri');
-                    $('.letra9e').removeClass('labelE');
-                    $('.letra9e').addClass('label-char');
-                } else {
-                    // Error, cédula does not exist
-                    Swal.fire({
+                if (data.resultado === "error Cedula") {
+                     Swal.fire({
                         toast: true,
                         position: 'top-end',
                         icon: 'error',
@@ -1428,11 +1429,21 @@ $(".borrarE2").on('click', function(){
                     $('.letra9e').addClass('labelE');
                     $('.letra9e').removeClass('label-char');
                     error_Cedula2 = true;
+                } else {
+                    $(".error9e").hide();
+                    $('#cedula2').removeClass('errorBorder');
+                    $('.bar9e').addClass('bar');
+                    $('.ic9e').removeClass('l');
+                    $('.ic9e').addClass('labelPri');
+                    $('.letra9e').removeClass('labelE');
+                    $('.letra9e').addClass('label-char');
+                   
                 }
             },
         });
     }
 }
+
 let error_Exc = false;
 
 function validarQueNoSeRepita2(callback) {
@@ -1479,6 +1490,7 @@ function registrarExcepcion2() {
             let cedula = $('#cedula2').val();
             let justificativo = $('#justificativo3').val();
             let platosDisponibles = parseInt($('#comidaDisponible').val());
+            let token= $('input[name="csrf_token"]').val();
 
             if (platosDisponibles > 0) {
                 $.ajax({
@@ -1486,14 +1498,18 @@ function registrarExcepcion2() {
                     url: "",
                     dataType: "json",
                     data: {
+                        excepcion2: true,
                         cedula: cedula,
                         idmenu: menuId,
-                        justificativo: justificativo
+                        justificativo: justificativo,
+                        csrfToken: token,
+                        
                     },
                     beforeSend: function() {
                         $("#registrarE2").prop("disabled", true);
                     },
                     success: function(data) {
+                        if (data.mensaje.resultado == 'registro del Estudiante 2' && data.newCsrfToken) {
                         Swal.fire({
                             toast: true,
                             position: 'top-end',
@@ -1504,9 +1520,12 @@ function registrarExcepcion2() {
                             timerProgressBar: true,
                             scrollbarPadding: false,
                         });
-                        $('.formu').trigger('reset');
+                        $('.formu').trigger('reset'); 
+                        $('input[name="csrf_token"]').val(data.newCsrfToken);  
                         obtenerPlatosDisponibles();
+                        
                         $('#cerrarModal2').click();
+                    }
                     },
                     complete: function() {
                         $("#registrarE2").prop("disabled", false);
@@ -1535,3 +1554,24 @@ function registrarExcepcion2() {
 $('#as1').addClass('active');
 $('#as2').addClass('text-primary');
 $('.as2').addClass('active')
+
+
+setInterval(function() {
+  $.ajax({
+     url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {renovarToken: true, csrfToken:  $('[name="csrf_token"]').val()}, 
+      success(data){
+      if (data.newCsrfToken) {
+      $('[name="csrf_token"]').val(data.newCsrfToken);
+        console.log('Token CSRF renovado');
+      } else {
+        console.log('No se pudo renovar el token CSRF');
+      }
+    },
+    error: function(err) {
+      console.error('Error renovando token CSRF:', err);
+    }
+  });
+}, 240000);

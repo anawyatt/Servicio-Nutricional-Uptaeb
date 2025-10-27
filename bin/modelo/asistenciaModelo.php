@@ -323,10 +323,10 @@ class asistenciaModelo extends connectDB
             return $resultado;
         }
         $this->cedula = $cedula;
-        return $this->verificarCedulaPrivado($cedula);
+        return $this->verificarCedulaPrivado();
     }
 
-    private function verificarCedulaPrivado($cedula)
+    private function verificarCedulaPrivado()
     {
         try {
             $this->conectarDB();
@@ -693,7 +693,7 @@ class asistenciaModelo extends connectDB
             // Confirmar la transacción
             $this->conex->commit();
 
-            $resultado = ['resultado' => 'registro del Estudiante'];
+            $resultado = ['resultado' => 'registro del Estudiante 2'];
             return $resultado;
         } catch (\PDOException $error) {
             $this->conex->rollBack();

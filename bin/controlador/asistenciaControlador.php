@@ -7,6 +7,8 @@ use component\footer as footer;
 use component\configuracion as configuracion;
 use helpers\encryption as encryption;
 use helpers\permisosHelper as permisosHelper;
+use helpers\csrfTokenHelper;
+use middleware\csrfMiddleware;
 use modelo\asistenciaModelo as asistencia;
 use component\NotificacionesServer as NotificacionesServer;
 
@@ -32,6 +34,8 @@ if (isset($payload->cedula)) {
     if (isset($_POST['notificacionId'])) {
         $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
     }
+
+  $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
 
 if (isset($_POST['verEstudiantes']) && isset($datosPermisos['permiso']['consultar'])) {
@@ -77,9 +81,10 @@ if (isset($_POST['verificar']) && isset($_POST['id']) && isset($datosPermisos['p
   die();
 }
 
-if (isset($_POST['registrar']) && isset($_POST['id']) && isset($_POST['idmenu']) && isset($datosPermisos['permiso']['registrar'])) {
+if (isset($_POST['registrar']) && isset($_POST['id']) && isset($_POST['idmenu']) && isset($_POST['csrfToken']) && isset($datosPermisos['permiso']['registrar'])) {
+  $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
   $registrar = $objeto->registrarAsistencia($_POST['id'], $_POST['idmenu']);
-  echo json_encode($registrar);
+  echo json_encode(['mensaje'=>$registrar, 'newCsrfToken' => $csrf['newToken']]);
   die();
 }
 
@@ -97,8 +102,11 @@ if (isset($_POST['verificarcodigo'])) {
 
 if (isset($_POST['mostrarC']) && isset($_POST['cedula'])) {
   $validarCedula = $objeto->verificarCedula($_POST['cedula']);
-  echo json_encode($validarCedula);
-  die();
+  if ($validarCedula['resultado'] === 'error cedula') {
+   echo json_encode($validarCedula);
+   die();
+  }
+  
 }
 
 if (isset($_POST['select3'])) {
@@ -124,9 +132,10 @@ if (isset($_POST['mostrarHorario']) && isset($_POST['seccion'])) {
 }
 
 
-if (isset($_POST['cedula']) && isset($_POST['nombre']) && isset($_POST['apellido']) && isset($_POST['sexo']) && isset($_POST['nucleo']) && isset($_POST['carrera']) && isset($_POST['seccion']) && isset($_POST['seccion2']) && isset($_POST['justificativo'])) {
+if (isset($_POST['cedula']) && isset($_POST['nombre']) && isset($_POST['apellido']) && isset($_POST['sexo']) && isset($_POST['nucleo']) && isset($_POST['carrera']) && isset($_POST['seccion']) && isset($_POST['seccion2']) && isset($_POST['justificativo']) && isset($_POST['csrfToken']) && isset($_POST['excepcion1'])) {
+  $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
   $registrar = $objeto->registrarStudyExcepcion1($_POST['cedula'], $_POST['nombre'], $_POST['apellido'], $_POST['sexo'], $_POST['nucleo'], $_POST['carrera'], $_POST['seccion'], $_POST['seccion2'], $_POST['justificativo']);
-  echo json_encode($registrar);
+  echo json_encode(['mensaje'=> $registrar, 'newCsrfToken' => $csrf['newToken']]);
   die();
 }
 
@@ -137,20 +146,27 @@ if (isset($_POST['cedula']) && isset($_POST['nombre']) && isset($_POST['apellido
 
 if (isset($_POST['mostrarCed']) && isset($_POST['cedula'])) {
   $validarCedula = $objeto->verificarExistenciaEstudiante($_POST['cedula']);
-  echo json_encode($validarCedula);
-  die();
+  if ($validarCedula['resultado'] == 'error Cedula') {
+   echo json_encode($validarCedula);
+   die();
+  }
 }
 
 if (isset($_POST['verificar']) && isset($_POST['horarioComida']) && isset($_POST['cedula'])) {
   $Validar = $objeto->verificarAsistenciaEstudiante2($_POST['horarioComida'], $_POST['cedula']);
-  echo json_encode($Validar);
-  die();
+  if($Validar['resultado'] === 'ya ingreso al comedor2') {
+    echo json_encode($Validar);
+    die();
+  }
 }
 
-if (isset($_POST['cedula']) && isset($_POST['idmenu']) && isset($_POST['justificativo'])) {
+if (isset($_POST['excepcion2']) && isset($_POST['cedula']) && isset($_POST['idmenu']) && isset($_POST['justificativo']) && isset($_POST['csrfToken'])  ) {
+  $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrfToken']);
   $registrar = $objeto->registrarStudyExcepcion2($_POST['cedula'],  $_POST['idmenu'], $_POST['justificativo']);
-  echo json_encode($registrar);
-  die();
+  if($registrar['resultado'] === 'registro del Estudiante 2') {
+    echo json_encode(['mensaje'=>$registrar, 'newCsrfToken' => $csrf['newToken']]);
+    die();
+  }
 }
 
 

@@ -43,7 +43,7 @@
                       }
                       if (isset($permisos['Estudiantes']['consultar'])) {
                         echo '
-                                      <li class="breadcrumb-item fw-bold"><a href="?url=' . urlencode($sistem->encryptURL('estudiantes')) . '">Consultar Estudiantes</a></li>';
+                                      <li class="breadcrumb-item fw-bold"><a href="?url=' . urlencode($sistem->encryptURL('estudiantes')) . '">Estudiantes</a></li>';
                       }
                       if (isset($permisos['Asistencias']['consultar'])) {
                         echo '<li class="breadcrumb-item fw-bold"><a href="?url=' . urlencode($sistem->encryptURL('consultarAsistencia')) . '">Consultar Asistencias</a></li>
@@ -305,8 +305,9 @@
             </div>
             <div class="card-body">
               <!-- Formulario -->
-
+               <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
               <div class="form-row row">
+                 
                 <div class="form-group col-md-12">
                   <label class="label labelPri ic2">
                     <span class="label-char pl-2 letra2" style="--index: 0; margin-right: 3px!important;">
@@ -421,8 +422,10 @@
         <div class="modal-header bg-azul4">
           <h1 class="modal-title fs-5  title" id="staticBackdropLabel">Justificativo</h1>
           <button type="button" id="cerrarModal2" class="btn-close borrarE2" data-bs-dismiss="modal" aria-label="Close"></button>
-        </div>
+        </div> 
+        <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
         <form class="formu">
+          
           <div class="modal-body">
 
             <div class="form-row row">
@@ -491,6 +494,7 @@
           <button type="button" class="btn-close borrarE1" data-bs-dismiss="modal" aria-label="Close" id="cerrar"></button>
         </div>
         <form class="formu">
+           <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
           <div class="modal-body">
             <div id="alerts" data-aos="fade-up" data-aos-delay="1000">
               <div class="alert alert-top alert-info alert-dismissible fade show h-5" role="alert">
