@@ -302,7 +302,7 @@ function valAnulacion(idd){
 
 
   ///-----------------------DESCARGAR PDF
-  $(document).on('click', '.pdf', function() {
+ $(document).on('click', '.pdf', function() {
        id = this.id;
 
        $('#idSalidaU').val(id);
@@ -311,38 +311,39 @@ function valAnulacion(idd){
 function exportarReporte(){
   
     let idSalidaU = $('#idSalidaU').val();
-    $.ajax({
-      url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {reporte:true, idSalidaU}, 
-      success(data){
-         if(data.respuesta == "guardado"){
-            console.log(data.ruta)
-            descargarArchivo(data.ruta);
-            abrirArchivo(data.ruta);
-             $('#clos').click();
-        }else{
-            console.log('ERROR WE')
-        }
-      } })
+    
+    // Crear un formulario temporal para la petición POST
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = ''; 
+    
+    // Añadir los datos como campos ocultos
+    let inputReporte = document.createElement('input');
+    inputReporte.type = 'hidden';
+    inputReporte.name = 'reporte'; 
+    inputReporte.value = 'true';
+    form.appendChild(inputReporte);
+    
+    let inputId = document.createElement('input');
+    inputId.type = 'hidden';
+    inputId.name = 'idSalidaU';
+    inputId.value = idSalidaU;
+    form.appendChild(inputId);
+
+    // Añadir y enviar el formulario
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form); // Limpiar el formulario
+
+    $('#clos').click();
 }
 
-function descargarArchivo(ruta){
-let link=document.createElement('a');
-link.href = ruta;
-link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
-link.click();
-}
 
-function abrirArchivo(ruta){
-    window.open(ruta, '_blank');
-}
 
 $('#reportebtn').click(()=>{
     exportarReporte();
 })
- 
+  
 
 /// ------------- DESCARGAR PDF 2
 
@@ -352,34 +353,39 @@ $('#reportebtn2').click(()=>{
 
 
 function exportarReporte2(){
-     var fechaI= $('#fecha').val();
+      var fechaI= $('#fecha').val();
       var fechaF= $('#fecha2').val();
-    $.ajax({
-      url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {reporte2:true, fechaI, fechaF}, 
-      success(data){
-         if(data.respuesta == "guardado"){
-            console.log(data.ruta)
-            descargarArchivo2(data.ruta);
-            abrirArchivo2(data.ruta);
-             $('#clos').click();
-        }else{
-            console.log('ERROR WE')
-        }
-      } })
-}
+      
+    // Crear un formulario temporal para la petición POST
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = ''; 
 
-function descargarArchivo2(ruta){
-let link=document.createElement('a');
-link.href = ruta;
-link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
-link.click();
-}
+    // Añadir los datos como campos ocultos
+    let inputReporte2 = document.createElement('input');
+    inputReporte2.type = 'hidden';
+    inputReporte2.name = 'reporte2'; 
+    inputReporte2.value = 'true';
+    form.appendChild(inputReporte2);
+    
+    let inputFechaI = document.createElement('input');
+    inputFechaI.type = 'hidden';
+    inputFechaI.name = 'fechaI';
+    inputFechaI.value = fechaI;
+    form.appendChild(inputFechaI);
 
-function abrirArchivo2(ruta){
-    window.open(ruta, '_blank');
+    let inputFechaF = document.createElement('input');
+    inputFechaF.type = 'hidden';
+    inputFechaF.name = 'fechaF';
+    inputFechaF.value = fechaF;
+    form.appendChild(inputFechaF);
+
+    // Añadir y enviar el formulario
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form); // Limpiar el formulario
+    
+    $('#clos').click();
 }
 
 

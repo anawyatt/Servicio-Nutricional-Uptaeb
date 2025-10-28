@@ -264,81 +264,63 @@ $('#porHorario').change(function () {
 // DESCARGAR PDF 2//
 $(document).ready(function() {
   $('#reportebtn').click(function() {
+      $('#reportebtn').prop('disabled', true);
+      $('.loadingAnimation').show();
       exportarReporte();
   });
 
   function exportarReporte() {
-      
-      $('#reportebtn').prop('disabled', true);
-      $('.loadingAnimation').show();
-
       if ($('#ultimo_Registro').is(':checked')) {
-          $.ajax({
-              url: '',
-              type: 'POST',
-              dataType: 'JSON',
-              data: { reporte2: true },
-              success(data) {
-                  if (data.respuesta == "guardado") {
-                      console.log(data.ruta);
-                      descargarArchivo(data.ruta);
-                      abrirArchivo(data.ruta);
-                      $('#clos').click();
-                  } else {
-                      console.log('ERROR');
-                  }
+          let form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '';
+          
+          let inputReporte = document.createElement('input');
+          inputReporte.type = 'hidden';
+          inputReporte.name = 'reporte2';
+          inputReporte.value = 'true';
+          form.appendChild(inputReporte);
 
-                  
-                  $('#reportebtn').prop('disabled', false);
-                  $('.loadingAnimation').hide();
-              },
-              error() {
-        
-                  console.log('Error en la solicitud');
-                  $('#reportebtn').prop('disabled', false);
-                  $('.loadingAnimation').hide();
-              }
-          });
+          document.body.appendChild(form);
+          form.submit();
+          document.body.removeChild(form);
+
       } else {
-          var fecha = $('#selectFecha').val();
-          var horario = $('#selectHorario').val();
-          $.ajax({
-              url: '',
-              type: 'POST',
-              dataType: 'JSON',
-              data: { reporte: true, fecha, horario },
-              success(data) {
-                  if (data.respuesta == "guardado") {
-                      console.log(data.ruta);
-                      descargarArchivo(data.ruta);
-                      abrirArchivo(data.ruta);
-                      $('#clos').click();
-                  } else {
-                      console.log('Error');
-                  }
-                  
-                  $('#reportebtn').prop('disabled', false);
-                  $('.loadingAnimation').hide();
-              },
-              error() {
-                  
-                  console.log('Error en la solicitud');
-                  $('#reportebtn').prop('disabled', false);
-                  $('.loadingAnimation').hide();
-              }
-          });
+          let fecha = $('#selectFecha').val();
+          let horario = $('#selectHorario').val();
+
+          let form = document.createElement('form');
+          form.method = 'POST';
+          form.action = '';
+          
+          let inputReporte = document.createElement('input');
+          inputReporte.type = 'hidden';
+          inputReporte.name = 'reporte';
+          inputReporte.value = 'true';
+          form.appendChild(inputReporte);
+
+          let inputFecha = document.createElement('input');
+          inputFecha.type = 'hidden';
+          inputFecha.name = 'fecha';
+          inputFecha.value = fecha;
+          form.appendChild(inputFecha);
+
+          let inputHorario = document.createElement('input');
+          inputHorario.type = 'hidden';
+          inputHorario.name = 'horario';
+          inputHorario.value = horario;
+          form.appendChild(inputHorario);
+
+          document.body.appendChild(form);
+          form.submit();
+          document.body.removeChild(form);
       }
-  }
-
-  function descargarArchivo(ruta) {
-      let link = document.createElement('a');
-      link.href = ruta;
-      link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
-      link.click();
-  }
-
-  function abrirArchivo(ruta) {
-      window.open(ruta, '_blank');
+      
+      $('#clos').click();
+      setTimeout(() => {
+          $('#reportebtn').prop('disabled', false);
+          $('.loadingAnimation').hide();
+      }, 3000); 
   }
 });
 

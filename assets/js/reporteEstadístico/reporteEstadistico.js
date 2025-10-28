@@ -149,20 +149,26 @@ function verificarIU(){
 }
 
 // Validar grafos
-
-if ($('#grafos').hasClass('grafis')) {
-  $('#grafico1, #grafico2, #grafico3, #grafico4, #grafico5, #grafico6').on('click', function() {
-    Swal.fire({
-      toast: true,
-      position: 'top-end',
-      icon: 'error',
-      title: '¡Selecciona el tipo de reporte!',
-      showConfirmButton: false,
-      timer: 2500,
-      timerProgressBar: true,
+$(document).ready(function() {
+  if ($('#grafos').hasClass('grafos')) {
+    $('#grafico1, #grafico2, #grafico3, #grafico4, #grafico5, #grafico6').off('click.myAlert');
+  }
+  if ($('#grafos').hasClass('grafis')) {
+    $('#grafico1, #grafico2, #grafico3, #grafico4, #grafico5, #grafico6').on('click.myAlert', function() {
+      Swal.fire({
+        toast: true,
+        position: 'top-end',
+        icon: 'error',
+        title: '¡Selecciona el tipo de reporte!',
+        showConfirmButton: false,
+        timer: 2500,
+        timerProgressBar: true,
+      });
     });
-  });
-}
+  }
+});
+
+
 
 
 //--------------------- Agregar el select 2 -----------------------------------------
@@ -2200,115 +2206,69 @@ function salidaUtensilios(){
 // ------------- PDF ------------------------------
 
 
-function exportarReporte(a,b,c){
-  let grafica =a.val();
-  let tipo = b;
-  let fecha = c;
-  console.log(grafica)
-    $.ajax({
-      url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {reporte:true, grafica, tipo, fecha}, 
-      success(data){
-         if(data.respuesta == "guardado"){
-            console.log(data.ruta)
-            descargarArchivo(data.ruta);
-            abrirArchivo(data.ruta);
-             $('#clos').click();
-        }else{
-            console.log('ERROR WE')
-        }
-      },
-      complete() {
-           $('.loadingAnimation').hide();
-   
-      } })
- }
- 
-  
- function descargarArchivo(ruta){
- let link=document.createElement('a');
- link.href = ruta;
- link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
- link.click();
- }
- 
- function abrirArchivo(ruta){
-    window.open(ruta, '_blank');
- }
- 
- 
- $('#reportebtn').on('click', function() {
-   html2canvas(document.querySelector("#reporteIMG")).then(canvas => {
-     const imageDataUrl = canvas.toDataURL();
-     console.log(imageDataUrl);
-     let grafica=$('#imagenCap').val(imageDataUrl);
-     let tipo;
-     let fecha = $('#selectFecha').val();
- 
- 
-   if ($('#asisEstu').val() == 1) {
-      tipo ='AE1';
-   }
-   if ($('#asisEstu').val() == 2) {
-      tipo ='AE2';
-   }
-   if ($('#asisEstu').val() == 3) {
-     tipo ='AE3';
-   }
-   if ($('#asisEstu').val() == 4) {
-      tipo ='AE4';
-   }
-   if ($('#asisEstu').val() == 5) {
-      tipo ='AE5';
-   }
-   
-   if ($('#menuEvent').val() == 1) {
-       tipo ='ME1';
-   }
-   if ($('#menuEvent').val() == 2) {
-       tipo ='ME2';
-   }
-   if ($('#menuEvent').val() == 3) {
-       tipo ='ME3';
-   }
-   if ($('#menuEvent').val() == 4) {
-       tipo ='ME4';
-   }
-   if ($('#menuEvent').val() == 5) {
-       tipo ='ME5';
-   }
-  
-   if ($('#alimento').val() == 1) {
-      tipo ='A1';
-   }
-   if ($('#alimento').val() == 2) {
-       tipo ='A2';
+function exportarReporte(grafica, tipo, fecha){
+    $('.loadingAnimation').hide();
+
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = ''; 
+    
+    const data = {
+        reporte: 'true',
+        grafica: grafica.val(),
+        tipo: tipo,
+        fecha: fecha
+    };
+    
+    for (const key in data) {
+        let input = document.createElement('input');
+        input.type = 'hidden';
+        input.name = key; 
+        input.value = data[key];
+        form.appendChild(input);
+    }
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form);
+
+    $('#clos').click();
+}
+
+
+$('#reportebtn').on('click', function() {
+    $('.loadingAnimation').show(); // Mostrar la animación de carga
+    
+    html2canvas(document.querySelector("#reporteIMG")).then(canvas => {
+        const imageDataUrl = canvas.toDataURL();
+        let grafica=$('#imagenCap').val(imageDataUrl);
+        let tipo;
+        let fecha = $('#selectFecha').val();
+
+        if ($('#asisEstu').val() == 1) { tipo ='AE1'; }
+        if ($('#asisEstu').val() == 2) { tipo ='AE2'; }
+        if ($('#asisEstu').val() == 3) { tipo ='AE3'; }
+        if ($('#asisEstu').val() == 4) { tipo ='AE4'; }
+        if ($('#asisEstu').val() == 5) { tipo ='AE5'; }
+        
+        if ($('#menuEvent').val() == 1) { tipo ='ME1'; }
+        if ($('#menuEvent').val() == 2) { tipo ='ME2'; }
+        if ($('#menuEvent').val() == 3) { tipo ='ME3'; }
+        if ($('#menuEvent').val() == 4) { tipo ='ME4'; }
+        if ($('#menuEvent').val() == 5) { tipo ='ME5'; }
      
-   }
-   if ($('#alimento').val() == 3) {
-       tipo ='A3';
-     
-   }
-   if ($('#alimento').val() == 4) {
-       tipo ='A4';
-   }
- 
-  if ($('#utensilio').val() == 1) {
-       tipo ='U1';
-   }
-   if ($('#utensilio').val() == 2) {
-       tipo ='U2';
-   }
-   if ($('#utensilio').val() == 3) {
-       tipo ='U3';
-   }
- 
-     exportarReporte(grafica, tipo, fecha);
-   });
-   $('.loadingAnimation').show();
- });
+        if ($('#alimento').val() == 1) { tipo ='A1'; }
+        if ($('#alimento').val() == 2) { tipo ='A2'; }
+        if ($('#alimento').val() == 3) { tipo ='A3'; }
+        if ($('#alimento').val() == 4) { tipo ='A4'; }
+    
+        if ($('#utensilio').val() == 1) { tipo ='U1'; }
+        if ($('#utensilio').val() == 2) { tipo ='U2'; }
+        if ($('#utensilio').val() == 3) { tipo ='U3'; }
+
+        exportarReporte(grafica, tipo, fecha);
+    });
+});
 
   /// ----------------------- GRÁFICOS ----------------------------
 

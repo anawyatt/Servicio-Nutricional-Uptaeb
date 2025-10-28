@@ -1763,50 +1763,50 @@ let newAlimento = `
         
     ///-----------------------DESCARGAR PDF 
 
-      $(document).on('click', '.pdf', function() {
-        id = this.id;
- 
-        $('#idMenu').val(id);
-    })
- 
- function exportarReporte(){
-   
-     let idMenu = $('#idMenu').val();
-     $('.loadingAnimation').show();
-     $.ajax({
-       url: '',
-       type: 'POST',
-       dataType: 'JSON',
-       data: {reporte:true, idMenu}, 
-       success(data){
-          if(data.respuesta == "guardado"){
-             console.log(data.ruta)
-             descargarArchivo(data.ruta);
-             abrirArchivo(data.ruta);
-              $('#clos').click();
-         }else{
-             console.log('ERROR PDF MENU')
-         }
-         $('.loadingAnimation').hide();
- 
-       } })
- }
- 
- function descargarArchivo(ruta){
- let link=document.createElement('a');
- link.href = ruta;
- link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
- link.click();
- }
- 
- function abrirArchivo(ruta){
-     window.open(ruta, '_blank');
- }
- 
- $('#reportebtn').click(()=>{
-     exportarReporte();
- })
+    $(document).on('click', '.pdf', function() {
+    id = this.id;
+    $('#idMenu').val(id);
+})
 
+function exportarReporte(){
+    
+    let idMenu = $('#idMenu').val();
+    $('.loadingAnimation').show();
+
+    // Crear un formulario temporal para la petición POST
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = ''; 
+
+    // Añadir los datos como campos ocultos
+    let inputReporte = document.createElement('input');
+    inputReporte.type = 'hidden';
+    inputReporte.name = 'reporte'; 
+    inputReporte.value = 'true';
+    form.appendChild(inputReporte);
+    
+    let inputIdMenu = document.createElement('input');
+    inputIdMenu.type = 'hidden';
+    inputIdMenu.name = 'idMenu';
+    inputIdMenu.value = idMenu;
+    form.appendChild(inputIdMenu);
+
+    // Añadir y enviar el formulario
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form); // Limpiar el formulario
+    
+    $('#clos').click();
+    setTimeout(() => {
+        $('.loadingAnimation').hide();
+    }, 3000); 
+}
+
+
+
+$('#reportebtn').click(()=>{
+    exportarReporte();
+})
 
  $('#me1').addClass('active');
 $('#me3').addClass('text-primary');

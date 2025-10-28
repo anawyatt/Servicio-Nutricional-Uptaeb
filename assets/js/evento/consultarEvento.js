@@ -1856,46 +1856,48 @@ function valAnulacion(idd){
      })
  
 
-     ///-----------------------DESCARGAR PDF 1
+   ///-----------------------DESCARGAR PDF 1
 
-     $(document).on('click', '.pdf', function() {
-      id = this.id;
+    $(document).on('click', '.pdf', function() {
+     id = this.id;
 
-      $('#idEvento').val(id);
-  })
+     $('#idEvento').val(id);
+ })
 
 function exportarReporte(){
- 
+
    let idEvento = $('#idEvento').val();
    $('.loadingAnimation').show();
-   $.ajax({
-     url: '',
-     type: 'POST',
-     dataType: 'JSON',
-     data: {reporte:true, idEvento}, 
-     success(data){
-        if(data.respuesta == "guardado"){
-           console.log(data.ruta)
-           descargarArchivo(data.ruta);
-           abrirArchivo(data.ruta);
-            $('#clos').click();
-       }else{
-           console.log('ERROR PDF EVENTO')
-       }
+   
+   // Crear un formulario temporal para la petición POST
+   let form = document.createElement('form');
+   form.method = 'POST';
+   form.action = ''; 
+
+   // Añadir los datos como campos ocultos
+   let inputReporte = document.createElement('input');
+   inputReporte.type = 'hidden';
+   inputReporte.name = 'reporte'; 
+   inputReporte.value = 'true';
+   form.appendChild(inputReporte);
+   
+   let inputIdEvento = document.createElement('input');
+   inputIdEvento.type = 'hidden';
+   inputIdEvento.name = 'idEvento';
+   inputIdEvento.value = idEvento;
+   form.appendChild(inputIdEvento);
+
+   // Añadir y enviar el formulario
+   document.body.appendChild(form);
+   form.submit();
+   document.body.removeChild(form); // Limpiar el formulario
+
+   $('#clos').click();
+
+   // Ocultar la animación después de un tiempo, ya que la descarga es asíncrona respecto al JS
+   setTimeout(() => {
        $('.loadingAnimation').hide();
-
-     } })
-}
-
-function descargarArchivo(ruta){
-let link=document.createElement('a');
-link.href = ruta;
-link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
-link.click();
-}
-
-function abrirArchivo(ruta){
-   window.open(ruta, '_blank');
+   }, 3000); 
 }
 
 $('#reportebtn').click(()=>{

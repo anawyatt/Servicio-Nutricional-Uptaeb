@@ -74,13 +74,22 @@ $(document).ready(function (){
                 </tr>
                     `;
                 });
-                $('#tbody_usuario').html(tabla);
-                mostrar = $('.tabla').DataTable();
-                mostrar.on('draw.dt', function () {
-                    quitarBotones();
-                   });
-      
-                  quitarBotones();
+
+     if ($.fn.DataTable.isDataTable('.tabla')) {
+        $('.tabla').DataTable().clear().destroy();
+    }
+
+    $('#tbody_usuario').html(tabla);
+
+   mostrar = $('.tabla').DataTable({
+        destroy: true
+    });
+
+   mostrar.on('draw.dt', function () {
+        quitarBotones();
+    });
+
+    quitarBotones();
             }
         });
 
@@ -656,7 +665,7 @@ $("#editar").on("click", function(e){
       csrfToken: token
     },
       success(data){
-        if (data.resultado === 'eliminado' && data.newCsrfToken) {
+        if (data.mensaje.resultado === 'eliminado' && data.newCsrfToken) {
         $('[name="csrf_token"]').val(data.newCsrfToken);
         $('#cerrarU').click();
          rellenar();

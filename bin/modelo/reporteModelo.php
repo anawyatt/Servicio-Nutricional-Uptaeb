@@ -151,11 +151,9 @@ function entradaAlimentos($data) {
         $this->Ln(10);
     }
 
-    $directorio = 'assets/pdfs/alimentos';
-    $repositorio = $directorio . '/entradaAlimentos Fecha ' . $descripcion->fecha . '.pdf';
-    $this->Output('F', $repositorio);
 
-    echo json_encode(['respuesta' => 'guardado', 'ruta' => $repositorio]);
+    $nombreArchivo = 'entradaAlimentos Fecha ' . $descripcion->fecha . '.pdf';
+    $this->Output('D', $nombreArchivo);
     die();
 }
 
@@ -306,19 +304,18 @@ function entradaAlimentosTotal($data){
         }
     }
 
-    // --- Guardar PDF ---
-    $directorio = 'assets/pdfs/alimentos';
+    // --- ENVIAR PDF DIRECTAMENTE AL NAVEGADOR ---
     if ($fechaI && $fechaF) {
-        $repositorio = ($fechaI != $fechaF)
-            ? $directorio . '/entradaAlimentosTotal '.$fechaI.' hasta '.$fechaF.'.pdf'
-            : $directorio . '/entradaAlimentosTotal.pdf';
+        $nombreArchivo = ($fechaI != $fechaF)
+            ? 'entradaAlimentosTotal '.$fechaI.' hasta '.$fechaF.'.pdf'
+            : 'entradaAlimentosTotal '.$fechaI.'.pdf';
     } else {
-        $repositorio = $directorio . '/entradaAlimentosTotal.pdf';
+        $nombreArchivo = 'entradaAlimentosTotal.pdf';
     }
-
-    $this->Output('F', $repositorio);
-    echo json_encode(['respuesta' => 'guardado', 'ruta' => $repositorio]);
+    $this->Output('D', $nombreArchivo);
     die();
+
+    
 }
 
 
@@ -404,11 +401,8 @@ function stockAlimentos($data){
         
     }
 
-    $directorio = 'assets/pdfs/alimentos';
-    $repositorioo = $directorio . '/stockAlimentos.pdf';
-    $this->Output('F', $repositorioo);
-    $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-    echo json_encode($respuesta);
+    $nombreArchivo = 'stockAlimentos - '.$fecha_actual.' '.$hora_actual. '.pdf';
+    $this->Output('D', $nombreArchivo);
     die();
 }
 
@@ -548,11 +542,8 @@ function salidaAlimentos($data){
     }
 
     // --- Guardar PDF ---
-    $directorio = 'assets/pdfs/alimentos';
-    $repositorio = $directorio . '/salidaAlimentos Fecha ' . $descripcion->fecha . '.pdf';
-    $this->Output('F', $repositorio);
-
-    echo json_encode(['respuesta' => 'guardado', 'ruta' => $repositorio]);
+    $nombreArchivo = 'salidaAlimentos Fecha ' . $descripcion->fecha . '.pdf';
+    $this->Output('D', $nombreArchivo);
     die();
 }
 
@@ -697,31 +688,25 @@ function salidaAlimentos($data){
     $this->Ln(6);
 
     // Guardar PDF
-    $directorio = 'assets/pdfs/alimentos';
-    if ($fechaI != '' && $fechaF != '') {
-        $repositorio = ($fechaI != $fechaF) 
-            ? $directorio . '/salidaAlimentosTotal '.$fechaI.' hasta '.$fechaF.'.pdf'
-            : $directorio . '/salidaAlimentosTotal.pdf';
+   if ($fechaI != '' && $fechaF != '') {
+        $nombreArchivo = ($fechaI != $fechaF) 
+            ? 'salidaAlimentosTotal '.$fechaI.' hasta '.$fechaF.'.pdf'
+            : 'salidaAlimentosTotal '.$fechaI.'.pdf';
     } else {
-        $repositorio = $directorio . '/salidaAlimentosTotal.pdf';
+        $nombreArchivo = 'salidaAlimentosTotal.pdf';
     }
 
-    $this->Output('F', $repositorio);
-    echo json_encode(['respuesta' => 'guardado', 'ruta' => $repositorio]);
+    $this->Output('D', $nombreArchivo);
     die();
 }
 
 
 
-
-
 function asistencia($data){
-    ob_end_clean(); // Limpiar el búfer de salida
+    ob_end_clean();
 
     $fecha = $data['fecha'];
     $horario = $data['horario'];
-
-    // -------------- FECHA ACTUAL ----------------
 
     // Establecer zona horaria de Venezuela
     date_default_timezone_set('America/Caracas');
@@ -752,16 +737,19 @@ function asistencia($data){
     $this->SetTextColor(9,85,160);
     $this->SetFont('Helvetica', 'B', 20);
     // Título
-    $this->SetX(0); // Establecer posición X en 0
+    $this->SetX(0);
     $this->Cell(210, 10, utf8_decode('Asistencias del Servicio Nutricional'), 0, 1, 'C');
     $this->Ln(6);
     $this->SetTextColor(0);
     $this->SetFont('Helvetica', 'B', 14);
 
+    $nombreArchivo = 'Asistencias';
+
     if ($fecha != 'Seleccionar' && $horario != 'Seleccionar') {
        $fechaDateTime = new \DateTime($fecha);
        $formattedFecha = $fechaDateTime->format('d-m-Y');
        $this->Cell(185, 8, utf8_decode($horario.' - '. $formattedFecha), 0, 1, 'C');
+       $nombreArchivo .= ' '.$horario.' '. $formattedFecha;
     }
     else if ($fecha != 'Seleccionar' || $horario != 'Seleccionar') {
       
@@ -769,13 +757,16 @@ function asistencia($data){
            $fechaDateTime = new \DateTime($fecha);
            $formattedFecha = $fechaDateTime->format('d-m-Y');
            $this->Cell(185, 8, utf8_decode($formattedFecha), 0, 1, 'C');
+           $nombreArchivo .= ' '.$formattedFecha;
       }
       if ($horario != 'Seleccionar') {
            $this->Cell(185, 8, utf8_decode($horario), 0, 1, 'C');
+           $nombreArchivo .= ' '.$horario;
       }
     }
     else{
-         $this->Cell(185, 8, utf8_decode($fecha_actual), 0, 1, 'C');
+        $this->Cell(185, 8, utf8_decode($fecha_actual), 0, 1, 'C');
+        $nombreArchivo .= ' '.$fecha_actual;
     }
 
     $this->Ln(20);
@@ -819,50 +810,27 @@ function asistencia($data){
         }
         $this->Ln(1);
     }
-
-    $directorio = 'assets/pdfs/asistencias';
-    if ($fecha != 'Seleccionar' && $horario != 'Seleccionar') {
-       $fechaDateTime = new \DateTime($fecha);
-       $formattedFecha = $fechaDateTime->format('d-m-Y');
-       $repositorioo = $directorio . '/Asistencias '.$horario.' '. $formattedFecha.' .pdf';
-    }
-    else if ($fecha != 'Seleccionar' || $horario != 'Seleccionar') {
-      
-      if ($fecha != 'Seleccionar') {
-         $fechaDateTime = new \DateTime($fecha);
-         $formattedFecha = $fechaDateTime->format('d-m-Y');
-         $repositorioo = $directorio . '/Asistencias '. $formattedFecha.' .pdf';
-      }
-      if ($horario != 'Seleccionar') {
-           $repositorioo = $directorio . '/Asistencias '.$horario.' .pdf';
-      }
-    }
-    else{
-        $repositorioo = $directorio . '/Asistencias '.$fecha_actual.' .pdf';
-    }
-
-    $this->Output('F', $repositorioo);
-    $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-    echo json_encode($respuesta);
+    
+    $nombreArchivo .= '.pdf';
+    $this->Output('D', $nombreArchivo);
     die();
 }
 
 
 function asistencia2($data){
-    ob_end_clean(); // Limpiar el búfer de salida
+    ob_end_clean();
 //-------------- ESTRUCTURA--------------
 $asistencia = $data['detalle'];
 
 $this->SetTextColor(9, 85, 160);
 $this->SetFont('Helvetica', 'B', 20);
 // Título
-$this->SetX(0); // Establecer posición X en 0
+$this->SetX(0);
 $this->Cell(210, 10, utf8_decode('Asistencias del Servicio Nutricional'), 0, 1, 'C');
 $this->Ln(6);
 $this->SetTextColor(0);
 $this->SetFont('Helvetica', 'B', 14);
 
-// Verificar si $asistencia[0]->fechaAsistencia está definida y formatear la fecha
 if (isset($asistencia[0]->FechaAsistencia)) {
     $fechaOriginal = $asistencia[0]->FechaAsistencia;
     $fechaDateTime = new \DateTime($fechaOriginal);
@@ -914,15 +882,13 @@ foreach ($asistencia as $info) {
     $this->Ln(1);
 }
 
-// Guardar el PDF
-$directorio = 'assets/pdfs/asistencias';
-$repositorioo = $directorio . '/Asistencias ' . $fechaAsistencia . ' .pdf';
-$this->Output('F', $repositorioo);
-$respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-echo json_encode($respuesta);
+$nombreArchivo = 'Asistencias ' . $fechaAsistencia . '.pdf';
+$this->Output('D', $nombreArchivo);
 die();
 
 }
+
+
 
 //----------------- MENU ------------------------
 
@@ -1055,11 +1021,8 @@ function menu($data){
         $this->Ln(6);
     }
 
-    $directorio = 'assets/pdfs/menus';
-    $repositorioo = $directorio . '/Menú del dia ' . $descripcion[0]->feMenu . '.pdf';
-    $this->Output('F', $repositorioo);
-    $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-    echo json_encode($respuesta);
+    $nombreArchivo = 'Menu del dia ' . $descripcion[0]->feMenu . ' - ' . $descripcion[0]->horarioComida . '.pdf';
+    $this->Output('D', $nombreArchivo);
     die();
 }
 
@@ -1185,11 +1148,8 @@ foreach ($alimento as $detalle) {
 }
 
 
-    $directorio = 'assets/pdfs/eventos';
-    $repositorioo = $directorio . '/Evento del dia ' . $descripcion[0]->feMenu . '.pdf';
-    $this->Output('F', $repositorioo);
-    $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-    echo json_encode($respuesta);
+    $nombreArchivo = 'Evento del dia ' . $descripcion[0]->feMenu . ' - ' . $descripcion[0]->horarioComida . '.pdf';
+    $this->Output('D', $nombreArchivo);
     die();
 }
 
@@ -1285,11 +1245,8 @@ foreach ($utensilios as $detalle) {
         $this->Ln(6);
     }
 
-    $directorio = 'assets/pdfs/utensilios';
-    $repositorioo = $directorio . '/entradaUtensilios Fecha ' . $descripcion[0]->fecha . '.pdf';
-    $this->Output('F', $repositorioo);
-    $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-    echo json_encode($respuesta);
+    $nombreArchivo = 'entradaUtensilios Fecha ' . $descripcion[0]->fecha . '.pdf';
+    $this->Output('D', $nombreArchivo);
     die();
 }
 
@@ -1445,21 +1402,18 @@ foreach ($utensilios as $detalleU) {
     
     $this->Ln(6);
   
-    $directorio = 'assets/pdfs/utensilios';
     if ($fechaI != '' && $fechaF != '') {
       if ($fechaI != $fechaF) {
-          $repositorio = $directorio . '/entradaUtensiliosTotal '. $fechaI . ' hasta '. $fechaF.'.pdf';
+          $archivo = 'entradaUtensiliosTotal '. $fechaI . ' hasta '. $fechaF.'.pdf';
       }
       else{
-         $repositorio = $directorio . '/entradaUtensiliosTotal.pdf';
+         $archivo = 'entradaUtensiliosTotal.pdf';
       }
       }else{
-           $repositorio = $directorio . '/entradaUtensiliosTotal.pdf';
+           $archivo = 'entradaUtensiliosTotal.pdf';
       }
   
-    $this->Output('F', $repositorio);
-    $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorio];
-    echo json_encode($respuesta);
+    $this->Output('D', $archivo);
     die();
 }
 
@@ -1551,11 +1505,8 @@ function stockUtensilios($data){
        $this->Ln(6);
    }
 
-   $directorio = 'assets/pdfs/utensilios';
-   $repositorioo = $directorio . '/stockUtensilios.pdf';
-   $this->Output('F', $repositorioo);
-   $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-   echo json_encode($respuesta);
+   $nombreArchivo = 'stockUtensilios ' . $fecha_actual . '.pdf';
+   $this->Output('D', $nombreArchivo);
    die();
 }
 
@@ -1659,11 +1610,9 @@ function salidaUtensilios($data){
          $this->Ln(6);
    }
 
-  $directorio = 'assets/pdfs/utensilios';
-  $repositorioo = $directorio. '/salidaUtensilios Fecha '. $descripcion[0]->fecha .'.pdf';
-  $this->Output('F', $repositorioo);
-  $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-  echo json_encode($respuesta);
+
+  $archivo = 'salidaUtensilios Fecha '. $descripcion[0]->fecha .'.pdf';
+  $this->Output('D', $archivo);
   die();
 }
 
@@ -1823,21 +1772,18 @@ function salidaUtensiliosTotal($data){
     
     $this->Ln(6);
   
-    $directorio = 'assets/pdfs/utensilios';
     if ($fechaI != '' && $fechaF != '') {
       if ($fechaI != $fechaF) {
-          $repositorio = $directorio . '/salidaUtensiliosTotal '.$fechaI.' hasta '.$fechaF.'.pdf';
+          $archivo = 'salidaUtensiliosTotal '.$fechaI.' hasta '.$fechaF.'.pdf';
       }
       else{
-         $repositorio = $directorio . '/salidaUtensiliosTotal.pdf';
+         $archivo = 'salidaUtensiliosTotal.pdf';
       }
       }else{
-           $repositorio = $directorio . '/salidaUtensiliosTotal.pdf';
+           $archivo = 'salidaUtensiliosTotal.pdf';
       }
   
-    $this->Output('F', $repositorio);
-    $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorio];
-    echo json_encode($respuesta);
+    $this->Output('D', $archivo);
     die();
 }
 
@@ -1869,7 +1815,7 @@ function reporteGrafica($data){
        }
        $this->Ln(20);
        $this->Image($img, 10, 95, 190,60,'PNG');
-       $this->Ln(60);
+       $this->Ln(65);
 
        $datos = $data['datos'];
        $titulos = $data['titulos'];
@@ -1905,15 +1851,13 @@ function reporteGrafica($data){
           $fechaDateTime = new \DateTime($fecha);
           $fechaReporte = $fechaDateTime->format('d-m-Y');
 
-          $repositorioo = 'assets/pdfs/graficos/Reporte Estadístico '.$cabecera.' '. $fechaReporte .'.pdf';
+          $archivo = 'Reporte Estadistico '.$cabecera.' '. $fechaReporte .'.pdf';
        }
        else{
-          $repositorioo = 'assets/pdfs/graficos/Reporte Estadístico '.$cabecera.'.pdf';
+          $archivo = 'Reporte Estadistico '.$cabecera.'.pdf';
        }
         
-        $this->Output('F', $repositorioo);
-        $respuesta = ['respuesta' => 'guardado', 'ruta' => $repositorioo];
-        echo json_encode($respuesta);
+        $this->Output('D', $archivo);
         die();
     }
 

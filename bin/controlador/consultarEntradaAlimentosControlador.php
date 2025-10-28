@@ -122,6 +122,8 @@ if (isset($datosPermisos['permiso']['eliminar'])) {
 
 }
 
+
+
 //  REPORTE DEl PDF //
 
 if (isset($_POST['reporte']) && isset($_POST['idEntradaA'])) {

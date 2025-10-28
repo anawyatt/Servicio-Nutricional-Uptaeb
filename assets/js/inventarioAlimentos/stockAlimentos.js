@@ -64,40 +64,39 @@
 }
 
  ///-----------------------DESCARGAR PDF
+$('#reportebtn').click(()=>{
+    $('.loadingAnimation').show(); 
+    exportarReporte();
+    setTimeout(() => {
+         $('.loadingAnimation').hide(); 
+    }, 3000); 
+})
 
 function exportarReporte(){
     let tipoA = $('#tipoA2').val();
-    $.ajax({
-      url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {reporte:true, tipoA}, 
-      success(data){
-         if(data.respuesta == "guardado"){
-            console.log(data.ruta)
-            descargarArchivo(data.ruta);
-            abrirArchivo(data.ruta);
-             $('#clos').click();
-        }else{
-            console.log('ERROR WE')
-        }
-      } })
-}
+    
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = ''; 
+    
+    let inputReporte = document.createElement('input');
+    inputReporte.type = 'hidden';
+    inputReporte.name = 'reporte'; 
+    inputReporte.value = 'true';
+    form.appendChild(inputReporte);
+    
+    let inputTipoA = document.createElement('input');
+    inputTipoA.type = 'hidden';
+    inputTipoA.name = 'tipoA';
+    inputTipoA.value = tipoA;
+    form.appendChild(inputTipoA);
 
-function descargarArchivo(ruta){
-let link=document.createElement('a');
-link.href = ruta;
-link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
-link.click();
-}
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form); 
 
-function abrirArchivo(ruta){
-    window.open(ruta, '_blank');
+    $('#clos').click();
 }
-
-$('#reportebtn').click(()=>{
-    exportarReporte();
-})
 
 //---------------------------- FILTRO DE BUSQUEDA ---------------------------
 

@@ -353,50 +353,47 @@ function valAnulacion(idd){
 
   ///-----------------------DESCARGAR PDF 1
 
-   $(document).on('click', '.pdf', function() {
-       id = this.id;
-
-       $('#idEntradaAA').val(id);
-   })
+  $(document).on('click', '.pdf', function() {
+    id = this.id;
+    $('#idEntradaAA').val(id);
+})
 
 function exportarReporte(){
-  
     let idEntradaA = $('#idEntradaAA').val();
+    
     $('.loadingAnimation').show();
-    $.ajax({
-      url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {reporte:true, idEntradaA}, 
-      success(data){
-         if(data.respuesta == "guardado"){
-            console.log(data.ruta)
-            descargarArchivo(data.ruta);
-            abrirArchivo(data.ruta);
-             $('#clos').click();
-        }else{
-            console.log('ERROR WE')
-        }
-        $('.loadingAnimation').hide();
 
-      } })
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = ''; 
+    
+    let inputReporte = document.createElement('input');
+    inputReporte.type = 'hidden';
+    inputReporte.name = 'reporte';
+    inputReporte.value = 'true';
+    form.appendChild(inputReporte);
+    
+    let inputId = document.createElement('input');
+    inputId.type = 'hidden';
+    inputId.name = 'idEntradaA';
+    inputId.value = idEntradaA;
+    form.appendChild(inputId);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form); 
+
+    $('#clos').click();
+
+    setTimeout(() => {
+         $('.loadingAnimation').hide();
+    }, 3000); 
 }
 
-function descargarArchivo(ruta){
-let link=document.createElement('a');
-link.href = ruta;
-link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
-link.click();
-}
-
-function abrirArchivo(ruta){
-    window.open(ruta, '_blank');
-}
 
 $('#reportebtn').click(()=>{
     exportarReporte();
 })
-
 
 /// ------------- DESCARGAR PDF 2
 
@@ -406,38 +403,45 @@ $('#reportebtn2').click(()=>{
 
 
 function exportarReporte2(){
-     var fechaI= $('#fecha').val();
-      var fechaF= $('#fecha2').val();
-     $('.loadingAnimation').show();
-    $.ajax({
-      url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {reporte2:true, fechaI, fechaF}, 
-      success(data){
-         if(data.respuesta == "guardado"){
-            console.log(data.ruta)
-            descargarArchivo2(data.ruta);
-            abrirArchivo2(data.ruta);
-             $('#clos').click();
-        }else{
-            console.log('ERROR WE')
-        }
-        $('.loadingAnimation').hide();
-      } })
+    var fechaI= $('#fecha').val();
+    var fechaF= $('#fecha2').val();
+
+    $('.loadingAnimation').show();
+
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = ''; 
+    
+
+    let inputReporte = document.createElement('input');
+    inputReporte.type = 'hidden';
+    inputReporte.name = 'reporte2'; 
+    inputReporte.value = 'true';
+    form.appendChild(inputReporte);
+    
+    let inputFechaI = document.createElement('input');
+    inputFechaI.type = 'hidden';
+    inputFechaI.name = 'fechaI';
+    inputFechaI.value = fechaI;
+    form.appendChild(inputFechaI);
+
+    let inputFechaF = document.createElement('input');
+    inputFechaF.type = 'hidden';
+    inputFechaF.name = 'fechaF';
+    inputFechaF.value = fechaF;
+    form.appendChild(inputFechaF);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form); // Limpiar el formulario
+
+    $('#clos').click();
+
+    setTimeout(() => {
+         $('.loadingAnimation').hide();
+    }, 3000); 
 }
 
-
-function descargarArchivo2(ruta){
-let link=document.createElement('a');
-link.href = ruta;
-link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
-link.click();
-}
-
-function abrirArchivo2(ruta){
-    window.open(ruta, '_blank');
-}
 
 
  //------------------------- FILTRO DE BUSQUEDA -----------------

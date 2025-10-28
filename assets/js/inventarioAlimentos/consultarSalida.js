@@ -348,91 +348,93 @@ function valAnulacion(idd){
 
 
   ///-----------------------DESCARGAR PDF
-  $(document).on('click', '.pdf', function() {
-       id = this.id;
+  $(document).on('click', '.pdf', function() {
+       id = this.id;
 
-       $('#idSalidaA').val(id);
-   })
+       $('#idSalidaA').val(id);
+   })
 
 function exportarReporte(){
-  $('.loadingAnimation').show();
   
-    let idSalidaA = $('#idSalidaA').val();
-    $.ajax({
-      url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {reporte:true, idSalidaA}, 
-      success(data){
-        $('.loadingAnimation').hide();
-         if(data.respuesta == "guardado"){
-            console.log(data.ruta)
-            descargarArchivo(data.ruta);
-            abrirArchivo(data.ruta);
-             $('#clos').click();
-        }else{
-            console.log('ERROR WE')
-        }
-      } })
+    let idSalidaA = $('#idSalidaA').val();
+
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '';
+    let inputReporte = document.createElement('input');
+    inputReporte.type = 'hidden';
+    inputReporte.name = 'reporte'; // Nombre de variable POST esperado en el servidor
+    inputReporte.value = 'true';
+    form.appendChild(inputReporte);
+    
+    let inputId = document.createElement('input');
+    inputId.type = 'hidden';
+    inputId.name = 'idSalidaA'; // Nombre de variable POST esperado en el servidor
+    inputId.value = idSalidaA;
+    form.appendChild(inputId);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form); 
+    $('#clos').click();
+
 }
 
-function descargarArchivo(ruta){
-let link=document.createElement('a');
-link.href = ruta;
-link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
-link.click();
-}
-
-function abrirArchivo(ruta){
-    window.open(ruta, '_blank');
-}
 
 $('#reportebtn').click(()=>{
+    $('.loadingAnimation').show(); 
     exportarReporte();
+    setTimeout(() => {
+         $('.loadingAnimation').hide(); 
+    }, 3000); 
 })
  
 
 /// ------------- DESCARGAR PDF 2
 
 $('#reportebtn2').click(()=>{
+    $('.loadingAnimation').show(); 
     exportarReporte2();
+    setTimeout(() => {
+         $('.loadingAnimation').hide(); 
+    }, 3000); 
 })
 
 
 function exportarReporte2(){
-  $('.loadingAnimation').show();
-     var fechaI= $('#fecha').val();
-      var fechaF= $('#fecha2').val();
-    $.ajax({
-      url: '',
-      type: 'POST',
-      dataType: 'JSON',
-      data: {reporte2:true, fechaI, fechaF}, 
-      success(data){
-        $('.loadingAnimation').hide();
-         if(data.respuesta == "guardado"){
-            console.log(data.ruta)
-            descargarArchivo2(data.ruta);
-            abrirArchivo2(data.ruta);
-             $('#clos').click();
-        }else{
-            console.log('ERROR WE')
-        }
-      } })
+
+    let fechaI = $('#fecha').val();
+    let fechaF = $('#fecha2').val();
+    
+   
+
+    let form = document.createElement('form');
+    form.method = 'POST';
+    form.action = '';
+    
+    let inputReporte = document.createElement('input');
+    inputReporte.type = 'hidden';
+    inputReporte.name = 'reporte2'; 
+    inputReporte.value = 'true';
+    form.appendChild(inputReporte);
+    
+    let inputFechaI = document.createElement('input');
+    inputFechaI.type = 'hidden';
+    inputFechaI.name = 'fechaI';
+    inputFechaI.value = fechaI;
+    form.appendChild(inputFechaI);
+
+    let inputFechaF = document.createElement('input');
+    inputFechaF.type = 'hidden';
+    inputFechaF.name = 'fechaF';
+    inputFechaF.value = fechaF;
+    form.appendChild(inputFechaF);
+
+    document.body.appendChild(form);
+    form.submit();
+    document.body.removeChild(form); 
+     $('#clos').click();
 }
-
-function descargarArchivo2(ruta){
-let link=document.createElement('a');
-link.href = ruta;
-link.download = ruta.substr(ruta.lastIndexOf('/') + 1);
-link.click();
-}
-
-function abrirArchivo2(ruta){
-    window.open(ruta, '_blank');
-}
-
-
 
  //------------------------- FILTRO DE BUSQUEDA -----------------
  $('#fecha, #fecha2').on('change', function() { 
