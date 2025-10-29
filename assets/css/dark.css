@@ -526,7 +526,7 @@ hr {
   background-color: rgba(var(--bs-primary-rgb), 0.2);
 }
 .dark .footer {
-  background-color: #222738 !important;
+  background-color: #222738;
 }
 .dark .footer a {
   color: #8A92A6;
@@ -563,14 +563,16 @@ hr {
   color: #ffffff;
 }
 .dark .iq-navbar.nav-glass {
-  background: -webkit-linear-gradient(330deg, rgba(96, 101, 138, 0.5) -8%, rgba(96, 101, 138, 0.01) 120%);
-  background: -o-linear-gradient(330deg, rgba(96, 101, 138, 0.5) -8%, rgba(96, 101, 138, 0.01) 120%);
-  background: linear-gradient(120deg, rgba(96, 101, 138, 0.5) -8%, rgba(96, 101, 138, 0.01) 120%);
-  border-color: #30384f;
+  background: -webkit-linear-gradient(330deg, rgba(96, 101, 138, 0.377) -8%, rgba(96, 101, 138, 0.01) 120%)!important;
+  background: -o-linear-gradient(330deg, rgba(96, 101, 138, 0.5) -8%, rgba(96, 101, 138, 0.01) 120%)!important;
+  background: linear-gradient(120deg, rgba(96, 101, 138, 0.5) -8%, rgba(96, 101, 138, 0.01) 120%)!important;
+  -webkit-backdrop-filter: blur(10px)!important;
+	backdrop-filter: blur(10px)!important;
+  border-color: #30384f!important;
 }
 
 .dark .iq-navbar.nav-glass .titulo12{
-color: #5188fe!important;
+color: #5188fe;
 }
 .dark .iq-navbar .dropdown .dropdown-menu.sub-drop li a {
   color: #8A92A6;

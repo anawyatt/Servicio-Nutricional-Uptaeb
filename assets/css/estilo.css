@@ -372,7 +372,7 @@ hr{
     transition: transform 0.1s ease;
 }
 .nav-link:hover,.nav-link:focus{
-  color: #fff!important;
+  color: #fff;
 }
 
 
