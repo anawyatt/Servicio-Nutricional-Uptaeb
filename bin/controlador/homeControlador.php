@@ -4,7 +4,6 @@ use component\navegador as navegador;
 use component\sidebar as sidebar;
 use component\configuracion as configuracion;
 use component\cardysHome as cardysHome;
-use component\NotificacionesServer as NotificacionesServer;
 use modelo\homeModelo as home;
 use component\footer as footer;
 use helpers\encryption as encryption;
@@ -19,23 +18,13 @@ $datosPermisos = permisosHelper::verificarPermisos($sistem, $objModel, 'Home', '
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
-// Si las notificaciones están activas, consultar
- $NotificacionesServer = new NotificacionesServer();
-
-        if (isset($payload->cedula)) {
-        $NotificacionesServer->setCedula($payload->cedula);
-        } else {
-            echo json_encode(['error' => 'Cédula no encontrada en el token']);
-            exit;
+        if (!$payload->cedula) {
+             die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
         }
 
-        if (isset($_POST['notificaciones'])) {
-            $valor = $NotificacionesServer->consultarNotificaciones();
-        }
-    
-        if (isset($_POST['notificacionId'])) {
-            $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-        }
+
+
+
 if(isset($payload->horario_comida)){
 $objModel->setHorario($payload->horario_comida);
 }

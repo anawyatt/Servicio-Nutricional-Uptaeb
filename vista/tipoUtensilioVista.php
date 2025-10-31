@@ -7,6 +7,10 @@
        <?php $components->componentsHeader(); ?>
        <link rel="stylesheet" href="assets/css/estilo.css"/>
        <script src="assets/js/close.js"></script>
+       <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        window.userCedulaGlobal = "<?php echo $payload->cedula ?>";
+    </script>
        
   </head>
   <body class="  ">

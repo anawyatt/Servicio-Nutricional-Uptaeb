@@ -5,7 +5,6 @@ use component\navegador as navegador;
 use component\sidebar as sidebar;
 use component\footer as footer;
 use component\configuracion as configuracion;
-use component\NotificacionesServer as NotificacionesServer;
 use helpers\encryption as encryption;
 use modelo\tipoSalidaModelo as tipoSalida;
 use helpers\permisosHelper as permisosHelper;
@@ -20,21 +19,11 @@ $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Tipos de S
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
-$NotificacionesServer = new NotificacionesServer();
+if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
 
-if (isset($payload->cedula)) {
-  $NotificacionesServer->setCedula($payload->cedula);
-} else {
-  die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-}
 
-if (isset($_POST['notificaciones'])) {
-  $valor = $NotificacionesServer->consultarNotificaciones();
-}
-
-if (isset($_POST['notificacionId'])) {
-  $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-}
 
 $tokenCsrf = csrfTokenHelper::generateCsrfToken($payload->cedula);
 

@@ -4,7 +4,6 @@ use component\initComponents as initComponents;
 use component\navegador as navegador;
 use component\sidebar as sidebar;
 use component\configuracion as configuracion;
-use component\NotificacionesServer as NotificacionesServer;
 use helpers\encryption as encryption;
 use helpers\permisosHelper as permisosHelper;
 use component\footer as footer;
@@ -13,27 +12,15 @@ use modelo\ModulosModelo as Modulo;
 
 $obj_modulo = new Modulo();
 $sistem = new encryption();
-$NotificacionesServer = new NotificacionesServer();
 
 $datosPermisos = permisosHelper::verificarPermisos($sistem, $obj_modulo, 'Modulos', 'consultar');
 
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
- if (isset($payload->cedula)) {
-        $NotificacionesServer->setCedula($payload->cedula);
-    } else {
-        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-    }
-
-    if (isset($_POST['notificaciones'])) {
-        $valor = $NotificacionesServer->consultarNotificaciones();
-    }
-  
-    if (isset($_POST['notificacionId'])) {
-        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-    }
-
+ if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
 
 
 if (isset($_POST['mostrar'])) {

@@ -1,15 +1,152 @@
-.dropdown-item h6 {
-    margin: 0;
-    font-size: 18px;
-  }
-  
-  .dropdown-item p {
-    margin: 5px 0 0;
-    font-size: 14px;
-  }
-  
-  /* Hacer que el contenedor de las notificaciones sea desplazable cuando alcance el borde */
-  #nota {
-    max-height: 300px; /* Ajusta según sea necesario */
+/* notificaciones.css - DISEÑO FINAL Y ALINEACIÓN CORREGIDA */
+
+/* =========================================================
+   ESTILOS BASE Y GENERALES
+   ========================================================= */
+
+/* Contenedor principal de la lista */
+#nota {
+    max-height: 400px; 
     overflow-y: auto;
-  }
+    border: 1px solid #e9ecef;
+    border-radius: 8px;
+    padding: 0;
+    margin: 0;
+    scrollbar-width: thin;
+    scrollbar-color: #ced4da transparent;
+}
+
+/* Estilo Base para todas las notificaciones */
+.noti {
+    cursor: pointer;
+    transition: background-color 0.15s ease-in-out, transform 0.2s ease-out;
+    border-radius: 0; 
+    margin-bottom: 0; 
+    border-bottom: 1px solid #f0f0f0; /* Separador ligero */
+    box-shadow: none !important;
+    overflow: hidden;
+    padding: 12px 15px !important; 
+    width: 100%;
+    display: flex; 
+    /* Alineación al inicio, clave para el estiramiento vertical */
+    align-items: flex-start; 
+    background-color: #ffffff;
+    animation: fadeIn 0.4s ease-out; /* Animación de entrada */
+}
+
+/* Quitar el borde inferior de la última notificación */
+#nota .noti:last-child {
+    border-bottom: none;
+}
+
+/* Efecto al pasar el ratón (hover) */
+.noti:hover {
+    background-color: #f5f5f5 !important;
+    transform: translateY(-1px); 
+}
+
+/* =========================================================
+   INDICADORES DE ESTADO
+   ========================================================= */
+
+/* Indicador de Notificación NO LEÍDA */
+.noti-unread {
+    background-color: #f7fcff !important; 
+    border-left: 4px solid #007bff; /* Barra lateral azul destacada */
+    padding-left: 12px !important; 
+}
+
+/* Estilo para Notificación LEÍDA (fondo neutral) */
+.noti-read {
+    background-color: #ffffff; 
+}
+
+/* =========================================================
+   ESTRUCTURA DE CONTENIDO (Texto y Acciones)
+   ========================================================= */
+
+/* Ícono al lado del título */
+.title-icon {
+    font-size: 1.05rem; 
+    line-height: 1; 
+}
+
+/* Contenido de la Notificación (Título y Mensaje) */
+.noti .content {
+    flex-grow: 1;
+    overflow: hidden;
+    margin-top: 0; 
+}
+
+/* Título de la Notificación */
+.noti .content .noti-title {
+    font-size: 0.88rem; 
+    line-height: 1.3;
+    white-space: normal;
+    word-break: break-word; 
+    color: #1a1a1a; 
+    margin-bottom: 2px !important; 
+}
+
+/* Mensaje de la Notificación (Sale COMPLETO) */
+.noti .content .noti-message {
+    font-size: 0.85rem; 
+    line-height: 1.4;
+    white-space: normal; 
+    word-break: break-word;
+    color: #555555; 
+    display: block; 
+    overflow: visible;
+    margin-top: 4px !important; 
+}
+
+/* Contenedor Derecho (Botón de Cerrar y Hora) - SOLUCIÓN DE ALINEACIÓN FINAL */
+.ms-auto.text-end {
+    flex-shrink: 0; 
+    margin-left: 10px !important; 
+    padding-top: 0; 
+    
+    /* 🔥 PROPIEDADES CRÍTICAS PARA QUE LA HORA VAYA AL FONDO */
+    align-self: stretch; /* ESTO HACE QUE EL CONTENEDOR TOME TODA LA ALTURA DEL MENSAJE */
+    height: auto; 
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between; /* Empuja el botón arriba y la hora abajo */
+    align-items: flex-end;
+}
+
+/* Estilo para el botón de cerrar (con icono 'X') */
+.btn-close {
+    /* Aseguramos alta visibilidad y tamaño */
+    opacity: 1; 
+    transition: opacity 0.2s;
+    font-size: 0.65rem; 
+}
+
+.btn-close:hover {
+    opacity: 0.8;
+}
+
+/* Estilo para la hora */
+.noti-time {
+    font-size: 0.65rem !important; /* Hora pequeña y sutil */
+    color: #a0a0a0 !important; 
+    line-height: 1;
+    margin-top: 0 !important; /* Eliminamos cualquier margen residual */
+}
+
+
+/* =========================================================
+   ANIMACIONES
+   ========================================================= */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-5px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

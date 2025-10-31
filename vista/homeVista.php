@@ -7,7 +7,10 @@
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">    
     <title>Inicio | Servicio Nutricional UPTAEB</title>
     <link rel="stylesheet" href="assets/css/estilo.css"/>
-    
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        window.userCedulaGlobal = "<?php echo $payload->cedula ?>";
+    </script>
     
     <link rel="stylesheet" href="assets/css/chosen.min.css">
   </head>
@@ -139,8 +142,6 @@
     <?php $components->componentsJS(); ?>
   <script src="assets/js/home/home.js"></script>
   <script src="assets/js/close.js"></script>
-  
- 
 
 <style>
 .fc-content {

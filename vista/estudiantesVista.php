@@ -2,10 +2,14 @@
 <html lang="en" dir="ltr">
 
 <head>
+    <?php $components->componentsHeader(); ?>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
   <title>Estudiantes | Servicio Nutricional UPTAEB</title>
-  <?php $components->componentsHeader(); ?>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        window.userCedulaGlobal = "<?php echo $payload->cedula ?>";
+    </script>
   <link rel="stylesheet" href="assets/css/estilo.css" />
 
 </head>
@@ -189,7 +193,10 @@
         </div>
         <!-- Footer Section Start -->
 
-        <div class="modal fade" id="agregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel">
+  <?php $footer->footer(); ?>
+  </main>
+  
+<div class="modal fade" id="agregar" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel">
           <div class="modal-dialog modal-lg">
             <div class="modal-content">
               <div class="modal-header bg-azul4">
@@ -235,10 +242,6 @@
             </div>
           </div>
         </div>
-
-
-  </main>
-  <?php $footer->footer(); ?>
 
   <?php $configuracion->configuracion(); ?>
 

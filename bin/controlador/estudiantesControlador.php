@@ -5,7 +5,6 @@ use component\navegador as navegador;
 use component\sidebar as sidebar;
 use component\configuracion as configuracion;
 use component\footer as footer;
-use component\NotificacionesServer as NotificacionesServer;
 use helpers\encryption as encryption;
 use helpers\permisosHelper as permisosHelper;
 use modelo\EstudianteNormalizer as EstudianteNormalizer;
@@ -17,34 +16,20 @@ set_time_limit(3600);
 use modelo\estudiantesModelo as estudiantes;
 use modelo\bitacoraModelo as bitacora;
 
-
-
 $objeto = new estudiantes;
-
 $sistem = new encryption();
-
 $normalizer = new EstudianteNormalizer();
 
-$NotificacionesServer = new NotificacionesServer();
 
 
 $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Estudiantes', 'consultar');
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
-    if (isset($payload->cedula)) {
-        $NotificacionesServer->setCedula($payload->cedula);
-    } else {
-        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-    }
+ if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
 
-    if (isset($_POST['notificaciones'])) {
-        $valor = $NotificacionesServer->consultarNotificaciones();
-    }
-  
-    if (isset($_POST['notificacionId'])) {
-        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-    }
 
     $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
@@ -254,6 +239,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'Se han registrado un total de ' . $totalProcessed . ' estudiantes.',
             $payload->cedula
         );
+
+        $objeto->notificacionRegistro($totalProcessed, $alreadyRegistered, $incompleteData);
 
         echo json_encode([
             'status' => 'success',

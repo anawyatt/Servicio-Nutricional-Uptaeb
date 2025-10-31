@@ -4,7 +4,6 @@
  use component\sidebar as sidebar;
  use component\footer as footer;
  use component\configuracion as configuracion;
- use component\NotificacionesServer as NotificacionesServer;
  use modelo\PermisoModelo as Permisos;
  use helpers\encryption as encryption;
  use helpers\permisosHelper as permisosHelper;
@@ -27,21 +26,10 @@ if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_P
     die();
 }
 
- $NotificacionesServer = new NotificacionesServer();
+ if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
 
-    if (isset($payload->cedula)) {
-        $NotificacionesServer->setCedula($payload->cedula);
-    } else {
-        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-    }
-
-    if (isset($_POST['notificaciones'])) {
-        $valor = $NotificacionesServer->consultarNotificaciones();
-    }
-  
-    if (isset($_POST['notificacionId'])) {
-        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-    }
   
 
 if (isset($datosPermisos['permiso']['consultar'])) {

@@ -2,10 +2,15 @@
 <html lang="en" dir="ltr">
 
 <head>
+
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <title>Restablecer Contraseña | Servicio Nutricional UPTAEB</title>
     <link rel="stylesheet" href="assets/css/style.css" />
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        window.userCedulaGlobal = "<?php echo $payload->cedula ?>";
+    </script>
     <?php $components->componentsHeader(); ?>
 </head>
 

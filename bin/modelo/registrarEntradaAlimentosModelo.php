@@ -21,12 +21,12 @@ class registrarEntradaAlimentosModelo extends connectDB
 
 
   public function __construct()
-{
+  {
     parent::__construct();
-        $token = $_COOKIE['jwt'];
-        $this->payload = JwtHelpers::validarToken($token);
-    
-}
+    $token = $_COOKIE['jwt'];
+    $this->payload = JwtHelpers::validarToken($token);
+
+  }
 
 
   public function mostrarTipoAlimento()
@@ -194,8 +194,8 @@ class registrarEntradaAlimentosModelo extends connectDB
       $this->notificaciones($this->fecha, $this->hora, $this->descripcion);
       $mensaje = ['respuesta' => 'registrado', 'id' => $this->id];
       $bitacora = new bitacoraModelo;
-      $bitacora->registrarBitacora('Inventario de Alimentos - Entrada', 'Registró una entrada de alimentos en la fecha y hora: ' 
-      . $this->fecha . ' - ' . $this->hora . ' la cual describe que es :  ' . $this->descripcion, $this->payload->cedula);
+      $bitacora->registrarBitacora('Inventario de Alimentos - Entrada', 'Registró una entrada de alimentos en la fecha y hora: '
+        . $this->fecha . ' - ' . $this->hora . ' la cual describe que es :  ' . $this->descripcion, $this->payload->cedula);
       $this->conex->commit();
 
       return $mensaje;
@@ -257,28 +257,28 @@ class registrarEntradaAlimentosModelo extends connectDB
   }
 
 
- private function actualizarStock($idAlimento, $cantidad)
-{
+  private function actualizarStock($idAlimento, $cantidad)
+  {
     $this->alimento = $idAlimento;
     $this->cantidad = $cantidad;
 
     try {
-        $query = $this->conex->prepare("SELECT stock FROM `alimento` WHERE `idAlimento` = ? FOR UPDATE");
-        $query->bindValue(1, $this->alimento);
-        $query->execute();
+      $query = $this->conex->prepare("SELECT stock FROM `alimento` WHERE `idAlimento` = ? FOR UPDATE");
+      $query->bindValue(1, $this->alimento);
+      $query->execute();
 
-        $row = $query->fetch(\PDO::FETCH_ASSOC);
-        $nuevoStock = $row['stock'] + $this->cantidad;
+      $row = $query->fetch(\PDO::FETCH_ASSOC);
+      $nuevoStock = $row['stock'] + $this->cantidad;
 
-        $registrar = $this->conex->prepare("UPDATE `alimento` SET stock = ? WHERE `idAlimento` = ?");
-        $registrar->bindValue(1, $nuevoStock);
-        $registrar->bindValue(2, $this->alimento);
-        $registrar->execute();
+      $registrar = $this->conex->prepare("UPDATE `alimento` SET stock = ? WHERE `idAlimento` = ?");
+      $registrar->bindValue(1, $nuevoStock);
+      $registrar->bindValue(2, $this->alimento);
+      $registrar->execute();
 
     } catch (\Exception $e) {
-        throw new \RuntimeException('Error al actualizar el stock: ' . $e->getMessage());
+      throw new \RuntimeException('Error al actualizar el stock: ' . $e->getMessage());
     }
-}
+  }
 
 
   private function notificaciones($fecha, $hora, $descripcion)
@@ -300,18 +300,57 @@ class registrarEntradaAlimentosModelo extends connectDB
       $query->execute();
       $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
 
+      $cedulasDestino = []; 
       $query = $this->conex2->prepare("INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)");
       foreach ($usuarios as $usuario) {
         $query->bindValue(1, $usuario->cedula);
         $query->bindValue(2, $notificacionId);
         $query->execute();
+        $cedulasDestino[] = $usuario->cedula;
       }
 
+      if (!empty($cedulasDestino)) {
+        $this->enviarNotificacionWebSocket($cedulasDestino, [
+          'type' => 'nueva_notificacion', // Usado por tu JS cliente
+          'idNotificaciones' => $notificacionId,
+          'titulo' => $titulo,
+          'mensaje' => $mensaje,
+          'fecha' => $fecha,
+          'hora' => $hora
+
+        ]);
+      }
 
     } catch (\Exception $e) {
-
       error_log("Error al enviar notificación a través de WebSocket: " . $e->getMessage());
     }
+  }
+  private function enviarNotificacionWebSocket(array $cedulasDestino, array $data)
+  {
+    $url = 'http://localhost:3000/send-notif';
+    $payload = [
+      'cedulas' => $cedulasDestino,
+      'data' => $data
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt(
+      $ch,
+      CURLOPT_HTTPHEADER,
+      array(
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen(json_encode($payload))
+      )
+    );
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+      error_log('Error cURL al enviar a Node.js: ' . curl_error($ch));
+    }
+    curl_close($ch);
   }
 
 }

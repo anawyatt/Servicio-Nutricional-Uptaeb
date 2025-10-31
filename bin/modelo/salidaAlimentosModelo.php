@@ -338,140 +338,151 @@ class salidaAlimentosModelo extends connectDB
     }
   }
 
-  private function notificaciones()
-  {
+
+private function _enviarNotificacionGeneral(string $titulo, string $mensaje, string $tipomsj = "informacion")
+{
     try {
-      $this->conectarDBSeguridad();
-      $titulo = "Registro de Salida de Alimentos";
-      $mensaje = 'Se registro una salida de alimentos en la fecha y hora: ' . $this->fecha . ' - ' . $this->hora . ' la cual describe que es :  ' . $this->descripcion;
-      $tipomsj = "informacion";
-      $query = $this->conex2->prepare("INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)");
-      $query->bindValue(1, $titulo);
-      $query->bindValue(2, $mensaje);
-      $query->bindValue(3, $tipomsj);
-      $query->execute();
+        $this->conectarDBSeguridad();
 
-      $notificacionId = $this->conex2->lastInsertId();
 
-      $query = $this->conex2->prepare("SELECT * FROM usuario u INNER JOIN rol r ON u.idRol = r.idRol INNER JOIN permiso p ON p.idRol = r.idRol INNER JOIN modulo m ON m.idModulo = p.idModulo WHERE m.nombreModulo = 'Inventario de Alimentos' and p.nombrePermiso = 'consultar' and p.status = 1 and u.status = 1;");
-      $query->execute();
-      $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
-
-      $query = $this->conex2->prepare("INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)");
-      foreach ($usuarios as $usuario) {
-        $query->bindValue(1, $usuario->cedula);
-        $query->bindValue(2, $notificacionId);
+        $query = $this->conex2->prepare("INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)");
+        $query->bindValue(1, $titulo);
+        $query->bindValue(2, $mensaje);
+        $query->bindValue(3, $tipomsj);
         $query->execute();
-      }
 
-    } catch (\Exception $e) {
+        $notificacionId = $this->conex2->lastInsertId();
 
-      error_log("Error al enviar notificación a través de WebSocket: " . $e->getMessage());
-    }
-  }
+        $query = $this->conex2->prepare("SELECT u.cedula FROM usuario u 
+            INNER JOIN rol r ON u.idRol = r.idRol 
+            INNER JOIN permiso p ON p.idRol = r.idRol 
+            INNER JOIN modulo m ON m.idModulo = p.idModulo 
+            WHERE m.nombreModulo = 'Inventario de Alimentos' 
+            AND p.nombrePermiso = 'consultar' 
+            AND p.status = 1 
+            AND u.status = 1;");
+        $query->execute();
+        $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
 
-  private function notificaciones2()
-  {
-    try {
-      $this->conectarDBSeguridad();
-      $query = $this->conex->prepare("SELECT stock, nombre FROM `alimento` WHERE idAlimento = ?");
-      $query->bindValue(1, $this->alimento);
-      $query->execute();
-
-      $result = $query->fetch(\PDO::FETCH_ASSOC);
-
-      if ($result) {
-        $stock = $result['stock'];
-        $nombre = $result['nombre'];
-
-        if ($stock == 0) {
-
-          $titulo = "Stock Vacio";
-          $mensaje = "El Stock del alimento " . $nombre . " se encuentra vacio.";
-          $tipomsj = "informacion";
-          $query = $this->conex2->prepare("INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)");
-          $query->bindValue(1, $titulo);
-          $query->bindValue(2, $mensaje);
-          $query->bindValue(3, $tipomsj);
-          $query->execute();
-
-          $notificacionId = $this->conex2->lastInsertId();
-
-          $query = $this->conex2->prepare("SELECT * FROM usuario u INNER JOIN rol r ON u.idRol = r.idRol INNER JOIN permiso p ON p.idRol = r.idRol INNER JOIN modulo m ON m.idModulo = p.idModulo WHERE m.nombreModulo = 'Inventario de Alimentos' and p.nombrePermiso = 'consultar' and p.status = 1 and u.status = 1;");
-          $query->execute();
-          $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
-
-          $query = $this->conex2->prepare("INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)");
-          foreach ($usuarios as $usuario) {
-            $query->bindValue(1, $usuario->cedula);
-            $query->bindValue(2, $notificacionId);
-            $query->execute();
-          }
-        } else {
-
+        $cedulasDestino = [];
+        if (!empty($usuarios)) {
+            $query = $this->conex2->prepare("INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)");
+            foreach ($usuarios as $usuario) {
+                $query->bindValue(1, $usuario->cedula);
+                $query->bindValue(2, $notificacionId);
+                $query->execute();
+                $cedulasDestino[] = $usuario->cedula;
+            }
         }
-      } else {
-        echo "No se encontró el alimento con idAlimento = .";
-      }
 
-
-    } catch (\Exception $e) {
-
-      error_log("Error al enviar notificación a través de WebSocket: " . $e->getMessage());
-    }
-  }
-
-  private function notificaciones3()
-  {
-    try {
-      $this->conectarDBSeguridad();
-      $query = $this->conex->prepare("SELECT tipoSalida FROM `tiposalidas` WHERE idTipoSalidas = ?");
-      $query->bindValue(1, $this->tipoS);
-      $query->execute();
-
-      $result = $query->fetch(\PDO::FETCH_ASSOC);
-
-      if ($result) {
-        $tipoSalida = $result['tipoSalida'];
-
-        if ($tipoSalida == "Merma") {
-
-          $titulo = "Salida de Merma";
-          $mensaje = "Se ha realizado una salida por motivo de Merma en la fecha y hora:" . $this->fecha . "-" . $this->hora;
-          $tipomsj = "informacion";
-          $query = $this->conex2->prepare("INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)");
-          $query->bindValue(1, $titulo);
-          $query->bindValue(2, $mensaje);
-          $query->bindValue(3, $tipomsj);
-          $query->execute();
-
-          $notificacionId = $this->conex2->lastInsertId();
-
-          $query = $this->conex2->prepare("SELECT * FROM usuario u INNER JOIN rol r ON u.idRol = r.idRol INNER JOIN permiso p ON p.idRol = r.idRol INNER JOIN modulo m ON m.idModulo = p.idModulo WHERE m.nombreModulo = 'Inventario de Alimentos' and p.nombrePermiso = 'consultar' and p.status = 1 and u.status = 1;");
-          $query->execute();
-          $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
-
-          $query = $this->conex2->prepare("INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)");
-          foreach ($usuarios as $usuario) {
-            $query->bindValue(1, $usuario->cedula);
-            $query->bindValue(2, $notificacionId);
-            $query->execute();
-
-          }
-        } else {
-
+        if (!empty($cedulasDestino)) {
+            $this->enviarNotificacionWebSocket($cedulasDestino, [
+                'type' => 'nueva_notificacion', 
+                'idNotificaciones' => $notificacionId,
+                'titulo' => $titulo,
+                'mensaje' => $mensaje
+            ]);
         }
-      } else {
-        echo "No se encontró el alimento con idAlimento = .";
-      }
+        
+    } catch (\Exception $e) {
+        error_log("Error al procesar y enviar notificación: " . $e->getMessage());
+        throw $e; 
+    }
+}
 
-
+private function notificaciones() // Renombrada de notificaciones1
+{
+    try {
+        $titulo = "Registro de Salida de Alimentos";
+        $mensaje = 'Se registró una salida de alimentos en la fecha y hora: ' . $this->fecha . ' - ' . $this->hora . ' la cual describe que es: ' . $this->descripcion;
+        $tipomsj = "informacion";
+        
+        $this->_enviarNotificacionGeneral($titulo, $mensaje, $tipomsj);
 
     } catch (\Exception $e) {
-
-      error_log("Error al enviar notificación a través de WebSocket: " . $e->getMessage());
+        error_log("Error en notificaciones (Salida de Alimentos): " . $e->getMessage());
     }
-  }
+}
+
+private function notificaciones2()
+{
+    try {
+        $this->conectarDBSeguridad();
+        $query = $this->conex->prepare("SELECT stock, nombre FROM `alimento` WHERE idAlimento = ?");
+        $query->bindValue(1, $this->alimento);
+        $query->execute();
+
+        $result = $query->fetch(\PDO::FETCH_ASSOC);
+
+        if ($result) {
+            $stock = $result['stock'];
+            $nombre = $result['nombre'];
+
+            if ($stock == 0) {
+                $titulo = "Stock Vacío del Alimento";
+                $mensaje = "El Stock del alimento " . $nombre . " se encuentra vacío.";
+                $tipomsj = "informacion";
+                
+                $this->_enviarNotificacionGeneral($titulo, $mensaje, $tipomsj);
+            }
+        } else {
+            error_log("No se encontró el alimento con idAlimento = " . $this->alimento);
+        }
+    } catch (\Exception $e) {
+        error_log("Error en notificaciones2 (Stock Vacío): " . $e->getMessage());
+    }
+}
+
+private function notificaciones3()
+{
+    try {
+        $this->conectarDBSeguridad();
+        $query = $this->conex->prepare("SELECT tipoSalida FROM `tiposalidas` WHERE idTipoSalidas = ?");
+        $query->bindValue(1, $this->tipoS);
+        $query->execute();
+
+        $result = $query->fetch(\PDO::FETCH_ASSOC);
+
+        if ($result) {
+            $tipoSalida = $result['tipoSalida'];
+
+            if ($tipoSalida == "Merma") {
+                $titulo = "Salida por Merma";
+                $mensaje = "Se ha realizado una salida por motivo de Merma en la fecha y hora: " . $this->fecha . " - " . $this->hora;
+                $tipomsj = "informacion";
+                
+                $this->_enviarNotificacionGeneral($titulo, $mensaje, $tipomsj);
+            }
+        } else {
+            error_log("No se encontró el tipo de salida con idTipoSalidas = " . $this->tipoS);
+        }
+    } catch (\Exception $e) {
+        error_log("Error en notificaciones3 (Salida por Merma): " . $e->getMessage());
+    }
+}
+
+private function enviarNotificacionWebSocket(array $cedulasDestino, array $data) {
+    $url = 'http://localhost:3000/send-notif'; 
+    $payload = [
+        'cedulas' => $cedulasDestino,
+        'data' => $data
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen(json_encode($payload)))
+    );
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        error_log('Error cURL al enviar a Node.js: ' . curl_error($ch));
+    }
+    curl_close($ch);
+}
 
 
 

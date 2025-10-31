@@ -7,7 +7,6 @@
     use component\configuracion as configuracion;
     use helpers\encryption as encryption;
     use helpers\permisosHelper as permisosHelper;
-    use component\NotificacionesServer as NotificacionesServer;
     use middleware\PostRateMiddleware as PostRateMiddleware;
     use helpers\csrfTokenHelper;
     use middleware\csrfMiddleware;
@@ -15,26 +14,15 @@
 
     $object = new consultarMenu;
     $sistem = new encryption();
-    $NotificacionesServer = new NotificacionesServer();
+
 
     $datosPermisos = permisosHelper::verificarPermisos($sistem, $object, 'Menú', 'consultar');
     $permisos = $datosPermisos['permisos'];
     $payload = $datosPermisos['payload'];
 
-
-    if (isset($payload->cedula)) {
-        $NotificacionesServer->setCedula($payload->cedula);
-    } else {
-        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-    }
-
-    if (isset($_POST['notificaciones'])) {
-        $valor = $NotificacionesServer->consultarNotificaciones();
-    }
-  
-    if (isset($_POST['notificacionId'])) {
-        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-    }
+ if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
 
   
      $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);

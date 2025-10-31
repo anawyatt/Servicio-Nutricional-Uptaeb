@@ -24,6 +24,8 @@
 
       private $payload;
 
+    
+
       public function __construct(){
         parent ::__construct();
         $token = $_COOKIE['jwt'];
@@ -231,8 +233,7 @@
               $bitacora->registrarBitacora('Menú', 'Se registró un menú para el dia: '.$this->feMenu.' n° comensales: '.$this->cantPlatos,  $this->payload->cedula);
         
               $this->conex->commit();
-              $this->notificaciones($this->horarioComida, $this->descripcion, $this->cantPlatos, $this->feMenu);
-              $this->notificaciones2($this->horarioComida, $this->descripcion, $this->cantPlatos, $this->feMenu);
+              $this->notificaciones2();
              
               return ['resultado' => 'registrado', 'menuId' => $menuId, 'salidaId' => $salidaId];
 
@@ -375,79 +376,85 @@
           }
         }
 
-        private function notificaciones2() {
-          try {
-             $this->conectarDBSeguridad();
-            $titulo = "Registro de menú";
-            $mensaje = 'Se registro un menú para '.$this->cantPlatos. '° Comensales  para el dia '.$this->feMenu. ' en el horario: '.$this->horarioComida;
-            $tipomsj = "informacion";
-            $query = $this->conex2->prepare("INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)");
-              $query->bindValue(1, $titulo);
-              $query->bindValue(2, $mensaje);
-              $query->bindValue(3, $tipomsj);
-              $query->execute();
-      
-            $notificacionId = $this->conex2->lastInsertId();
-      
-            $query = $this->conex2->prepare("SELECT * FROM usuario u INNER JOIN rol r ON u.idRol = r.idRol INNER JOIN permiso p ON p.idRol = r.idRol INNER JOIN modulo m ON m.idModulo = p.idModulo WHERE m.nombreModulo = 'Menú' and p.nombrePermiso = 'consultar' and p.status = 1 and u.status = 1;");
-            $query->execute();
-            $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
-      
+
+
+
+private function notificaciones2() 
+{
+    try {
+        $titulo = "Menú";
+        $mensaje = 'Se registró un menú para ' . $this->cantPlatos . ' Estudiantes para el día ' . $this->feMenu . ' en el horario: ' . $this->horarioComida;
+        $tipomsj = "informacion";
+        $this->conectarDBSeguridad();
+        $query = $this->conex2->prepare('INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)');
+        $query->bindValue(1, $titulo);
+        $query->bindValue(2, $mensaje);
+        $query->bindValue(3, $tipomsj);
+        $query->execute();
+
+        $notificacionId = $this->conex2->lastInsertId();
+
+        $query = $this->conex2->prepare("SELECT u.cedula FROM usuario u 
+            INNER JOIN rol r ON u.idRol = r.idRol 
+            INNER JOIN permiso p ON p.idRol = r.idRol 
+            INNER JOIN modulo m ON m.idModulo = p.idModulo 
+            WHERE m.nombreModulo = 'Menú' 
+            AND p.nombrePermiso = 'consultar' 
+            AND p.status = 1 
+            AND u.status = 1;");
+        $query->execute();
+        $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
+
+        $cedulasDestino = [];
+        if (!empty($usuarios)) {
             $query = $this->conex2->prepare("INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)");
             foreach ($usuarios as $usuario) {
                 $query->bindValue(1, $usuario->cedula);
                 $query->bindValue(2, $notificacionId);
                 $query->execute();
+                $cedulasDestino[] = $usuario->cedula;
             }
-      
-          } catch (Exception $e) {
-              
-              error_log("Error al enviar notificación a través de WebSocket: " . $e->getMessage());
-          }
         }
 
-        private function notificaciones() {
-          $this->conectarDBSeguridad();
-    
-          try {
-            $titulo = "Menú Del Dia - ". $this->horarioComida;
-            $mensaje = "Descripción: " . $this->descripcion . " hecho para " .$this->cantPlatos. "° comensales. Su asistencia esta disponible para el registro" ;
-            $tipomsj = $this->horarioComida;
-            $query = $this->conex2->prepare("INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`, `fechaNoti`) VALUES (?, ?, ?, ?)");
-            $query->bindValue(1, $titulo);
-            $query->bindValue(2, $mensaje);
-            $query->bindValue(3, $tipomsj);
-            $query->bindValue(4, $this->feMenu);
-            $query->execute();
-
-            $notificacionId = $this->conex2->lastInsertId();
-    
-            // Obtener todos los usuarios con status igual a 1
-            $query = $this->conex2->prepare("SELECT u.cedula FROM usuario u
-                INNER JOIN rol r ON u.idRol = r.idRol
-                INNER JOIN permiso p ON p.idRol = r.idRol
-                INNER JOIN modulo m ON m.idModulo = p.idModulo
-                WHERE m.nombreModulo = 'Menú' 
-                AND p.nombrePermiso = 'consultar' 
-                AND p.status = 1 
-                AND u.status = 1;");
-            $query->execute();
-            $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
-    
-            // Insertar en la tabla notificaciones_usuarios
-            $query = $this->conex2->prepare("INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)");
-            foreach ($usuarios as $usuario) {
-                $query->bindValue(1, $usuario->cedula);
-                $query->bindValue(2, $notificacionId);
-                $query->execute();
-            }
-            $this->desconectarDB();
-          } catch (Exception $e) {
-              
-              error_log("Error al enviar notificación a través de WebSocket: " . $e->getMessage());
-          }
-          
+        if (!empty($cedulasDestino)) {
+            $this->enviarNotificacionWebSocket($cedulasDestino, [
+                'type' => 'nueva_notificacion', 
+                'idNotificaciones' => $notificacionId,
+                'titulo' => $titulo,
+                'mensaje' => $mensaje
+            ]);
         }
+
+        $this->desconectarDB();
+
+    } catch (\Exception $e) {
+        error_log("Error en notificaciones2 (Registro de Menú): " . $e->getMessage());
+    }
+}
+
+
+private function enviarNotificacionWebSocket(array $cedulasDestino, array $data) {
+    $url = 'http://localhost:3000/send-notif'; 
+    $payload = [
+        'cedulas' => $cedulasDestino,
+        'data' => $data
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen(json_encode($payload)))
+    );
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        error_log('Error cURL al enviar a Node.js: ' . curl_error($ch));
+    }
+    curl_close($ch);
+}
     
   
 

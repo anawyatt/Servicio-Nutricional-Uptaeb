@@ -2,7 +2,6 @@
     use component\initComponents as initComponents;
     use component\navegador as navegador;
     use component\sidebar as sidebar;
-    use component\NotificacionesServer as NotificacionesServer;
     use component\configuracion as configuracion;
     use helpers\encryption as encryption;
     use helpers\JwtHelpers;
@@ -13,15 +12,15 @@
 
     $objet = new perfil(); 
     $sistem = new encryption();
-    $NotificacionesServer = new NotificacionesServer();
 
     $jwt = new JwtHelpers();
     $payload = $jwt->validarToken($_COOKIE['jwt'] ?? '');
 
   
-    if (!$payload) {
-        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-    }
+   if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
+
       $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
     
@@ -33,20 +32,7 @@ if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_P
 
     $permisos = $objet->getPermisosRol($payload->rol);
 
-    if (isset($payload->cedula)) {
-        $NotificacionesServer->setCedula($payload->cedula);
-    } else {
-        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-    }
-
-    if (isset($_POST['notificaciones'])) {
-        $valor = $NotificacionesServer->consultarNotificaciones();
-    }
-  
-    if (isset($_POST['notificacionId'])) {
-        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-    }
-
+    
     if (isset($_POST['info'])) {
       $respuesta = $objet->informacionUsuario($payload->cedula);
       echo json_encode($respuesta);

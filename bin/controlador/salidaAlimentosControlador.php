@@ -5,7 +5,6 @@
  use component\sidebar as sidebar;
  use component\footer as footer;
  use component\configuracion as configuracion;
- use component\NotificacionesServer as NotificacionesServer;
  use helpers\encryption as encryption;
  use modelo\salidaAlimentosModelo as salidaAlimentos;
  use helpers\permisosHelper as permisosHelper;
@@ -15,11 +14,15 @@ use middleware\PostRateMiddleware as PostRateMiddleware;
 
  $objeto = new salidaAlimentos;
 $sistem = new encryption();
-$NotificacionesServer = new NotificacionesServer();
 
 $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Inventario de Alimentos', 'registrar');
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
+
+if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
+
 
 $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
 
@@ -29,24 +32,7 @@ if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_P
     die();
 }
 
-    $NotificacionesServer = new NotificacionesServer();
-
-    if (isset($payload->cedula)) {
-        $NotificacionesServer->setCedula($payload->cedula);
-    } else {
-        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-    }
-
-    if (isset($_POST['notificaciones'])) {
-        $valor = $NotificacionesServer->consultarNotificaciones();
-    }
   
-    if (isset($_POST['notificacionId'])) {
-        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-    }
-
-
-
  if (isset($_POST['valida']) && isset($_POST['tipoA'])) {
    try{
      $validarExistenciaTA=  $objeto->verificarExistenciaTipoA($_POST['tipoA']);

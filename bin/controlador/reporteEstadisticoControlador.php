@@ -6,7 +6,6 @@ use component\sidebar as sidebar;
 use component\footer as footer;
 use component\configuracion as configuracion;
 use component\cardysReporte as cardysReporte;
-use component\NotificacionesServer as NotificacionesServer;
 use modelo\reporteEstadisticoModelo as reporteEstadistico;
 use helpers\encryption as encryption;
 use helpers\permisosHelper as permisosHelper;
@@ -18,15 +17,9 @@ $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Alimentos'
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
-$NotificacionesServer = new NotificacionesServer();
-
-if (isset($_POST['notificaciones'])) {
-  $valor = $NotificacionesServer->consultarNotificaciones();
-}
-
-if (isset($_POST['notificacionId'])) {
-  $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-}
+if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
 
 
 // ------------------------------ VERIFICAR CARDS DE LOS REPORTES -----------------

@@ -147,7 +147,7 @@
           titulo VARCHAR(255) NOT NULL,
           mensaje TEXT NOT NULL,
           tipo VARCHAR(255) NOT NULL,
-          fechaNoti DATE NOT NULL,
+          fechaNoti DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
           PRIMARY KEY (idNotificaciones)
         );
 

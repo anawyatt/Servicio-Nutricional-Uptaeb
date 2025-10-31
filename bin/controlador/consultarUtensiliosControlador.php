@@ -5,7 +5,6 @@
  use component\sidebar as sidebar;
  use component\footer as footer;
  use component\configuracion as configuracion;
- use component\NotificacionesServer as NotificacionesServer;
  use helpers\encryption as encryption;
  use helpers\permisosHelper as permisosHelper;
  use helpers\csrfTokenHelper;
@@ -19,8 +18,13 @@
  $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Utensilios', 'consultar');
  $permisos = $datosPermisos['permisos'];
  $payload = $datosPermisos['payload'];
- $NotificacionesServer = new NotificacionesServer();
  $tokenCsrf= csrfTokenHelper::generateCsrfToken($payload->cedula);
+
+  if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
+
+
 
  if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_POST['csrfToken'])) {
     $resultadoToken = csrfMiddleware::verificarYRenovar($_POST['csrfToken'], $payload->cedula);
@@ -28,20 +32,7 @@
     die();
   }
 
-    if (isset($payload->cedula)) {
-          $NotificacionesServer->setCedula($payload->cedula);
-      } else {
-          echo json_encode(['error' => 'Cédula no encontrada en el token']);
-          exit;
-      }
-
-      if (isset($_POST['notificaciones'])) {
-          $valor = $NotificacionesServer->consultarNotificaciones();
-      }
-    
-      if (isset($_POST['notificacionId'])) {
-          $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-    }
+      
 
 if(isset($_POST['mostrarU'])){
  $mostrarTabla= $objeto->mostrarUtensilios();

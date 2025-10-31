@@ -1,12 +1,17 @@
 <!DOCTYPE html>
 <html dir="ltr" lang="en">
  <head>
+
   <meta charset="utf-8"/>
   <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
   <title>
    Consultar Menú |Servicio Nutricional UPTAEB
   </title>
   <?php $components->componentsHeader(); ?>
+  <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        window.userCedulaGlobal = "<?php echo $payload->cedula ?>";
+    </script>
   <link href="assets/css/estilo.css" rel="stylesheet"/>
  </head>
  <body class="">

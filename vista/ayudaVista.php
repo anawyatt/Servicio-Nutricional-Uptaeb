@@ -6,11 +6,12 @@
       <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
       <title> Ayuda | Servicio Nutricional UPTAEB</title>
        <?php $components->componentsHeader(); ?>
+       <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        window.userCedulaGlobal = "<?php echo $payload->cedula ?>";
+    </script>
        <script src="assets/js/close.js"></script>
        <link rel="stylesheet" href="assets/css/estilo.css"/>
-
-      
-       <?php $components->componentsHeader(); ?>
       
   </head>
 

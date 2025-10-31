@@ -541,6 +541,73 @@ class estudiantesModelo extends connectDB
         }
     }
 
+    // NOTIFICACIONES
+
+       public function notificacionRegistro($cantEstudiantes, $msj1, $msj2) {
+          try {
+             $this->conectarDBSeguridad();
+            $titulo = "Data de Estudiantes";
+            $mensaje = 'Se realizo el registro de Nuevos Estuadiantes:  '.$cantEstudiantes. '. Actualización de Datos '.$msj1. ' Estudiantes con Datos incompletos ' .$msj2;
+            $tipomsj = "informacion";
+            $query = $this->conex2->prepare("INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)");
+              $query->bindValue(1, $titulo);
+              $query->bindValue(2, $mensaje);
+              $query->bindValue(3, $tipomsj);
+              $query->execute();
+      
+            $notificacionId = $this->conex2->lastInsertId();
+      
+            $query = $this->conex2->prepare("SELECT * FROM usuario u INNER JOIN rol r ON u.idRol = r.idRol INNER JOIN permiso p ON p.idRol = r.idRol INNER JOIN modulo m ON m.idModulo = p.idModulo WHERE m.nombreModulo = 'Menú' and p.nombrePermiso = 'consultar' and p.status = 1 and u.status = 1;");
+            $query->execute();
+            $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
+      
+            $query = $this->conex2->prepare("INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)");
+            foreach ($usuarios as $usuario) {
+                $query->bindValue(1, $usuario->cedula);
+                $query->bindValue(2, $notificacionId);
+                $query->execute();
+                 $cedulasDestino[] = $usuario->cedula; 
+            }
+
+             if (!empty($cedulasDestino)) {
+            $this->enviarNotificacionWebSocket($cedulasDestino, [
+                'type' => 'nueva_notificacion', // Usado por tu JS cliente
+                'idNotificaciones' => $notificacionId,
+                'titulo' => $titulo,
+                'mensaje' => $mensaje
+            ]);
+        }
+      
+          } catch (\Exception $e){
+              
+             throw new \RuntimeException('Error evento: ' . $e->getMessage());
+          }
+        }
+
+
+ private function enviarNotificacionWebSocket(array $cedulasDestino, array $data) {
+    $url = 'http://localhost:3000/send-notif'; 
+    $payload = [
+        'cedulas' => $cedulasDestino,
+        'data' => $data
+    ];
+
+    $ch = curl_init($url);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "POST");
+    curl_setopt($ch, CURLOPT_POSTFIELDS, json_encode($payload));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array(
+        'Content-Type: application/json',
+        'Content-Length: ' . strlen(json_encode($payload)))
+    );
+
+    $result = curl_exec($ch);
+    if (curl_errno($ch)) {
+        error_log('Error cURL al enviar a Node.js: ' . curl_error($ch));
+    }
+    curl_close($ch);
+}
+
 
     
 }

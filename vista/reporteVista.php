@@ -7,6 +7,10 @@
        <?php $components->componentsHeader(); ?>
        <link rel="stylesheet" href="assets/css/estilo.css"/>
         <link href="assets/carousel/owl-carousel.css" rel="stylesheet">
+        <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        window.userCedulaGlobal = "<?php echo $payload->cedula ?>";
+    </script>
 
 
 

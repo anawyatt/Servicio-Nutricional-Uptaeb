@@ -11,31 +11,17 @@ use component\configuracion as configuracion;
 use helpers\encryption as encryption;
 use helpers\permisosHelper as permisosHelper;
 use modelo\bitacoraModelo as bitacora;
-use component\NotificacionesServer as NotificacionesServer;
 
 $objeto = new bitacora;
 $sistem = new encryption();
-
-$NotificacionesServer = new NotificacionesServer();
 
 $datosPermisos = permisosHelper::verificarPermisos($sistem, $objeto, 'Bitacora', 'consultar');
 $permisos = $datosPermisos['permisos'];
 $payload = $datosPermisos['payload'];
 
-if (isset($payload->cedula)) {
-        $NotificacionesServer->setCedula($payload->cedula);
-    } else {
-        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-    }
-
-    if (isset($_POST['notificaciones'])) {
-        $valor = $NotificacionesServer->consultarNotificaciones();
-    }
-  
-    if (isset($_POST['notificacionId'])) {
-        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-    }
-
+ if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
 
 
 // Controlador modificado para manejar server-side processing

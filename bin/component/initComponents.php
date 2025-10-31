@@ -7,7 +7,7 @@
 		public static function componentsHeader(){
 
 			$componentsHeader = '
-
+                     
                      <!-- Favicon -->
                      <link rel="shortcut icon" href="assets/images/logos/favicon.ico" />
 

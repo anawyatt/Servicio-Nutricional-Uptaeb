@@ -5,7 +5,6 @@
  use component\sidebar as sidebar;
  use component\footer as footer;
  use component\configuracion as configuracion;
- use component\NotificacionesServer as NotificacionesServer;
  use helpers\encryption as encryption;
  use helpers\permisosHelper as permisosHelper;
  use modelo\consultarSalidaAlimentosModelo as consultarSalidaAlimentos;
@@ -30,22 +29,10 @@ if (isset($_POST['renovarToken']) && $_POST['renovarToken'] == true && isset($_P
     die();
 }
 
-
-  $NotificacionesServer = new NotificacionesServer();
-
-    if (isset($payload->cedula)) {
-        $NotificacionesServer->setCedula($payload->cedula);
-    } else {
-        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-    }
-
-    if (isset($_POST['notificaciones'])) {
-        $valor = $NotificacionesServer->consultarNotificaciones();
-    }
-  
-    if (isset($_POST['notificacionId'])) {
-        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-    }
+  if (!isset($payload->cedula)) {
+            echo json_encode(['error' => 'Cédula no encontrada en el token']);
+            exit;
+        }
 
 if (isset($datosPermisos['permiso']['consultar'])) {
  //---------------- MOSTRAR INFO EN LA TABLA

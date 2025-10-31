@@ -1,6 +1,7 @@
 <?php
 namespace modelo;
 use config\connect\connectDB as connectDB;
+use PDO;
 
 class homeModelo extends connectDB {
 
@@ -243,6 +244,9 @@ class homeModelo extends connectDB {
             return $e;
         }
     }
+
+
+
 }
 
 ?>

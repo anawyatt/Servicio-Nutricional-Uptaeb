@@ -7,6 +7,10 @@
     <title>Horario de Comida | Servicio Nutricional UPTAEB</title>
     <link rel="stylesheet" href="assets/css/style.css" />
     <?php $components->componentsHeader(); ?>
+    <script src="http://localhost:3000/socket.io/socket.io.js"></script>
+    <script>
+        window.userCedulaGlobal = "<?php echo $payload->cedula ?>";
+    </script>
 </head>
 
 <body>

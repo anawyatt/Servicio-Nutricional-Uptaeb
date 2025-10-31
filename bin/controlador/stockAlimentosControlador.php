@@ -4,12 +4,12 @@
  use component\navegador as navegador;
  use component\sidebar as sidebar;
  use component\footer as footer;
- use component\NotificacionesServer as NotificacionesServer;
+
  use component\configuracion as configuracion;
  use helpers\encryption as encryption;
  use helpers\permisosHelper as permisosHelper;
  use modelo\stockAlimentosModelo as stockAlimentos;
- use middleware\PostRateMiddleware as PostRateMiddleware;
+ 
 
  $objeto = new stockAlimentos;
  $sistem = new encryption();
@@ -18,21 +18,9 @@
  $permisos = $datosPermisos['permisos'];
  $payload = $datosPermisos['payload'];
 
- $NotificacionesServer = new NotificacionesServer();
-
-    if (isset($payload->cedula)) {
-        $NotificacionesServer->setCedula($payload->cedula);
-    } else {
-        die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
-    }
-
-    if (isset($_POST['notificaciones'])) {
-        $valor = $NotificacionesServer->consultarNotificaciones();
-    }
-  
-    if (isset($_POST['notificacionId'])) {
-        $valor = $NotificacionesServer->marcarNotificacionLeida($_POST['notificacionId']);
-    }
+ if (!$payload->cedula) {
+    die("<script>window.location='?url=" . urlencode($sistem->encryptURL('login')) . "'</script>");
+  }
 
 
  //---- FILTRO---
