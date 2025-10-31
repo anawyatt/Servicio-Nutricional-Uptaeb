@@ -562,7 +562,7 @@ class estudiantesModelo extends connectDB
       
             $notificacionId = $this->conex2->lastInsertId();
       
-            $query = $this->conex2->prepare("SELECT * FROM usuario u INNER JOIN rol r ON u.idRol = r.idRol INNER JOIN permiso p ON p.idRol = r.idRol INNER JOIN modulo m ON m.idModulo = p.idModulo WHERE m.nombreModulo = 'Menú' and p.nombrePermiso = 'consultar' and p.status = 1 and u.status = 1;");
+            $query = $this->conex2->prepare("SELECT * FROM usuario u INNER JOIN rol r ON u.idRol = r.idRol INNER JOIN permiso p ON p.idRol = r.idRol INNER JOIN modulo m ON m.idModulo = p.idModulo WHERE m.nombreModulo = 'Estudiantes' and p.nombrePermiso = 'consultar'  and p.status = 1 and u.status = 1;");
             $query->execute();
             $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
       

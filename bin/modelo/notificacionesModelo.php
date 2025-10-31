@@ -24,7 +24,7 @@ class notificacionesModelo extends connectDB {
         INNER JOIN notificaciones_usuarios nu 
         ON n.idNotificaciones = nu.idNotificaciones  
         WHERE nu.cedula = ? AND nu.leida = 0 
-        ORDER BY n.fechaNoti DESC
+        ORDER BY n.fechaNoti
     ");
     $consultar->bindValue(1, $this->payload->cedula);
     $consultar->execute();
@@ -83,65 +83,6 @@ class notificacionesModelo extends connectDB {
 
        //-------------------- NOTIFICACIONES ------
 
-
-          /**
- *
- * @param string $titulo Título de la notificación.
- * @param string $mensaje Mensaje de la notificación.
- * @param string $tipomsj Tipo de mensaje (ej: 'informacion', 'Almuerzo').
- * @param string|null $fechaNoti Campo opcional para fechaNoti en la tabla notificaciones.
- */
-private function _enviarNotificacionGeneral(string $titulo, string $mensaje, string $tipomsj, )
-{
-    try {
-        $this->conectarDBSeguridad();
-
-        $sql = "INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)";
-        $query = $this->conex2->prepare($sql);
-        $query->bindValue(1, $titulo);
-        $query->bindValue(2, $mensaje);
-        $query->bindValue(3, $tipomsj);
-        $query->execute();
-        $notificacionId = $this->conex2->lastInsertId();
-
-        $query = $this->conex2->prepare("SELECT u.cedula FROM usuario u 
-            INNER JOIN rol r ON u.idRol = r.idRol 
-            INNER JOIN permiso p ON p.idRol = r.idRol 
-            INNER JOIN modulo m ON m.idModulo = p.idModulo 
-            WHERE m.nombreModulo = 'Menú' 
-            AND p.nombrePermiso = 'consultar' 
-            AND p.status = 1 
-            AND u.status = 1;");
-        $query->execute();
-        $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
-
-        $cedulasDestino = [];
-        if (!empty($usuarios)) {
-            $query = $this->conex2->prepare("INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)");
-            foreach ($usuarios as $usuario) {
-                $query->bindValue(1, $usuario->cedula);
-                $query->bindValue(2, $notificacionId);
-                $query->execute();
-                $cedulasDestino[] = $usuario->cedula;
-            }
-        }
-
-        if (!empty($cedulasDestino)) {
-            $this->enviarNotificacionWebSocket($cedulasDestino, [
-                'type' => 'nueva_notificacion', 
-                'idNotificaciones' => $notificacionId,
-                'titulo' => $titulo,
-                'mensaje' => $mensaje
-            ]);
-        }
-        
-    } catch (\Exception $e) {
-        error_log("Error al procesar y enviar notificación del menú: " . $e->getMessage());
-        throw $e; 
-    }
-}
-
-
 public function notificaciones()
 {
     try {
@@ -187,7 +128,48 @@ public function notificaciones()
         $mensaje = "Menú disponible: " . $descripcion . " hecho para " . $cantPlatos . " Estudiantes. Su asistencia está disponible para el registro.";
         $tipomsj = $horarioComida;
 
-        $this->_enviarNotificacionGeneral($titulo, $mensaje, $tipomsj);
+
+        $sql = "INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)";
+        $query = $this->conex2->prepare($sql);
+        $query->bindValue(1, $titulo);
+        $query->bindValue(2, $mensaje);
+        $query->bindValue(3, $tipomsj);
+        $query->execute();
+        $notificacionId = $this->conex2->lastInsertId();
+
+        $query = $this->conex2->prepare("SELECT u.cedula FROM usuario u 
+            INNER JOIN rol r ON u.idRol = r.idRol 
+            INNER JOIN permiso p ON p.idRol = r.idRol 
+            INNER JOIN modulo m ON m.idModulo = p.idModulo 
+            WHERE m.nombreModulo = 'Menú' 
+            AND p.nombrePermiso = 'consultar' 
+            AND p.status = 1 
+            AND u.status = 1;");
+        $query->execute();
+        $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
+
+        $cedulasDestino = [];
+        if (!empty($usuarios)) {
+            $sql_insert_user = "INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)";
+            $query_insert_user = $this->conex2->prepare($sql_insert_user);
+            
+            foreach ($usuarios as $usuario) {
+                $query_insert_user->execute([
+                    $usuario->cedula, 
+                    $notificacionId
+                ]);
+
+                $cedulasDestino[] = $usuario->cedula;
+            }
+        }
+        if (!empty($cedulasDestino)) {
+            $this->enviarNotificacionWebSocket($cedulasDestino, [
+                'type' => 'nueva_notificacion', 
+                'idNotificaciones' => $notificacionId,
+                'titulo' => $titulo,
+                'mensaje' => $mensaje
+            ]);
+        }
 
     } catch (\Exception $e) {
         error_log("Error en notificaciones (Menú del Día): " . $e->getMessage());
@@ -243,7 +225,49 @@ public function notificacionEventos()
         $mensaje = "Evento Disponible: " . $evento . " con un Menú: " . $descripcion . " hecho para " . $cantPlatos . " Comensales.";
         $tipomsj = $horarioComida;
 
-        $this->_enviarNotificacionGeneral($titulo, $mensaje, $tipomsj);
+        $sql = "INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)";
+        $query = $this->conex2->prepare($sql);
+        $query->bindValue(1, $titulo);
+        $query->bindValue(2, $mensaje);
+        $query->bindValue(3, $tipomsj);
+        $query->execute();
+        $notificacionId = $this->conex2->lastInsertId();
+
+        $query = $this->conex2->prepare("SELECT u.cedula FROM usuario u 
+            INNER JOIN rol r ON u.idRol = r.idRol 
+            INNER JOIN permiso p ON p.idRol = r.idRol 
+            INNER JOIN modulo m ON m.idModulo = p.idModulo 
+            WHERE m.nombreModulo = 'Eventos' 
+            AND p.nombrePermiso = 'consultar' 
+            AND p.status = 1 
+            AND u.status = 1;");
+        $query->execute();
+        $usuarios = $query->fetchAll(\PDO::FETCH_OBJ);
+
+        $cedulasDestino = [];
+        if (!empty($usuarios)) {
+            $sql_insert_user = "INSERT INTO `notificaciones_usuarios` (`cedula`, `idNotificaciones`, `leida`) VALUES (?, ?, 0)";
+            $query_insert_user = $this->conex2->prepare($sql_insert_user);
+            
+            foreach ($usuarios as $usuario) {
+                $query_insert_user->execute([
+                    $usuario->cedula, 
+                    $notificacionId
+                ]);
+
+                $cedulasDestino[] = $usuario->cedula;
+            }
+        }
+        if (!empty($cedulasDestino)) {
+            $this->enviarNotificacionWebSocket($cedulasDestino, [
+                'type' => 'nueva_notificacion', 
+                'idNotificaciones' => $notificacionId,
+                'titulo' => $titulo,
+                'mensaje' => $mensaje
+            ]);
+        }
+
+        
 
     } catch (\Exception $e) {
         error_log("Error en notificaciones (Evento del Día): " . $e->getMessage());
