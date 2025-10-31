@@ -402,7 +402,7 @@ class eventoModelo extends connectDB {
           try {
              $this->conectarDBSeguridad();
             $titulo = "Evento";
-            $mensaje = 'Se registro el evento '.$this->nomEvent. ' para '.$this->cantPlatos. '° comensales. Para el dia ' .$this->feMenu;
+            $mensaje = 'Se registro el evento '.$this->nomEvent. ' para '.$this->cantPlatos. ' comensales. Para el dia ' .$this->feMenu;
             $tipomsj = "informacion";
             $query = $this->conex2->prepare("INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)");
               $query->bindValue(1, $titulo);
