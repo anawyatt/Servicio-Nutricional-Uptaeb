@@ -150,3 +150,48 @@
         transform: translateY(0);
     }
 }
+
+
+ .marcar-todas {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: none;
+    color: #0d6efd;
+    font-weight: 500;
+    font-size: 0.9rem;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.3s ease;
+    animation: pulse 2.5s infinite;
+  }
+
+  .marcar-todas i {
+    font-size: 1rem;
+  }
+
+  .marcar-todas:hover {
+    color: #0056b3;
+  }
+
+  .marcar-todas::after {
+    content: '';
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 0%;
+    height: 1.5px;
+    background-color: currentColor;
+    transition: width 0.3s ease;
+  }
+
+  .marcar-todas:hover::after {
+    width: 100%;
+  }
+
+  @keyframes pulse {
+    0% { text-shadow: 0 0 0 rgba(13, 110, 253, 0.5); }
+    50% { text-shadow: 0 0 6px rgba(13, 110, 253, 0.7); }
+    100% { text-shadow: 0 0 0 rgba(13, 110, 253, 0.5); }
+  }

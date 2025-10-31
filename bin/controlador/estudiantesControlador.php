@@ -162,7 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['
 // procesamiento
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') { 
-    if (isset($_POST['data']) && isset($_POST['csrf_token'])) {
+    if (isset($_POST['registrar']) && isset($_POST['data']) && isset($_POST['csrf_token'])) {
         
         $csrf = csrfMiddleware::verificarCsrfToken($payload->cedula, $_POST['csrf_token']);
 
@@ -251,10 +251,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             'newCsrfToken' => $csrf['newToken']
         ]);
         die();
-    } else {
-        echo json_encode(['status' => 'error', 'message' => 'No data received']);
-        die();
-    }
+    } 
 }
 
 
@@ -262,11 +259,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
 
 
-$components = new initComponents();
-$navegador = new navegador($payload);
-$sidebar = new sidebar($permisos);
-$footer = new footer();
-$configuracion = new configuracion($permisos);
+    $components = new initComponents();
+    $navegador = new navegador($payload);
+    $sidebar = new sidebar($permisos);
+    $footer = new footer();
+    $configuracion = new configuracion($permisos);
+
 
 
 if (file_exists("vista/estudiantesVista.php")) {

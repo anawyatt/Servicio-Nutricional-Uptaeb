@@ -473,7 +473,7 @@ function procesarArchivo() {
       ajaxRequest = $.ajax({
         url: "", // URL del controlador
         method: "POST",
-        data: { data: dataToSend, csrf_token: token },
+        data: { registrar:true, data: dataToSend, csrf_token: token },
         xhr: function () {
           var xhr = new window.XMLHttpRequest();
 

@@ -113,11 +113,11 @@ class navegador
                           </div>
                       </div>
                       
-                      <div class="p-3">
-                          <button id="leerTodas" class="btn btn-primary rounded-pill shadow" style="width: 100%;">
-                              <i class="fas fa-check"></i> Marcar Todas
-                          </button>
-                      </div>
+   <div class="p-3 text-center">
+  <button id="leerTodas" class="marcar-todas">
+    <i class="bi bi-check-all"></i> Marcar todas como leídas
+  </button>
+</div>
                       
                       <div id="nota"></div>
                   </div>

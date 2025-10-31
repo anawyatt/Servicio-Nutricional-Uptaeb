@@ -543,11 +543,16 @@ class estudiantesModelo extends connectDB
 
     // NOTIFICACIONES
 
-       public function notificacionRegistro($cantEstudiantes, $msj1, $msj2) {
+       public function notificacionRegistro($cantEstudiantes) {
           try {
+            if($cantEstudiantes>0){
+                 $mensaje = 'Se registró la data de los estudiantes, alcanzando un total de: '.$cantEstudiantes. '.';
+            }
+            else{
+                $mensaje = 'Se realizo la actualización de la data de Estudiantes.';
+            }
              $this->conectarDBSeguridad();
             $titulo = "Data de Estudiantes";
-            $mensaje = 'Se realizo el registro de Nuevos Estuadiantes:  '.$cantEstudiantes. '. Actualización de Datos '.$msj1. ' Estudiantes con Datos incompletos ' .$msj2;
             $tipomsj = "informacion";
             $query = $this->conex2->prepare("INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)");
               $query->bindValue(1, $titulo);
