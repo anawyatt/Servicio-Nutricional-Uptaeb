@@ -7,7 +7,6 @@ use \PDO;
 use helpers\encryption;
 use PhpOffice\PhpSpreadsheet\IOFactory;
 use modelo\EstudianteNormalizer as EstudianteNormalizer;
-use PhpOffice\PhpSpreadsheet\Reader\Exception as ReaderException;
 
 
 
@@ -140,22 +139,38 @@ class estudiantesModelo extends connectDB
 
 
 
-    public function infoStudy($idEncriptado)
-    {
-        try {
-            $this->conectarDB();
-            $id = $this->encryption->decryptData($idEncriptado);
-            $query = $this->conex->prepare("SELECT * FROM vista_info_estudiante WHERE cedEstudiante = ?");
-            $query->bindValue(1, $id);
-            $query->execute();
-            $data = $query->fetchAll(\PDO::FETCH_OBJ);
-            $this->desconectarDB();
-            return $data;
-        } catch (\PDOException $e) {
-            error_log("Error en infoStudy: " . $e->getMessage());
-            return false; // o puedes retornar ['error' => true] si prefieres
+   public function infoStudy($idEncriptado)
+{
+    try {
+        $this->conectarDB();
+        $id = $this->encryption->decryptData($idEncriptado);
+        $query = $this->conex->prepare("SELECT * FROM vista_info_estudiante WHERE cedEstudiante = ?");
+        $query->bindValue(1, $id);
+        $query->execute();
+        $data = $query->fetchAll(\PDO::FETCH_OBJ);
+        
+        if (!empty($data)) {
+            foreach ($data as $registro) {
+                if (isset($registro->telefono) && !empty($registro->telefono)) {
+  
+                    if (!preg_match('/^\d{4}-\d{7}$/', trim($registro->telefono))) {
+                        $decryptedTelefono = $this->encryption->decryptData($registro->telefono);
+                        $registro->telefono = $decryptedTelefono;
+                    }
+                }
+            }
         }
+
+        $this->desconectarDB();
+        return $data;
+        
+    } catch (\PDOException $e) {
+        error_log("Error en infoStudy: " . $e->getMessage());
+        return false; 
     }
+}
+
+
 
 
 
@@ -465,6 +480,7 @@ class estudiantesModelo extends connectDB
     if (!preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚüÜ\s]+$/u', $nucleo) ||
         !preg_match('/^[a-zA-ZáéíóúÁÉÍÓÚüÜ\s]+$/u', $carrera)) return 'Núcleo o carrera inválido';
 
+
         try {
 
 
@@ -508,13 +524,14 @@ class estudiantesModelo extends connectDB
 
             $exists = $this->verificarEstudianteExistente($this->cedula);
             $esActualizacion = false;
+             $telefonoCifrado = $this->encryption->encryptData($this->telefono);
 
             if ($exists > 0) {
-                $this->actualizarEstudiante($this->cedula, $this->nombre, $this->segNombre, $this->apellido, $this->segApellido, $this->sexo, $this->telefono, $this->nucleo, $this->carrera);
+                $this->actualizarEstudiante($this->cedula, $this->nombre, $this->segNombre, $this->apellido, $this->segApellido, $this->sexo, $telefonoCifrado, $this->nucleo, $this->carrera);
                 $this->eliminarSecciones($this->cedula);
                 $esActualizacion = true;
             } else {
-                $this->registrarNuevoEstudiante($this->cedula, $this->nombre, $this->segNombre, $this->apellido, $this->segApellido, $this->sexo, $this->telefono, $this->nucleo, $this->carrera);
+                $this->registrarNuevoEstudiante($this->cedula, $this->nombre, $this->segNombre, $this->apellido, $this->segApellido, $this->sexo, $telefonoCifrado, $this->nucleo, $this->carrera);
             }
 
             // Procesar secciones y horarios

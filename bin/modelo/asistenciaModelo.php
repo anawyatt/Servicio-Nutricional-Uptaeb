@@ -5,6 +5,7 @@ namespace modelo;
 use config\connect\connectDB as connectDB;
 use \PDO;
 use helpers\JwtHelpers;
+use helpers\encryption;
 
 
 
@@ -30,11 +31,13 @@ class asistenciaModelo extends connectDB
 
 
 
+
     public function __construct()
     {
         parent::__construct();
         $token = $_COOKIE['jwt'];
         $this->payload = JwtHelpers::validarToken($token);
+        $this->encryption = new encryption();
     }
 
 
@@ -47,22 +50,33 @@ class asistenciaModelo extends connectDB
         $this->id = $id;
         return $this->Study();
     }
+private function Study()
+{
+    try {
+        $this->conectarDB();
+        $query = $this->conex->prepare("SELECT * FROM vista_info_estudiante WHERE cedEstudiante = ?");
+        $query->bindValue(1, $this->id);
+        $query->execute();
+        $data = $query->fetchAll(\PDO::FETCH_OBJ);
 
-    private function Study()
-    {
-        try {
-            $this->conectarDB();
-            $query = $this->conex->prepare("SELECT * FROM vista_info_estudiante WHERE cedEstudiante = ?");
-            $query->bindValue(1, $this->id);
-            $query->execute();
-            $data = $query->fetchAll();
-            $this->desconectarDB();
-            return $data;
-        } catch (\PDOException $e) {
-            return ['error' => $e->getMessage()];
+        if (!empty($data)) {
+            foreach ($data as $registro) {
+                if (isset($registro->telefono) && !empty($registro->telefono)) {
+                    if (!preg_match('/^\d{4}-\d{7}$/', trim($registro->telefono))) {
+                        $decryptedTelefono = $this->encryption->decryptData($registro->telefono);
+                        $registro->telefono = $decryptedTelefono;
+                    }
+                }
+            }
         }
+        
+        $this->desconectarDB();
+        return $data;
+    } catch (\PDOException $e) {
+        error_log("Error en Study: " . $e->getMessage()); 
+        return ['error' => $e->getMessage()];
     }
-
+}
 
     public function obtenerIdMenu($idmenu)
     {

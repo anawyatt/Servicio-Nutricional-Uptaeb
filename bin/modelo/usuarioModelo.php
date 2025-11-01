@@ -8,6 +8,7 @@
 
     class usuarioModelo extends connectDB{
    
+        
     private $cedula;
     private $nombre;
     private $segNombre;
