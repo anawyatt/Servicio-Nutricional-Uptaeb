@@ -51,14 +51,14 @@
 
 /* Indicador de Notificación NO LEÍDA */
 .noti-unread {
-    background-color: #f7fcff !important; 
-    border-left: 4px solid #007bff; /* Barra lateral azul destacada */
+    background-color: #ffffff !important; /* Fondo claro */
+    border-left: 4px solid #007bff; /* Barra lateral azul */
     padding-left: 12px !important; 
 }
 
 /* Estilo para Notificación LEÍDA (fondo neutral) */
 .noti-read {
-    background-color: #ffffff; 
+    background-color: #76c8f72d; 
 }
 
 /* =========================================================

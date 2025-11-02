@@ -1,22 +1,39 @@
 <?php
 namespace modelo;
 use config\connect\connectDB as connectDB;
-use helpers\JwtHelpers;
+
 use PDO;
 
 class notificacionesModelo extends connectDB {
 
-    private $payload;
+    private $cedula;
     private $idNotificacion;
 
 
     public function __construct() {
         parent::__construct();
-        $token = $_COOKIE['jwt'];
-        $this->payload = JwtHelpers::validarToken($token);
     }
 
-    public function obtenerNotificaciones() {
+ public function obtenerNotificacionesCompletas($cedula) {
+    $this->cedula = $cedula;
+    $this->conectarDBSeguridad();
+    $consultar = $this->conex2->prepare("
+        SELECT n.idNotificaciones, n.titulo, n.mensaje, n.fechaNoti, n.tipo, nu.leida 
+        FROM notificaciones n 
+        INNER JOIN notificaciones_usuarios nu 
+        ON n.idNotificaciones = nu.idNotificaciones 
+        WHERE nu.cedula = ? 
+        ORDER BY n.fechaNoti DESC
+    ");
+    $consultar->bindValue(1, $this->cedula);
+    $consultar->execute(); // Esta es la línea 30 donde ocurría el error.
+    $resultado = $consultar->fetchAll(\PDO::FETCH_ASSOC);
+    $this->desconectarDB();
+    return $resultado; 
+}
+
+    public function obtenerNotificaciones($cedula) {
+        $this->cedula = $cedula;
     $this->conectarDBSeguridad();
     $consultar = $this->conex2->prepare("
         SELECT n.idNotificaciones, n.titulo, n.mensaje, n.fechaNoti 
@@ -26,7 +43,7 @@ class notificacionesModelo extends connectDB {
         WHERE nu.cedula = ? AND nu.leida = 0 
         ORDER BY n.fechaNoti
     ");
-    $consultar->bindValue(1, $this->payload->cedula);
+    $consultar->bindValue(1, $this->cedula);
     $consultar->execute();
     $resultado = $consultar->fetchAll(\PDO::FETCH_ASSOC);
     $this->desconectarDB();
@@ -34,11 +51,12 @@ class notificacionesModelo extends connectDB {
 }
 
 
-    public function marcarNotificacionLeida($notificacionId) {
+    public function marcarNotificacionLeida($notificacionId, $cedula) {
         if(!preg_match("/^[0-9]{1,}$/", $notificacionId)){
             return ['error' => 'ID de notificación inválido.'];
 
         }
+        $this->cedula = $cedula;
         $this->idNotificacion = $notificacionId;
          return  $this->marcarLeida();
     }
@@ -48,25 +66,27 @@ class notificacionesModelo extends connectDB {
         $this->conectarDBSeguridad();
         $actualizar = $this->conex2->prepare("UPDATE notificaciones_usuarios SET leida = 1 WHERE idNotificaciones = ? AND cedula = ?");
         $actualizar->bindValue(1, $this->idNotificacion);
-        $actualizar->bindValue(2, $this->payload->cedula);
+        $actualizar->bindValue(2, $this->cedula);
         $actualizar->execute();
         $this->desconectarDB();
     }
 
-    public function marcarTodasLeidas() {
+    public function marcarTodasLeidas($cedula) {
+        $this->cedula = $cedula;
         $this->conectarDBSeguridad();
         $actualizar = $this->conex2->prepare("UPDATE notificaciones_usuarios SET leida = 1 WHERE cedula = ?");
-        $actualizar->bindValue(1, $this->payload->cedula);
+        $actualizar->bindValue(1, $this->cedula);
         $actualizar->execute();
         $this->desconectarDB();
 
      }
 
-     public function eliminarNotificacion($notificacionId) {
+     public function eliminarNotificacion($notificacionId, $cedula) {
         if(!preg_match("/^[0-9]{1,}$/", $notificacionId)){
             return ['error' => 'ID de notificación inválido.'];
 
         }
+        $this->cedula = $cedula;
         $this->idNotificacion = $notificacionId;
          return  $this->eliminar();
      }
@@ -75,7 +95,7 @@ class notificacionesModelo extends connectDB {
         $this->conectarDBSeguridad();
         $eliminar = $this->conex2->prepare("DELETE FROM notificaciones_usuarios WHERE idNotificaciones = ? AND cedula = ?");
         $eliminar->bindValue(1, $this->idNotificacion);
-        $eliminar->bindValue(2, $this->payload->cedula);
+        $eliminar->bindValue(2, $this->cedula);
         $eliminar->execute();
         $this->desconectarDB();
 
@@ -126,7 +146,7 @@ public function notificaciones()
         if ($notificacionExistente) return;
 
         $mensaje = "Menú disponible: " . $descripcion . " hecho para " . $cantPlatos . " Estudiantes. Su asistencia está disponible para el registro.";
-        $tipomsj = $horarioComida;
+        $tipomsj = 'Menu';
 
 
         $sql = "INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)";
@@ -162,14 +182,16 @@ public function notificaciones()
                 $cedulasDestino[] = $usuario->cedula;
             }
         }
-        if (!empty($cedulasDestino)) {
-            $this->enviarNotificacionWebSocket($cedulasDestino, [
-                'type' => 'nueva_notificacion', 
-                'idNotificaciones' => $notificacionId,
-                'titulo' => $titulo,
-                'mensaje' => $mensaje
-            ]);
-        }
+       if (!empty($cedulasDestino)) {
+    $this->enviarNotificacionWebSocket($cedulasDestino, [
+        'type' => 'nueva_notificacion', 
+        'idNotificaciones' => $notificacionId,
+        'titulo' => $titulo,
+        'mensaje' => $mensaje,
+        'tipo' => $tipomsj, 
+        'fechaNoti' => date('Y-m-d H:i:s') 
+    ]);
+}
 
     } catch (\Exception $e) {
         error_log("Error en notificaciones (Menú del Día): " . $e->getMessage());
@@ -223,7 +245,7 @@ public function notificacionEventos()
         if ($notificacionExistente) return;
 
         $mensaje = "Evento Disponible: " . $evento . " con un Menú: " . $descripcion . " hecho para " . $cantPlatos . " Comensales.";
-        $tipomsj = $horarioComida;
+        $tipomsj = 'Evento';
 
         $sql = "INSERT INTO `notificaciones` (`titulo`, `mensaje`, `tipo`) VALUES (?, ?, ?)";
         $query = $this->conex2->prepare($sql);
@@ -258,14 +280,16 @@ public function notificacionEventos()
                 $cedulasDestino[] = $usuario->cedula;
             }
         }
-        if (!empty($cedulasDestino)) {
-            $this->enviarNotificacionWebSocket($cedulasDestino, [
-                'type' => 'nueva_notificacion', 
-                'idNotificaciones' => $notificacionId,
-                'titulo' => $titulo,
-                'mensaje' => $mensaje
-            ]);
-        }
+       if (!empty($cedulasDestino)) {
+          $this->enviarNotificacionWebSocket($cedulasDestino, [
+            'type' => 'nueva_notificacion', 
+            'idNotificaciones' => $notificacionId,
+            'titulo' => $titulo,
+            'mensaje' => $mensaje,
+            'tipo' => $tipomsj,
+           'fechaNoti' => date('Y-m-d H:i:s')
+         ]);
+}
 
         
 

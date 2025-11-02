@@ -5,35 +5,38 @@ namespace component;
 use helpers\encryption as encryption;
 use modelo\horarioComidaModelo as horarioComida;
 use modelo\notificacionesModelo as notificacionesModelo;
+use helpers\JwtHelpers;
 
 $objetoN = new horarioComida();
 $objetoNoti = new notificacionesModelo();
+$token = $_COOKIE['jwt'];
+$payload = JwtHelpers::validarToken($token);
 
  $objetoNoti->notificaciones();
  $objetoNoti->notificacionEventos();   
 
 if (isset($_POST['obtenerNotificaciones'])) {
-  $notificaciones = $objetoNoti->obtenerNotificaciones();
+  $notificaciones = $objetoNoti->obtenerNotificacionesCompletas($payload->cedula);
   echo json_encode($notificaciones);
   exit;
 }
 
 if (isset($_POST['marcarLeida']) && isset($_POST['notificacionId'])) {
   $notificacionId = $_POST['notificacionId'];
-  $resultado = $objetoNoti->marcarNotificacionLeida($notificacionId);
+  $resultado = $objetoNoti->marcarNotificacionLeida($notificacionId, $payload->cedula);
   echo json_encode($resultado);
   exit;
 }
 
 if (isset($_POST['marcarTodasLeidas'])) {
-  $objetoNoti->marcarTodasLeidas();
+  $objetoNoti->marcarTodasLeidas($payload->cedula);
   echo json_encode(['success' => 'Todas las notificaciones marcadas como leídas.']);
   exit;
 }
 
 if (isset($_POST['eliminarNotificacion']) && isset($_POST['notificacionId'])) {
   $notificacionId = $_POST['notificacionId'];
-  $resultado = $objetoNoti->eliminarNotificacion($notificacionId);
+  $resultado = $objetoNoti->eliminarNotificacion($notificacionId, $payload->cedula);
   echo json_encode($resultado);
   exit;
 }
@@ -108,18 +111,20 @@ class navegador
                 <div class="p-0 sub-drop dropdown-menu dropdown-menu-end" aria-labelledby="notification-drop">
                   <div class="m-0 shadow-none card">
                       <div class="py-3 card-header d-flex justify-content-between bg-primary">
-                          <div class="header-title">
+                         <div class="header-title">
                               <h5 class="mb-0 text-white">Notificaciones</h5>
                           </div>
-                      </div>
+                          <button type="button" class="btn-close btn-close-white" id="cerrarDropdown"></button>
+                           </div>
+
                       
-   <div class="p-3 text-center">
-  <button id="leerTodas" class="marcar-todas">
-    <i class="bi bi-check-all"></i> Marcar todas como leídas
-  </button>
-</div>
+                    <div class="p-3 text-center">
+                       <button id="leerTodas" class="marcar-todas">
+                       <i class="bi bi-check-all"></i> Marcar todas como leídas
+                       </button>
+                    </div>
                       
-                      <div id="nota"></div>
+                    <div id="nota"></div>
                   </div>
               </div>
               </li>

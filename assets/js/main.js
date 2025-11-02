@@ -1,12 +1,7 @@
-
-var noNotificacionesHTML = ""; 
-const userCedula = window.userCedulaGlobal; 
+var noNotificacionesHTML = "";
+const userCedula = window.userCedulaGlobal; // Asumiendo que esta variable está definida
 
 notificaciones();
-
-// =========================================================
-// 1. FUNCIONES AJAX PARA CARGAR Y MANEJAR EL ESTADO DE LAS NOTIFICACIONES
-// =========================================================
 
 function notificaciones() {
     $.ajax({
@@ -15,23 +10,24 @@ function notificaciones() {
         dataType: "json",
         data: { obtenerNotificaciones: true },
         success(data) {
-            let listaGenerales = data || [];
-            let contador = 0;
+            let listaNotificaciones = data || [];
+            let unreadCount = 0;
 
             document.getElementById('nota').innerHTML = '';
 
-            const todasLasNotificaciones = [...listaGenerales];
-
-            if (todasLasNotificaciones.length > 0) {
-                todasLasNotificaciones.forEach(row => {
-                    renderNotification(row, false); 
-                    contador++;
+            if (listaNotificaciones.length > 0) {
+                listaNotificaciones.forEach(row => {
+                    renderNotification(row); 
+                    if (row.leida == 0) {
+                        unreadCount++;
+                    }
                 });
             } else {
                 showNoNotificationsMessage();
             }
-        
-            document.getElementById('notificacionCount').innerText = contador;
+            
+            // Actualiza el contador con el número de notificaciones NO LEÍDAS
+            document.getElementById('notificacionCount').innerText = unreadCount;
         },
         error: function(jqXHR, textStatus, errorThrown) {
              console.error("Error al cargar notificaciones:", textStatus, errorThrown);
@@ -40,43 +36,33 @@ function notificaciones() {
 };
 
 document.getElementById('leerTodas').addEventListener('click', function() {
-    let notificaciones = document.querySelectorAll('#nota .noti');
-    if (notificaciones.length === 0) {
+    let notificacionesNoLeidas = document.querySelectorAll('#nota .noti-unread');
+    if (notificacionesNoLeidas.length === 0) {
         return;
     }
 
-    let notificacionCountElement = document.getElementById('notificacionCount');
-
-    // 💡 Mejora UX: Mostrar un mensaje temporal de "Leyendo..." mientras se procesan.
-    let originalText = notificacionCountElement.innerText;
-    notificacionCountElement.innerText = '...'; 
-
-    // Usamos Promise.all para esperar a que todas las AJAX terminen (opcional, pero mejor)
-    const ajaxPromises = [];
-
-    notificaciones.forEach((notificacionElement) => {
-        let notificacionId = notificacionElement.getAttribute('data-id');
-
-        // Eliminación visual inmediata
-        notificacionElement.remove();
-        
-        // Llamada AJAX para marcar como leída
-        const promise = $.ajax({
-            method: "post",
-            url: "", 
-            dataType: "json",
-            data: { marcarTodasLeidas: true }
-        }).fail(function() {
-             console.error(`Error al marcar ${notificacionId} como leída.`);
-        });
-        ajaxPromises.push(promise);
+    // 1. Actualización visual inmediata y conteo
+    const totalToMark = notificacionesNoLeidas.length;
+    notificacionesNoLeidas.forEach((notificacionElement) => {
+        notificacionElement.classList.remove('noti-unread');
+        notificacionElement.classList.add('noti-read');
+        // También puedes cambiar el data-leida para consistencia, si lo usas
+        notificacionElement.setAttribute('data-leida', 1); 
     });
+    updateNotificationCount(-totalToMark);
 
-    Promise.all(ajaxPromises).finally(() => {
-        updateNotificationCount(-notificaciones.length); // Resta el total
-        if (parseInt(notificacionCountElement.innerText) === 0) {
-            showNoNotificationsMessage();
+    // 2. Llamada AJAX para marcar todas
+    $.ajax({
+        method: "post",
+        url: "", 
+        dataType: "json",
+        data: { marcarTodasLeidas: true }
+    }).done(function(response) {
+        if (response.success) {
+            console.log('Todas las notificaciones marcadas como leídas en el servidor.');
         }
+    }).fail(function() {
+        console.error('Error al marcar todas como leídas en el servidor.');
     });
 });
 
@@ -84,31 +70,69 @@ document.getElementById('nota').addEventListener('click', function(event) {
     let closeButton = event.target.closest('.delete-notification');
     let notificacionElement = event.target.closest('.noti');
     
+    if (!notificacionElement) return; // No es un elemento de notificación
+
+    let notificacionId = notificacionElement.getAttribute('data-id');
+    let isUnread = notificacionElement.getAttribute('data-leida') === '0';
+
     if (closeButton) {
         event.stopPropagation(); 
+        
+        // 🚨 CAMBIO CLAVE: Reemplazo de confirm() por Swal.fire()
+        Swal.fire({
+            title: '¿Estás seguro?',
+            text: "¡Esta acción eliminará la notificación permanentemente!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#dc3545', // Rojo
+            cancelButtonColor: '#1659d6ff', // Gris
+            confirmButtonText: 'Sí, eliminar',
+            cancelButtonText: 'Cancelar'
+        }).then((result) => {
+            if (result.isConfirmed) {
+                // Si el usuario confirma, procedemos con la eliminación
+                
+                // 1. Eliminación visual inmediata
+                notificacionElement.remove();
 
-        if (notificacionElement) {
-            let notificacionId = notificacionElement.getAttribute('data-id');
+                // 2. Si era no leída, decrementa el contador
+                if (isUnread) {
+                    updateNotificationCount(-1);
+                }
 
-            notificacionElement.remove();
-            updateNotificationCount(-1);
+                // 3. Llamada AJAX para ELIMINAR
+                $.ajax({
+                    method: "post",
+                    url: "",
+                    dataType: "json",
+                    data: { eliminarNotificacion: true, notificacionId: notificacionId }
+                }).done(function() {
+                    // Opcional: Mostrar un pequeño mensaje de éxito después de eliminar
+                    // Swal.fire('Eliminada!', 'La notificación ha sido eliminada.', 'success');
+                }).fail(function() {
+                     console.error(`Error al eliminar la notificación ${notificacionId}.`);
+                     // Opcional: Mostrar un mensaje de error si la eliminación falla en el servidor
+                     Swal.fire('Error', 'Hubo un problema al intentar eliminar la notificación.', 'error');
+                });
+                
+                // 4. Revisar si hay que mostrar el mensaje de "No hay notificaciones"
+                if (document.querySelectorAll('#nota .noti').length === 0) {
+                    showNoNotificationsMessage();
+                }
+            }
+        });
 
-            $.ajax({
-                method: "post",
-                url: "",
-                dataType: "json",
-                data: { marcarLeida: true, notificacionId: notificacionId }
-            });
-        }
-    } else if (notificacionElement) {
+    } else {
         // Lógica para MARCAR COMO LEÍDA (al hacer clic en el cuerpo)
-        if (notificacionElement.classList.contains('noti-unread')) {
+        if (isUnread) {
+            // 1. Actualización visual
             notificacionElement.classList.remove('noti-unread');
-            notificacionElement.classList.add('noti-read'); 
-            updateNotificationCount(-1); // Reducir el contador de no leídas
-
-            let notificacionId = notificacionElement.getAttribute('data-id');
+            notificacionElement.classList.add('noti-read');
+            notificacionElement.setAttribute('data-leida', 1);
             
+            // 2. Actualización de contador
+            updateNotificationCount(-1); 
+
             $.ajax({
                 method: "post",
                 url: "",
@@ -120,9 +144,6 @@ document.getElementById('nota').addEventListener('click', function(event) {
 });
 
 
-// =========================================================
-// 2. GESTIÓN DE SOCKET.IO Y NOTIFICACIONES EN TIEMPO REAL
-// =========================================================
 
 // Conexión al servidor Node.js/Socket.IO en el puerto 3000
 const socket = io('http://localhost:3000'); 
@@ -142,104 +163,96 @@ socket.on('disconnect', () => {
 // Escucha el evento 'nueva_notificacion_push' que envía Node.js.
 socket.on('nueva_notificacion_push', (data) => {
     console.log('🔔 Notificación en tiempo real recibida!', data);
-    // Renderiza como nueva (isNew: true)
-    renderNotification(data, true); 
+    
+    // Aseguramos que la notificación en tiempo real se considere NO LEÍDA (leida: 0)
+    data.leida = 0; 
+    
+    renderNotification(data); 
     updateNotificationCount(1);
 });
 
-// =========================================================
-// 3. FUNCIONES DE UTILIDAD (RENDERING, CONTADOR, SANITIZACIÓN)
-// =========================================================
+
 
 /**
  * Renderiza la notificación en el DOM.
- * @param {object} data - Objeto con idNotificaciones, titulo, mensaje, y el nuevo campo 'tipo' o 'categoria'.
- * @param {boolean} isNew - Indica si es una notificación en tiempo real (true) para aplicar estilos de "no leído".
+ * @param {object} data - Objeto con idNotificaciones, titulo, mensaje, fechaNoti, tipo, leida.
  */
-function renderNotification(data, isNew) {
+function renderNotification(data) {
 
     // Si había un mensaje de "No hay notificaciones", lo eliminamos.
-    if(noNotificacionesHTML !== "" && isNew) {
+    if(noNotificacionesHTML !== "" && document.getElementById('nota').children.length === 0) {
         document.getElementById('nota').innerHTML = '';
         noNotificacionesHTML = "";
     }
 
-    // Determina la clase CSS para el estado
-    const statusClass = isNew ? 'noti-unread' : 'noti-read';
-    
-    // Asumiendo que 'data' tiene un campo 'tipo' (ej. 'solicitud', 'sistema', 'nuevo')
-    // 💡 Asegúrate de que tu backend envíe el campo 'tipo' (o cámbialo a 'categoria' si prefieres)
-    const tipoNotificacion = data.tipo || 'general'; // Valor por defecto
-    
-    // Formateo de la hora
-    const now = new Date();
-    const hora = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    // 🚨 CAMBIO CLAVE: Usar data.leida (0 o 1) para determinar la clase CSS
+    const isUnread = data.leida == 0;
+    const statusClass = isUnread ? 'noti-unread' : 'noti-read';
 
-    // Mapeo de tipos a estilos (usa colores de Bootstrap: primary, danger, success, warning)
+    const tipoNotificacion = data.tipo || 'general'; 
     const metadata = {
-        'solicitud': { icon: 'bi-person-check', colorClass: 'bg-primary' }, // Azul: Solicitudes/Acciones
-        'alerta': { icon: 'bi-exclamation-triangle-fill', colorClass: 'bg-danger' }, // Rojo: Errores/Alertas críticas
-        'sistema': { icon: 'bi-gear-fill', colorClass: 'bg-info' }, // Celeste: Mantenimiento/Info del sistema
-        'exito': { icon: 'bi-check-circle-fill', colorClass: 'bg-success' }, // Verde: Operaciones exitosas
-        'general': { icon: 'bi-bell-fill', colorClass: 'bg-secondary' } // Gris: Notificaciones genéricas
+        'Menu': { icon: 'bi-cup-fill', colorClass: 'bg-primary' }, 
+        'Evento': { icon: 'bi-calendar-event-fill', colorClass: 'bg-warning' }, 
+        'solicitud': { icon: 'bi-person-check', colorClass: 'bg-primary' }, 
+        'alerta': { icon: 'bi-exclamation-triangle-fill', colorClass: 'bg-danger' },
+        'sistema': { icon: 'bi-gear-fill', colorClass: 'bg-info' }, 
+        'exito': { icon: 'bi-check-circle-fill', colorClass: 'bg-success' }, 
+        'general': { icon: 'bi-bell-fill', colorClass: 'bg-secondary' } 
     };
     
-   const meta = metadata[tipoNotificacion] || metadata['general'];
-const iconClass = meta.icon;
-const iconColorClass = meta.colorClass; 
+    const meta = metadata[tipoNotificacion] || metadata['general'];
+    const iconClass = meta.icon;
+    const iconColorClass = meta.colorClass; 
 
-// ✅ Si no viene fechaNoti, usar fecha/hora actual
-let fechaNotiRaw = data.fechaNoti;
-if (!fechaNotiRaw) {
-  const ahora = new Date();
-  const año = ahora.getFullYear();
-  const mes = String(ahora.getMonth() + 1).padStart(2, '0');
-  const dia = String(ahora.getDate()).padStart(2, '0');
-  const hora = String(ahora.getHours()).padStart(2, '0');
-  const minutos = String(ahora.getMinutes()).padStart(2, '0');
-  fechaNotiRaw = `${año}-${mes}-${dia} ${hora}:${minutos}:00`;
-}
+    // ✅ Lógica de Formato de Fecha/Hora (Tu código original)
+    let fechaNotiRaw = data.fechaNoti;
+    if (!fechaNotiRaw) {
+        const ahora = new Date();
+        const año = ahora.getFullYear();
+        const mes = String(ahora.getMonth() + 1).padStart(2, '0');
+        const dia = String(ahora.getDate()).padStart(2, '0');
+        const hora = String(ahora.getHours()).padStart(2, '0');
+        const minutos = String(ahora.getMinutes()).padStart(2, '0');
+        fechaNotiRaw = `${año}-${mes}-${dia} ${hora}:${minutos}:00`;
+    }
 
-// 🕐 Si viene formato ISO, reemplazar la T
-if (fechaNotiRaw.includes('T')) {
-  fechaNotiRaw = fechaNotiRaw.replace('T', ' ').replace(/(Z|[+-]\d{2}:\d{2})$/, '');
-}
+    if (fechaNotiRaw.includes('T')) {
+        fechaNotiRaw = fechaNotiRaw.replace('T', ' ').replace(/(Z|[+-]\d{2}:\d{2})$/, '');
+    }
 
-// 📅 Separar fecha y hora
-const [fechaPart, horaPart = '00:00:00'] = fechaNotiRaw.split(' ');
+    const [fechaPart, horaPart = '00:00:00'] = fechaNotiRaw.split(' ');
 
-// 📆 Fecha local de hoy (formato YYYY-MM-DD)
-const hoyLocal = new Date();
-const año = hoyLocal.getFullYear();
-const mes = String(hoyLocal.getMonth() + 1).padStart(2, '0');
-const dia = String(hoyLocal.getDate()).padStart(2, '0');
-const fechaHoy = `${año}-${mes}-${dia}`;
+    const hoyLocal = new Date();
+    const año = hoyLocal.getFullYear();
+    const mes = String(hoyLocal.getMonth() + 1).padStart(2, '0');
+    const dia = String(hoyLocal.getDate()).padStart(2, '0');
+    const fechaHoy = `${año}-${mes}-${dia}`;
 
-// ✅ Mostrar hora si es de hoy, fecha si no lo es
-const mostrarFechaHora = (fechaPart === fechaHoy)
-  ? horaPart.slice(0, 5)
-  : fechaPart;
+    const mostrarFechaHora = (fechaPart === fechaHoy)
+        ? horaPart.slice(0, 5)
+        : fechaPart;
 
-let notificacionHTML = `
-  <div class="noti ${statusClass} d-flex" data-id="${data.idNotificaciones}"> 
-      
-      <div class="content flex-grow-1">
-          <div class="d-flex align-items-center mb-1">
-              <i class="bi ${iconClass} title-icon me-2" style="color: var(--bs-primary, #007bff);"></i> 
-              <h6 class="fw-bold text-primary noti-title mb-0">${sanitize(data.titulo)}</h6>
+
+    let notificacionHTML = `
+     <div class="noti ${statusClass} d-flex" data-id="${data.idNotificaciones}" data-leida="${data.leida}"> 
+          
+          <div class="content flex-grow-1">
+              <div class="d-flex align-items-center mb-1">
+                  <i class="bi ${iconClass} title-icon me-2" style="color: var(--bs-primary, #007bff);"></i> 
+                  <h6 class="fw-bold text-primary noti-title mb-0">${sanitize(data.titulo)}</h6>
+              </div>
+              <p class="mb-0 text-muted small noti-message">${sanitize(data.mensaje)}</p>
           </div>
-          <p class="mb-0 text-muted small noti-message">${sanitize(data.mensaje)}</p>
-      </div>
-      
-      <div class="ms-auto text-end d-flex flex-column justify-content-between align-items-end flex-shrink-0">
-          <button class="delete-notification p-0 btn-link" aria-label="Cerrar" data-id="${data.idNotificaciones}" style="border:none; background:none;">
-              <i class="bi bi-x-lg" style="font-size: 0.8rem; color: #007bff;"></i>
-          </button>
-          <small class="text-secondary fw-light noti-time mt-3">${mostrarFechaHora}</small>
-      </div>
-  </div>`;
+          
+          <div class="ms-auto text-end d-flex flex-column justify-content-between align-items-end flex-shrink-0">
+              <button class="delete-notification p-0 btn-link" aria-label="Eliminar" style="border:none; background:none;">
+                  <i class="bi bi-x-lg" style="font-size: 0.8rem; color: #007bff;" title="Eliminar Notificación"></i>
+              </button>
+              <small class="text-secondary fw-light noti-time mt-3">${mostrarFechaHora}</small>
+          </div>
+      </div>`;
 
-document.getElementById('nota').insertAdjacentHTML('afterbegin', notificacionHTML);
+    document.getElementById('nota').insertAdjacentHTML('afterbegin', notificacionHTML);
 
 }
 
@@ -269,14 +282,34 @@ function sanitize(text) {
 function updateNotificationCount(delta) {
     let notificacionCount = document.getElementById('notificacionCount');
     let currentCount = parseInt(notificacionCount.innerText) || 0;
-    
-    // Asegura que el contador nunca sea negativo
+
     let newCount = Math.max(0, currentCount + delta);
     
     notificacionCount.innerText = newCount;
 
-    // Asegurar que el mensaje de "No hay notificaciones" se muestre si el contador llega a 0
     if (newCount === 0) {
-        showNoNotificationsMessage();
+        if (document.querySelectorAll('#nota .noti').length === 0) {
+             showNoNotificationsMessage();
+        }
     }
 }
+
+
+
+
+document.addEventListener('DOMContentLoaded', function () {
+  const dropdown = document.querySelector('.sub-drop.dropdown-menu');
+  if (dropdown) {
+    dropdown.addEventListener('click', e => e.stopPropagation());
+  }
+
+  const cerrar = document.getElementById('cerrarDropdown');
+  if (cerrar) {
+    cerrar.addEventListener('click', () => {
+      const dropdownEl = bootstrap.Dropdown.getInstance(
+        document.getElementById('notification-drop')
+      );
+      if (dropdownEl) dropdownEl.hide(); // cierra manualmente el dropdown
+    });
+  }
+});

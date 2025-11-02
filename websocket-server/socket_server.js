@@ -30,7 +30,7 @@ io.on('connection', (socket) => {
         for (const cedula in userSocketMap) {
             if (userSocketMap[cedula] === socket.id) {
                 delete userSocketMap[cedula];
-                console.log(`[Socket.IO] Cédula ${cedula} desconectada.`);
+                console.log(`[Socket.IO] Cédula ${cedula} desconectada. registrada al socket ${socket.id}`);
                 break;
             }
         }
@@ -50,9 +50,10 @@ app.post('/send-notif', (req, res) => {
     cedulas.forEach(cedula => {
         const socketId = userSocketMap[cedula];
         if (socketId) {
+            console.log(`[Socket.IO] 🔔 EMITIENDO PUSH A: Cédula ${cedula}, Socket ID: ${socketId}`); 
             io.to(socketId).emit('nueva_notificacion_push', data);
             sentCount++;
-        }
+     }
     });
 
     res.json({ 
