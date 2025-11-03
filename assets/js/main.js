@@ -78,7 +78,7 @@ document.getElementById('nota').addEventListener('click', function(event) {
     if (closeButton) {
         event.stopPropagation(); 
         
-        // 🚨 CAMBIO CLAVE: Reemplazo de confirm() por Swal.fire()
+        // 🚨 Uso de Swal.fire()
         Swal.fire({
             title: '¿Estás seguro?',
             text: "¡Esta acción eliminará la notificación permanentemente!",
@@ -90,8 +90,6 @@ document.getElementById('nota').addEventListener('click', function(event) {
             cancelButtonText: 'Cancelar'
         }).then((result) => {
             if (result.isConfirmed) {
-                // Si el usuario confirma, procedemos con la eliminación
-                
                 // 1. Eliminación visual inmediata
                 notificacionElement.remove();
 
@@ -167,6 +165,8 @@ socket.on('nueva_notificacion_push', (data) => {
     // Aseguramos que la notificación en tiempo real se considere NO LEÍDA (leida: 0)
     data.leida = 0; 
     
+    // Si quieres que las de tiempo real vayan al principio, tendrías que 
+    // cambiar la lógica de inserción aquí, pero por defecto usa renderNotification (que inserta al final).
     renderNotification(data); 
     updateNotificationCount(1);
 });
@@ -185,7 +185,7 @@ function renderNotification(data) {
         noNotificacionesHTML = "";
     }
 
-    // 🚨 CAMBIO CLAVE: Usar data.leida (0 o 1) para determinar la clase CSS
+    // Usar data.leida (0 o 1) para determinar la clase CSS
     const isUnread = data.leida == 0;
     const statusClass = isUnread ? 'noti-unread' : 'noti-read';
 
@@ -204,7 +204,7 @@ function renderNotification(data) {
     const iconClass = meta.icon;
     const iconColorClass = meta.colorClass; 
 
-    // ✅ Lógica de Formato de Fecha/Hora (Tu código original)
+    // Lógica de Formato de Fecha/Hora
     let fechaNotiRaw = data.fechaNoti;
     if (!fechaNotiRaw) {
         const ahora = new Date();
@@ -235,7 +235,7 @@ function renderNotification(data) {
 
     let notificacionHTML = `
      <div class="noti ${statusClass} d-flex" data-id="${data.idNotificaciones}" data-leida="${data.leida}"> 
-          
+           
           <div class="content flex-grow-1">
               <div class="d-flex align-items-center mb-1">
                   <i class="bi ${iconClass} title-icon me-2" style="color: var(--bs-primary, #007bff);"></i> 
@@ -252,7 +252,8 @@ function renderNotification(data) {
           </div>
       </div>`;
 
-    document.getElementById('nota').insertAdjacentHTML('afterbegin', notificacionHTML);
+    // ✅ CORRECCIÓN: Se usa 'beforeend' para mantener el orden del backend
+    document.getElementById('nota').insertAdjacentHTML('beforeend', notificacionHTML);
 
 }
 
@@ -293,8 +294,6 @@ function updateNotificationCount(delta) {
         }
     }
 }
-
-
 
 
 document.addEventListener('DOMContentLoaded', function () {
