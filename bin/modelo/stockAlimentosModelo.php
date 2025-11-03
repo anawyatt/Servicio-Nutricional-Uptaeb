@@ -114,6 +114,10 @@ class stockAlimentosModelo extends connectDB
 
 public function buscarAlimentoPaginado($alimento, $limit, $offset)
 {
+   if (!preg_match("/^[a-zA-ZÀ-ÿ\s]{2,}$/", $alimento)) {
+      return ['resultado' => 'ingresar el alimento'];
+    }
+
   $alimentoBuscado = '%' . $alimento . '%';
   try {
     $this->conectarDB();
