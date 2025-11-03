@@ -8,6 +8,7 @@ use \PDO;
 class tipoUtensilioModelo extends connectDB{
 
     private $tipo;
+    private $id;
     private $payload;
 
 
@@ -105,7 +106,6 @@ class tipoUtensilioModelo extends connectDB{
                 $bitacora->registrarBitacora('Tipos Utensilios', 'Registró un Tipo Utensilios llamado: ' . $this->tipo, $this->payload->cedula);
                
             }
-            $this->notificaciones($this->tipo);
             return ['resultado' => $resultados[0]->resultado ?? 'sin resultado'];
             
         } catch (Exception $e) {
@@ -114,66 +114,6 @@ class tipoUtensilioModelo extends connectDB{
             $this->desconectarDB();
         }
     }   
-    
-
-    private function notificaciones($tipo)
-{
-    try {
-        $this->conectarDBSeguridad();
-        $this->conex2->beginTransaction();
-
-        $titulo = "Nuevo Tipo de Utensilio";
-        $mensaje = "Se ha registrado un nuevo tipo de utensilio llamado: {$this->tipo}";
-        $tipomsj = "informacion";
-
-        // Insertar notificación principal
-        $stmt = $this->conex2->prepare(
-            "INSERT INTO notificaciones (titulo, mensaje, tipo) VALUES (?, ?, ?)"
-        );
-        $stmt->execute([$titulo, $mensaje, $tipomsj]);
-        $notificacionId = $this->conex2->lastInsertId();
-
-        // Obtener usuarios con permiso de consulta en el módulo correspondiente
-        $usuarios = $this->conex2->query("
-            SELECT u.cedula
-            FROM usuario u
-            JOIN rol r ON u.idRol = r.idRol
-            JOIN permiso p ON p.idRol = r.idRol
-            JOIN modulo m ON m.idModulo = p.idModulo
-            WHERE m.nombreModulo = 'Tipos de Utensilios'
-              AND p.nombrePermiso = 'consultar'
-              AND p.status = 1
-              AND u.status = 1
-        ")->fetchAll(\PDO::FETCH_COLUMN);
-
-        // Insertar notificaciones individuales
-        $insertStmt = $this->conex2->prepare(
-            "INSERT INTO notificaciones_usuarios (cedula, idNotificaciones, leida) VALUES (?, ?, 0)"
-        );
-        foreach ($usuarios as $cedula) {
-            $insertStmt->execute([$cedula, $notificacionId]);
-        }
-
-        $this->conex2->commit();
-
-        $this->enviarNotificacionWebSocket($notificacionId, $titulo, $mensaje);
-    } catch (\Exception $e) {
-        $this->conex2->rollBack();
-        error_log("Error al registrar notificación: " . $e->getMessage());
-    } finally {
-        $this->desconectarDB();
-    }
-}
-
-private function enviarNotificacionWebSocket($notificacionId, $titulo, $mensaje)
-{
-    $titulo = escapeshellarg($titulo);
-    $mensaje = escapeshellarg($mensaje);
-    $ruta = __DIR__ . "/../helpers/enviarNotificacion.php";
-
-    $comando = "php $ruta $notificacionId $titulo $mensaje > /dev/null 2>&1 &";
-    exec($comando);
-}
     
 
     public function verTipos($id) {

@@ -166,7 +166,6 @@ public function contarAlimentosTotales()
   }
 }
 
-  /*-------LA FUNCION PARA El PDFD--------*/
   public function fpdf($tipoA)
   {
 
@@ -176,8 +175,6 @@ public function contarAlimentosTotales()
       $data = [
         'detalle' => $detalle
       ];
-
-      /*-------fDFD--------*/
 
       $reporte = new reporte;
       $reporte->AddPage();

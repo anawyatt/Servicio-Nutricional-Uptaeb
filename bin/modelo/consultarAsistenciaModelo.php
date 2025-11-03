@@ -180,7 +180,7 @@ class consultarAsistenciaModelo extends connectDB{
 
     public function fpdf2(){
         try {
-            $detalle = $this->mostrarUltimaVez(true);
+            $detalle = $this->mostrarUltimaVez();
             $data = [
                 'detalle' => $detalle
             ];

@@ -16,18 +16,19 @@ class estudiantesModelo extends connectDB
     private $id;
     private $cedula;
     private $nombre;
-    private $sexo;
-    private $secciones;
-    private $horarios;
+   
     private $segNombre;
     private $apellido;
     private $segApellido;
     private $telefono;
     private $nucleo;
     private $carrera;
+  private $secciones;
+    private $horarios;
     private $encryption;
     private $normalizer;
-
+ private $sexo;
+  
 
 
     public function __construct()
