@@ -63,10 +63,6 @@ class horarioComidaModelo extends connectDB
         ];
     }
 
-
-     
-
-
     public function inactividad()
     {
         $this->sistem = new encryption();
