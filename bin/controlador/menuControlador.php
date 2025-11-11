@@ -5,6 +5,7 @@
     use component\sidebar as sidebar;
     use component\footer as footer;
     use component\configuracion as configuracion;
+    use component\generadorMenu as generadorMenu;
     use helpers\encryption as encryption;
     use helpers\permisosHelper as permisosHelper;
     use middleware\PostRateMiddleware as PostRateMiddleware;
@@ -115,6 +116,7 @@ if (!$payload->cedula) {
     $sidebar = new sidebar($permisos);
     $footer = new footer();
    $configuracion = new configuracion($permisos);
+   $generadorMenu=new generadorMenu($permisos);
 
 
    if (file_exists("vista/menuVista.php")) {

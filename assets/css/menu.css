@@ -1,0 +1,50 @@
+.btnHorario {
+  border: 2px solid #0d6efd;
+  background-color: #fff;
+  color: #0d6efd;
+  border-radius: 25px;
+  padding: 10px 20px;
+  font-weight: 600;
+  font-size: 0.95rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+}
+
+.btnHorario i {
+  font-size: 20px;
+  color: #0d6efd;
+  transition: all 0.3s ease;
+}
+
+.btnHorario:hover {
+  background-color: #e7f0ff;
+  transform: scale(1.05);
+}
+
+.btnHorario.active {
+  background-color: #0d6efd;
+  color: #fff;
+  box-shadow: 0 0 10px rgba(13, 110, 253, 0.5);
+}
+
+.btnHorario.active i {
+  color: #fff;
+}
+
+
+.btnHorario.error-btn {
+  border: 2px solid #dc3545 !important; /* Rojo de Bootstrap (danger) */
+  color: #dc3545 !important;
+}
+
+.btnHorario.error-btn i {
+  color: #dc3545 !important;
+}
+
+.btnHorario.error-btn:hover {
+  background-color: #f8d7da; /* Fondo ligeramente rojo al pasar el ratón */
+  transform: scale(1.05);
+}

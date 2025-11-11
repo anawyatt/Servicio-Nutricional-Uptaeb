@@ -1009,4 +1009,21 @@ hr{
         box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     }
 
-    
+
+
+
+
+
+.fixed-buttons-container {
+    position: fixed;
+    right: 0.5px; 
+    top: 40%;
+    transform: translateY(-40%); 
+    z-index: 1050; 
+    display: flex;
+    flex-direction: column-reverse; 
+}
+
+.fixed-buttons-container > .btn {
+    margin-top: 15px; 
+}

@@ -6,6 +6,7 @@
       <title>Registrar Menú | Servicio Nutricional UPTAEB</title>
        <?php $components->componentsHeader(); ?>
        <link rel="stylesheet" href="assets/css/estilo.css"/>
+       <link rel="stylesheet" href="assets/css/menu.css"/>
        <script src="http://localhost:3000/socket.io/socket.io.js"></script>
     <script>
         window.userCedulaGlobal = "<?php echo $payload->cedula ?>";
@@ -407,9 +408,11 @@
  </main>
 
    <?php $configuracion->configuracion(); ?>
+   <?php $generadorMenu->generadorMenu();?>
     </div>
      <?php $components->componentsJS(); ?>
      <script  type="text/javascript" src="assets/js/menu/menu.js"></script> 
+     <script  type="text/javascript" src="assets/js/generarMenu/generarMenu.js"></script> 
      <script src="assets/js/close.js"></script>
   </body>
 </html>
