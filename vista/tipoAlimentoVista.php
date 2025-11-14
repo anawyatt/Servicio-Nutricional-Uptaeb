@@ -305,7 +305,7 @@
 
 
 
-
+ 
     <?php $configuracion->configuracion(); ?>
     </div>
     <?php $components->componentsJS(); ?>

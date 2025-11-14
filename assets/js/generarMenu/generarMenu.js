@@ -55,6 +55,7 @@ document.addEventListener("DOMContentLoaded", () => {
         chequeo_cantidadPlatos();
 
         if (!error_horario && !error_cantidadE) {
+            informacion();
             alert("Validación exitosa! Generando menú...");
         } else {
             e.preventDefault();
@@ -96,3 +97,28 @@ document.addEventListener("DOMContentLoaded", () => {
         }
     }
 });
+
+
+//--------------------------- OBTENER ALIMENTOS, REGISTRO DE ENTRADAS Y MENUS ----------------------
+
+
+function informacion(){
+
+  let horarioComida=$('#horarioSeleccionado').val();
+  let cantPlatos=$('#cantPlatos2').val(); 
+console.log('datos a enviar: ', cantPlatos, horarioComida);
+ $.ajax({
+      url: '',
+      type: 'POST',
+      dataType: 'JSON',
+      data: {informacionAlimentos:true, horarioComida, cantPlatos}, 
+      success(data){
+
+        if(data){
+            console.log('Informacion para Generar Menus:', data);
+        }
+  
+      }
+
+    })
+}

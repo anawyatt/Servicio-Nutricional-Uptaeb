@@ -126,17 +126,23 @@
                               </div>
                           </div>  
       
-                
-         
-    
+                          
      
       <!-- Footer Section Start -->
       <?php $footer->footer(); ?>
-      <!-- Footer Section End -->   
+      <!-- Footer Section End -->  
  </main>
+
+   
+    
+
   <?php $configuracion->configuracion(); ?>
 
+
+
     </div>
+
+
 
  
     <?php $components->componentsJS(); ?>

@@ -111,6 +111,68 @@ if (!$payload->cedula) {
         }
       
 
+        //------------------------------- IA MENU ----------------------------------------------------
+
+if( isset($_POST['informacionAlimentos']) && isset($_POST['horarioComida']) && isset($_POST['cantPlatos']) ){ 
+$horario = $_POST['horarioComida'];
+$cantPlatos = $_POST['cantPlatos'];
+$entradaAlimentos = $object->entradaAlimentos();
+$stockAlimentosDisponibles = $object->stockAlimentosDisponibles();
+$menusHechos = $object->MenusHechos($horario);
+
+        $data_to_python = [
+            'horario_comida' => $horario,
+            'cantidad_platos' => $cantPlatos,
+            'stock_disponible' => $stockAlimentosDisponibles,
+            'ultimas_entradas' => $entradaAlimentos,
+            'ultimo_menu' => $menusHechos
+        ];
+
+        // -----------------------------------------------------------
+        // LLAMADA AL MICROSERVICIO PYTHON (Flask)
+        // -----------------------------------------------------------
+        
+        $url_python = 'http://127.0.0.1:5000/generar_menu'; 
+        
+        $ch = curl_init($url_python);
+        
+        $json_data = json_encode($data_to_python);
+        
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $json_data);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+            'Content-Type: application/json',
+            'Content-Length: ' . strlen($json_data)
+        ]);
+
+        $response_python = curl_exec($ch);
+        $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        $curl_error = curl_error($ch);
+        curl_close($ch);
+        
+        if ($response_python === false) {
+            echo json_encode([
+                'resultado' => 'error',
+                'mensaje' => 'Error al conectar con el microservicio Python: ' . $curl_error
+            ]);
+            die();
+        }
+        if ($http_code >= 400) {
+             $error_data = json_decode($response_python, true);
+             echo json_encode([
+                'resultado' => 'error',
+                'mensaje' => 'Error de Python: ' . ($error_data['mensaje'] ?? 'Error desconocido'),
+                'http_code' => $http_code
+            ]);
+            die();
+        }
+
+echo $response_python; 
+die();
+}
+  
+
     $components = new initComponents();
     $navegador = new navegador($payload);
     $sidebar = new sidebar($permisos);

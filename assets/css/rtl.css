@@ -1475,6 +1475,7 @@ hr {
   -webkit-border-bottom-left-radius: 0;
           border-bottom-left-radius: 0;
 }
+
 [dir=rtl] .btn-fixed-start {
   right: 0;
   left: auto;

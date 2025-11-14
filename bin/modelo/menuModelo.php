@@ -455,10 +455,58 @@ private function enviarNotificacionWebSocket(array $cedulasDestino, array $data)
     }
     curl_close($ch);
 }
-    
+  ///------------------------------------------ CONSULTAR STOCK ALIMENTOS - IA --------------------------------------
   
+        public function stockAlimentosDisponibles(){
+          try{
+              $this->conectarDB();
+                $mostrar = $this->conex->prepare("SELECT ta.tipo,a.idAlimento, a.nombre, a.unidadMedida, a.marca, a.stock FROM alimento a INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE stock>0 AND a.status =1;");
+                $mostrar->execute();
+                $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
+                $this->desconectarDB();
+                 return $data;
+                
+            }catch(\PDOException $e){
+                return $e;
+            }
+        }
 
+        public function MenusHechos($horario){
+          $this->horarioComida=$horario;
+          return $this->MenusH();
+        }
+
+        public function MenusH(){
+          try{
+              $this->conectarDB();
+                $mostrar = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, sa.descripcion, m.cantPlatos, ta.tipo, a.nombre, dsm.cantidad, a.marca, a.unidadMedida FROM menu m INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA INNER JOIN alimento a ON dsm.idAlimento = a.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE m.status = 1 AND m.horarioComida = ? AND m.idMenu = ( SELECT idMenu FROM menu WHERE status = 1 AND horarioComida = ? AND feMenu < CURDATE() AND idMenu NOT IN (SELECT e.idMenu FROM evento e) ORDER BY feMenu DESC, idMenu DESC LIMIT 1 ) ORDER BY a.nombre;`");
+                $mostrar->bindValue(1, $this->horarioComida);
+                $mostrar->bindValue(2, $this->horarioComida);
+                $mostrar->execute();
+                $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
+                $this->desconectarDB();
+                 return $data;
+                
+            }catch(\PDOException $e){
+                return $e;
+            }
+        }
+
+         public function entradaAlimentos(){
+          try{
+              $this->conectarDB();
+                $mostrar = $this->conex->prepare("SELECT a.idAlimento, a.nombre, dea.cantidad, ea.fecha FROM alimento a INNER JOIN detalleentradaa dea ON a.idAlimento = dea.idAlimento INNER JOIN entradaalimento ea ON dea.idEntradaA = ea.idEntradaA INNER JOIN (  SELECT dea_max.idAlimento, MAX(ea_max.fecha) AS ultima_fecha FROM detalleentradaa dea_max INNER JOIN entradaalimento ea_max ON dea_max.idEntradaA = ea_max.idEntradaA GROUP BY dea_max.idAlimento ) AS ult_reg ON a.idAlimento = ult_reg.idAlimento AND ea.fecha = ult_reg.ultima_fecha;");
+                $mostrar->execute();
+                $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
+                $this->desconectarDB();
+                 return $data;
+                
+            }catch(\PDOException $e){
+                return $e;
+            }
+        }
+
+    
 }
-
 
 ?>

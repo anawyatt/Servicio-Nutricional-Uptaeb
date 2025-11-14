@@ -683,6 +683,7 @@
      
  </main>
    <?php $configuracion->configuracion(); ?>
+   
     </div>
      <?php $components->componentsJS(); ?>
      <script  type="text/javascript" src="assets/js/evento/consultarEvento.js"></script> 

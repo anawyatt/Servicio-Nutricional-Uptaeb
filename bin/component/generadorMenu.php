@@ -40,38 +40,33 @@
 
             <form method="POST" class="p-2" id="modificarM">
                 <div class="modal-body mb-2">
-
+                     <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
                     <!-- Sección de horarios -->
                     <div class="wave-group p-1 col-md-12 my-1" id="tablita22">
                         <div class="table-responsive table-wrapper">
                             <table class="table table-bordered table-hover text-center align-middle">
                                 <thead class="table-success">
                                     <tr>
-                                        <th colspan="4" class="blanco fw-bold text-center">Horario de la comida</th>
+                                        <th colspan="1" class="blanco fw-bold text-center">Horario de la comida</th>
                                     </tr>
                                 </thead>
                                 <tbody>
                                     <tr>
-                                        <td>
-                                            <button type="button" class="btn btnHorario" data-value="Desayuno">
-                                                <i class="ri-sun-foggy-line"></i> Desayuno
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btnHorario" data-value="Almuerzo">
-                                                <i class="ri-restaurant-2-line"></i> Almuerzo
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btnHorario" data-value="Merienda">
-                                                <i class="ri-cup-line"></i> Merienda
-                                            </button>
-                                        </td>
-                                        <td>
-                                            <button type="button" class="btn btnHorario" data-value="Cena">
-                                                <i class="ri-moon-line"></i> Cena
-                                            </button>
-                                        </td>
+                                       <td class="d-flex justify-content-between flex-wrap gap-2">
+    <button type="button" class="btn btnHorario" data-value="Desayuno">
+        <i class="ri-sun-foggy-line"></i> Desayuno
+    </button>
+    <button type="button" class="btn btnHorario" data-value="Almuerzo">
+        <i class="ri-restaurant-2-line"></i> Almuerzo
+    </button>
+    <button type="button" class="btn btnHorario" data-value="Merienda">
+        <i class="ri-cup-line"></i> Merienda
+    </button>
+    <button type="button" class="btn btnHorario" data-value="Cena">
+        <i class="ri-moon-line"></i> Cena
+    </button>
+</td>
+
                                     </tr>
                                 </tbody>
                             </table>
