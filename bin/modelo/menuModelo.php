@@ -455,7 +455,7 @@ private function enviarNotificacionWebSocket(array $cedulasDestino, array $data)
     }
     curl_close($ch);
 }
-  ///------------------------------------------ CONSULTAR STOCK ALIMENTOS - IA --------------------------------------
+  ///------------------------------------------ CONSULTAR  - IA --------------------------------------
   
         public function stockAlimentosDisponibles(){
           try{
@@ -471,6 +471,28 @@ private function enviarNotificacionWebSocket(array $cedulasDestino, array $data)
             }
         }
 
+        public function MenuUltimo($horario){
+          $this->horarioComida=$horario;
+          return $this->MenusU();
+        }
+
+        public function MenusU(){
+          try{
+              $this->conectarDB();
+                $mostrar = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, sa.descripcion, m.cantPlatos, ta.tipo, a.nombre, dsm.cantidad, a.marca, a.unidadMedida FROM menu m INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA INNER JOIN alimento a ON dsm.idAlimento = a.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE m.status = 1 AND m.horarioComida = ? AND m.idMenu = ( SELECT idMenu FROM menu WHERE status = 1 AND horarioComida = ? AND feMenu < CURDATE() AND idMenu NOT IN (SELECT e.idMenu FROM evento e) ORDER BY feMenu DESC, idMenu DESC LIMIT 1 ) ORDER BY a.nombre;`");
+                $mostrar->bindValue(1, $this->horarioComida);
+                $mostrar->bindValue(2, $this->horarioComida);
+                $mostrar->execute();
+                $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
+                $this->desconectarDB();
+                 return $data;
+                
+            }catch(\PDOException $e){
+                return $e;
+            }
+        }
+
+
         public function MenusHechos($horario){
           $this->horarioComida=$horario;
           return $this->MenusH();
@@ -479,9 +501,8 @@ private function enviarNotificacionWebSocket(array $cedulasDestino, array $data)
         public function MenusH(){
           try{
               $this->conectarDB();
-                $mostrar = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, sa.descripcion, m.cantPlatos, ta.tipo, a.nombre, dsm.cantidad, a.marca, a.unidadMedida FROM menu m INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA INNER JOIN alimento a ON dsm.idAlimento = a.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA WHERE m.status = 1 AND m.horarioComida = ? AND m.idMenu = ( SELECT idMenu FROM menu WHERE status = 1 AND horarioComida = ? AND feMenu < CURDATE() AND idMenu NOT IN (SELECT e.idMenu FROM evento e) ORDER BY feMenu DESC, idMenu DESC LIMIT 1 ) ORDER BY a.nombre;`");
+                $mostrar = $this->conex->prepare("SELECT m.idMenu, m.feMenu, m.horarioComida, sa.descripcion, m.cantPlatos, ta.tipo, a.nombre, dsm.cantidad, a.marca, a.unidadMedida FROM menu m INNER JOIN detallesalidamenu dsm ON m.idMenu = dsm.idMenu INNER JOIN salidaalimentos sa ON sa.idSalidaA = dsm.idSalidaA INNER JOIN alimento a ON dsm.idAlimento = a.idAlimento INNER JOIN tipoalimento ta ON a.idTipoA = ta.idTipoA LEFT JOIN evento me ON m.idMenu = me.idMenu WHERE m.status = 1 AND m.horarioComida = ? AND me.idMenu IS NULL;");
                 $mostrar->bindValue(1, $this->horarioComida);
-                $mostrar->bindValue(2, $this->horarioComida);
                 $mostrar->execute();
                 $data = $mostrar->fetchAll(\PDO::FETCH_OBJ);
                 $this->desconectarDB();

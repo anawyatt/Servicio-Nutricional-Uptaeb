@@ -56,7 +56,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
         if (!error_horario && !error_cantidadE) {
             informacion();
-            alert("Validación exitosa! Generando menú...");
         } else {
             e.preventDefault();
         }

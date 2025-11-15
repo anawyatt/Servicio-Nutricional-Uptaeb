@@ -118,14 +118,16 @@ $horario = $_POST['horarioComida'];
 $cantPlatos = $_POST['cantPlatos'];
 $entradaAlimentos = $object->entradaAlimentos();
 $stockAlimentosDisponibles = $object->stockAlimentosDisponibles();
-$menusHechos = $object->MenusHechos($horario);
+$menuUltimo = $object->MenuUltimo($horario);
+$menusHechos= $object->MenusHechos($horario);
 
         $data_to_python = [
             'horario_comida' => $horario,
             'cantidad_platos' => $cantPlatos,
             'stock_disponible' => $stockAlimentosDisponibles,
             'ultimas_entradas' => $entradaAlimentos,
-            'ultimo_menu' => $menusHechos
+            'ultimo_menu' => $menuUltimo,
+            'menus_Hechos'=>$menusHechos
         ];
 
         // -----------------------------------------------------------
