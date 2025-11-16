@@ -280,8 +280,8 @@
               return ['Ingresar Alimento'];
           }
       
-          if (!preg_match("/^[0-9]{1,}$/", $cantidad)) {
-              return ['Ingresar Cantidad de Alimentos'];
+         if (!preg_match("/^\d+([.,]\d+)?$/", $cantidad)) {
+               return ['Ingresar Cantidad de Alimentos'];
           }
       
           if (!preg_match("/^[0-9]{1,}$/", $menuId)) {

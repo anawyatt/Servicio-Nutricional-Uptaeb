@@ -104,6 +104,48 @@
     </div>
 </div>
 
+
+<div class="modal fade" id="sugerenciasMenu" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1"
+    aria-labelledby="sugerenciasMenuLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header bg-azul4">
+                <h5 class="modal-title title" id="sugerenciasMenuLabel">Generar Menú</h5>
+                <button type="button" id="cerrar2" class="btn-close resetear" data-bs-dismiss="modal"
+                    aria-label="Close"></button>
+            </div>
+
+            <div class="modal-body">
+                <h4 id="menuHorario">Menú para **[Horario Seleccionado]**</h4> 
+                <p>Número de Platos solicitados: <strong id="menuPlatos">N</strong></p> 
+                <hr>
+
+                <div class="accordion" id="listaSugerencias">
+
+                    <div class="accordion-item shadow-sm mb-3 rounded">
+                        <h2 class="accordion-header" id="headingOne">
+                            <button class="accordion-button bg-azul7 azul4 fw-bold" type="button" data-bs-toggle="collapse"
+                                data-bs-target="#collapseOne" aria-expanded="true" aria-controls="collapseOne">
+                                Cargando Opciones de Menú...
+                            </button>
+                        </h2>
+                        <div id="collapseOne" class="accordion-collapse collapse show" aria-labelledby="headingOne"
+                            data-bs-parent="#listaSugerencias">
+                            <div class="accordion-body">
+                                <p>Generando sugerencias basado en sus reglas y preferencias.</p>
+                            </div>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+
+            <div class="modal-footer d-flex">
+                <button type="button" class="btn btn-danger" data-bs-dismiss="modal">Cerrar</button>
+            </div>
+        </div>
+    </div>
+</div>
     
     ' : '';
 
