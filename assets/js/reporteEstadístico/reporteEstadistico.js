@@ -148,25 +148,6 @@ function verificarIU(){
     })
 }
 
-// Validar grafos
-$(document).ready(function() {
-  if ($('#grafos').hasClass('grafos')) {
-    $('#grafico1, #grafico2, #grafico3, #grafico4, #grafico5, #grafico6').off('click.myAlert');
-  }
-  if ($('#grafos').hasClass('grafis')) {
-    $('#grafico1, #grafico2, #grafico3, #grafico4, #grafico5, #grafico6').on('click.myAlert', function() {
-      Swal.fire({
-        toast: true,
-        position: 'top-end',
-        icon: 'error',
-        title: '¡Selecciona el tipo de reporte!',
-        showConfirmButton: false,
-        timer: 2500,
-        timerProgressBar: true,
-      });
-    });
-  }
-});
 
 
 
