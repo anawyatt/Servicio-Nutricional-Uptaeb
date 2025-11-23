@@ -143,62 +143,11 @@ $('input[type="checkbox"]').on('change', function(e) {
     primary2();
     });
 
-    $("#agregarInventario").on('click', function() {
-    error_tipoA = false;
-    error_alimento = false;
-    error_cantidad = false;
-    error_veriTA = false;
-    error_veriA = false;
-    error_horarioC = false;
+   $("#agregarInventario").on('click', function() {
+        manejarAgregarAlimento(); // Llama a la función centralizada
+    });
 
-    verificarTipoA();
-    chequeo_tipoA();
-    verificarAlimento();
-    chequeo_alimento();
-    chequeo_cantidad();
-
-        let alimento = $('#alimento').val();
-        let alimentoDuplicado = false;
-        $('.tabla tbody tr').each(function() {
-            let idAlimento = $(this).find('#idAlimento').val();
-            if (alimento === idAlimento) {
-                alimentoDuplicado = true;
-                return false;  // Salir del bucle each
-            }
-        });
-
-        if (alimentoDuplicado) {
-        	       Swal.fire({
-                          toast: true,
-                          position: 'top-end',
-                          icon:'error',
-                          title:'<span class=" text-rojo">El alimento ya está en la tabla!</span>',
-                          showConfirmButton:false,
-                          timer:3000,
-                          timerProgressBar:3000,
-                          width:'38%',
-                      })
-         $(".error3").html('<i  class="bi bi-exclamation-triangle-fill"></i> El alimento ya existe en la tabla!');
-         $(".error3").show();
-         $('#alimento').addClass('is-invalid');
-         $('.bar3').removeClass('bar');
-         $('.ic3').addClass('l');
-         $('.ic3').removeClass('labelPri');
-         $('.letra3').addClass('labelE');
-         $('.letra3').removeClass('label-char');
-        } else {
-         if (!error_tipoA && !error_alimento && !error_veriA  && !error_veriTA  && !error_cantidad ) {
-             let cantidad = $('#cantidad').val();
-             let unidad=$('#unidad').val();
-             if (cantidad > 0 && cantidad !== '') {
-                         mostrarInfo(alimento, cantidad, unidad);
-            $('#ani').show(1000);
-             }
-         
-        }
-    }
-});
-
+    
     $('body').on('click', '#quitarFila', function(e) {
       var claseAEliminar = $(this).attr('value');
       console.log(claseAEliminar);
@@ -222,8 +171,66 @@ $('input[type="checkbox"]').on('change', function(e) {
     });
 
     e.preventDefault();
-});
+    });
 
+    function manejarAgregarAlimento() {
+    // Reestablecer banderas de error para validaciones específicas de agregar alimento
+    error_tipoA = false;
+    error_alimento = false;
+    error_cantidad = false;
+    error_veriTA = false;
+    error_veriA = false;
+    error_horarioC = false;
+
+    // Realizar todas las validaciones necesarias
+    verificarTipoA();
+    chequeo_tipoA();
+    verificarAlimento();
+    chequeo_alimento();
+    chequeo_cantidad();
+
+    // 1. Chequeo de duplicados en la tabla
+    let alimento = $('#alimento').val();
+    let alimentoDuplicado = false;
+    $('.tabla tbody tr').each(function() {
+        let idAlimento = $(this).find('#idAlimento').val();
+        if (alimento === idAlimento) {
+            alimentoDuplicado = true;
+            return false; // Salir del bucle each
+        }
+    });
+
+    if (alimentoDuplicado) {
+        Swal.fire({
+            toast: true,
+            position: 'top-end',
+            icon: 'error',
+            title: '<span class=" text-rojo">El alimento ya está en la tabla!</span>',
+            showConfirmButton: false,
+            timer: 3000,
+            timerProgressBar: 3000,
+            width: '38%',
+        });
+        $(".error3").html('<i  class="bi bi-exclamation-triangle-fill"></i> El alimento ya existe en la tabla!');
+        $(".error3").show();
+        $('#alimento').addClass('is-invalid');
+        $('.bar3').removeClass('bar');
+        $('.ic3').addClass('l');
+        $('.ic3').removeClass('labelPri');
+        $('.letra3').addClass('labelE');
+        $('.letra3').removeClass('label-char');
+    } else {
+        // 2. Si pasa todas las validaciones
+        if (!error_tipoA && !error_alimento && !error_veriA && !error_veriTA && !error_cantidad) {
+            let cantidad = $('#cantidad').val();
+            let unidad = $('#unidad').val();
+            if (cantidad > 0 && cantidad !== '') {
+                mostrarInfo(alimento, cantidad, unidad); // Función que añade a la tabla
+                $('#ani').show(1000);
+            }
+        }
+    }
+}
 
 
 $("#registrar").on('click', function() {
