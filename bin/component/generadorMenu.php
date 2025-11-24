@@ -10,8 +10,8 @@
     }
 
 		public function generadorMenu(){
-
-       $boton = (isset($this->permisos['Menú']["registrar"])) ? '
+        
+            $boton = (isset($this->permisos['Menú']["registrar"])) ? '
        
        <a class="btn btn-fixed-end2 btn-info btn-icon btn-setting" role="button" data-bs-toggle="modal" data-bs-target="#generarMenu" title="Generar Menu">
        <svg width="24" height="24" viewBox="0 0 612 612" class="animated-scale icon-30" version="1.1" xmlns="http://www.w3.org/2000/svg">
@@ -38,68 +38,69 @@
                     aria-label="Close"></button>
             </div>
 
-            <form method="POST" class="p-2" id="modificarM">
-                <div class="modal-body mb-2">
-                     <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
-                    <!-- Sección de horarios -->
-                    <div class="wave-group p-1 col-md-12 my-1" id="tablita22">
-                        <div class="table-responsive table-wrapper">
-                            <table class="table table-bordered table-hover text-center align-middle">
-                                <thead class="table-success">
-                                    <tr>
-                                        <th colspan="1" class="blanco fw-bold text-center">Horario de la comida</th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    <tr>
-                                       <td class="d-flex justify-content-between flex-wrap gap-2">
-    <button type="button" class="btn btnHorario" data-value="Desayuno">
-        <i class="ri-sun-foggy-line"></i> Desayuno
-    </button>
-    <button type="button" class="btn btnHorario" data-value="Almuerzo">
-        <i class="ri-restaurant-2-line"></i> Almuerzo
-    </button>
-    <button type="button" class="btn btnHorario" data-value="Merienda">
-        <i class="ri-cup-line"></i> Merienda
-    </button>
-    <button type="button" class="btn btnHorario" data-value="Cena">
-        <i class="ri-moon-line"></i> Cena
-    </button>
-</td>
+            <div class="modal-body mb-2">
+                
+                <div id="loadingSpinner" style="display:none; text-align: center; padding: 50px;">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                        <span class="visually-hidden">Generando Menú...</span>
+                    </div>
+                    <p class="mt-3 text-primary fw-bold">Generando Menú, por favor espere...</p>
+                </div>
 
-                                    </tr>
-                                </tbody>
-                            </table>
+                <div id="menuFormContent">
+                    <form method="POST" class="p-2" id="modificarM">
+                        <input type="hidden" name="csrf_token"  value="<?php echo htmlspecialchars($tokenCsrf); ?>">
+                        
+                        <div class="wave-group p-1 col-md-12 my-1" id="tablita22">
+                            <div class="table-responsive table-wrapper">
+                                <table class="table table-bordered table-hover text-center align-middle">
+                                    <thead class="table-success">
+                                        <tr>
+                                            <th colspan="1" class="blanco fw-bold text-center">Horario de la comida</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <tr>
+                                            <td class="d-flex justify-content-between flex-wrap gap-2">
+                                                <button type="button" class="btn btnHorario" data-value="Desayuno">
+                                                    <i class="ri-sun-foggy-line"></i> Desayuno
+                                                </button>
+                                                <button type="button" class="btn btnHorario" data-value="Almuerzo">
+                                                    <i class="ri-restaurant-2-line"></i> Almuerzo
+                                                </button>
+                                                <button type="button" class="btn btnHorario" data-value="Merienda">
+                                                    <i class="ri-cup-line"></i> Merienda
+                                                </button>
+                                                <button type="button" class="btn btnHorario" data-value="Cena">
+                                                    <i class="ri-moon-line"></i> Cena
+                                                </button>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+
+                            <input type="hidden" id="horarioSeleccionado" name="horarioSeleccionado">
+                            <p class="text-center l er error30"></p>
                         </div>
 
-                        <!-- input oculto -->
-                        <input type="hidden" id="horarioSeleccionado" name="horarioSeleccionado">
-                        <p class="text-center l er error30"></p>
-                    </div>
-
-                    <!-- Campo número de platos -->
-                    <div class="wave-group p-1 col-12 my-1">
-                        <input required type="number" class="input cantPlatos2 mt-2" id="cantPlatos2">
-                        <span class="bar bar20"></span>
-                        <label class="label labelPri ic20">
-                            <span class="label-char pl-2 letra20" style="--index: 0; margin-right: 3px!important;">
-                                <i class="ri-restaurant-2-line"></i>
-                            </span>
-                            <span class="label-char letra20" style="--index: 0">N° de Platos</span>
-                        </label>
-                        <p class="text-center l er error20"></p>
-                    </div>
-
-
-
-
+                        <div class="wave-group p-1 col-12 my-1">
+                            <input required type="number" class="input cantPlatos2 mt-2" id="cantPlatos2">
+                            <span class="bar bar20"></span>
+                            <label class="label labelPri ic20">
+                                <span class="label-char pl-2 letra20" style="--index: 0; margin-right: 3px!important;">
+                                    <i class="ri-restaurant-2-line"></i>
+                                </span>
+                                <span class="label-char letra20" style="--index: 0">N° de Platos</span>
+                            </label>
+                            <p class="text-center l er error20"></p>
+                        </div>
+                    </form>
                 </div>
-            </form>
-          <div class="modal-footer d-flex justify-content-center">
-    <div> 
-        <button id="generar" type="button" class="btn btn-primary">Generar Menú</button>
-    </div>
-</div>
+            </div>
+            <div class="modal-footer d-flex justify-content-center">
+                <button id="generar" type="button" class="btn btn-primary">Generar Menú</button>
+            </div>
         </div>
     </div>
 </div>
@@ -114,6 +115,8 @@
                 <button type="button" id="cerrar2" class="btn-close resetear" data-bs-dismiss="modal"
                     aria-label="Close"></button>
             </div>
+
+            
 
             <div class="modal-body">
                 <h4 id="menuHorario">Menú para **[Horario Seleccionado]**</h4> 

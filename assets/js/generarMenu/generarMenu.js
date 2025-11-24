@@ -118,7 +118,15 @@ document.addEventListener("DOMContentLoaded", () => {
 function informacion(){
     let horarioComida=$('#horarioSeleccionado').val();
     let cantPlatos=$('#cantPlatos2').val(); 
+
     console.log('datos a enviar: ', cantPlatos, horarioComida);
+
+    // CONTROL DE CARGA (Ajustado para el nuevo HTML - ver abajo)
+    $('#menuFormContent').hide(); // Ocultar el contenido del formulario
+    $('#loadingSpinner').show(); 
+    $("#generar").prop("disabled", true);
+    $("#cerrar2").prop("disabled", true); // Deshabilitar botón cerrar del modal
+
     $.ajax({
         url: '',
         type: 'POST',
@@ -127,19 +135,25 @@ function informacion(){
         success(data){
             if(data && data.resultado === 'exito'){
                 console.log('Informacion para Generar Menus:', data);
-                $('#generarMenu').modal('hide'); // Ocultar modal de generación
+                $('#generarMenu').modal('hide'); 
                 mostrarSugerenciasMenu(data, horarioComida, cantPlatos); 
-                $('#sugerenciasMenu').modal('show'); // Mostrar modal de sugerencias
+                $('#sugerenciasMenu').modal('show'); 
             } else {
                 console.error('Error al obtener sugerencias de menú o resultado no exitoso:', data);
             }
         },
         error: function(xhr, status, error) {
             console.error('Error en la solicitud AJAX:', status, error);
+        },
+        // ✅ CORRECCIÓN DE SINTAXIS: El bloque 'complete' va aquí adentro.
+        complete: function() { 
+            $('#loadingSpinner').hide();
+            $('#menuFormContent').show(); // Mostrar contenido del formulario nuevamente
+            $("#generar").prop("disabled", false);
+            $("#cerrar2").prop("disabled", false); // Habilitar botón cerrar del modal
         }
     })
 }
-
 /**
  * Muestra las sugerencias de menú en el modal #sugerenciasMenu.
  */
@@ -202,25 +216,7 @@ function mostrarSugerenciasMenu(data, horarioSeleccionado, numPlatos) {
         });
 
         // Opcional: Mostrar las justificaciones globales
-        if (data.justificaciones_globales && data.justificaciones_globales.length > 0) {
-            // Usamos párrafos para evitar puntos de lista (li)
-            const justificacionesHtml = data.justificaciones_globales.map(justificacion => `<p class="mb-1">${justificacion}</p>`).join('');
-            
-            const alertHtml = `
-                <div id="alerts" data-aos="fade-up" data-aos-delay="1000" class="mb-3">
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
-                        <h6 class="fw-bold mb-2">Justificaciones Generales:</h6>
-                        
-                        <div style="font-size: 13px!important;" align="justify">
-                            ${justificacionesHtml}
-                        </div>
-                        
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                </div>
-            `;
-            $listaSugerencias.prepend(alertHtml);
-        }
+     
         
     } else {
         // En caso de que no haya sugerencias
