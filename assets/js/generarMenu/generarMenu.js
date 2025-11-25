@@ -115,17 +115,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
 //--------------------------- OBTENER ALIMENTOS, REGISTRO DE ENTRADAS Y MENUS ----------------------
 
+
 function informacion(){
     let horarioComida=$('#horarioSeleccionado').val();
     let cantPlatos=$('#cantPlatos2').val(); 
 
     console.log('datos a enviar: ', cantPlatos, horarioComida);
 
-    // CONTROL DE CARGA (Ajustado para el nuevo HTML - ver abajo)
-    $('#menuFormContent').hide(); // Ocultar el contenido del formulario
+    $('#menuFormContent').hide(); 
     $('#loadingSpinner').show(); 
     $("#generar").prop("disabled", true);
-    $("#cerrar2").prop("disabled", true); // Deshabilitar botón cerrar del modal
+    $("#cerrar2").prop("disabled", true); 
 
     $.ajax({
         url: '',
@@ -140,23 +140,44 @@ function informacion(){
                 $('#sugerenciasMenu').modal('show'); 
             } else {
                 console.error('Error al obtener sugerencias de menú o resultado no exitoso:', data);
+                
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: '<span class="text-rojo">Error al Generar Menú</span>', 
+                    text:  'Ocurrió un error inesperado. Inténtelo de nuevo.',
+                    showConfirmButton: false,
+                    timer: 8000,
+                    timerProgressBar: true,
+                    width: '350px',
+                });
             }
         },
-        error: function(xhr, status, error) {
-            console.error('Error en la solicitud AJAX:', status, error);
+        error: function(xhr, status, error) {            
+            if (xhr.status === 0 || status === 'timeout') {
+                Swal.fire({
+                    toast: true,
+                    position: 'top-end',
+                    icon: 'error',
+                    title: '<span class="text-rojo">¡Error de Conexión!</span>',
+                    text: 'No se pudo conectar con el servidor. Por favor, revise su conexión a Internet.',
+                    showConfirmButton: false,
+                    timer: 8000,
+                    timerProgressBar: true,
+                    width: '450px',
+                });
+            }
         },
-        // ✅ CORRECCIÓN DE SINTAXIS: El bloque 'complete' va aquí adentro.
         complete: function() { 
             $('#loadingSpinner').hide();
-            $('#menuFormContent').show(); // Mostrar contenido del formulario nuevamente
+            $('#menuFormContent').show(); 
             $("#generar").prop("disabled", false);
-            $("#cerrar2").prop("disabled", false); // Habilitar botón cerrar del modal
+            $("#cerrar2").prop("disabled", false); 
         }
     })
 }
-/**
- * Muestra las sugerencias de menú en el modal #sugerenciasMenu.
- */
+
 function mostrarSugerenciasMenu(data, horarioSeleccionado, numPlatos) {
     // 1. Actualizar encabezado del modal
     $('#menuHorario').html(`Menú para ${horarioSeleccionado}`);
