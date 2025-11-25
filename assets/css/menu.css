@@ -48,3 +48,14 @@
   background-color: #f8d7da; /* Fondo ligeramente rojo al pasar el ratón */
   transform: scale(1.05);
 }
+
+.input.Textarea.descripcion {
+    /* Altura mínima para que se vea bien, por ejemplo 80px */
+    min-height: 80px !important; 
+    
+    /* Permite redimensionar solo verticalmente. Usa 'none' si no quieres que se pueda redimensionar. */
+    resize: vertical !important; 
+    
+    /* Importante para que el texto no se oculte detrás de la etiqueta flotante */
+    padding-top: 15px; 
+}

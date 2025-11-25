@@ -343,7 +343,7 @@
 
 
                           <div class="wave-group p-2  my-2">
-                    <textarea class="input Textarea descripcion" id="descripcion"></textarea>
+                    <textarea class="input Textarea descripcion" id="descripcion" rows="8" ></textarea>
                     <span class="bar bar8"></span>
                     <label class="label labelPri ic8 ">
                         <span class="label-char pl-2 letra8" style="--index: 0; margin-right: 3px!important;"> <i class=" " >
@@ -410,6 +410,9 @@
    <?php $configuracion->configuracion(); ?>
    <?php $generadorMenu->generadorMenu();?>
     </div>
+
+
+
      <?php $components->componentsJS(); ?>
      <script  type="text/javascript" src="assets/js/menu/menu.js"></script> 
      <script  type="text/javascript" src="assets/js/generarMenu/generarMenu.js"></script> 
